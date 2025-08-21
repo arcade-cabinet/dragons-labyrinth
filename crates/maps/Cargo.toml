@@ -23,7 +23,7 @@ mapgen = { workspace = true }
 bevy_ecs_tilemap = { workspace = true }
 
 # 3D tile generation (can potentially do 3D hexagons)
-bevy_clay_tiles = "0.3"
+bevy_clay_tiles = "0.16"
 
 # Procedural generation
 noise = { workspace = true }

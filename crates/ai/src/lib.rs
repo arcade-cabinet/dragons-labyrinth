@@ -4,6 +4,9 @@ use bevy::prelude::*;
 use big_brain::prelude::*;
 use pathfinding::prelude::*;
 
+pub mod behaviors;
+pub use behaviors::*;
+
 pub struct AIPlugin;
 
 impl Plugin for AIPlugin {
@@ -11,7 +14,10 @@ impl Plugin for AIPlugin {
         app.add_plugins(BigBrainPlugin::new(PreUpdate))
             .init_resource::<AIConfig>()
             .add_systems(Update, (
-                update_ai_behaviors,
+                behaviors::update_ai_behaviors,
+                behaviors::patrol_behavior_system,
+                behaviors::chase_behavior_system,
+                behaviors::flee_behavior_system,
                 process_pathfinding,
             ));
     }
@@ -36,38 +42,7 @@ impl Default for AIConfig {
     }
 }
 
-#[derive(Component)]
-pub struct AIAgent {
-    pub behavior_type: BehaviorType,
-    pub state: AIState,
-    pub target: Option<Entity>,
-}
 
-#[derive(Clone, Debug)]
-pub enum BehaviorType {
-    Aggressive,
-    Defensive,
-    Neutral,
-    Fleeing,
-    Patrolling,
-}
-
-#[derive(Clone, Debug)]
-pub enum AIState {
-    Idle,
-    Moving,
-    Attacking,
-    Fleeing,
-    Investigating,
-    Dead,
-}
-
-fn update_ai_behaviors(
-    mut agents: Query<&mut AIAgent>,
-    time: Res<Time>,
-) {
-    // AI behavior update logic
-}
 
 fn process_pathfinding(
     agents: Query<&AIAgent>,

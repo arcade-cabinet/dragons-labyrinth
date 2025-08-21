@@ -21,13 +21,13 @@ bevy = { workspace = true, features = [
 bevy_hanabi = { workspace = true }
 
 # Motion graphics and procedural animations
-motiongfx_bevy = "0.4"
+# motiongfx_bevy = "0.4"  # Not available, commented out
 
 # Additional VFX
-bevy_particle_systems = "0.13"
-bevy_polyline = "0.12"
-bevy_smud = "0.11"
-bevy-vfx-bag = "0.2"
+# bevy_particle_systems = "0.13"  # Version mismatch
+# bevy_polyline = "0.12"  # Version mismatch
+# bevy_smud = "0.11"  # Version mismatch
+# bevy-vfx-bag = "0.2"  # Version mismatch
 
 # Math
 nalgebra = "0.34"

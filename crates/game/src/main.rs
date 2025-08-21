@@ -13,10 +13,18 @@ use dragons_save::{SaveSystemPlugin, DatabasePlugin};
 mod systems;
 mod generators;
 mod cutscenes;
+mod states;
+mod movement;
+mod camera;
+mod combat;
 
 use systems::*;
 use generators::*;
-use cutscenes::{CutscenePlugin, GameState};
+use cutscenes::{CutscenePlugin, GameState as OldGameState};
+use states::{GameStatePlugin, GameState, menu_button_system};
+use movement::HexMovementPlugin;
+use camera::CameraControllerPlugin;
+use combat::CombatPlugin;
 
 fn main() {
     App::new()
@@ -46,43 +54,40 @@ fn main() {
                 app_name: "dragons_labyrinth".to_string(),
             },
             CutscenePlugin,
+            
+            // New game systems
+            GameStatePlugin,
+            HexMovementPlugin,
+            CameraControllerPlugin,
+            CombatPlugin,
         ))
-        .init_state::<GameState>()
         // Core resources for Dragon's Labyrinth
         .init_resource::<DreadState>()
         .init_resource::<HexWorld>()
         .init_resource::<NarrativeState>()
         .init_resource::<CompanionState>()
         .init_resource::<PlayerState>()
-        // Startup systems
-        .add_systems(Startup, (
-            setup_camera,
+        // Startup systems - only run in InGame state
+        .add_systems(OnEnter(GameState::InGame), (
             setup_lighting,
             setup_hex_world,
             spawn_player,
             spawn_companions,
             generate_initial_content,
         ))
-        // Core game systems
+        // Core game systems - only run in InGame state
         .add_systems(Update, (
-            handle_hex_movement,
             update_dread_progression,
             apply_world_corruption,
             update_companion_trauma,
             process_narrative_events,
             update_lighting_based_on_dread,
-        ))
+            menu_button_system,
+        ).run_if(in_state(GameState::InGame)))
         .run();
 }
 
-fn setup_camera(mut commands: Commands) {
-    // Isometric camera for 2.5D hex world view
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(12.0, 20.0, 12.0)
-            .looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
-}
+
 
 fn setup_lighting(mut commands: Commands) {
     // Directional light that gets corrupted as dread increases
