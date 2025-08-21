@@ -23,8 +23,8 @@ bevy_kira_audio = { workspace = true }
 rodio = { workspace = true }
 
 # Audio processing
-fundsp = "0.18"
-oddio = "0.9"
+fundsp = "0.20"
+oddio = "0.7"
 
 # Serialization
 serde = { workspace = true }

@@ -106,5 +106,5 @@ web-sys = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 
 [dev-dependencies]
-criterion = "0.5"
-proptest = "1.5"
+criterion = "0.7"
+proptest = "1.7"

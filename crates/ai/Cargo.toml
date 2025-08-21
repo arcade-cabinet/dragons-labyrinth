@@ -18,15 +18,15 @@ bevy = { workspace = true, default-features = false }
 pathfinding = { workspace = true }
 big-brain = "0.22"
 
-# Behavior trees
-bevy_behavior_tree = "0.6"
+# Behavior trees (if available)
+# bevy_behavior_tree = "0.6"  # Not currently available
 
-# Utility AI
-bevy_utility_ai = "0.3"
+# Utility AI (if available) 
+# bevy_utility_ai = "0.3"  # Not currently available
 
 # Math and algorithms
-nalgebra = "0.33"
-petgraph = "0.6"
+nalgebra = "0.34"
+petgraph = "0.8"
 
 # Random
 rand = { workspace = true }

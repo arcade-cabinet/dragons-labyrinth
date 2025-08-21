@@ -20,13 +20,13 @@ bevy = { workspace = true, features = [
 ] }
 
 # Cobweb for reactive UI
-bevy_cobweb = "0.2"
-bevy_cobweb_ui = "0.2"
+bevy_cobweb = "0.17"
+bevy_cobweb_ui = "0.21"
 
 # UI utilities
-bevy_egui = "0.31"
-egui = "0.30"
-egui_extras = "0.30"
+bevy_egui = "0.36"
+egui = "0.32"
+egui_extras = "0.32"
 
 serde = { workspace = true }
 serde_json = { workspace = true }
