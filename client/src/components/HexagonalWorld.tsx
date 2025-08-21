@@ -1,8 +1,11 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
+const grassTexture = '/attached_assets/generated_images/grass_hexagon_tile_a528c91a.png';
+const forestTexture = '/attached_assets/generated_images/forest_hex_tile_1eafc553.png';
+const corruptedTexture = '/attached_assets/generated_images/corrupted_hex_tile_6c6e11cd.png';
 
 interface HexTile {
   q: number;
@@ -150,6 +153,30 @@ export default function HexagonalWorld() {
   });
 
   // Create hexagon geometry
+  // Load textures conditionally
+  const [grassTex, setGrassTex] = useState<THREE.Texture | null>(null);
+  const [forestTex, setForestTex] = useState<THREE.Texture | null>(null);
+  const [corruptedTex, setCorruptedTex] = useState<THREE.Texture | null>(null);
+  
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    loader.load(grassTexture, (texture) => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1);
+      setGrassTex(texture);
+    });
+    loader.load(forestTexture, (texture) => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1);
+      setForestTex(texture);
+    });
+    loader.load(corruptedTexture, (texture) => {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1);
+      setCorruptedTex(texture);
+    });
+  }, []);
+  
   const hexGeometry = useMemo(() => {
     const shape = new THREE.Shape();
     const size = 1;
@@ -202,7 +229,16 @@ export default function HexagonalWorld() {
           >
             <primitive object={hexGeometry} />
             <meshStandardMaterial
-              color={appearance.color}
+              map={
+                tile.type === 'grass' ? grassTex :
+                tile.type === 'forest' ? forestTex :
+                tile.type === 'corrupted' ? corruptedTex :
+                undefined
+              }
+              color={
+                (tile.type === 'grass' || tile.type === 'forest' || tile.type === 'corrupted') && 
+                (grassTex || forestTex || corruptedTex) ? '#FFFFFF' : appearance.color
+              }
               emissive={appearance.emissive || (isPlayerTile ? '#FFD700' : undefined)}
               emissiveIntensity={appearance.emissiveIntensity || (isPlayerTile ? 0.3 : 0)}
               transparent={tile.type === 'water' || tile.type === 'void'}

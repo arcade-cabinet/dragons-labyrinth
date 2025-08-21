@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Line } from '@react-three/drei';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
 
@@ -201,22 +200,27 @@ export default function PathfindingSystem() {
     };
   }, [playerPosition, isMoving, currentPath]);
 
-  // Render path visualization
-  if (currentPath.length > 1) {
-    const pathPoints = currentPath.map(coord => hexToWorld(coord.q, coord.r, 0.2));
+  // Create path line geometry
+  const pathLineGeometry = useMemo(() => {
+    if (currentPath.length < 2) return null;
     
+    const points = currentPath.map(coord => hexToWorld(coord.q, coord.r, 0.2));
+    return new THREE.BufferGeometry().setFromPoints(points);
+  }, [currentPath]);
+
+  // Render path visualization
+  if (currentPath.length > 1 && pathLineGeometry) {
     return (
       <>
-        {/* Path line */}
-        <Line
-          points={pathPoints}
-          color={currentStage >= 3 ? "#B71C1C" : "#4CAF50"}
-          lineWidth={3}
-          dashed={!isMoving}
-          dashScale={2}
-          dashSize={0.5}
-          dashOffset={0}
-        />
+        {/* Path line using basic THREE.js line */}
+        <lineSegments geometry={pathLineGeometry}>
+          <lineBasicMaterial 
+            color={currentStage >= 3 ? "#B71C1C" : "#4CAF50"}
+            linewidth={3}
+            transparent
+            opacity={isMoving ? 1 : 0.7}
+          />
+        </lineSegments>
         
         {/* Highlight tiles in path */}
         {currentPath.slice(1).map((coord, idx) => {
