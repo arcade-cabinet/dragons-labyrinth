@@ -59,6 +59,9 @@ Dragon's Labyrinth is a complete horror RPG that follows the emotional arc Peace
 ## Recent Changes
 - **Initial Setup (2025-01-21)**: Received complete handoff documentation including biomes, companions, monsters, quests, and Blender scripts
 - **Architecture Planning**: Established focus on Dragon's Labyrinth as primary deliverable, not generation tools
+- **Movement System (2025-01-24)**: Replaced WASD controls with tap-to-move pathfinding for better mobile compatibility and modern gameplay
+- **Hexagonal Grid**: Implemented proper hexagonal world with 6-directional movement ("hexagons are the bestagons")
+- **Visual Improvements**: Added chess piece-style character sprites and stage-based world corruption effects
 
 ## Implementation Status
 - [ ] Core CLI structure

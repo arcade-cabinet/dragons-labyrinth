@@ -183,8 +183,22 @@ export default function HexagonalWorld() {
             key={`${tile.q}_${tile.r}`}
             position={position}
             rotation={[-Math.PI / 2, 0, 0]}
-            userData={{ elevation: tile.elevation }}
+            userData={{ elevation: tile.elevation, q: tile.q, r: tile.r }}
             receiveShadow
+            onClick={(e) => {
+              e.stopPropagation();
+              if ((window as any).handleHexClick) {
+                (window as any).handleHexClick(tile.q, tile.r);
+              }
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
           >
             <primitive object={hexGeometry} />
             <meshStandardMaterial
