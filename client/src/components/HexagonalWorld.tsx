@@ -226,7 +226,7 @@ export default function HexagonalWorld() {
               document.body.style.cursor = 'default';
             }}
           >
-            <cylinderGeometry args={[1, 1, 0.2, 6]} />
+            <cylinderGeometry args={[1, 1, 0.3, 6]} />
             <meshStandardMaterial
               map={
                 tile.type === 'grass' ? grassTex :

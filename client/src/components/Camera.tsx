@@ -16,18 +16,17 @@ export default function Camera() {
   useFrame((state, delta) => {
     const worldPos = getHexPosition(playerPosition.q, playerPosition.r, 1);
     
-    // Isometric camera angle for 2.5D view
-    // 45 degrees rotation, 30 degrees elevation
-    const distance = currentStage === 4 ? 2 : 12 - currentStage; // Closer as horror progresses
-    const angleH = Math.PI / 4; // 45 degrees horizontal for isometric
-    const angleV = Math.PI / 6; // 30 degrees vertical for 2.5D tilt
+    // Classic isometric camera angle (better for hexagons)
+    const baseDistance = 12;
+    const distance = currentStage === 4 ? 4 : baseDistance - currentStage;
     
+    // Classic isometric: looking down at 45-degree angle from behind
     let cameraOffset = { 
-      x: distance * Math.cos(angleH) * Math.cos(angleV),
-      y: distance * Math.sin(angleV), 
-      z: distance * Math.sin(angleH) * Math.cos(angleV)
+      x: distance * 0.7,  // Slight offset to the right
+      y: distance * 0.9,  // Height above tiles
+      z: distance * 0.7   // Behind the player
     };
-    let fov = 45 + (currentStage * 5); // Wider FOV as horror progresses
+    let fov = 50; // Standard FOV
     
     // Special case for Horror stage - much closer
     if (currentStage === 4) {
