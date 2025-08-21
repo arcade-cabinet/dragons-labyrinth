@@ -1,7 +1,9 @@
 [workspace]
 members = [
-    "crates/build_tools",
-    "crates/game",
+    "crates/core",
+    "crates/game", 
+    "crates/assets",
+    "crates/tools",
 ]
 resolver = "2"
 
@@ -20,6 +22,7 @@ bevy = { version = "0.16.1", default-features = false }
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+toml = "0.8"
 
 # Random number generation
 rand = "0.8"
@@ -45,23 +48,39 @@ tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "time"
 dashmap = "6.1"
 parking_lot = "0.12"
 
-# Progress and logging
-indicatif = "0.17"
+# Logging
 tracing = "0.1"
 tracing-subscriber = "0.3"
-
-# Colored output
-colored = "2.0"
-
-# Audio
-rodio = { version = "0.19", features = ["vorbis", "wav"] }
-
-# Cross-platform directories
-directories = "5.0"
 
 # Error handling
 anyhow = "1.0"
 thiserror = "2.0"
+
+# Audio
+rodio = { version = "0.19", features = ["vorbis", "wav"] }
+bevy_kira_audio = "0.21"
+
+# Physics
+bevy_rapier3d = "0.28"
+
+# Particles
+bevy_hanabi = "0.13"
+
+# Pathfinding
+pathfinding = "4.9"
+
+# Noise generation
+noise = "0.9"
+
+# Utilities
+colored = "2.0"
+indicatif = "0.17"
+directories = "5.0"
+
+# File system
+walkdir = "2.5"
+regex = "1.10"
+sha2 = "0.10"
 
 # WebAssembly support
 wasm-bindgen = "0.2"
@@ -71,12 +90,12 @@ wasm-bindgen-futures = "0.4"
 [profile.dev]
 opt-level = 1
 
+[profile.dev.package."*"]
+opt-level = 3
+
 [profile.release]
 lto = "thin"
 codegen-units = 1
-
-[profile.dev.package."*"]
-opt-level = 3
 
 [profile.release-wasm]
 inherits = "release"

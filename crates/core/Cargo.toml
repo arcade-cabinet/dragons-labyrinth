@@ -1,0 +1,24 @@
+[package]
+name = "dragons_core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Core types and traits for Dragon's Labyrinth"
+
+[dependencies]
+bevy = { workspace = true, features = [
+    "bevy_asset",
+    "bevy_ecs",
+    "bevy_app",
+    "bevy_reflect",
+    "serialize",
+] }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+hexx = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
