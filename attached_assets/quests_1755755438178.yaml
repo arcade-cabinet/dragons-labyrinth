@@ -1,0 +1,90 @@
+quests:
+  - id: deliver_bread
+    stage: peace
+    description: "Deliver fresh bread to the farm across the field."
+    tasks:
+      - "Pick up bread from Tamara’s bakery."
+      - "Walk through the meadow."
+      - "Give bread to farmer Jorin."
+    outcomes:
+      complete: "Farmer Jorin thanks you; Tamara joins your party."
+      fail: "If ignored, the bread goes stale, causing Tamara to fret."
+  - id: fix_fence
+    stage: peace
+    description: "Help Einar repair the fence around his farm."
+    tasks:
+      - "Collect 5 wooden planks."
+      - "Hammer planks into the posts."
+    outcomes:
+      complete: "Einar joins your party, grateful for your help."
+  - id: guard_the_well
+    stage: unease
+    description: "Old man Daris asks you to guard the village well at night due to strange noises."
+    tasks:
+      - "Stay by the well from dusk until dawn."
+      - "Investigate whispers coming from the depths."
+    choices:
+      investigate: "Climb down and find a Whispering Shade; confronting it grants knowledge but costs sanity."
+      ignore: "Refuse to investigate; gain suspicion from companions."
+  - id: deliver_bones
+    stage: unease
+    description: "A hooded figure asks you to deliver a bag to the crypt outskirts."
+    tasks:
+      - "Carry the bag through the forest."
+      - "Leave it at the indicated gravestone."
+    outcomes:
+      complete: "The bag contains bones; delivering it triggers Hollow Caretaker’s appearance."
+  - id: close_the_gate
+    stage: dread
+    description: "Close the abandoned fort’s gates to prevent beasts from entering the village."
+    tasks:
+      - "Reach the fort through the swamp."
+      - "Find the gate mechanism."
+      - "Defend the mechanism from Forsaken Knight’s minions."
+    outcomes:
+      complete: "Reduces beast encounters; Forsaken Knight confronts you."
+  - id: lock_the_child
+    stage: dread
+    description: "A terrified mother asks you to lock her child in the cellar to protect them from the dragon’s call."
+    tasks:
+      - "Convince or force the child into the cellar."
+      - "Lock the door."
+    choices:
+      comply: "Companions react negatively; guilt increases."
+      refuse: "The child later appears as a Trauma Echo."
+  - id: deliver_cursed_item
+    stage: terror
+    description: "Deliver a cursed amulet to a hermit, knowing it will doom them."
+    tasks:
+      - "Find the hermit in the mirror lake biome."
+      - "Choose whether to deliver or destroy the amulet."
+    choices:
+      deliver: "Gain a temporary power boost; lose sanity."
+      destroy: "Keep sanity; anger the dragon, increasing pursuit intensity."
+  - id: choose_companion
+    stage: terror
+    description: "You must choose which companion to support at a critical moment when two are in peril."
+    tasks:
+      - "Decide whom to save."
+    choices:
+      save_A: "The other companion dies; influences ending."
+      save_B: "The other companion dies; influences ending."
+  - id: labyrinth_escape
+    stage: horror
+    description: "Navigate the dragon’s labyrinth, using sound cues and memory to progress."
+    tasks:
+      - "Listen for dragon’s breath to avoid encounters."
+      - "Use clues from Sorin (if alive) to follow the true path."
+      - "Reach the heart of the labyrinth."
+    outcomes:
+      completion: "Triggers the final encounter with the dragon."
+  - id: final_choice
+    stage: horror
+    description: "Decide how to confront the dragon at the heart of the labyrinth."
+    tasks:
+      - "Experience a vision explaining the dragon’s origin."
+      - "Choose acceptance, defiance or understanding."
+    outcomes:
+      acceptance: "Cycle resets; game ends with the world forgetting you."
+      defiance: "You die, preventing the dragon from feeding on you."
+      understanding: "You free all souls trapped in the labyrinth and end the dragon’s cycle."

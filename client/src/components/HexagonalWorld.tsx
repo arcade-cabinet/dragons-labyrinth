@@ -162,17 +162,23 @@ export default function HexagonalWorld() {
     const loader = new THREE.TextureLoader();
     loader.load(grassTexture, (texture) => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 1);
+      texture.repeat.set(0.5, 0.5); // Scale texture down for better appearance
+      texture.magFilter = THREE.LinearFilter;
+      texture.minFilter = THREE.LinearMipMapLinearFilter;
       setGrassTex(texture);
     });
     loader.load(forestTexture, (texture) => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 1);
+      texture.repeat.set(0.5, 0.5);
+      texture.magFilter = THREE.LinearFilter;
+      texture.minFilter = THREE.LinearMipMapLinearFilter;
       setForestTex(texture);
     });
     loader.load(corruptedTexture, (texture) => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 1);
+      texture.repeat.set(0.5, 0.5);
+      texture.magFilter = THREE.LinearFilter;
+      texture.minFilter = THREE.LinearMipMapLinearFilter;
       setCorruptedTex(texture);
     });
   }, []);
@@ -282,25 +288,7 @@ export default function HexagonalWorld() {
         });
       })}
       
-      {/* Hex grid overlay for clarity */}
-      {hexTiles.map((tile) => {
-        const position = hexToWorld(tile.q, tile.r, tile.elevation + 0.01);
-        
-        return (
-          <lineSegments
-            key={`grid_${tile.q}_${tile.r}`}
-            position={position}
-            rotation={[-Math.PI / 2, 0, 0]}
-          >
-            <edgesGeometry args={[hexGeometry]} />
-            <lineBasicMaterial 
-              color={0x000000} 
-              opacity={0.1} 
-              transparent 
-            />
-          </lineSegments>
-        );
-      })}
+      {/* Remove grid overlay - tiles should be clear enough on their own */}
     </group>
   );
 }

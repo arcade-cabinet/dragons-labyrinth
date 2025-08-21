@@ -3,6 +3,7 @@ import HexagonalWorld from './HexagonalWorld';
 import CharacterSprite from './CharacterSprite';
 import PathfindingSystem from './PathfindingSystem';
 import Camera from './Camera';
+import Lighting from './Lighting';
 import QuestSystem from './QuestSystem';
 import BossEncounter from './BossEncounter';
 import AudioManager from './AudioManager';
@@ -41,6 +42,7 @@ export default function Game() {
   return (
     <>
       <Camera />
+      <Lighting />
       <HexagonalWorld />
       <PathfindingSystem />
       <CharacterSprite type="player" position={playerPosition} name="You" />
