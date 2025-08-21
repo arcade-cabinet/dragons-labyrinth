@@ -7,6 +7,7 @@ import Game from "./components/Game";
 import GameUI from "./components/GameUI";
 import StageTransitionSystem from "./components/StageTransitionSystem";
 import SanityUIOverlay from "./components/SanityUIOverlay";
+import PathConfirmationUI from "./components/PathConfirmationUI";
 
 // Define control keys for the game
 enum Controls {
@@ -72,6 +73,7 @@ function App() {
           <GameUI />
           <SanityUIOverlay />
           <StageTransitionSystem />
+          <PathConfirmationUI />
         </KeyboardControls>
       )}
     </div>

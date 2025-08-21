@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import HexagonalWorld from './HexagonalWorld';
 import CharacterSprite from './CharacterSprite';
-import HexMovement from './HexMovement';
+import PathfindingSystem from './PathfindingSystem';
 import Camera from './Camera';
 import QuestSystem from './QuestSystem';
 import BossEncounter from './BossEncounter';
@@ -42,7 +42,7 @@ export default function Game() {
     <>
       <Camera />
       <HexagonalWorld />
-      <HexMovement />
+      <PathfindingSystem />
       <CharacterSprite type="player" position={playerPosition} name="You" />
       {companions.filter(c => c.isActive).map(companion => (
         <CharacterSprite 
