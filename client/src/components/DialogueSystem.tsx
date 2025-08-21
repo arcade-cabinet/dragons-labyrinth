@@ -49,59 +49,100 @@ export default function DialogueSystem() {
     let dialogueText = '';
     let choices: DialogueChoice[] = [];
 
-    // Get stage-appropriate dialogue
-    switch (currentStage) {
-      case 0: // Peace
-        if (companion.id === 'einar') {
-          dialogueText = "Feels good to stretch my legs. Think they'll need us back home soon?";
-        } else if (companion.id === 'mira') {
-          dialogueText = "This is amazing! I've never been this far from the market.";
-        } else if (companion.id === 'tamara') {
-          dialogueText = "Do you think the customer will like our bread? I hope it's still warm.";
-        }
-        break;
+    // Get stage-appropriate dialogue using imported companion data
+    const stageNames = ['peace', 'unease', 'dread', 'terror', 'horror'] as const;
+    const stageName = stageNames[currentStage] || 'peace';
 
-      case 1: // Unease
-        if (companion.id === 'einar') {
-          dialogueText = "Did you hear that whisper? Probably just the wind... right?";
-        } else if (companion.id === 'mira') {
-          dialogueText = "It's quiet... too quiet. But I'm sure it's nothing.";
-        } else if (companion.id === 'tamara') {
-          dialogueText = "Why won't anyone talk to us? Did we do something wrong?";
-        }
-        break;
-
-      case 2: // Dread
-        if (companion.id === 'einar') {
-          dialogueText = "They're all gone. Why are we still walking? The dragon is real, I know it.";
+    switch (companion.id) {
+      case 'einar':
+        const einarDialogues = {
+          peace: ["Feels good to stretch my legs. Think they'll need us back home soon?", "Remember the festival last year? We should hurry back for the next one."],
+          unease: ["Did you hear that whisper? Probably just the wind... right?", "People are acting strange. Let's finish this errand quickly."],
+          dread: ["They're all gone. Why are we still walking? The dragon is real, I know it.", "If this is what fate holds, maybe it's better to end it now..."],
+          terror: ["Please, just end it. I can't bear to be hunted anymore.", "I see my death in every shadow. I don't want the dragon to take me."],
+          horror: ["...", "You chose this path."]
+        };
+        dialogueText = einarDialogues[stageName][Math.floor(Math.random() * einarDialogues[stageName].length)];
+        
+        if (currentStage >= 2 && companion.morale < 50) {
           choices = [
             {
-              text: "Stay strong, we'll get through this",
-              action: () => updateCompanionMorale(companion.id, 10),
+              text: "Stay strong, we'll get through this together",
+              action: () => updateCompanionMorale(companion.id, 15),
             },
             {
-              text: "Maybe we should turn back",
-              action: () => adjustSanity(-5),
-            },
-          ];
-        } else if (companion.id === 'tamara') {
-          dialogueText = "I can't sleep. The shadows have teeth.";
-        }
-        break;
-
-      case 3: // Terror
-        if (companion.id === 'einar') {
-          dialogueText = "Please, just end it. I can't bear to be hunted anymore.";
-          choices = [
-            {
-              text: "I won't give up on you",
-              action: () => updateCompanionMorale(companion.id, 5),
-            },
-            {
-              text: "Maybe... maybe you're right",
+              text: "You're right, maybe we should give up",
               action: () => {
                 adjustSanity(-10);
-                // Could trigger companion leaving
+                updateCompanionMorale(companion.id, -10);
+              },
+            },
+          ];
+        }
+        break;
+
+      case 'mira':
+        const miraDialogues = {
+          peace: ["This is amazing! I've never been this far from the market.", "We should collect some flowers on the way. They'll look lovely at home."],
+          unease: ["It's quiet... too quiet. But I'm sure it's nothing.", "Come on, let's make the best of it. Maybe it's a festival for whispers!"],
+          dread: ["I can't do this anymore. I'm sorry. I hope you find what you're looking for."],
+          terror: ["Why did you leave me? Do you hear them laughing?", "I should have stayed... or maybe none of us should've come."],
+          horror: ["You still think there's an ending for you?"]
+        };
+        dialogueText = miraDialogues[stageName][Math.floor(Math.random() * miraDialogues[stageName].length)];
+        break;
+
+      case 'sorin':
+        const sorinDialogues = {
+          peace: ["Did you know ancient texts mention this path? Most take it for superstition.", "There is rational explanation for dragon myths — but I'm eager to find the truth."],
+          unease: ["Whispers? Perhaps they are echoes of a deeper truth.", "This phenomenon is fascinating. I must document it."],
+          dread: ["If only I could read these runes... What does 'inevitability' truly mean?", "The dragon is not just a beast. It's an idea. An inevitable end."],
+          terror: ["Forgive me. Knowledge must be attained, no matter the cost.", "I see now. It makes sense. You will too, one day."],
+          horror: ["There is still a chance. We must align the echoes of our choices."]
+        };
+        dialogueText = sorinDialogues[stageName][Math.floor(Math.random() * sorinDialogues[stageName].length)];
+        
+        if (currentStage >= 3 && companion.morale < 40) {
+          choices = [
+            {
+              text: "Don't let the dragon corrupt you",
+              action: () => updateCompanionMorale(companion.id, 20),
+            },
+            {
+              text: "Tell me what you've learned",
+              action: () => {
+                adjustSanity(-5);
+                // Sorin shares dangerous knowledge
+              },
+            },
+          ];
+        }
+        break;
+
+      case 'tamara':
+        const tamaraDialogues = {
+          peace: ["Do you think the customer will like our bread? I hope it's still warm.", "I've never seen so many trees! They're like a forest from a story."],
+          unease: ["Why won't anyone talk to us? Did we do something wrong?", "Please, don't leave me. I don't like the dark."],
+          dread: ["I can't sleep. The shadows have teeth.", "If we keep going, will we come back? I don't want to forget home."],
+          terror: ["Is it my fault? I'm sorry if it is. Don't let him take me."],
+          horror: ["I'm still here. Or am I? Are you?"]
+        };
+        dialogueText = tamaraDialogues[stageName][Math.floor(Math.random() * tamaraDialogues[stageName].length)];
+        
+        if (currentStage >= 1 && companion.morale < 70) {
+          choices = [
+            {
+              text: "I'll protect you, don't worry",
+              action: () => {
+                updateCompanionMorale(companion.id, 20);
+                adjustSanity(5); // Protecting innocence helps sanity
+              },
+            },
+            {
+              text: "You need to be stronger",
+              action: () => {
+                updateCompanionMorale(companion.id, -5);
+                adjustSanity(-5);
               },
             },
           ];

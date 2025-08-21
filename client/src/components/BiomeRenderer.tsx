@@ -68,8 +68,8 @@ export default function BiomeRenderer({ stage }: BiomeRendererProps) {
       {environmentObjects.map((obj) => (
         <mesh
           key={obj.id}
-          position={obj.position}
-          scale={obj.scale}
+          position={obj.position as [number, number, number]}
+          scale={obj.scale as [number, number, number]}
           castShadow
           receiveShadow
         >
