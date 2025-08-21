@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Billboard, Sprite } from '@react-three/drei';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
+import { getSpriteForType } from '../data/sprites';
 
 interface CharacterSpriteProps {
   type: 'player' | 'companion' | 'npc' | 'boss';
