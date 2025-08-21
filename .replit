@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "bash", "web", "rust", "rust-1.88"]
+modules = ["nodejs-20", "bash", "web", "rust", "rust-1.88", "rust-1.80"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
