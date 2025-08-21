@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use hexx::*;
 use crate::components::*;
 use crate::resources::*;
+use crate::cutscenes::{trigger_outro_cutscene, GameState};
 
 /// Handle hex-based movement input with modern Bevy input system
 pub fn handle_hex_movement(
