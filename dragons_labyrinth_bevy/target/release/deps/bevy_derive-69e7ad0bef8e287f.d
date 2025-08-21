@@ -1,0 +1,8 @@
+/home/runner/workspace/dragons_labyrinth_bevy/target/release/deps/bevy_derive-69e7ad0bef8e287f.d: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/bevy_main.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/derefs.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/enum_variant_meta.rs
+
+/home/runner/workspace/dragons_labyrinth_bevy/target/release/deps/libbevy_derive-69e7ad0bef8e287f.so: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/bevy_main.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/derefs.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/enum_variant_meta.rs
+
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/lib.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/bevy_main.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/derefs.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_derive-0.16.1/src/enum_variant_meta.rs:

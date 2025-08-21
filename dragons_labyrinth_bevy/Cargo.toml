@@ -1,47 +1,76 @@
 [package]
 name = "dragons_labyrinth"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-# Core Bevy - using compatible version
-bevy = { version = "0.11", default-features = false, features = ["bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi-threaded", "png", "x11"] }
+# Core Bevy - latest version with Rust 1.88
+bevy = { version = "0.16.1", default-features = false, features = ["bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi_threaded", "png", "x11"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-rand = "0.8"
+rand = "0.9"
 
-# Hex grid system
-hexx = { version = "0.11", features = ["algorithms"] }
+# Hex grid system - latest version
+hexx = { version = "0.21", features = ["algorithms"] }
 
-# For parallel processing
-rayon = "1.7"
+# Map generation with excellent algorithms and pathfinding
+mapgen = "0.6"
+bevy_ecs_tilemap = "0.16"
+
+# Database integration for persistent game state
+sea-orm = { version = "1.1.4", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+sea-orm-migration = "1.1.4"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite"] }
+xdg = "2.5"  # Cross-platform user directories
+async-trait = "0.1"
+
+# For parallel processing  
+rayon = "1.11"
 
 # For concurrent data structures
-dashmap = "5.5"
+dashmap = "6.1"
 
 # Image processing for sprite generation
-image = "0.24"
+image = "0.25"
 
 # Advanced concurrency
 crossbeam = "0.8"
 
 # Fast hashing
-blake3 = "1.5"
+blake3 = "1.8"
 
 # LRU cache for asset management
-lru = "0.12"
+lru = "0.16"
 
 # Color management
 palette = "0.7"
 
+# Date/time for asset metadata
+chrono = { version = "0.4", features = ["serde"] }
+
+# Additional crates from the metaprompt suggestions
+async-openai = "0.29"
+tiktoken-rs = "0.7"
+imageproc = "0.25"
+resvg = "0.45" 
+candle-core = "0.9"  # Latest stable version
+petgraph = "0.8"
+zstd = "0.13"
+rfd = "0.15"
+egui = "0.32"
+eframe = "0.32"
+base64 = "0.22"
+reqwest = { version = "0.12", features = ["json"] }
+tracing = "0.1"
+
 # Async runtime
-tokio = { version = "1", features = ["rt", "macros"] }
+tokio = { version = "1", features = ["full"] }
 
 # Progress indicators
-indicatif = "0.17"
+indicatif = "0.18"
 
 # Colored output
-colored = "2.0"
+colored = "3.0"
 
 [profile.dev]
 opt-level = 1
