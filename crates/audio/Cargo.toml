@@ -1,0 +1,36 @@
+[package]
+name = "dragons_audio"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Audio system for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, features = [
+    "bevy_audio",
+    "vorbis",
+    "wav",
+    "mp3",
+] }
+
+# Advanced audio
+bevy_kira_audio = { workspace = true }
+rodio = { workspace = true }
+
+# Audio processing
+fundsp = "0.20"
+oddio = "0.7"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

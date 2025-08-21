@@ -1,0 +1,47 @@
+[package]
+name = "dragons_vfx"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Visual effects system for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, features = [
+    "bevy_render",
+    "bevy_pbr",
+    "bevy_sprite",
+] }
+
+# Particle systems
+bevy_hanabi = { workspace = true }
+
+# Motion graphics and procedural animations
+motiongfx_bevy = "0.4"
+
+# Additional VFX
+bevy_particle_systems = "0.13"
+bevy_polyline = "0.12"
+bevy_smud = "0.11"
+bevy-vfx-bag = "0.2"
+
+# Math
+nalgebra = "0.34"
+glam = "0.30"
+
+# Random
+rand = { workspace = true }
+fastrand = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

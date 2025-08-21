@@ -1,0 +1,34 @@
+[package]
+name = "dragons_levels"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Level editor and management using Yoleck"
+
+[dependencies]
+dragons_core = { path = "../core" }
+dragons_maps = { path = "../maps" }
+
+bevy = { workspace = true, features = [
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_asset",
+    "bevy_scene",
+    "serialize",
+] }
+
+# Level editing
+bevy-yoleck = "0.28"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+ron = "0.10"
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

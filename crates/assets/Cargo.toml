@@ -1,0 +1,31 @@
+[package]
+name = "dragons_assets"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Asset loading and management for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, features = [
+    "bevy_asset",
+    "bevy_audio",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_scene",
+    "png",
+    "vorbis",
+] }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+directories = { workspace = true }
