@@ -4,44 +4,48 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.14", features = ["dynamic_linking"] }
-bevy_asset_loader = "0.21"
-bevy_kira_audio = "0.20"
+# Core Bevy - using compatible version
+bevy = { version = "0.11", default-features = false, features = ["bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi-threaded", "png", "x11"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = "0.8"
 
-# Specialized crates for Dragon's Labyrinth technical requirements
-hexx = { version = "0.18", features = ["algorithms"] }  # Hex grid system with pathfinding
-bevy_yoleck = "0.21"  # Level editing with JSON .yol files
-bevy_yarnspinner = "0.4"  # Dialogue system with .yarn files
-bevy_cobweb_ui = "0.11"  # Declarative UI with .cob scene format
-bevy_egui = "0.28"  # Editor interface for level editing mode
+# Hex grid system
+hexx = { version = "0.11", features = ["algorithms"] }
 
-# Advanced Bevy ecosystem as per vision document
-bevy_yoleck = "0.19"  # Level editor integration
-bevy_yarnspinner = "0.5"  # Dialogue system
-hexx = "0.15"  # Hex grid operations and pathfinding
-cobweb-ui = "0.9"  # Declarative UI framework
-cobweb = "0.4"  # Reactivity primitives
-egui = "0.28"  # Editor widgets for Yoleck
+# For parallel processing
+rayon = "1.7"
 
-# WebAssembly support
-[target.wasm32-unknown-unknown.dependencies]
-web-sys = "0.3"
-wasm-bindgen = "0.2"
+# For concurrent data structures
+dashmap = "5.5"
 
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
+# Image processing for sprite generation
+image = "0.24"
 
-# Development profile for faster compile times
+# Advanced concurrency
+crossbeam = "0.8"
+
+# Fast hashing
+blake3 = "1.5"
+
+# LRU cache for asset management
+lru = "0.12"
+
+# Color management
+palette = "0.7"
+
+# Async runtime
+tokio = { version = "1", features = ["rt", "macros"] }
+
+# Progress indicators
+indicatif = "0.17"
+
+# Colored output
+colored = "2.0"
+
 [profile.dev]
 opt-level = 1
 
-# WASM optimization
-[profile.wasm-release]
-inherits = "release"
-opt-level = "s"
-strip = true
+[profile.release]
+lto = "thin"
+codegen-units = 1
