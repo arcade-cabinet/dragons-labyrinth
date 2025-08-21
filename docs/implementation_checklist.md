@@ -15,13 +15,15 @@
 - [x] Memory management (no garbage collection issues)
 - [x] Asset loading pipeline structure
 
-## Phase 2: Design Bible Integration 🔄
+## Phase 2: Design Bible Integration ✅
 
 ### Documentation Structure
 - [x] Design bible reference documentation
 - [x] Biomes reference with dread progression
 - [x] Companions reference with trauma mechanics
 - [x] Implementation checklist and tracking
+- [x] Technical architecture specification
+- [x] Specialized crate integration (Hexx, Yoleck, Yarn Spinner, Cobweb UI)
 - [ ] Asset generation templates
 - [ ] Audio integration specifications
 
@@ -29,6 +31,10 @@
 - [x] Horror-first design (dread level drives all systems)
 - [x] Component-based architecture (<100 lines per system)
 - [x] Zero external dependencies (AI + Freesound only)
+- [x] Specialized crate integration (Hexx, Yoleck, Yarn Spinner, Cobweb UI)
+- [x] Board rendering with beauty textures and splatmaps
+- [x] Hex grid pathfinding and navigation system
+- [x] Dialogue system with dread progression
 - [ ] Idempotent generation system
 - [ ] Performance targets validation
 

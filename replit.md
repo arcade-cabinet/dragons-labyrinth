@@ -96,4 +96,11 @@ Current React/Three.js implementation faces fundamental limitations:
 - `docs/biomes_reference.md` - Environmental system specifications
 - `docs/companions_reference.md` - Character system details
 - `docs/implementation_checklist.md` - Development progress tracking
+- `docs/technical_architecture.md` - Specialized crate integration and board rendering
 - `bevy_migration_plan.md` - Architecture transition planning
+
+## Specialized Crate Integration
+- **Hexx**: Hex grid system with A* pathfinding, FOV, and navigation
+- **Yoleck**: Level editor with JSON .yol files for AI-generated content
+- **Yarn Spinner**: Dialogue system with .yarn files and dread progression
+- **Cobweb UI**: Declarative UI with .cob scene format for AI-generated interfaces
