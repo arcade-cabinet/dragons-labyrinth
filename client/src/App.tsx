@@ -5,6 +5,8 @@ import { useAudio } from "./lib/stores/useAudio";
 import "@fontsource/inter";
 import Game from "./components/Game";
 import GameUI from "./components/GameUI";
+import StageTransitionSystem from "./components/StageTransitionSystem";
+import SanityUIOverlay from "./components/SanityUIOverlay";
 
 // Define control keys for the game
 enum Controls {
@@ -68,6 +70,8 @@ function App() {
             </Suspense>
           </Canvas>
           <GameUI />
+          <SanityUIOverlay />
+          <StageTransitionSystem />
         </KeyboardControls>
       )}
     </div>

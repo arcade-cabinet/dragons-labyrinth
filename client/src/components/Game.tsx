@@ -5,6 +5,10 @@ import Camera from './Camera';
 import BiomeRenderer from './BiomeRenderer';
 import QuestSystem from './QuestSystem';
 import BossEncounter from './BossEncounter';
+import AudioManager from './AudioManager';
+import MonsterSystem from './MonsterSystem';
+import StageTransitionSystem from './StageTransitionSystem';
+import SanityEffects from './SanityEffects';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
 import { useAudio } from '../lib/stores/useAudio';
@@ -39,8 +43,11 @@ export default function Game() {
       <HexWorld />
       <BiomeRenderer stage={currentStage} />
       <Player />
+      <SanityEffects />
       <QuestSystem />
       <BossEncounter />
+      <MonsterSystem />
+      <AudioManager />
     </>
   );
 }

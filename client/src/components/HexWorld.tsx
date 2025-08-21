@@ -83,7 +83,7 @@ export default function HexWorld() {
       {hexTiles.map((tile) => (
         <mesh
           key={tile.id}
-          position={tile.position}
+          position={tile.position as [number, number, number]}
           rotation={[-Math.PI / 2, 0, 0]}
           receiveShadow
         >
