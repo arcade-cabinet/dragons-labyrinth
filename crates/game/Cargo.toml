@@ -16,6 +16,13 @@ path = "src/main.rs"
 # Internal crates
 dragons_core = { path = "../core" }
 dragons_assets = { path = "../assets" }
+dragons_ui = { path = "../ui" }
+dragons_maps = { path = "../maps" }
+dragons_levels = { path = "../levels" }
+dragons_ai = { path = "../ai" }
+dragons_audio = { path = "../audio" }
+dragons_physics = { path = "../physics" }
+dragons_vfx = { path = "../vfx" }
 
 # Core Bevy with all features
 bevy = { workspace = true, features = [
@@ -91,7 +98,6 @@ thiserror = { workspace = true }
 # Game-specific dependencies
 noise = { workspace = true }
 pathfinding = { workspace = true }
-bevy_rapier3d = { workspace = true }
 bevy_hanabi = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

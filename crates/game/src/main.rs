@@ -1,17 +1,21 @@
 use bevy::prelude::*;
-use hexx::*;
 use dragons_core::{components::*, resources::*};
 use dragons_assets::AssetsPlugin;
+use dragons_ui::UIPlugin;
+use dragons_maps::MapGenerationPlugin;
+use dragons_levels::LevelsPlugin;
+use dragons_ai::AIPlugin;
+use dragons_audio::AudioPlugin as DragonsAudioPlugin;
+use dragons_physics::PhysicsPlugin;
+use dragons_vfx::VFXPlugin;
 
 mod systems;
 mod generators;
-mod map_generation;
 mod database;
 mod cutscenes;
 
 use systems::*;
 use generators::*;
-use map_generation::MapGenerationPlugin;
 use database::DatabasePlugin;
 use cutscenes::{CutscenePlugin, GameState};
 
@@ -26,8 +30,17 @@ fn main() {
                 }),
                 ..default()
             }),
+            // Core plugins
             AssetsPlugin,
+            UIPlugin,
             MapGenerationPlugin,
+            LevelsPlugin,
+            AIPlugin,
+            DragonsAudioPlugin,
+            PhysicsPlugin,
+            VFXPlugin,
+            
+            // Game-specific plugins
             DatabasePlugin {
                 game_database_path: std::path::PathBuf::from("game.db"),
                 app_name: "dragons_labyrinth".to_string(),

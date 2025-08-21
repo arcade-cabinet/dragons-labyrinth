@@ -13,13 +13,9 @@ dragons_core = { path = "../core" }
 
 bevy = { workspace = true, default-features = false }
 
-# Physics
-bevy_rapier3d = { workspace = true }
-rapier3d = "0.22"
-
-# Extended physics
-bevy_xpbd_3d = "0.6"
+# Primary physics engine - Avian (formerly bevy_xpbd)
 avian3d = "0.2"
+avian2d = "0.2"  # In case we need 2D physics for UI or minigames
 
 # Math
 nalgebra = "0.33"
