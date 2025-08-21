@@ -61,6 +61,7 @@ Current React/Three.js implementation faces fundamental limitations:
 - Final dragon encounter has three endings: Acceptance, Defiance, Understanding
 
 ## User Preferences
+- **CRITICAL**: Always use `export PATH="$HOME/.cargo/bin:$PATH"` before ANY Rust/Cargo commands - custom installation path
 - Focus on complete game implementation over tooling
 - Component-based architecture with clear separation
 - Performance optimization for smooth gameplay
