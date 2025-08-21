@@ -8,6 +8,7 @@ mod generators;
 mod map_generation;
 mod build_tools;
 mod database;
+mod cutscenes;
 
 use components::*;
 use systems::*;
@@ -15,6 +16,7 @@ use resources::*;
 use generators::*;
 use map_generation::MapGenerationPlugin;
 use database::DatabasePlugin;
+use cutscenes::{CutscenePlugin, GameState};
 
 fn main() {
     App::new()
@@ -32,7 +34,9 @@ fn main() {
                 game_database_path: std::path::PathBuf::from("game.db"),
                 app_name: "dragons_labyrinth".to_string(),
             },
+            CutscenePlugin,
         ))
+        .init_state::<GameState>()
         // Core resources for Dragon's Labyrinth
         .init_resource::<DreadState>()
         .init_resource::<HexWorld>()

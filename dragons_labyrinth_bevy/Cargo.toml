@@ -1,7 +1,7 @@
 [package]
 name = "dragons_labyrinth"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 # Core Bevy - latest version with Rust 1.88

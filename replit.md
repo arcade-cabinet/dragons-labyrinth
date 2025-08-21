@@ -85,6 +85,7 @@ Current React/Three.js implementation faces fundamental limitations:
 - **Modern Ecosystem**: Using latest versions of hexx 0.21, dashmap 6.1, and other Rust crates for optimal performance
 - **Map Generation Integration (2025-08-21)**: Added mapgen 0.6 and bevy_ecs_tilemap 0.16 for superior procedural map generation with algorithms like BSP, cellular automata, and drunkard's walk
 - **Dual Database Architecture (2025-08-21)**: Implemented SeaORM with dual-database system - game.db for distributed ECS content (read-only) and player.db stored in XDG directories for player saves (read-write)
+- **FMV Cutscenes Added (2025-08-21)**: Integrated emotionally-driven FMV cutscenes (villager-intro.mp4, traveler-portal.mp4) that create the transition from first-person 3D to top-down 2.5D gameplay, establishing the "wonderland" horror atmosphere
 
 ## Implementation Status
 - [x] Core Bevy ECS architecture setup
@@ -92,6 +93,8 @@ Current React/Three.js implementation faces fundamental limitations:
 - [x] Component definitions (HexTile, Companion, Player, Quest, NPC)
 - [x] Resource management (DreadState, HexWorld, NarrativeState)
 - [x] Core systems (DreadProgression, CompanionTrauma, WorldCorruption)
+- [x] Dual-database architecture (game.db for content, player.db for saves)
+- [x] FMV cutscene system for emotional intro/outro transitions
 - [ ] Asset generation pipeline integration
 - [ ] Idempotent generation system
 - [ ] Audio system with Freesound integration
