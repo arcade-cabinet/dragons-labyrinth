@@ -1,10 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Billboard } from '@react-three/drei';
+import { Billboard, Sprite } from '@react-three/drei';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
-import { getSpriteForType } from '../data/sprites';
 
 interface CharacterSpriteProps {
   type: 'player' | 'companion' | 'npc' | 'boss';
@@ -93,32 +92,28 @@ export default function CharacterSprite({ type, position, name, color = '#FFFFFF
     }
   });
 
-  // Create chess piece-like shape
+  // Create sprite-based character
   const renderCharacterMesh = () => {
-    const shapes = {
-      cylinder: <cylinderGeometry args={[0.3, 0.3, 1, 8]} />,
-      cone: <coneGeometry args={[0.3, 0.8, 8]} />,
-      box: <boxGeometry args={[0.5, 0.8, 0.5]} />,
-      octahedron: <octahedronGeometry args={[0.5]} />
-    };
-
+    // For now, use billboarded planes with solid colors
+    // Will replace with actual sprite textures when loaded
     return (
-      <mesh
-        ref={meshRef}
+      <Billboard
+        follow={true}
+        lockX={false}
+        lockY={false}
+        lockZ={false}
         position={worldPos}
-        scale={appearance.scale}
-        castShadow
-        receiveShadow
       >
-        {shapes[appearance.shape as keyof typeof shapes]}
-        <meshStandardMaterial 
-          color={appearance.color}
-          emissive={appearance.emissive}
-          emissiveIntensity={appearance.emissiveIntensity}
-          roughness={0.4}
-          metalness={0.2}
-        />
-      </mesh>
+        <mesh ref={meshRef} scale={appearance.scale}>
+          <planeGeometry args={[1.2, 1.6]} />
+          <meshBasicMaterial 
+            color={appearance.color}
+            transparent
+            opacity={0.9}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </Billboard>
     );
   };
 
