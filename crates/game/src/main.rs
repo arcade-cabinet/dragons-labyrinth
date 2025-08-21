@@ -8,15 +8,14 @@ use dragons_ai::AIPlugin;
 use dragons_audio::AudioPlugin as DragonsAudioPlugin;
 use dragons_physics::PhysicsPlugin;
 use dragons_vfx::VFXPlugin;
+use dragons_save::{SaveSystemPlugin, DatabasePlugin};
 
 mod systems;
 mod generators;
-mod database;
 mod cutscenes;
 
 use systems::*;
 use generators::*;
-use database::DatabasePlugin;
 use cutscenes::{CutscenePlugin, GameState};
 
 fn main() {
@@ -41,6 +40,7 @@ fn main() {
             VFXPlugin,
             
             // Game-specific plugins
+            SaveSystemPlugin::default(),
             DatabasePlugin {
                 game_database_path: std::path::PathBuf::from("game.db"),
                 app_name: "dragons_labyrinth".to_string(),

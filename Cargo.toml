@@ -11,6 +11,7 @@ members = [
     "crates/audio",
     "crates/physics",
     "crates/vfx",
+    "crates/save",
 ]
 resolver = "2"
 

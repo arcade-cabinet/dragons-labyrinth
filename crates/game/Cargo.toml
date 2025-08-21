@@ -23,6 +23,7 @@ dragons_ai = { path = "../ai" }
 dragons_audio = { path = "../audio" }
 dragons_physics = { path = "../physics" }
 dragons_vfx = { path = "../vfx" }
+dragons_save = { path = "../save" }
 
 # Core Bevy with all features
 bevy = { workspace = true, features = [
