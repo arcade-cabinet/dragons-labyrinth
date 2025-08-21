@@ -36,7 +36,7 @@ interface GeneratedContent {
 
 // Initialize OpenAI client
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
+  apiKey: process.env.OPENAI__API_KEY || process.env.OPENAI_API_KEY 
 });
 
 // Calculate checksum for content
@@ -244,8 +244,6 @@ async function generateContent() {
 }
 
 // Run if called directly
-if (require.main === module) {
-  generateContent().catch(console.error);
-}
+generateContent().catch(console.error);
 
 export { generateContent };
