@@ -1,10 +1,9 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Billboard } from '@react-three/drei';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
-import { getSpriteForType } from '../data/sprites';
 
 interface CharacterSpriteProps {
   type: 'player' | 'companion' | 'npc' | 'boss';
@@ -28,20 +27,59 @@ export default function CharacterSprite({ type, position, name, color = '#FFFFFF
 
   const worldPos = hexToWorld(position.q, position.r);
 
+  // Load sprite textures
+  const characterTexture = useLoader(THREE.TextureLoader, '/sprites/character_sheet.svg');
+  const monsterTexture = useLoader(THREE.TextureLoader, '/sprites/monster_sheet.svg');
+  
+  // Create sprite material with UV mapping
+  const spriteMaterial = useMemo(() => {
+    const texture = type === 'boss' ? monsterTexture : characterTexture;
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    
+    // Calculate UV coordinates for sprite frame
+    let uvOffset = { x: 0, y: 0 };
+    let uvScale = { x: 0.25, y: 0.5 }; // Default to 32x32 sprite in 128x64 sheet
+    
+    if (type === 'player') {
+      uvOffset = { x: 0, y: 0.5 }; // Top row, first sprite
+    } else if (type === 'companion') {
+      // Different companions get different sprites
+      if (name === 'Einar') uvOffset = { x: 0, y: 0 };
+      else if (name === 'Mira') uvOffset = { x: 0.25, y: 0 };
+      else if (name === 'Sorin') uvOffset = { x: 0.5, y: 0 };
+      else if (name === 'Tamara') uvOffset = { x: 0.75, y: 0 };
+      else uvOffset = { x: 0, y: 0 };
+    } else if (type === 'boss') {
+      uvOffset = { x: 0, y: 0.5 }; // Monster sheet
+      if (name === 'Forsaken Knight') uvOffset = { x: 0.25, y: 0.5 };
+      else if (name === 'Dragon') {
+        uvOffset = { x: 0, y: 0 };
+        uvScale = { x: 0.5, y: 0.5 }; // Dragon is 2x2
+      }
+    }
+    
+    return new THREE.SpriteMaterial({ 
+      map: texture,
+      transparent: true,
+      alphaTest: 0.1
+    });
+  }, [characterTexture, monsterTexture, type, name]);
+
   // Character appearance based on type and stage
   const getCharacterAppearance = () => {
     const baseAppearance = {
       player: { 
-        scale: 0.7, 
+        scale: 0.8, 
         color: '#FFD700',
-        shape: 'cylinder',
+        shape: 'sprite',
         emissive: '#FFD700',
         emissiveIntensity: 0.2
       },
       companion: { 
-        scale: 0.6, 
+        scale: 0.7, 
         color: color || '#4CAF50',
-        shape: 'cone',
+        shape: 'sprite',
         emissive: undefined,
         emissiveIntensity: 0
       },
@@ -93,10 +131,8 @@ export default function CharacterSprite({ type, position, name, color = '#FFFFFF
     }
   });
 
-  // Create sprite-based character
+  // Create sprite-based character using actual sprite textures
   const renderCharacterMesh = () => {
-    // For now, use billboarded planes with solid colors
-    // Will replace with actual sprite textures when loaded
     return (
       <Billboard
         follow={true}
@@ -105,15 +141,7 @@ export default function CharacterSprite({ type, position, name, color = '#FFFFFF
         lockZ={false}
         position={worldPos}
       >
-        <mesh ref={meshRef} scale={appearance.scale}>
-          <planeGeometry args={[1.2, 1.6]} />
-          <meshBasicMaterial 
-            color={appearance.color}
-            transparent
-            opacity={0.9}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+        <sprite ref={meshRef} scale={[appearance.scale, appearance.scale, 1]} material={spriteMaterial} />
       </Billboard>
     );
   };
@@ -133,26 +161,7 @@ export default function CharacterSprite({ type, position, name, color = '#FFFFFF
         >
           <mesh>
             <planeGeometry args={[2, 0.5]} />
-            <meshBasicMaterial transparent opacity={0}>
-              <canvasTexture
-                attach="map"
-                image={(() => {
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 256;
-                  canvas.height = 64;
-                  const ctx = canvas.getContext('2d');
-                  if (ctx) {
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                    ctx.fillRect(0, 0, 256, 64);
-                    ctx.fillStyle = 'white';
-                    ctx.font = '24px Inter';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(name, 128, 40);
-                  }
-                  return canvas;
-                })()}
-              />
-            </meshBasicMaterial>
+            <meshBasicMaterial color="rgba(0,0,0,0.7)" transparent opacity={0.8} />
           </mesh>
         </Billboard>
       )}

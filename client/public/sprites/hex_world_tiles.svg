@@ -1,0 +1,110 @@
+<svg width="512" height="256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define gradients for 2.5D effect -->
+  <defs>
+    <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#6BC76F;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="forestGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3E8E41;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2E7D32;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1B5E20;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#9E9E9E;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#757575;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#424242;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#42A5F5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1976D2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="corruptGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C4DFF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#311B92;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A237E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Grass Tile (0,0) - 64x64 -->
+  <g transform="translate(32,32)">
+    <!-- Base hex -->
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#grassGrad)" stroke="#2E7D32" stroke-width="1"/>
+    <!-- Top face -->
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#6BC76F" stroke="#4CAF50" stroke-width="1"/>
+    <!-- Flowers -->
+    <circle cx="-8" cy="-8" r="2" fill="#FFEB3B"/>
+    <circle cx="8" cy="0" r="1.5" fill="#FF9800"/>
+    <circle cx="0" cy="8" r="1" fill="#E91E63"/>
+  </g>
+
+  <!-- Forest Tile (64,0) -->
+  <g transform="translate(96,32)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#forestGrad)" stroke="#1B5E20" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#3E8E41" stroke="#2E7D32" stroke-width="1"/>
+    <!-- Trees -->
+    <polygon points="-8,0 -5,-12 -2,0" fill="#0D2818"/>
+    <polygon points="5,-4 8,-16 11,-4" fill="#0D2818"/>
+    <circle cx="-8" cy="2" r="1" fill="#795548"/>
+  </g>
+
+  <!-- Stone Tile (128,0) -->
+  <g transform="translate(160,32)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#stoneGrad)" stroke="#424242" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#9E9E9E" stroke="#757575" stroke-width="1"/>
+    <!-- Stone blocks -->
+    <rect x="-12" y="-12" width="6" height="4" fill="#616161"/>
+    <rect x="-4" y="-16" width="8" height="3" fill="#616161"/>
+    <rect x="2" y="-8" width="10" height="5" fill="#616161"/>
+    <rect x="-8" y="-4" width="12" height="6" fill="#616161"/>
+  </g>
+
+  <!-- Water Tile (192,0) -->
+  <g transform="translate(224,32)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#waterGrad)" stroke="#0D47A1" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#42A5F5" stroke="#1976D2" stroke-width="1" opacity="0.9"/>
+    <!-- Water ripples -->
+    <ellipse cx="-8" cy="-8" rx="4" ry="2" fill="#1565C0" opacity="0.6"/>
+    <ellipse cx="8" cy="0" rx="3" ry="1.5" fill="#1565C0" opacity="0.6"/>
+    <circle cx="0" cy="6" r="1" fill="#81C784" opacity="0.8"/>
+  </g>
+
+  <!-- Corrupted Tile (256,0) -->
+  <g transform="translate(288,32)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#corruptGrad)" stroke="#1A237E" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#7C4DFF" stroke="#311B92" stroke-width="1"/>
+    <!-- Corruption veins -->
+    <path d="M-15,-8 Q0,-16 15,-8 Q0,0 -15,-8" fill="#9C27B0" opacity="0.8"/>
+    <path d="M-10,4 Q0,-4 10,4 Q0,12 -10,4" fill="#9C27B0" opacity="0.6"/>
+    <circle cx="0" cy="-4" r="2" fill="#E1BEE7"/>
+  </g>
+
+  <!-- Void Tile (320,0) -->
+  <g transform="translate(352,32)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="#000000" stroke="#424242" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#212121" stroke="#424242" stroke-width="1"/>
+    <circle cx="0" cy="-4" r="1" fill="#9E9E9E" opacity="0.3"/>
+  </g>
+
+  <!-- Village Tile (0,64) -->
+  <g transform="translate(32,96)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#grassGrad)" stroke="#2E7D32" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#6BC76F" stroke="#4CAF50" stroke-width="1"/>
+    <!-- House -->
+    <rect x="-6" y="-8" width="12" height="10" fill="#8D6E63"/>
+    <polygon points="-8,-8 0,-14 8,-8" fill="#5D4037"/>
+    <rect x="-2" y="-4" width="3" height="4" fill="#3E2723"/>
+  </g>
+
+  <!-- Ruins Tile (64,64) -->
+  <g transform="translate(96,96)">
+    <polygon points="0,-24 21,-12 21,12 0,24 -21,12 -21,-12" fill="url(#stoneGrad)" stroke="#424242" stroke-width="1"/>
+    <polygon points="0,-28 21,-16 21,-4 0,8 -21,-4 -21,-16" fill="#9E9E9E" stroke="#757575" stroke-width="1"/>
+    <!-- Ruined walls -->
+    <rect x="-12" y="-12" width="6" height="12" fill="#757575"/>
+    <rect x="6" y="-8" width="8" height="15" fill="#757575"/>
+    <rect x="-8" y="0" width="4" height="8" fill="#757575"/>
+  </g>
+</svg>
