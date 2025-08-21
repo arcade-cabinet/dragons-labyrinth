@@ -1,0 +1,9 @@
+/home/runner/workspace/dragons_labyrinth_bevy/target/release/deps/accesskit_winit-84ac644a1bb8f0e4.d: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
+
+/home/runner/workspace/dragons_labyrinth_bevy/target/release/deps/libaccesskit_winit-84ac644a1bb8f0e4.rlib: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
+
+/home/runner/workspace/dragons_labyrinth_bevy/target/release/deps/libaccesskit_winit-84ac644a1bb8f0e4.rmeta: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
+
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs:
