@@ -1,6 +1,5 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
@@ -161,43 +160,62 @@ export default function HexagonalWorld() {
     }
   });
 
-  // Load individual 3D tile models
-  const grassTile = useGLTF('/models/tiles/hex_grass.glb');
-  const forestTile = useGLTF('/models/tiles/hex_forest.glb');
-  const stoneTile = useGLTF('/models/tiles/hex_stone.glb');
-  const waterTile = useGLTF('/models/tiles/hex_water.glb');
-  const corruptedTile = useGLTF('/models/tiles/hex_corrupted.glb');
-  const voidTile = useGLTF('/models/tiles/hex_void.glb');
-  const labyrinthPortal = useGLTF('/models/labyrinth_portal.glb');
-  
-  // Preload all models
-  useGLTF.preload('/models/tiles/hex_grass.glb');
-  useGLTF.preload('/models/tiles/hex_forest.glb');
-  useGLTF.preload('/models/tiles/hex_stone.glb');
-  useGLTF.preload('/models/tiles/hex_water.glb');
-  useGLTF.preload('/models/tiles/hex_corrupted.glb');
-  useGLTF.preload('/models/tiles/hex_void.glb');
-  useGLTF.preload('/models/labyrinth_portal.glb');
-  
-  // Get appropriate 3D model for tile type
-  const getTileModel = (tileType: string) => {
+  // Use simple geometries instead of heavy 3D models for mobile performance
+  const getTileGeometry = (tileType: string) => {
+    // Return simple colored geometries instead of loading heavy models
+    const baseHeight = 0.2;
+    const radius = 1;
+    
     switch (tileType) {
-      case 'grass':
-      case 'village':
-        return grassTile;
-      case 'forest':
-        return forestTile;
-      case 'stone':
-      case 'ruins':
-        return stoneTile;
       case 'water':
-        return waterTile;
+        return {
+          geometry: <cylinderGeometry args={[radius, radius, baseHeight * 0.5, 6]} />,
+          material: (
+            <meshStandardMaterial
+              color="#1976D2"
+              transparent
+              opacity={0.7}
+              roughness={0.1}
+              metalness={0.8}
+            />
+          )
+        };
       case 'corrupted':
-        return corruptedTile;
+        return {
+          geometry: <cylinderGeometry args={[radius, radius, baseHeight, 6]} />,
+          material: (
+            <meshStandardMaterial
+              color="#7C4DFF"
+              emissive="#4A148C"
+              emissiveIntensity={0.3}
+            />
+          )
+        };
       case 'void':
-        return voidTile;
+        return {
+          geometry: <cylinderGeometry args={[radius, radius, baseHeight * 0.3, 6]} />,
+          material: (
+            <meshStandardMaterial
+              color="#000000"
+              transparent
+              opacity={0.3}
+            />
+          )
+        };
       default:
-        return grassTile; // fallback to grass
+        return {
+          geometry: <cylinderGeometry args={[radius, radius, baseHeight, 6]} />,
+          material: (
+            <meshStandardMaterial
+              color={
+                tileType === 'grass' || tileType === 'village' ? '#4CAF50' :
+                tileType === 'forest' ? '#2E7D32' :
+                tileType === 'stone' || tileType === 'ruins' ? '#757575' :
+                '#616161'
+              }
+            />
+          )
+        };
     }
   };
   
@@ -220,9 +238,9 @@ export default function HexagonalWorld() {
         const appearance = getTileAppearance(tile);
         const isPlayerTile = tile.q === playerPosition.q && tile.r === playerPosition.r;
         
-        // Check for special tiles that need 3D models
+        // Check for special tiles
         const hasLabyrinthEntrance = tile.biomeFeatures?.includes('labyrinth_entrance');
-        const tileModel = getTileModel(tile.type);
+        const tileGeom = getTileGeometry(tile.type);
         
         return (
           <group
@@ -245,36 +263,30 @@ export default function HexagonalWorld() {
             }}
           >
             {hasLabyrinthEntrance ? (
-              // Special 3D model for labyrinth entrance
-              <primitive 
-                object={labyrinthPortal.scene.clone()} 
-                scale={[1.5, 1.5, 1.5]}
-                position={[0, 0.5, 0]}
-                receiveShadow
-                castShadow
-              />
-            ) : tileModel ? (
-              // Use individual 3D models for tiles
-              <primitive 
-                object={tileModel.scene.clone()} 
-                scale={[2.5, 2.5, 2.5]}
-                position={[0, 0, 0]}
-                receiveShadow
-                castShadow
-              />
+              // Special indicator for labyrinth entrance - simple geometry
+              <group>
+                <mesh receiveShadow position={[0, 0, 0]}>
+                  <cylinderGeometry args={[1, 1, 0.3, 6]} />
+                  <meshStandardMaterial
+                    color="#1A237E"
+                    emissive="#7C4DFF"
+                    emissiveIntensity={0.5}
+                  />
+                </mesh>
+                <mesh position={[0, 0.5, 0]}>
+                  <boxGeometry args={[0.5, 1, 0.1]} />
+                  <meshStandardMaterial
+                    color="#000000"
+                    emissive="#9C27B0"
+                    emissiveIntensity={0.8}
+                  />
+                </mesh>
+              </group>
             ) : (
-              // Fallback geometry for water/void/corrupted
+              // Use lightweight geometry instead of heavy models
               <mesh receiveShadow position={[0, 0, 0]}>
-                <cylinderGeometry args={[1, 1, 0.2, 6]} />
-                <meshStandardMaterial
-                  color={appearance.color}
-                  emissive={appearance.emissive}
-                  emissiveIntensity={appearance.emissiveIntensity}
-                  transparent={tile.type === 'water' || tile.type === 'void'}
-                  opacity={appearance.opacity}
-                  roughness={tile.type === 'water' ? 0.1 : 0.8}
-                  metalness={tile.type === 'water' ? 0.8 : 0.1}
-                />
+                {tileGeom.geometry}
+                {tileGeom.material}
               </mesh>
             )}
             
