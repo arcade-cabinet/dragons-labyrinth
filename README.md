@@ -1,96 +1,158 @@
-# Dragon's Labyrinth - Bevy Implementation
+# Dragon's Labyrinth
 
-## Horror-First RPG with Entity Component System Architecture
+A horror-first RPG built with Bevy 0.16.1 and Rust 1.88.
 
-This is the Rust/Bevy implementation of Dragon's Labyrinth, designed to solve the memory leak and performance issues of the JavaScript version while perfectly implementing the design bible's component-based, horror-first architecture.
+## Project Structure
 
-## Architecture Highlights
+This project uses a modular workspace architecture with specialized crates:
 
-### Core Design Bible Compliance
-- ✅ **Zero External Dependencies**: AI-generated assets + Freesound audio only
-- ✅ **Component-Based**: ECS architecture with <100 line systems  
-- ✅ **Idempotent Generation**: Deterministic component IDs and stable APIs
-- ✅ **Horror-First Design**: Dread level (0-4) drives all systems
-- ✅ **Performance Targets**: 60 FPS with 10,000+ hex tiles
+### Core Crates
 
-### Narrative Orchestration via ECS
-The game implements the design bible's "narrative orchestration architecture" through Bevy's ECS:
+- **`dragons_core`** - Shared components, resources, and types used across all crates
+- **`dragons_game`** - Main game executable that orchestrates all systems
 
-```rust
-// Dread progression affects everything
-fn dread_progression_system(
-    mut dread_state: ResMut<DreadState>,     // 0=Peace → 4=Horror
-    mut companions: Query<&mut Companion>,    // Trauma progression
-    mut world: ResMut<HexWorld>,             // World corruption
-    mut lighting: ResMut<AmbientLight>,      // Darkness increases
-) {
-    // Peace → Unease → Dread → Terror → Horror
-    // Every system reacts to narrative state changes
-}
-```
+### Feature Crates
 
-### Key Systems
+- **`dragons_ui`** - Reactive UI system using Cobweb and cobweb-ui for modern interfaces
+- **`dragons_maps`** - Advanced map generation with:
+  - Hexagonal grids (hexx)
+  - 2D tilemaps (bevy_ecs_tilemap)
+  - 3D hexagonal tiles (bevy_clay_tiles)
+  - Procedural generation (mapgen)
+- **`dragons_levels`** - Level editor and management using Yoleck
+- **`dragons_ai`** - AI behaviors and pathfinding with big-brain
+- **`dragons_audio`** - Advanced audio with bevy_kira_audio
+- **`dragons_physics`** - Physics simulation using Avian (modern Bevy physics)
+- **`dragons_vfx`** - Visual effects with:
+  - Particle systems (Hanabi)
+  - Procedural animations (MotionGfx)
+  - Screen effects and transitions
+- **`dragons_assets`** - Asset loading and management
+- **`dragons_tools`** - Development and build tools
 
-1. **DreadProgressionSystem**: Central narrative orchestrator
-2. **CompanionTraumaSystem**: Follows design bible companion arcs
-3. **WorldCorruptionSystem**: Visual transformation based on horror
-4. **HexInteractionSystem**: Tap-to-move hexagonal navigation
-5. **AudioProximitySystem**: Dragon stalking audio cues
+## Features
 
-### Companion System Following Design Bible
-- **Einar**: Loyal friend who breaks under pressure (trauma > 0.8)
-- **Mira**: Abandons party in Dread stage (level 2)
-- **Sorin**: Becomes traitor boss if loyalty < 0.3
-- **Tamara**: Innocent baker's apprentice affected by trauma
-
-## Performance Benefits over JavaScript
-
-| Aspect | JavaScript/React/Three.js | Bevy/Rust/WASM |
-|--------|---------------------------|-----------------|
-| Memory Management | Garbage collection leaks | Direct control |
-| Performance | Interpreted execution | Compiled native |
-| Model Loading | Clone() memory explosion | ECS instancing |
-| Mobile Support | Crashes on high-end devices | Smooth 30+ FPS |
-| 3D Rendering | WebGL limitations | Native optimizations |
-
-## Building and Running
-
-### Native Development
-```bash
-cd dragons_labyrinth_bevy
-cargo run
-```
-
-### WebAssembly Deployment  
-```bash
-./build_wasm.sh
-python3 -m http.server 8000
-# Open http://localhost:8000
-```
-
-### Mobile Testing
-The WASM build runs smoothly on mobile devices that crashed with the JavaScript version.
-
-## Content Generation Integration
-
-The Bevy implementation integrates with the design bible's asset generation pipeline:
-
-- **Models**: AI-generated .glb files loaded via Bevy's asset system
-- **Audio**: Freesound CC0 integration with spatial audio
-- **Textures**: Procedural generation with idempotent seeds
-- **Quests**: Narrative-driven quest generation per dread level
-
-## Horror Progression Implementation
+### 3D Hexagonal Maps
+The game supports both 2D and 3D hexagonal tile generation. Toggle between modes using the `HexagonalMapConfig` resource:
 
 ```rust
-// Each dread level transforms all systems
-match dread_state.current_level {
-    0 => "Peace: Beautiful world, helpful NPCs",
-    1 => "Unease: Shadows, whispers, first boss",  
-    2 => "Dread: Swamps, ruins, Mira abandons party",
-    3 => "Terror: Reality warps, moral choices",
-    4 => "Horror: Dragon's labyrinth, first-person stalking",
-}
+hex_config.use_3d_tiles = true; // Enable 3D hexagonal tiles
 ```
 
-This architecture finally delivers the performance needed for the vision while maintaining the design bible's component-based, horror-first principles.
+### Advanced Physics
+Using Avian physics engine for better Bevy integration with features like:
+- Collision layers for different entity types
+- Force accumulation system
+- Kinematic and dynamic bodies
+- Custom gravity zones
+
+### Reactive UI
+Cobweb-based UI system provides:
+- Reactive state management
+- Component-based UI architecture
+- Smooth transitions and animations
+
+### Motion Graphics
+MotionGfx integration enables:
+- Procedural animations
+- Easing functions
+- UI element animations
+- Screen effects (shake, flash, fade)
+
+## Building
+
+Ensure you have Rust 1.88 or later installed:
+
+```bash
+rustup update
+rustup default 1.88
+```
+
+Build all crates:
+
+```bash
+cargo build --all
+```
+
+Run the game:
+
+```bash
+cargo run -p dragons_labyrinth
+```
+
+Build for release:
+
+```bash
+cargo build --release
+```
+
+## Development
+
+### Running with hot-reload
+
+```bash
+cargo watch -x "run -p dragons_labyrinth"
+```
+
+### Running tests
+
+```bash
+cargo test --all
+```
+
+### Building for WASM
+
+```bash
+cargo build --target wasm32-unknown-unknown --release
+```
+
+### Updating Dependencies
+
+Update to latest compatible versions:
+```bash
+cargo update
+```
+
+Update to latest incompatible versions:
+```bash
+cargo upgrade --incompatible
+```
+
+## Architecture
+
+The project follows a modular ECS (Entity Component System) architecture:
+
+- Each crate provides a Bevy plugin that can be independently developed and tested
+- Core game logic is separated from engine-specific implementations
+- Systems communicate through events and shared resources
+- All crates use workspace dependencies for consistency
+
+### Key Design Patterns
+
+1. **Plugin-based Architecture**: Each feature is a self-contained plugin
+2. **Resource-driven Configuration**: Runtime configuration through resources
+3. **Event-driven Communication**: Loose coupling between systems
+4. **Component Composition**: Entities built from reusable components
+
+## Dependencies
+
+Key technologies:
+- **Bevy 0.16.1** - Game engine
+- **Avian** - Modern physics engine for Bevy
+- **Cobweb** - Reactive UI framework
+- **Yoleck** - Level editor
+- **Hanabi** - Particle systems
+- **MotionGfx** - Procedural animations and motion graphics
+- **bevy_kira_audio** - Advanced audio
+- **hexx** - Hexagonal grids
+- **bevy_clay_tiles** - 3D tile generation
+- **big-brain** - AI behavior trees
+- **mapgen** - Procedural map generation
+
+## Project Status
+
+The project is structured with Rust edition 2024 and uses the latest stable Rust toolchain (1.88). All dependencies have been upgraded to their latest versions for maximum compatibility and performance.
+
+## License
+
+MIT OR Apache-2.0

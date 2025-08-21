@@ -1,0 +1,31 @@
+[package]
+name = "dragons_physics"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Physics system for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, default-features = false }
+
+# Primary physics engine - Avian (formerly bevy_xpbd)
+avian3d = "0.3"
+avian2d = "0.3"  # In case we need 2D physics for UI or minigames
+
+# Math
+nalgebra = "0.34"
+glam = "0.30"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
