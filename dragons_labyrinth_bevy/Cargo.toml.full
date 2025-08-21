@@ -1,0 +1,80 @@
+[package]
+name = "dragons_labyrinth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core Bevy - compatible with Rust 1.77.2
+bevy = { version = "0.13.2", default-features = false, features = ["bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi-threaded", "png", "x11"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = "0.9"
+
+# Hex grid system - compatible version
+hexx = { version = "0.18", features = ["algorithms"] }
+
+# Map generation with excellent algorithms and pathfinding
+mapgen = "0.5"
+# bevy_ecs_tilemap = "0.13" # Temporarily disabled - needs Bevy 0.14+
+
+# Database integration for persistent game state
+sea-orm = { version = "0.12", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+sea-orm-migration = "0.12"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
+xdg = "2.5"  # Cross-platform user directories
+async-trait = "0.1"
+
+# For parallel processing  
+rayon = "1.7"
+
+# For concurrent data structures
+dashmap = "5.5"
+
+# Image processing for sprite generation
+image = "0.24"
+
+# Advanced concurrency
+crossbeam = "0.8"
+
+# Fast hashing
+blake3 = "1.8"
+
+# LRU cache for asset management
+lru = "0.12"
+
+# Color management
+palette = "0.7"
+
+# Date/time for asset metadata
+chrono = { version = "0.4", features = ["serde"] }
+
+# Additional crates from the metaprompt suggestions
+async-openai = "0.18"
+tiktoken-rs = "0.5"
+imageproc = "0.24"
+resvg = "0.34" 
+candle-core = "0.3"  # Compatible with Rust 1.77.2
+petgraph = "0.6"
+zstd = "0.13"
+rfd = "0.14"
+egui = "0.27"
+eframe = "0.27"
+base64 = "0.22"
+reqwest = { version = "0.12", features = ["json"] }
+tracing = "0.1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Progress indicators
+indicatif = "0.17"
+
+# Colored output
+colored = "2.1"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
