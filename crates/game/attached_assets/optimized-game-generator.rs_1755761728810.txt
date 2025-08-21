@@ -1,0 +1,558 @@
+// Enhanced version with consistency optimizations
+
+use anyhow::{Context, Result};
+use async_openai::{Client, config::OpenAIConfig};
+use image::{DynamicImage, ImageBuffer, Rgba};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::{Mutex, Semaphore};
+
+/// Style consistency manager for maintaining visual coherence
+#[derive(Clone)]
+pub struct StyleConsistencyManager {
+    /// Base style embedding extracted from reference images
+    style_embedding: Vec<f32>,
+    /// Color palette enforced across all generations
+    color_palette: ColorPalette,
+    /// Visual style rules and constraints
+    style_rules: StyleRules,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ColorPalette {
+    pub primary_colors: Vec<[u8; 3]>,
+    pub secondary_colors: Vec<[u8; 3]>,
+    pub background_colors: Vec<[u8; 3]>,
+    pub transparency_color: [u8; 3],
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct StyleRules {
+    pub pixel_size: u32,
+    pub outline_style: OutlineStyle,
+    pub shading_technique: ShadingTechnique,
+    pub perspective: Perspective,
+    pub constraints: Vec<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum OutlineStyle {
+    None,
+    SinglePixel,
+    DoublePixel,
+    Selective,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum ShadingTechnique {
+    Flat,
+    Simple,
+    Dithered,
+    Gradient,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum Perspective {
+    Isometric3_4,
+    TopDown,
+    Orthogonal,
+}
+
+/// Enhanced image generation pipeline with consistency mechanisms
+pub struct ConsistentImageGenerator {
+    client: Arc<Client<OpenAIConfig>>,
+    style_manager: Arc<Mutex<StyleConsistencyManager>>,
+    validation_pipeline: ValidationPipeline,
+    retry_semaphore: Arc<Semaphore>,
+}
+
+impl ConsistentImageGenerator {
+    /// Generate a style guide image that will be used as reference for all assets
+    pub async fn generate_style_guide(&self, concept: &GameConcept) -> Result<Vec<u8>> {
+        let style_guide_prompt = format!(
+            "Create a comprehensive pixel art style guide for a 16-bit {} game. \
+            Include: \
+            1. Color palette swatches (max 16 colors) \
+            2. Character sprite examples (16x24 pixels) \
+            3. Tile examples (32x32 pixels) \
+            4. Shading technique demonstration \
+            5. Outline style examples \
+            All in 3/4 isometric view. \
+            Style inspired by: {} \
+            Mood: {} \
+            CRITICAL: This establishes the EXACT visual style for all game assets.",
+            concept.theme,
+            concept.visual_reference.join(", "),
+            concept.mood
+        );
+
+        // Generate with multiple attempts for best result
+        let best_result = self.generate_with_validation(
+            &style_guide_prompt,
+            ValidationCriteria::StyleGuide,
+            5 // max attempts
+        ).await?;
+
+        // Extract style information from the generated guide
+        self.extract_style_information(&best_result).await?;
+
+        Ok(best_result)
+    }
+
+    /// Generate sprites with enforced consistency
+    pub async fn generate_consistent_sprite(
+        &self,
+        sprite_type: &str,
+        base_prompt: &str,
+        style_guide: &[u8]
+    ) -> Result<Vec<u8>> {
+        // Create a composite prompt that references the style guide
+        let consistent_prompt = self.create_consistent_prompt(
+            base_prompt,
+            sprite_type,
+            style_guide
+        ).await?;
+
+        // Generate with validation
+        let sprite = self.generate_with_validation(
+            &consistent_prompt,
+            ValidationCriteria::Sprite(sprite_type.to_string()),
+            3
+        ).await?;
+
+        // Post-process to ensure palette consistency
+        let processed = self.enforce_palette_consistency(&sprite).await?;
+
+        Ok(processed)
+    }
+
+    /// Create a prompt that maintains consistency with established style
+    async fn create_consistent_prompt(
+        &self,
+        base_prompt: &str,
+        asset_type: &str,
+        style_guide: &[u8]
+    ) -> Result<String> {
+        let style_manager = self.style_manager.lock().await;
+        
+        let consistent_prompt = format!(
+            "{} \
+            MANDATORY STYLE REQUIREMENTS: \
+            - Use ONLY these exact colors: {} \
+            - Pixel size: {} \
+            - Outline: {} \
+            - Shading: {} \
+            - Maintain exact style consistency with provided reference \
+            - 3/4 isometric perspective at exactly 45-degree angle \
+            - No anti-aliasing, pure pixel art \
+            Additional constraints: {}",
+            base_prompt,
+            self.format_color_palette(&style_manager.color_palette),
+            style_manager.style_rules.pixel_size,
+            format!("{:?}", style_manager.style_rules.outline_style),
+            format!("{:?}", style_manager.style_rules.shading_technique),
+            style_manager.style_rules.constraints.join(", ")
+        );
+
+        Ok(consistent_prompt)
+    }
+
+    /// Post-process image to enforce palette constraints
+    async fn enforce_palette_consistency(&self, image_data: &[u8]) -> Result<Vec<u8>> {
+        let img = image::load_from_memory(image_data)?;
+        let style_manager = self.style_manager.lock().await;
+        
+        // Convert to limited palette
+        let processed = self.quantize_to_palette(
+            img,
+            &style_manager.color_palette
+        )?;
+
+        // Convert back to bytes
+        let mut buffer = Vec::new();
+        processed.write_to(&mut buffer, image::ImageOutputFormat::Png)?;
+        
+        Ok(buffer)
+    }
+
+    /// Advanced palette quantization
+    fn quantize_to_palette(
+        &self,
+        img: DynamicImage,
+        palette: &ColorPalette
+    ) -> Result<DynamicImage> {
+        let rgba = img.to_rgba8();
+        let (width, height) = rgba.dimensions();
+        
+        // Combine all palette colors
+        let mut all_colors = Vec::new();
+        all_colors.extend(&palette.primary_colors);
+        all_colors.extend(&palette.secondary_colors);
+        all_colors.extend(&palette.background_colors);
+        
+        // Create new image with quantized colors
+        let mut quantized = ImageBuffer::new(width, height);
+        
+        for (x, y, pixel) in rgba.enumerate_pixels() {
+            let nearest_color = self.find_nearest_color(
+                [pixel[0], pixel[1], pixel[2]],
+                &all_colors
+            );
+            
+            quantized.put_pixel(
+                x, y,
+                Rgba([nearest_color[0], nearest_color[1], nearest_color[2], pixel[3]])
+            );
+        }
+        
+        Ok(DynamicImage::ImageRgba8(quantized))
+    }
+
+    fn find_nearest_color(&self, color: [u8; 3], palette: &[[u8; 3]]) -> [u8; 3] {
+        palette.iter()
+            .min_by_key(|&&p| {
+                let dr = color[0] as i32 - p[0] as i32;
+                let dg = color[1] as i32 - p[1] as i32;
+                let db = color[2] as i32 - p[2] as i32;
+                dr * dr + dg * dg + db * db
+            })
+            .copied()
+            .unwrap_or(color)
+    }
+}
+
+/// Validation pipeline for ensuring quality and consistency
+pub struct ValidationPipeline {
+    validators: Vec<Box<dyn AssetValidator>>,
+}
+
+#[async_trait::async_trait]
+trait AssetValidator: Send + Sync {
+    async fn validate(&self, asset: &[u8], criteria: &ValidationCriteria) -> Result<ValidationResult>;
+}
+
+#[derive(Debug)]
+pub enum ValidationCriteria {
+    StyleGuide,
+    Sprite(String),
+    Tileset(String),
+    UIElement(String),
+}
+
+#[derive(Debug)]
+pub struct ValidationResult {
+    pub passed: bool,
+    pub score: f32,
+    pub issues: Vec<String>,
+    pub suggestions: Vec<String>,
+}
+
+/// Semantic consistency enforcer using embeddings
+pub struct SemanticConsistencyEnforcer {
+    client: Arc<Client<OpenAIConfig>>,
+    concept_embedding: Vec<f32>,
+    theme_keywords: Vec<String>,
+}
+
+impl SemanticConsistencyEnforcer {
+    /// Generate embeddings for concept consistency
+    pub async fn create_concept_embedding(&mut self, concept: &GameConcept) -> Result<()> {
+        let concept_text = format!(
+            "Game: {}, Theme: {}, Setting: {}, Mood: {}, Style: {}",
+            concept.name,
+            concept.theme,
+            concept.setting,
+            concept.mood,
+            concept.visual_reference.join(", ")
+        );
+
+        // Generate embedding using OpenAI's embedding model
+        // This embedding will be used to validate all generated content
+        self.concept_embedding = self.generate_embedding(&concept_text).await?;
+        
+        // Extract key theme words for validation
+        self.theme_keywords = self.extract_keywords(concept).await?;
+        
+        Ok(())
+    }
+
+    async fn generate_embedding(&self, text: &str) -> Result<Vec<f32>> {
+        // Use OpenAI's embedding API
+        // Simplified for example - actual implementation would use the embedding endpoint
+        Ok(vec![0.1; 1536]) // Placeholder
+    }
+}
+
+/// Improved code generation with template system
+pub struct TemplateBasedCodeGenerator {
+    templates: HashMap<String, CodeTemplate>,
+    concept: GameConcept,
+    style_consistency: Arc<Mutex<StyleConsistencyManager>>,
+}
+
+#[derive(Clone)]
+pub struct CodeTemplate {
+    pub base_template: String,
+    pub required_imports: Vec<String>,
+    pub feature_modules: HashMap<GameFeature, String>,
+    pub integration_points: Vec<String>,
+}
+
+impl TemplateBasedCodeGenerator {
+    /// Generate code using templates for consistency
+    pub async fn generate_component(
+        &self,
+        component_type: &str,
+        features: &[GameFeature]
+    ) -> Result<String> {
+        let template = self.templates.get(component_type)
+            .context("Template not found")?;
+        
+        let mut code = template.base_template.clone();
+        
+        // Add imports
+        for import in &template.required_imports {
+            code = code.replace("{{IMPORTS}}", &format!("{}\n{{{{IMPORTS}}}}", import));
+        }
+        
+        // Add feature-specific code
+        for feature in features {
+            if let Some(feature_code) = template.feature_modules.get(feature) {
+                code = code.replace("{{FEATURES}}", &format!("{}\n{{{{FEATURES}}}}", feature_code));
+            }
+        }
+        
+        // Clean up placeholders
+        code = code.replace("{{IMPORTS}}", "")
+                   .replace("{{FEATURES}}", "");
+        
+        Ok(code)
+    }
+}
+
+/// Batch generation manager for efficiency
+pub struct BatchGenerationManager {
+    client: Arc<Client<OpenAIConfig>>,
+    max_concurrent: usize,
+    retry_strategy: RetryStrategy,
+}
+
+#[derive(Clone)]
+pub struct RetryStrategy {
+    pub max_attempts: u32,
+    pub backoff_ms: u64,
+    pub backoff_multiplier: f32,
+}
+
+impl BatchGenerationManager {
+    /// Generate multiple assets in parallel with rate limiting
+    pub async fn generate_asset_batch(
+        &self,
+        requests: Vec<AssetRequest>
+    ) -> Result<HashMap<String, Vec<u8>>> {
+        let semaphore = Arc::new(Semaphore::new(self.max_concurrent));
+        let results = Arc::new(Mutex::new(HashMap::new()));
+        
+        let tasks: Vec<_> = requests.into_iter().map(|request| {
+            let sem = semaphore.clone();
+            let client = self.client.clone();
+            let results = results.clone();
+            let retry_strategy = self.retry_strategy.clone();
+            
+            tokio::spawn(async move {
+                let _permit = sem.acquire().await.unwrap();
+                
+                match self.generate_with_retry(&request, &retry_strategy).await {
+                    Ok(data) => {
+                        let mut res = results.lock().await;
+                        res.insert(request.name, data);
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to generate {}: {}", request.name, e);
+                    }
+                }
+            })
+        }).collect();
+        
+        // Wait for all tasks
+        for task in tasks {
+            task.await?;
+        }
+        
+        Ok(Arc::try_unwrap(results).unwrap().into_inner())
+    }
+}
+
+#[derive(Clone)]
+pub struct AssetRequest {
+    pub name: String,
+    pub prompt: String,
+    pub asset_type: AssetType,
+    pub validation_criteria: ValidationCriteria,
+}
+
+#[derive(Clone)]
+pub enum AssetType {
+    Sprite,
+    Tileset,
+    UI,
+    Audio,
+}
+
+/// Cache manager for avoiding regeneration
+pub struct GenerationCache {
+    cache_dir: PathBuf,
+    metadata: HashMap<String, CacheMetadata>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CacheMetadata {
+    pub prompt_hash: String,
+    pub generation_date: chrono::DateTime<chrono::Utc>,
+    pub style_version: String,
+    pub validation_score: f32,
+}
+
+impl GenerationCache {
+    /// Check if asset exists in cache with matching parameters
+    pub async fn get_cached_asset(
+        &self,
+        prompt: &str,
+        style_version: &str
+    ) -> Option<Vec<u8>> {
+        let hash = self.compute_hash(prompt);
+        
+        if let Some(metadata) = self.metadata.get(&hash) {
+            if metadata.style_version == style_version {
+                let path = self.cache_dir.join(&hash);
+                if let Ok(data) = tokio::fs::read(path).await {
+                    return Some(data);
+                }
+            }
+        }
+        
+        None
+    }
+    
+    fn compute_hash(&self, content: &str) -> String {
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(content);
+        format!("{:x}", hasher.finalize())
+    }
+}
+
+/// Example of optimized usage
+pub async fn optimized_generation_example() -> Result<()> {
+    // 1. Initialize with style consistency
+    let style_manager = Arc::new(Mutex::new(StyleConsistencyManager {
+        style_embedding: vec![],
+        color_palette: ColorPalette {
+            primary_colors: vec![
+                [34, 32, 52],    // Dark purple
+                [69, 40, 60],    // Purple
+                [102, 57, 49],   // Brown
+                [143, 86, 59],   // Light brown
+            ],
+            secondary_colors: vec![
+                [223, 113, 38],  // Orange
+                [217, 160, 102], // Light orange
+                [238, 195, 154], // Peach
+                [251, 242, 54],  // Yellow
+            ],
+            background_colors: vec![
+                [153, 229, 80],  // Green
+                [106, 190, 48],  // Dark green
+                [55, 148, 110],  // Teal
+                [75, 105, 47],   // Forest
+            ],
+            transparency_color: [255, 0, 255], // Magenta
+        },
+        style_rules: StyleRules {
+            pixel_size: 1,
+            outline_style: OutlineStyle::SinglePixel,
+            shading_technique: ShadingTechnique::Simple,
+            perspective: Perspective::Isometric3_4,
+            constraints: vec![
+                "No anti-aliasing".to_string(),
+                "Maximum 3 shades per color".to_string(),
+                "Consistent light source from top-left".to_string(),
+            ],
+        },
+    }));
+    
+    // 2. Generate style guide first
+    let generator = ConsistentImageGenerator {
+        client: Arc::new(Client::new()),
+        style_manager: style_manager.clone(),
+        validation_pipeline: ValidationPipeline { validators: vec![] },
+        retry_semaphore: Arc::new(Semaphore::new(3)),
+    };
+    
+    // 3. Use batch generation for efficiency
+    let batch_manager = BatchGenerationManager {
+        client: Arc::new(Client::new()),
+        max_concurrent: 5,
+        retry_strategy: RetryStrategy {
+            max_attempts: 3,
+            backoff_ms: 1000,
+            backoff_multiplier: 2.0,
+        },
+    };
+    
+    // 4. Generate assets with consistency enforcement
+    // ... implementation continues
+    
+    Ok(())
+}
+
+/// Advanced prompt engineering for consistency
+pub mod prompt_engineering {
+    use super::*;
+    
+    pub struct PromptEngineer {
+        negative_prompts: Vec<String>,
+        style_anchors: Vec<String>,
+        composition_rules: Vec<String>,
+    }
+    
+    impl PromptEngineer {
+        pub fn new() -> Self {
+            Self {
+                negative_prompts: vec![
+                    "blurry".to_string(),
+                    "anti-aliased".to_string(),
+                    "gradient shading".to_string(),
+                    "realistic".to_string(),
+                    "3D rendered".to_string(),
+                    "photographic".to_string(),
+                    "modern art style".to_string(),
+                ],
+                style_anchors: vec![
+                    "exact pixel art style".to_string(),
+                    "16-bit era constraints".to_string(),
+                    "limited color palette".to_string(),
+                    "no anti-aliasing".to_string(),
+                    "crisp pixel boundaries".to_string(),
+                ],
+                composition_rules: vec![
+                    "consistent 3/4 isometric angle".to_string(),
+                    "uniform pixel size throughout".to_string(),
+                    "matching outline thickness".to_string(),
+                    "coherent light source direction".to_string(),
+                ],
+            }
+        }
+        
+        pub fn enhance_prompt(&self, base_prompt: &str) -> String {
+            format!(
+                "{}\n\nSTYLE ANCHORS: {}\n\nCOMPOSITION: {}\n\nAVOID: {}",
+                base_prompt,
+                self.style_anchors.join(", "),
+                self.composition_rules.join(", "),
+                self.negative_prompts.join(", ")
+            )
+        }
+    }
+}
