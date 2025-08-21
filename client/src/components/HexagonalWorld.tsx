@@ -1,11 +1,8 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
-const grassTexture = '/attached_assets/generated_images/grass_hexagon_tile_a528c91a.png';
-const forestTexture = '/attached_assets/generated_images/forest_hex_tile_1eafc553.png';
-const corruptedTexture = '/attached_assets/generated_images/corrupted_hex_tile_6c6e11cd.png';
 
 interface HexTile {
   q: number;
@@ -163,41 +160,33 @@ export default function HexagonalWorld() {
     }
   });
 
-  // Create hexagon geometry
-  // Load textures conditionally
-  const [grassTex, setGrassTex] = useState<THREE.Texture | null>(null);
-  const [forestTex, setForestTex] = useState<THREE.Texture | null>(null);
-  const [corruptedTex, setCorruptedTex] = useState<THREE.Texture | null>(null);
+  // Load textures
+  const grassTexture = useLoader(THREE.TextureLoader, '/textures/grass.png');
+  const woodTexture = useLoader(THREE.TextureLoader, '/textures/wood.jpg');
+  const sandTexture = useLoader(THREE.TextureLoader, '/textures/sand.jpg');
   
+  // Configure textures
   useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    loader.load(grassTexture, (texture) => {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(0.5, 0.5); // Scale texture down for better appearance
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearMipMapLinearFilter;
-      setGrassTex(texture);
-    });
-    loader.load(forestTexture, (texture) => {
+    [grassTexture, woodTexture, sandTexture].forEach(texture => {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(0.5, 0.5);
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearMipMapLinearFilter;
-      setForestTex(texture);
+      texture.needsUpdate = true;
     });
-    loader.load(corruptedTexture, (texture) => {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(0.5, 0.5);
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearMipMapLinearFilter;
-      setCorruptedTex(texture);
-    });
-  }, []);
+  }, [grassTexture, woodTexture, sandTexture]);
   
-  // Remove unused hexGeometry since we're using cylinder geometry now
+  // Add ground plane for visual reference
+  const groundPlane = useMemo(() => (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+      <planeGeometry args={[100, 100]} />
+      <meshStandardMaterial color="#1a1a1a" />
+    </mesh>
+  ), []);
 
   return (
     <group ref={worldRef}>
+      {/* Ground plane for visual reference */}
+      {groundPlane}
+      
       {/* Render hex tiles */}
       {hexTiles.map((tile) => {
         const position = hexToWorld(tile.q, tile.r, tile.elevation);
@@ -229,14 +218,15 @@ export default function HexagonalWorld() {
             <cylinderGeometry args={[1, 1, 0.2, 6]} />
             <meshStandardMaterial
               map={
-                tile.type === 'grass' ? grassTex :
-                tile.type === 'forest' ? forestTex :
-                tile.type === 'corrupted' ? corruptedTex :
+                tile.type === 'grass' ? grassTexture :
+                tile.type === 'forest' ? woodTexture :
+                tile.type === 'stone' ? sandTexture :
                 undefined
               }
               color={
-                (tile.type === 'grass' || tile.type === 'forest' || tile.type === 'corrupted') && 
-                (grassTex || forestTex || corruptedTex) ? '#FFFFFF' : appearance.color
+                (tile.type === 'grass' || tile.type === 'forest' || tile.type === 'stone') 
+                  ? '#FFFFFF' 
+                  : appearance.color
               }
               emissive={appearance.emissive || (isPlayerTile ? '#FFD700' : undefined)}
               emissiveIntensity={appearance.emissiveIntensity || (isPlayerTile ? 0.3 : 0)}
