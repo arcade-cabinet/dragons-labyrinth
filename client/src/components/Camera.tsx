@@ -16,31 +16,23 @@ export default function Camera() {
   useFrame((state, delta) => {
     const worldPos = getHexPosition(playerPosition.q, playerPosition.r, 1);
     
-    // Adjust camera based on horror stage
-    let cameraOffset = { x: 0, y: 8, z: 12 };
-    let fov = 45;
+    // Isometric camera angle for 2.5D view
+    // 45 degrees rotation, 30 degrees elevation
+    const distance = currentStage === 4 ? 2 : 12 - currentStage; // Closer as horror progresses
+    const angleH = Math.PI / 4; // 45 degrees horizontal for isometric
+    const angleV = Math.PI / 6; // 30 degrees vertical for 2.5D tilt
     
-    switch (currentStage) {
-      case 0: // Peace
-        cameraOffset = { x: 0, y: 8, z: 12 };
-        fov = 45;
-        break;
-      case 1: // Unease
-        cameraOffset = { x: 0, y: 7, z: 10 };
-        fov = 50;
-        break;
-      case 2: // Dread
-        cameraOffset = { x: 0, y: 6, z: 8 };
-        fov = 55;
-        break;
-      case 3: // Terror
-        cameraOffset = { x: 0, y: 4, z: 6 };
-        fov = 60;
-        break;
-      case 4: // Horror - First person view in labyrinth
-        cameraOffset = { x: 0, y: 1.5, z: 0 };
-        fov = 75;
-        break;
+    let cameraOffset = { 
+      x: distance * Math.cos(angleH) * Math.cos(angleV),
+      y: distance * Math.sin(angleV), 
+      z: distance * Math.sin(angleH) * Math.cos(angleV)
+    };
+    let fov = 45 + (currentStage * 5); // Wider FOV as horror progresses
+    
+    // Special case for Horror stage - much closer
+    if (currentStage === 4) {
+      cameraOffset = { x: 0, y: 1.5, z: 0 };
+      fov = 75;
     }
 
     // Set camera position
