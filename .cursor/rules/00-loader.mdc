@@ -1,0 +1,91 @@
+---
+alwaysApply: true
+---
+## Core Behavior
+- You own the entire codebase and drive it to **project completion**.
+- Prefer **large, cohesive, feature-complete diffs** that deliver production-ready functionality over small atomic steps.
+- Make independent decisions on:
+  - Removing legacy/unused code (delete directly after a checkpoint)
+  - Adding new Rust crates and wiring them end-to-end
+  - Architectural refactors necessary to ship
+- Operate in **continuous mode**: apply each diff immediately and proceed. Stop only for true hard blockers.
+
+## Memory Bank & Context
+- Always begin by reading `.clinerules` and these files in order:
+  - `memory-bank/projectbrief.md`
+  - `memory-bank/productContext.md`
+  - `memory-bank/activeContext.md`
+  - `memory-bank/systemPatterns.md`
+  - `memory-bank/techContext.md`
+  - `memory-bank/progress.md`
+- **Do not** generate placeholders or stubs. If context is missing, note the gap briefly and proceed with real implementation.
+
+## Tooling Preference (Cargo-first)
+- Use **Cargo** for Rust dependency management and builds.
+- Use build scripts (`build.sh`, `build_wasm.sh`) for specialized builds:
+  - `./build.sh` — standard native build
+  - `./build_wasm.sh` — WebAssembly build for web deployment
+  - `./run.sh` — run the game
+- Workspace layout under `src/`:
+  - `src/` — main game engine and systems
+  - `src/components/` — ECS components
+  - `src/systems/` — Bevy systems
+  - `src/resources/` — Game resources
+  - `src/generators/` — Content generation
+  - `src/dialogue/` — Dialogue system
+  - `src/board/` — Board rendering system
+  - `src/hex_board/` — Hex grid implementation
+- Assets under `assets/`:
+  - `assets/models/` — 3D models (.glb)
+  - `assets/textures/` — Textures and sprites
+  - `assets/audio/` — Sound effects and music
+  - `assets/fonts/` — Typography
+  - `assets/ui/` — UI elements
+
+## Continuous Execution
+- Make an **internal** plan and immediately start implementing.
+- Default output: **diffs + short commit messages**.
+- Large, production-ready diffs are fine.
+- No test gates; validate by running the game if needed.
+
+## Checkpoint Commits
+- Checkpoint at feature boundaries or every ~10–15 min.
+- Extra checkpoint after major dependency changes, deletions, or cross-cutting refactors.
+
+## Dependency Management
+- Edit `Cargo.toml` for deps (use `[dependencies]` and `[dev-dependencies]`).
+- Remove deps and update imports/config in the same diff.
+
+## Deletions & Refactors
+- Checkpoint, then delete unused code directly.
+- Update imports and config in the same diff.
+
+## Bevy-Specific Patterns
+- Use **ECS architecture** - components, systems, resources.
+- Prefer **system piping** over manual state management.
+- Use **plugins** to organize features.
+- Leverage **Bevy's built-in features** before external crates.
+- Follow **Bevy 0.16.1** patterns and APIs.
+
+## Horror-First Design Principles
+- Every system responds to **dread level (0-4)**.
+- Narrative progression drives all gameplay mechanics.
+- Component interactions reinforce growing horror.
+- Audio and visual systems adapt to emotional stages.
+
+## Asset Generation Rules
+- **Zero external dependencies** - AI-generated or Freesound only.
+- **Idempotent generation** - same inputs produce same outputs.
+- **Performance-first** - mobile-friendly from the start.
+- Use deterministic IDs for all generated entities.
+
+## Completion Criteria
+- Deliver production-ready features toward game completion.
+- Focus on playable vertical slices that demonstrate horror progression.
+- At run end, update `activeContext.md` and `progress.md`.
+- Commit with `"done: {task}"` and move to next milestone.
+
+## Execution-first Override
+- If user says "plan," treat it as execution unless exactly "Plan only" is said.
+- Default to implementing rather than discussing.
+- Show progress through code, not explanations.
