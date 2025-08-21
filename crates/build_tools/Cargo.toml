@@ -1,0 +1,36 @@
+[package]
+name = "build_tools"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Build tools and utilities for Dragon's Labyrinth"
+
+[dependencies]
+bevy = { workspace = true, features = [
+    "bevy_asset",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_scene",
+    "multi-threaded",
+    "png",
+] }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+indicatif = { workspace = true }
+colored = { workspace = true }
+directories = { workspace = true }
+
+# Build-specific dependencies
+toml = "0.8"
+walkdir = "2.5"
+regex = "1.10"
+sha2 = "0.10"
