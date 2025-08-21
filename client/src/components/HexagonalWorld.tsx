@@ -194,25 +194,7 @@ export default function HexagonalWorld() {
     });
   }, []);
   
-  const hexGeometry = useMemo(() => {
-    const shape = new THREE.Shape();
-    const size = 1;
-    
-    for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI / 3) * i;
-      const x = size * Math.cos(angle);
-      const y = size * Math.sin(angle);
-      
-      if (i === 0) {
-        shape.moveTo(x, y);
-      } else {
-        shape.lineTo(x, y);
-      }
-    }
-    shape.closePath();
-    
-    return new THREE.ShapeGeometry(shape);
-  }, []);
+  // Remove unused hexGeometry since we're using cylinder geometry now
 
   return (
     <group ref={worldRef}>
@@ -244,7 +226,7 @@ export default function HexagonalWorld() {
               document.body.style.cursor = 'default';
             }}
           >
-            <primitive object={hexGeometry} />
+            <cylinderGeometry args={[1, 1, 0.2, 6]} />
             <meshStandardMaterial
               map={
                 tile.type === 'grass' ? grassTex :
