@@ -1,21 +1,34 @@
-[workspace]
-members = [
-    "crates/build_tools",
-    "crates/game",
-]
-resolver = "2"
-
-[workspace.package]
+[package]
+name = "dragons_labyrinth"
 version = "0.1.0"
-edition = "2024"
-authors = ["Dragon's Labyrinth Team"]
+edition = "2021"
+authors = ["AI Assistant"]
+description = "Dragon's Labyrinth - Horror-First RPG built with Bevy"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/dragons-labyrinth/dragons-labyrinth"
+repository = "https://github.com/replit/dragons-labyrinth"
 rust-version = "1.88"
 
-[workspace.dependencies]
-# Core Bevy
-bevy = { version = "0.16.1", default-features = false }
+[dependencies]
+# Core Bevy - Rust 1.88 compatible latest version
+bevy = { version = "0.16.1", default-features = false, features = [
+    "bevy_asset",
+    "bevy_winit", 
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_audio",
+    "bevy_scene",
+    "bevy_gltf",
+    "multi-threaded",
+    "png",
+    "vorbis",
+    "x11",
+    "wayland",
+    "webgl2"
+] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -25,20 +38,20 @@ serde_json = "1.0"
 rand = "0.8"
 fastrand = "2.0"
 
-# Hex grid system
+# Hex grid system - latest version
 hexx = { version = "0.21", features = ["algorithms", "serde"] }
 
-# Map generation
+# Map generation - latest version  
 mapgen = "0.6"
 
 # ECS Tilemap for Bevy
 bevy_ecs_tilemap = "0.16"
 
-# Database
+# Database - modern versions
 sea-orm = { version = "1.1", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio-rustls"] }
 
-# Async runtime
+# Async runtime - latest
 tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "time"] }
 
 # Concurrency
@@ -53,7 +66,7 @@ tracing-subscriber = "0.3"
 # Colored output
 colored = "2.0"
 
-# Audio
+# Audio loading and management
 rodio = { version = "0.19", features = ["vorbis", "wav"] }
 
 # Cross-platform directories
@@ -64,6 +77,7 @@ anyhow = "1.0"
 thiserror = "2.0"
 
 # WebAssembly support
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
 web-sys = "0.3"
 wasm-bindgen-futures = "0.4"
@@ -74,12 +88,3 @@ opt-level = 1
 [profile.release]
 lto = "thin"
 codegen-units = 1
-
-[profile.dev.package."*"]
-opt-level = 3
-
-[profile.release-wasm]
-inherits = "release"
-opt-level = "z"
-lto = "fat"
-panic = "abort"
