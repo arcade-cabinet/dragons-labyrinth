@@ -1,22 +1,23 @@
 import { useEffect } from 'react';
-import HexWorld from './HexWorld';
-import Player from './Player';
+import HexagonalWorld from './HexagonalWorld';
+import CharacterSprite from './CharacterSprite';
+import HexMovement from './HexMovement';
 import Camera from './Camera';
-import BiomeRenderer from './BiomeRenderer';
 import QuestSystem from './QuestSystem';
 import BossEncounter from './BossEncounter';
 import AudioManager from './AudioManager';
 import MonsterSystem from './MonsterSystem';
-import StageTransitionSystem from './StageTransitionSystem';
 import SanityEffects from './SanityEffects';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
 import { useAudio } from '../lib/stores/useAudio';
+import { useCompanions } from '../lib/stores/useCompanions';
 
 export default function Game() {
-  const { initializeGame } = useGameState();
+  const { initializeGame, playerPosition } = useGameState();
   const { currentStage } = useNarrative();
   const { toggleMute } = useAudio();
+  const { companions } = useCompanions();
 
   useEffect(() => {
     initializeGame();
@@ -40,9 +41,21 @@ export default function Game() {
   return (
     <>
       <Camera />
-      <HexWorld />
-      <BiomeRenderer stage={currentStage} />
-      <Player />
+      <HexagonalWorld />
+      <HexMovement />
+      <CharacterSprite type="player" position={playerPosition} name="You" />
+      {companions.filter(c => c.isActive).map(companion => (
+        <CharacterSprite 
+          key={companion.id}
+          type="companion" 
+          position={{ 
+            q: playerPosition.q + Math.round(Math.random() * 2 - 1), 
+            r: playerPosition.r + Math.round(Math.random() * 2 - 1) 
+          }}
+          name={companion.name}
+          color={companion.color}
+        />
+      ))}
       <SanityEffects />
       <QuestSystem />
       <BossEncounter />
