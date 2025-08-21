@@ -1,5 +1,6 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
@@ -160,19 +161,51 @@ export default function HexagonalWorld() {
     }
   });
 
-  // Load textures
-  const grassTexture = useLoader(THREE.TextureLoader, '/textures/grass.png');
-  const woodTexture = useLoader(THREE.TextureLoader, '/textures/wood.jpg');
-  const sandTexture = useLoader(THREE.TextureLoader, '/textures/sand.jpg');
+  // Load 2.5D world tile sprite sheet
+  const worldTileTexture = useLoader(THREE.TextureLoader, '/sprites/hex_world_tiles.svg');
   
-  // Configure textures
+  // Load special 3D models for unique elements
+  const labyrinthPortal = useGLTF('/models/labyrinth_portal.glb');
+  useGLTF.preload('/models/labyrinth_portal.glb');
+  
+  // Configure sprite texture
   useEffect(() => {
-    [grassTexture, woodTexture, sandTexture].forEach(texture => {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(0.5, 0.5);
+    worldTileTexture.magFilter = THREE.NearestFilter;
+    worldTileTexture.minFilter = THREE.NearestFilter;
+    worldTileTexture.wrapS = worldTileTexture.wrapT = THREE.ClampToEdgeWrapping;
+    worldTileTexture.needsUpdate = true;
+  }, [worldTileTexture]);
+  
+  // Create sprite materials for different tile types
+  const tileMaterials = useMemo(() => {
+    const materials: Record<string, THREE.SpriteMaterial> = {};
+    
+    const tileFrames = {
+      'grass': { x: 0, y: 0 },
+      'forest': { x: 64, y: 0 },
+      'stone': { x: 128, y: 0 },
+      'water': { x: 192, y: 0 },
+      'corrupted': { x: 256, y: 0 },
+      'void': { x: 320, y: 0 },
+      'village': { x: 0, y: 64 },
+      'ruins': { x: 64, y: 64 }
+    };
+    
+    Object.entries(tileFrames).forEach(([tileType, offset]) => {
+      const texture = worldTileTexture.clone();
+      texture.offset.set(offset.x / 512, offset.y / 256); // 512x256 sheet size
+      texture.repeat.set(64 / 512, 64 / 256); // 64x64 tile size
       texture.needsUpdate = true;
+      
+      materials[tileType] = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: tileType === 'water',
+        opacity: tileType === 'water' ? 0.8 : 1
+      });
     });
-  }, [grassTexture, woodTexture, sandTexture]);
+    
+    return materials;
+  }, [worldTileTexture]);
   
   // Add ground plane for visual reference
   const groundPlane = useMemo(() => (
@@ -193,13 +226,15 @@ export default function HexagonalWorld() {
         const appearance = getTileAppearance(tile);
         const isPlayerTile = tile.q === playerPosition.q && tile.r === playerPosition.r;
         
+        // Check for special tiles that need 3D models
+        const hasLabyrinthEntrance = tile.biomeFeatures.includes('labyrinth_entrance');
+        const tileMaterial = tileMaterials[tile.type];
+        
         return (
-          <mesh
+          <group
             key={`${tile.q}_${tile.r}`}
             position={position}
-            rotation={[-Math.PI / 2, 0, Math.PI / 6]} // Lay flat and align hex
             userData={{ elevation: tile.elevation, q: tile.q, r: tile.r }}
-            receiveShadow
             onClick={(e) => {
               e.stopPropagation();
               if ((window as any).handleHexClick) {
@@ -215,27 +250,46 @@ export default function HexagonalWorld() {
               document.body.style.cursor = 'default';
             }}
           >
-            <cylinderGeometry args={[1, 1, 0.2, 6]} />
-            <meshStandardMaterial
-              map={
-                tile.type === 'grass' ? grassTexture :
-                tile.type === 'forest' ? woodTexture :
-                tile.type === 'stone' ? sandTexture :
-                undefined
-              }
-              color={
-                (tile.type === 'grass' || tile.type === 'forest' || tile.type === 'stone') 
-                  ? '#FFFFFF' 
-                  : appearance.color
-              }
-              emissive={appearance.emissive || (isPlayerTile ? '#FFD700' : undefined)}
-              emissiveIntensity={appearance.emissiveIntensity || (isPlayerTile ? 0.3 : 0)}
-              transparent={tile.type === 'water' || tile.type === 'void'}
-              opacity={appearance.opacity}
-              roughness={tile.type === 'water' ? 0.1 : 0.8}
-              metalness={tile.type === 'water' ? 0.8 : 0.1}
-            />
-          </mesh>
+            {hasLabyrinthEntrance ? (
+              // Special 3D model for labyrinth entrance
+              <primitive 
+                object={labyrinthPortal.scene.clone()} 
+                scale={[1.5, 1.5, 1.5]}
+                position={[0, 0.5, 0]}
+                receiveShadow
+                castShadow
+              />
+            ) : tileMaterial ? (
+              // Use 2.5D sprite for regular tiles
+              <sprite 
+                material={tileMaterial} 
+                scale={[2, 2, 1]}
+                position={[0, 0.5, 0]}
+              />
+            ) : (
+              // Fallback geometry
+              <mesh receiveShadow position={[0, 0, 0]}>
+                <cylinderGeometry args={[1, 1, 0.2, 6]} />
+                <meshStandardMaterial
+                  color={appearance.color}
+                  emissive={appearance.emissive}
+                  emissiveIntensity={appearance.emissiveIntensity}
+                  transparent={tile.type === 'water' || tile.type === 'void'}
+                  opacity={appearance.opacity}
+                  roughness={tile.type === 'water' ? 0.1 : 0.8}
+                  metalness={tile.type === 'water' ? 0.8 : 0.1}
+                />
+              </mesh>
+            )}
+            
+            {/* Player highlight effect */}
+            {isPlayerTile && (
+              <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.8, 1.2, 6]} />
+                <meshBasicMaterial color="#FFD700" transparent opacity={0.5} />
+              </mesh>
+            )}
+          </group>
         );
       })}
       
