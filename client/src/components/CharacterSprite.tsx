@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
-import { Billboard, Sprite } from '@react-three/drei';
+import { Billboard } from '@react-three/drei';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
 import { getSpriteForType } from '../data/sprites';
