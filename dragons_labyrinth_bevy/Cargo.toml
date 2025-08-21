@@ -11,6 +11,21 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rand = "0.8"
 
+# Specialized crates for Dragon's Labyrinth technical requirements
+hexx = { version = "0.18", features = ["algorithms"] }  # Hex grid system with pathfinding
+bevy_yoleck = "0.21"  # Level editing with JSON .yol files
+bevy_yarnspinner = "0.4"  # Dialogue system with .yarn files
+bevy_cobweb_ui = "0.11"  # Declarative UI with .cob scene format
+bevy_egui = "0.28"  # Editor interface for level editing mode
+
+# Advanced Bevy ecosystem as per vision document
+bevy_yoleck = "0.19"  # Level editor integration
+bevy_yarnspinner = "0.5"  # Dialogue system
+hexx = "0.15"  # Hex grid operations and pathfinding
+cobweb-ui = "0.9"  # Declarative UI framework
+cobweb = "0.4"  # Reactivity primitives
+egui = "0.28"  # Editor widgets for Yoleck
+
 # WebAssembly support
 [target.wasm32-unknown-unknown.dependencies]
 web-sys = "0.3"

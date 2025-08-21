@@ -3,22 +3,40 @@ use bevy::prelude::*;
 mod components;
 mod systems;
 mod resources;
+mod assets;
+mod hex_board;
+mod dialogue;
+mod assets;
+mod board;
+mod dialogue;
 
 use components::*;
 use systems::*;
 use resources::*;
+use assets::*;
+use hex_board::*;
+use dialogue::*;
+use assets::*;
+use board::*;
+use dialogue::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Dragon's Labyrinth".into(),
-                resolution: (1024.0, 768.0).into(),
-                canvas: Some("#bevy".to_owned()),
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Dragon's Labyrinth".into(),
+                    resolution: (1024.0, 768.0).into(),
+                    canvas: Some("#bevy".to_owned()),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }))
+            // Specialized plugins for technical requirements
+            AssetManagementPlugin,
+            BoardPlugin,
+            DialoguePlugin,
+        ))
         // Core resources following design bible
         .init_resource::<DreadState>()
         .init_resource::<HexWorld>()
