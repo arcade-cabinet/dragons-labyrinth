@@ -16,18 +16,21 @@ Current React/Three.js implementation faces fundamental limitations:
 - Interpreted JavaScript cannot handle complex 3D model management efficiently
 - Garbage collection causes memory leaks with frequent model instantiation
 - WebGL lacks direct memory control needed for mobile 3D performance
-- Proper solution requires compiled language (C++/Rust) with WebAssembly or native engine
+- **Solution**: Migrate to Bevy Engine (Rust) with WebAssembly deployment for proper performance
 
 ### Output Structure
 ```
 /generated_game/
-  ├── project.godot
-  ├── scenes/
-  ├── scripts/
+  ├── Cargo.toml      # Bevy project configuration
+  ├── src/
+  │   ├── main.rs     # Entry point
+  │   ├── systems/    # ECS systems
+  │   ├── components/ # Game components
+  │   └── resources/  # Game resources
   ├── assets/
   │   ├── models/     # .glb files with vertex colors
   │   ├── audio/      # .ogg files from generation
-  │   └── textures/   # SVG-based textures
+  │   └── textures/   # Generated textures
   └── metadata/       # JSON metadata for all generated content
 ```
 
@@ -70,7 +73,8 @@ Current React/Three.js implementation faces fundamental limitations:
 - **Hexagonal Grid**: Implemented proper hexagonal world with 6-directional movement ("hexagons are the bestagons")
 - **Visual Improvements**: Added chess piece-style character sprites and stage-based world corruption effects
 - **Performance Issue Identified (2025-01-21)**: JavaScript/React/Three.js architecture fundamentally insufficient for complex 3D game with multiple models due to interpreted language limitations and garbage collection
-- **Architecture Limitation**: Current web stack cannot efficiently manage 3D models without memory leaks - proper solution requires compiled language (C++/Rust) with WebAssembly or native engine
+- **Architecture Migration (2025-01-21)**: Transitioning to Bevy Engine (Rust) with WebAssembly deployment for proper 2.5D performance and memory management
+- **Design Bible Integration**: Aligning with zero dependencies, idempotent generation, and component-based architecture principles from project design bible
 
 ## Implementation Status
 - [ ] Core CLI structure
