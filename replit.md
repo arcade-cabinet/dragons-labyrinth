@@ -78,6 +78,9 @@ Current React/Three.js implementation faces fundamental limitations:
 - **Performance Issue Identified (2025-01-21)**: JavaScript/React/Three.js architecture fundamentally insufficient for complex 3D game with multiple models due to interpreted language limitations and garbage collection
 - **Architecture Migration (2025-01-21)**: Transitioning to Bevy Engine (Rust) with WebAssembly deployment for proper 2.5D performance and memory management
 - **Design Bible Integration**: Aligning with zero dependencies, idempotent generation, and component-based architecture principles from project design bible
+- **Build System Setup (2025-01-21)**: Created build_tools crate with AI-powered content generators using openai_dive and freesound-rs for structured output generation
+- **Asset Pipeline**: Established idempotent build system with caching and automatic generation of .cob UI files, .yol level files, and ECS prefabs
+- **Rust Compatibility**: Working with Rust 1.77.2, using Bevy 0.12 for compatibility
 
 ## Implementation Status
 - [x] Core Bevy ECS architecture setup
