@@ -1,0 +1,42 @@
+[package]
+name = "dragons_ai"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "AI and pathfinding systems for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+dragons_maps = { path = "../maps" }
+
+bevy = { workspace = true, default-features = false }
+
+# AI and pathfinding
+pathfinding = { workspace = true }
+big-brain = "0.22"
+
+# Behavior trees
+bevy_behavior_tree = "0.6"
+
+# Utility AI
+bevy_utility_ai = "0.3"
+
+# Math and algorithms
+nalgebra = "0.33"
+petgraph = "0.6"
+
+# Random
+rand = { workspace = true }
+fastrand = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

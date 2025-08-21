@@ -1,0 +1,104 @@
+[package]
+name = "dragons_labyrinth"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Dragon's Labyrinth - Horror-First RPG built with Bevy"
+
+[[bin]]
+name = "dragons_labyrinth"
+path = "src/main.rs"
+
+[dependencies]
+# Internal crates
+dragons_core = { path = "../core" }
+dragons_assets = { path = "../assets" }
+
+# Core Bevy with all features
+bevy = { workspace = true, features = [
+    "bevy_asset",
+    "bevy_winit", 
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_audio",
+    "bevy_scene",
+    "bevy_gltf",
+    "multi_threaded",
+    "png",
+    "vorbis",
+    "x11",
+    "wayland",
+    "webgl2",
+    "bevy_gilrs",
+    "serialize",
+    "bevy_debug_stepping",
+] }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Random number generation
+rand = { workspace = true }
+fastrand = { workspace = true }
+
+# Hex grid system
+hexx = { workspace = true }
+
+# Map generation
+mapgen = { workspace = true }
+
+# ECS Tilemap
+bevy_ecs_tilemap = { workspace = true }
+
+# Database
+sea-orm = { workspace = true }
+sqlx = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+
+# Concurrency
+dashmap = { workspace = true }
+parking_lot = { workspace = true }
+
+# Logging
+indicatif = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Colored output
+colored = { workspace = true }
+
+# Audio
+rodio = { workspace = true }
+bevy_kira_audio = { workspace = true }
+
+# Cross-platform directories
+directories = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Game-specific dependencies
+noise = { workspace = true }
+pathfinding = { workspace = true }
+bevy_rapier3d = { workspace = true }
+bevy_hanabi = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.5"

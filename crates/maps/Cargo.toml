@@ -1,0 +1,37 @@
+[package]
+name = "dragons_maps"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Map generation and management for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, features = [
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_asset",
+] }
+
+# Map generation and hex grids
+hexx = { workspace = true }
+mapgen = { workspace = true }
+bevy_ecs_tilemap = { workspace = true }
+
+# Procedural generation
+noise = { workspace = true }
+rand = { workspace = true }
+fastrand = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

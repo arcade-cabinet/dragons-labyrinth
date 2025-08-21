@@ -1,0 +1,35 @@
+[package]
+name = "dragons_physics"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Physics system for Dragon's Labyrinth"
+
+[dependencies]
+dragons_core = { path = "../core" }
+
+bevy = { workspace = true, default-features = false }
+
+# Physics
+bevy_rapier3d = { workspace = true }
+rapier3d = "0.22"
+
+# Extended physics
+bevy_xpbd_3d = "0.6"
+avian3d = "0.2"
+
+# Math
+nalgebra = "0.33"
+glam = "0.29"
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
