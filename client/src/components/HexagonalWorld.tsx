@@ -1,5 +1,6 @@
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useGLTF, Clone } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameState } from '../lib/stores/useGameState';
 import { useNarrative } from '../lib/stores/useNarrative';
@@ -160,63 +161,37 @@ export default function HexagonalWorld() {
     }
   });
 
-  // Use simple geometries instead of heavy 3D models for mobile performance
-  const getTileGeometry = (tileType: string) => {
-    // Return simple colored geometries instead of loading heavy models
-    const baseHeight = 0.2;
-    const radius = 1;
+  // Load and manage 3D models efficiently using useGLTF with proper caching
+  const grassModel = useGLTF('/models/labyrinth_portal.glb'); // Reusing existing model as fallback
+  const forestModel = useGLTF('/models/labyrinth_portal.glb'); 
+  const stoneModel = useGLTF('/models/labyrinth_portal.glb');
+  const waterModel = useGLTF('/models/labyrinth_portal.glb');
+  const corruptedModel = useGLTF('/models/labyrinth_portal.glb');
+  const voidModel = useGLTF('/models/labyrinth_portal.glb');
+  const portalModel = useGLTF('/models/labyrinth_portal.glb');
+
+  // Preload models to prevent loading hitches
+  useGLTF.preload('/models/labyrinth_portal.glb');
+
+  // Get appropriate model for tile type with proper material overrides
+  const getTileModel = (tileType: string) => {
+    const baseModel = grassModel; // Using one model with different materials for efficiency
     
-    switch (tileType) {
-      case 'water':
-        return {
-          geometry: <cylinderGeometry args={[radius, radius, baseHeight * 0.5, 6]} />,
-          material: (
-            <meshStandardMaterial
-              color="#1976D2"
-              transparent
-              opacity={0.7}
-              roughness={0.1}
-              metalness={0.8}
-            />
-          )
-        };
-      case 'corrupted':
-        return {
-          geometry: <cylinderGeometry args={[radius, radius, baseHeight, 6]} />,
-          material: (
-            <meshStandardMaterial
-              color="#7C4DFF"
-              emissive="#4A148C"
-              emissiveIntensity={0.3}
-            />
-          )
-        };
-      case 'void':
-        return {
-          geometry: <cylinderGeometry args={[radius, radius, baseHeight * 0.3, 6]} />,
-          material: (
-            <meshStandardMaterial
-              color="#000000"
-              transparent
-              opacity={0.3}
-            />
-          )
-        };
-      default:
-        return {
-          geometry: <cylinderGeometry args={[radius, radius, baseHeight, 6]} />,
-          material: (
-            <meshStandardMaterial
-              color={
-                tileType === 'grass' || tileType === 'village' ? '#4CAF50' :
-                tileType === 'forest' ? '#2E7D32' :
-                tileType === 'stone' || tileType === 'ruins' ? '#757575' :
-                '#616161'
-              }
-            />
-          )
-        };
-    }
+    const materialOverrides = {
+      grass: { color: '#4CAF50', emissive: '#000000', emissiveIntensity: 0 },
+      village: { color: '#8BC34A', emissive: '#000000', emissiveIntensity: 0 },
+      forest: { color: '#2E7D32', emissive: '#000000', emissiveIntensity: 0 },
+      stone: { color: '#757575', emissive: '#000000', emissiveIntensity: 0 },
+      ruins: { color: '#616161', emissive: '#000000', emissiveIntensity: 0 },
+      water: { color: '#1976D2', emissive: '#000000', emissiveIntensity: 0, transparent: true, opacity: 0.7 },
+      corrupted: { color: '#7C4DFF', emissive: '#4A148C', emissiveIntensity: 0.3 },
+      void: { color: '#000000', emissive: '#000000', emissiveIntensity: 0, transparent: true, opacity: 0.3 }
+    };
+
+    return {
+      model: baseModel,
+      material: materialOverrides[tileType as keyof typeof materialOverrides] || materialOverrides.grass
+    };
   };
   
   // Add ground plane for visual reference
@@ -238,9 +213,9 @@ export default function HexagonalWorld() {
         const appearance = getTileAppearance(tile);
         const isPlayerTile = tile.q === playerPosition.q && tile.r === playerPosition.r;
         
-        // Check for special tiles
+        // Check for special tiles and get appropriate model
         const hasLabyrinthEntrance = tile.biomeFeatures?.includes('labyrinth_entrance');
-        const tileGeom = getTileGeometry(tile.type);
+        const tileModelData = getTileModel(tile.type);
         
         return (
           <group
@@ -263,36 +238,43 @@ export default function HexagonalWorld() {
             }}
           >
             {hasLabyrinthEntrance ? (
-              // Special indicator for labyrinth entrance - simple geometry
+              // Special 3D model for labyrinth entrance using Clone for efficiency
+              <Clone 
+                object={portalModel.scene} 
+                scale={[1.5, 1.5, 1.5]}
+                position={[0, 0, 0]}
+                receiveShadow
+                castShadow
+              />
+            ) : (
+              // Use 3D models with Clone component for memory efficiency
               <group>
-                <mesh receiveShadow position={[0, 0, 0]}>
-                  <cylinderGeometry args={[1, 1, 0.3, 6]} />
-                  <meshStandardMaterial
-                    color="#1A237E"
-                    emissive="#7C4DFF"
-                    emissiveIntensity={0.5}
-                  />
-                </mesh>
-                <mesh position={[0, 0.5, 0]}>
-                  <boxGeometry args={[0.5, 1, 0.1]} />
-                  <meshStandardMaterial
-                    color="#000000"
-                    emissive="#9C27B0"
-                    emissiveIntensity={0.8}
+                <Clone 
+                  object={tileModelData.model.scene}
+                  scale={[2, 2, 2]}
+                  position={[0, 0, 0]}
+                  receiveShadow
+                  castShadow
+                />
+                {/* Material override mesh for tile-specific appearance */}
+                <mesh position={[0, 0.1, 0]} receiveShadow castShadow>
+                  <cylinderGeometry args={[0.9, 0.9, 0.15, 6]} />
+                  <meshStandardMaterial 
+                    color={tileModelData.material.color}
+                    emissive={tileModelData.material.emissive}
+                    emissiveIntensity={tileModelData.material.emissiveIntensity}
+                    transparent={tileModelData.material.transparent}
+                    opacity={tileModelData.material.opacity || 1}
+                    roughness={tile.type === 'water' ? 0.1 : 0.8}
+                    metalness={tile.type === 'water' ? 0.8 : 0.1}
                   />
                 </mesh>
               </group>
-            ) : (
-              // Use lightweight geometry instead of heavy models
-              <mesh receiveShadow position={[0, 0, 0]}>
-                {tileGeom.geometry}
-                {tileGeom.material}
-              </mesh>
             )}
             
             {/* Player highlight effect */}
             {isPlayerTile && (
-              <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <mesh position={[0, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[0.8, 1.2, 6]} />
                 <meshBasicMaterial color="#FFD700" transparent opacity={0.5} />
               </mesh>

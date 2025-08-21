@@ -9,7 +9,14 @@ Dragon's Labyrinth is a complete horror RPG that follows the emotional arc Peace
 - **CLI Interface**: Python-only toolchain (no external dependencies, stdlib only)
 - **Component-based**: Each system <100 lines, clear I/O, no cross-coupling
 - **Idempotent generation**: Deterministic IDs, stable APIs, reproducible outputs
-- **Performance-first**: 60 FPS desktop, 30 FPS mobile target
+- **Performance Limitation**: JavaScript/WebGL fundamentally insufficient for complex 3D with many models
+
+### Performance Architecture Issue
+Current React/Three.js implementation faces fundamental limitations:
+- Interpreted JavaScript cannot handle complex 3D model management efficiently
+- Garbage collection causes memory leaks with frequent model instantiation
+- WebGL lacks direct memory control needed for mobile 3D performance
+- Proper solution requires compiled language (C++/Rust) with WebAssembly or native engine
 
 ### Output Structure
 ```
@@ -62,8 +69,8 @@ Dragon's Labyrinth is a complete horror RPG that follows the emotional arc Peace
 - **Movement System (2025-01-24)**: Replaced WASD controls with tap-to-move pathfinding for better mobile compatibility and modern gameplay
 - **Hexagonal Grid**: Implemented proper hexagonal world with 6-directional movement ("hexagons are the bestagons")
 - **Visual Improvements**: Added chess piece-style character sprites and stage-based world corruption effects
-- **Performance Fix (2025-01-21)**: Replaced heavy 3D model cloning with lightweight geometries to fix memory leak causing mobile crashes
-- **Mobile Optimization**: Switched from complex GLTF models to simple cylinder geometries with materials for better mobile performance
+- **Performance Issue Identified (2025-01-21)**: JavaScript/React/Three.js architecture fundamentally insufficient for complex 3D game with multiple models due to interpreted language limitations and garbage collection
+- **Architecture Limitation**: Current web stack cannot efficiently manage 3D models without memory leaks - proper solution requires compiled language (C++/Rust) with WebAssembly or native engine
 
 ## Implementation Status
 - [ ] Core CLI structure
