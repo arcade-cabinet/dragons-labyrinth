@@ -62,6 +62,8 @@ Dragon's Labyrinth is a complete horror RPG that follows the emotional arc Peace
 - **Movement System (2025-01-24)**: Replaced WASD controls with tap-to-move pathfinding for better mobile compatibility and modern gameplay
 - **Hexagonal Grid**: Implemented proper hexagonal world with 6-directional movement ("hexagons are the bestagons")
 - **Visual Improvements**: Added chess piece-style character sprites and stage-based world corruption effects
+- **Performance Fix (2025-01-21)**: Replaced heavy 3D model cloning with lightweight geometries to fix memory leak causing mobile crashes
+- **Mobile Optimization**: Switched from complex GLTF models to simple cylinder geometries with materials for better mobile performance
 
 ## Implementation Status
 - [ ] Core CLI structure
