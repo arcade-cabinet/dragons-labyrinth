@@ -161,51 +161,45 @@ export default function HexagonalWorld() {
     }
   });
 
-  // Load 2.5D world tile sprite sheet
-  const worldTileTexture = useLoader(THREE.TextureLoader, '/sprites/hex_world_tiles.svg');
-  
-  // Load special 3D models for unique elements
+  // Load individual 3D tile models
+  const grassTile = useGLTF('/models/tiles/hex_grass.glb');
+  const forestTile = useGLTF('/models/tiles/hex_forest.glb');
+  const stoneTile = useGLTF('/models/tiles/hex_stone.glb');
+  const waterTile = useGLTF('/models/tiles/hex_water.glb');
+  const corruptedTile = useGLTF('/models/tiles/hex_corrupted.glb');
+  const voidTile = useGLTF('/models/tiles/hex_void.glb');
   const labyrinthPortal = useGLTF('/models/labyrinth_portal.glb');
+  
+  // Preload all models
+  useGLTF.preload('/models/tiles/hex_grass.glb');
+  useGLTF.preload('/models/tiles/hex_forest.glb');
+  useGLTF.preload('/models/tiles/hex_stone.glb');
+  useGLTF.preload('/models/tiles/hex_water.glb');
+  useGLTF.preload('/models/tiles/hex_corrupted.glb');
+  useGLTF.preload('/models/tiles/hex_void.glb');
   useGLTF.preload('/models/labyrinth_portal.glb');
   
-  // Configure sprite texture
-  useEffect(() => {
-    worldTileTexture.magFilter = THREE.NearestFilter;
-    worldTileTexture.minFilter = THREE.NearestFilter;
-    worldTileTexture.wrapS = worldTileTexture.wrapT = THREE.ClampToEdgeWrapping;
-    worldTileTexture.needsUpdate = true;
-  }, [worldTileTexture]);
-  
-  // Create sprite materials for different tile types
-  const tileMaterials = useMemo(() => {
-    const materials: Record<string, THREE.SpriteMaterial> = {};
-    
-    const tileFrames = {
-      'grass': { x: 0, y: 0 },
-      'forest': { x: 64, y: 0 },
-      'stone': { x: 128, y: 0 },
-      'water': { x: 192, y: 0 },
-      'corrupted': { x: 256, y: 0 },
-      'void': { x: 320, y: 0 },
-      'village': { x: 0, y: 64 },
-      'ruins': { x: 64, y: 64 }
-    };
-    
-    Object.entries(tileFrames).forEach(([tileType, offset]) => {
-      const texture = worldTileTexture.clone();
-      texture.offset.set(offset.x / 512, offset.y / 256); // 512x256 sheet size
-      texture.repeat.set(64 / 512, 64 / 256); // 64x64 tile size
-      texture.needsUpdate = true;
-      
-      materials[tileType] = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: tileType === 'water',
-        opacity: tileType === 'water' ? 0.8 : 1
-      });
-    });
-    
-    return materials;
-  }, [worldTileTexture]);
+  // Get appropriate 3D model for tile type
+  const getTileModel = (tileType: string) => {
+    switch (tileType) {
+      case 'grass':
+      case 'village':
+        return grassTile;
+      case 'forest':
+        return forestTile;
+      case 'stone':
+      case 'ruins':
+        return stoneTile;
+      case 'water':
+        return waterTile;
+      case 'corrupted':
+        return corruptedTile;
+      case 'void':
+        return voidTile;
+      default:
+        return grassTile; // fallback to grass
+    }
+  };
   
   // Add ground plane for visual reference
   const groundPlane = useMemo(() => (
@@ -227,8 +221,8 @@ export default function HexagonalWorld() {
         const isPlayerTile = tile.q === playerPosition.q && tile.r === playerPosition.r;
         
         // Check for special tiles that need 3D models
-        const hasLabyrinthEntrance = tile.biomeFeatures.includes('labyrinth_entrance');
-        const tileMaterial = tileMaterials[tile.type];
+        const hasLabyrinthEntrance = tile.biomeFeatures?.includes('labyrinth_entrance');
+        const tileModel = getTileModel(tile.type);
         
         return (
           <group
@@ -259,15 +253,17 @@ export default function HexagonalWorld() {
                 receiveShadow
                 castShadow
               />
-            ) : tileMaterial ? (
-              // Use 2.5D sprite for regular tiles
-              <sprite 
-                material={tileMaterial} 
-                scale={[2, 2, 1]}
-                position={[0, 0.5, 0]}
+            ) : tileModel ? (
+              // Use individual 3D models for tiles
+              <primitive 
+                object={tileModel.scene.clone()} 
+                scale={[2.5, 2.5, 2.5]}
+                position={[0, 0, 0]}
+                receiveShadow
+                castShadow
               />
             ) : (
-              // Fallback geometry
+              // Fallback geometry for water/void/corrupted
               <mesh receiveShadow position={[0, 0, 0]}>
                 <cylinderGeometry args={[1, 1, 0.2, 6]} />
                 <meshStandardMaterial
