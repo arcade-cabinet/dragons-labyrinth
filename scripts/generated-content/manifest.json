@@ -1,0 +1,10 @@
+{
+  "generated": "2025-08-21T06:13:07.772Z",
+  "dialogueCount": 28,
+  "soundEffectCount": 7,
+  "files": [
+    "companion-dialogues.json",
+    "npc-dialogues.json",
+    "sound-effects.json"
+  ]
+}

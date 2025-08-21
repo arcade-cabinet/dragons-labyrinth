@@ -1,0 +1,82 @@
+{
+  "villager_stage_0": {
+    "character": "villager",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "Ah, welcome traveler! The birds sing a sweet melody today, don't they? But heed my words, not all is as it seems in our tranquil village.",
+      "Such an unusual mist rolling in today. It whispers eerie secrets, but fear not, day still holds its gentle grace... for now.",
+      "The sun shines warmly upon us; cherish its glow, dear friend. For as night approaches, the world here begins to tell a very different story."
+    ]
+  },
+  "merchant_stage_0": {
+    "character": "merchant",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "Ah, a fresh face in these parts! Don’t be fooled by the sunshine, traveler; shadows here have long arms.",
+      "Care for a charm or two? They'll be your best friends once the skies start turning their darker hues.",
+      "You might notice things... shifting. Best stock up now, lest you find yourself without under a maleficent moon."
+    ]
+  },
+  "merchant_stage_1": {
+    "character": "merchant",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "Greetings, traveler! The sun may shine now, but beware... A darkness lurks ahead that not even my finest wares can illuminate.",
+      "You seek provisions for your journey through the labyrinth? Choose wisely, for shadows stretch long where you tread.",
+      "Ah, you've noticed the eerie calm. The world is deceiving here; take what you need before the horrors descend."
+    ]
+  },
+  "hollow_caretaker_stage_1": {
+    "character": "hollow_caretaker",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "Welcome, wanderer. Tread lightly, for this world soon unravels from dream to nightmare.",
+      "The air is deceptively calm here, but shadows whisper of the darkness that will claim the light.",
+      "Each choice you make ripples through time; in this place, decisions are the currency of survival."
+    ]
+  },
+  "forsaken_knight_stage_2": {
+    "character": "forsaken_knight",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "This twisted landscape... it feels like the air itself whispers of past afflictions.",
+      "Courage, my friends. To let fear rule our hearts is to fall prey to the labyrinth's true menace.",
+      "Even in this encroaching darkness, our light shall not waver. We must press on."
+    ]
+  },
+  "swamp_hermit_stage_2": {
+    "character": "swamp_hermit",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "Ah, you sense it too, don't you? The air grows heavy with whispers, and the swamp is no longer the sanctuary it was...",
+      "Careful now, traveler. Shadows here have a way of clinging to the soul, and not all that you see in the murk is willing to let go.",
+      "Beware the fog that creeps upon this mire. It's hungry for lost souls, and once swallowed, even I cannot guide you back."
+    ]
+  },
+  "ghost_town_echo_stage_3": {
+    "character": "ghost_town_echo",
+    "stage": 3,
+    "context": "Terror",
+    "lines": [
+      "Whispers linger here like a cursed breeze... Who dares to tread where memories bleed into shadows?",
+      "Once, laughter echoed through these streets; now only silence remains... or is it something else?",
+      "In the darkness, every footfall is a scream, every breath another soul lost... welcome to the ghost town."
+    ]
+  },
+  "dragon_stage_4": {
+    "character": "dragon",
+    "stage": 4,
+    "context": "Horror",
+    "lines": [
+      "Welcome to the Shadow’s Embrace, where your sweet dreams come to shatter!",
+      "Do you feel the chill creeping into your bones? That’s the air of despair seeping in.",
+      "Once bathed in light, now you wander into my darkness. Are you ready to face your nightmares?"
+    ]
+  }
+}

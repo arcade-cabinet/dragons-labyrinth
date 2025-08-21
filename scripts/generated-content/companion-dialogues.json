@@ -1,0 +1,242 @@
+{
+  "einar_stage_0": {
+    "character": "einar",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "Ah, it’s quite peaceful today, isn’t it? Makes you almost forget we’re at the edge of a labyrinth.",
+      "Mira, your unwavering optimism keeps us all grounded... even when things seem too calm.",
+      "Sorin, with all your knowledge, what do you make of these strange symbols? I'm glad to have your insight.",
+      "Tamara, your bread smells divine! It's a wonder you can bake anywhere, even here.",
+      "I trust each of you, but sometimes I can't help but feel uneasy... We've no idea what lies ahead."
+    ]
+  },
+  "einar_stage_1": {
+    "character": "einar",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "Something doesn’t feel right about this place. Do you think Mira saw something that made her leave us behind?",
+      "These walls seem like they’re closing in. Sorin, are you sure you’re not hiding anything from us?",
+      "I promised I’d protect you all, but how can I do that when everything seems like a threat?",
+      "The way forward is shrouded in doubt. Tamara, stick close to me. We can’t afford to lose another friend.",
+      "I can’t shake the feeling that Mira’s departure wasn’t just a whim. We need to watch each other’s backs more than ever."
+    ]
+  },
+  "einar_stage_2": {
+    "character": "einar",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "Stay close, Tamara. This maze is playing tricks on our minds... or is it just mine?",
+      "Did you hear that, Sorin? Whispers... or am I losing it? You wouldn't betray us, right?",
+      "Mira was our sunshine, and now even she has abandoned us... How much longer can we trust each other?",
+      "I promised to protect you all, but in this cursed place, who’s the real danger?",
+      "These walls are closing in. I can’t shake the feeling that someone is watching... or someone is planning."
+    ]
+  },
+  "einar_stage_3": {
+    "character": "einar",
+    "stage": 3,
+    "context": "Terror",
+    "lines": [
+      "Did you hear that? It’s like the walls are whispering... something's not right here. I can feel it in my bones.",
+      "Mira’s gone. Just like that. How can she leave us in this maze? We can't trust anyone... not even our own shadows.",
+      "Sorin, I saw you reading that old tome near the fire last night. What secrets are you hiding? I won’t let you lead us into a trap.",
+      "This place... it’s messing with my head. Tamara, watch your back. I won’t let this cursed labyrinth take another friend from us.",
+      "Why do I feel like the darkness itself is closing in on us? We have to stay together, but who can we truly trust?"
+    ]
+  },
+  "einar_stage_4": {
+    "character": "einar",
+    "stage": 4,
+    "context": "Horror",
+    "lines": [
+      "What was that sound? I swear something's watching us from the shadows.",
+      "We can't trust anyone fully anymore, not even ourselves. We need to be cautious.",
+      "Why did Mira leave? Are we going to end up just like her if we stay here?",
+      "Sorin, you've been quiet. I hope you're not holding anything back from us.",
+      "Tamara, stay close. We have to look out for each other now more than ever."
+    ]
+  },
+  "mira_stage_0": {
+    "character": "mira",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "I can't believe how beautiful and peaceful everything is here. It's like a dream come true!",
+      "Einar, I know you're worried, but let's just enjoy this moment. Nothing bad can come from a place like this.",
+      "Sorin, all your research couldn't have prepared us for this serenity, don't you think?",
+      "Tamara, look at all these flowers! We should pick some and make a beautiful crown for you.",
+      "I have a feeling that everything will be alright. Let's just stick together and enjoy this peace while it lasts."
+    ]
+  },
+  "mira_stage_1": {
+    "character": "mira",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "I know it's dark and creepy here, but let's focus on finding the way out. We can do it, guys!",
+      "Don't worry, Tamara. Just stick close to us, and everything will be fine.",
+      "Sorin, your knowledge might be just what we need to solve this puzzle. I believe in you!",
+      "Einar, stay calm. We'll get through this labyrinth together, no matter how unsettling it gets.",
+      "I have a feeling this path will lead us somewhere safe. We have to keep moving forward!"
+    ]
+  },
+  "mira_stage_2": {
+    "character": "mira",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "We're in deep now, aren't we? But hey, things always get better!",
+      "Einar, I don't know why you're doubting Sorin, but I'm sure he's on our side!",
+      "I can feel the weight of this labyrinth pressing down, but we'll find a way out, I've just got to!",
+      "I believe that every twist and turn here is just leading us closer to something great. Keep your spirits up, Tamara!",
+      "I'm sorry, everyone, but maybe it's best if I go on my own for now. Trust that I'll find a way."
+    ]
+  },
+  "mira_stage_3": {
+    "character": "mira",
+    "stage": 3,
+    "context": "Terror",
+    "lines": [
+      "Why is everyone so worried? Sure, the shadows seem creepy, but there's always light after darkness!",
+      "Einar, I understand you're concerned, but what if this is just another chance to prove ourselves?",
+      "Sorin, we might not know everything about this place, but isn't that what makes it exciting?",
+      "I wish you all the best, and I'm sure we'll meet again outside with stories to tell!",
+      "Tamara, trust your gut; it's never led you astray. I believe in you even if I have to leave now."
+    ]
+  },
+  "mira_stage_4": {
+    "character": "mira",
+    "stage": 4,
+    "context": "Horror",
+    "lines": [
+      "We can't stay here, it's getting into everyone's heads. We need to keep moving before we're all lost.",
+      "Einar, listen to me! You know I care about you, but this place is messing with your mind.",
+      "I think leaving might be our best option. There has to be a way out of this madness.",
+      "Sorin, you're the smart one here. Can't you see that none of this is real?",
+      "Tamara, sweetie, just promise me you'll stay safe, alright? I—I need to find a way out."
+    ]
+  },
+  "sorin_stage_0": {
+    "character": "sorin",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "There's so much to learn here in the labyrinth, if only there were more time.",
+      "Einar, your loyalty is admirable, but sometimes it's wise to question, even your own thoughts.",
+      "Mira, we must remain hopeful yet vigilant. Abandon the path of knowledge too soon and one might miss the true understanding.",
+      "Tamara, your innocence is a treasure, but knowledge of this place could truly enhance your curiosity.",
+      "In peace, we find the clarity to prepare for what's to come. Let's use this time wisely, my friends."
+    ]
+  },
+  "sorin_stage_1": {
+    "character": "sorin",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "We should proceed with caution; this labyrinth has a way of disguising its true nature.",
+      "Tamara, hold onto that lantern tightly. We mustn't let the shadows deceive us.",
+      "Einar, your instincts have served us well so far, but listen closely. Not everything is as it appears.",
+      "Mira, your optimism is refreshing, but you must realize the stakes here are far more grave than you imagine.",
+      "I have studied ancient maps of this place. Trust in my knowledge, and we might just uncover a path through this madness."
+    ]
+  },
+  "sorin_stage_2": {
+    "character": "sorin",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "I understand your mistrust, Einar, but knowledge is our true ally in this labyrinth.",
+      "Mira's optimism has always been her strength, but this place distorts even the brightest of spirits.",
+      "Tamara, your innocence is a beacon in this darkness—hold onto that, no matter what happens.",
+      "Every door we unlock here opens up another mystery. Who knows what else we might unleash?",
+      "Beware, my friends, wisdom is not just a light but also an inviting shadow when wielded carelessly."
+    ]
+  },
+  "sorin_stage_3": {
+    "character": "sorin",
+    "stage": 3,
+    "context": "Terror",
+    "lines": [
+      "I don't mean to cause alarm, but the ancient texts did speak of how alliances could fracture in this part of the labyrinth.",
+      "Mira's sudden departure is... concerning. We must remain vigilant; danger lurks in every shadow.",
+      "Einar, your judgment is clouded by fear. Trust your knowledge and instincts, not your paranoia.",
+      "Within these walls, nothing is as it seems. The labyrinth tests not just our skills, but our loyalties.",
+      "Tamara, hold onto your innocence tightly. This place seeks to corrupt the pure-hearted."
+    ]
+  },
+  "sorin_stage_4": {
+    "character": "sorin",
+    "stage": 4,
+    "context": "Horror",
+    "lines": [
+      "Why, Einar, your paranoia only fuels the darkness around us. Can you not see that reason is our lantern here?",
+      "Mira abandoning us was inevitable, though unfortunate. Her optimism clouded her ability to face the true horrors of this labyrinth.",
+      "This place... its secrets whisper to me, urging me toward choices I never thought possible.",
+      "Tamara, stay close. Your innocence is a light in this consuming gloom, but it also makes you vulnerable.",
+      "Remember, even scholars must sometimes tread paths uncharted, even if it means considering paths once unthinkable."
+    ]
+  },
+  "tamara_stage_0": {
+    "character": "tamara",
+    "stage": 0,
+    "context": "Peace",
+    "lines": [
+      "I hope I brought enough sweet rolls for everyone! My baking might not win battles, but it sure can lift spirits!",
+      "Oh, Mira! Look at how the sunlight filters through the trees here. It's like magic!",
+      "Sorin, did you find anything interesting in those old books you carry around? I bet they smell just as old as they look.",
+      "Einar, I know you're worried, but we're all together and that's what matters, right?",
+      "I love hearing everyone's stories around the campfire. It makes this adventure feel like a really big family trip!"
+    ]
+  },
+  "tamara_stage_1": {
+    "character": "tamara",
+    "stage": 1,
+    "context": "Unease",
+    "lines": [
+      "Wow, Einar, this place is huge! I bet we could spend days exploring those twists and turns.",
+      "Hey Mira, did you bring those dried berries you were talking about? I think we'd all love a treat right now.",
+      "Sorin, do you think the stories about the dragon are true? It sounds so scary, but also kind of exciting!",
+      "I'm not used to all this running around. Back home, I mostly just knead dough and bake bread!",
+      "Did anyone else hear that noise? Maybe it's just the wind, but it gave me goosebumps!"
+    ]
+  },
+  "tamara_stage_2": {
+    "character": "tamara",
+    "stage": 2,
+    "context": "Dread",
+    "lines": [
+      "1. \"Do you really think we can still find our way out of this nightmare, Einar? I baked bread in simpler mazes!\"",
+      "2. \"Mira, don't leave us! Even in my bakery, we work better with more hands helping!\"",
+      "3. \"Sorin, why are you looking at us like that? I can tell when someone's planning to take the last muffin... or something worse.\"",
+      "4. \"Einar, I know you're scared, but your loyalty means everything right now. Remember the time you stood by me when the loaves fell apart at the Fire Festival?\"",
+      "5. \"I might be just a baker's apprentice, but even I know we need to stick together if we want to leave this dread behind.\"]}"
+    ]
+  },
+  "tamara_stage_3": {
+    "character": "tamara",
+    "stage": 3,
+    "context": "Terror",
+    "lines": [
+      "Why did Mira leave us? I thought she believed we could make it through together.",
+      "Einar, please, you're scaring me. We have to trust each other in here, don't we?",
+      "Even in this maze, I just keep thinking of the smell of fresh bread. It helps me stay calm.",
+      "Sorin, please promise you'll stay with us. I can't take another friend walking away.",
+      "I know I'm not a warrior like you all, but I can still find a way to help us, right?"
+    ]
+  },
+  "tamara_stage_4": {
+    "character": "tamara",
+    "stage": 4,
+    "context": "Horror",
+    "lines": [
+      "Einar, why are you looking at us like that? We're still on the same team, aren't we?",
+      "Mira, please don't leave us! We can't do this without your spirit!",
+      "Sorin, I don't understand those symbols, but can you use them to help us?",
+      "This place doesn't feel right... everything is so cold and... eerie.",
+      "Can't we all just stick together until we find a way out? Splitting up sounds too scary."
+    ]
+  }
+}
