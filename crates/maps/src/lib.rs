@@ -1,6 +1,7 @@
 // Map generation system combining mapgen algorithms with bevy_ecs_tilemap visuals
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_clay_tiles::prelude::*;
 use mapgen::{
     Map, MapBuilder, 
     filter::{
@@ -10,10 +11,9 @@ use mapgen::{
     },
     geometry::{Point, Rect},
 };
-use hexx::Hex;
-use crate::components::*;
-use crate::resources::*;
-use crate::generators::*;
+use hexx::{Hex, HexLayout, HexOrientation};
+use dragons_core::components::*;
+use dragons_core::resources::*;
 
 /// Map generation plugin for Dragon's Labyrinth
 pub struct MapGenerationPlugin;
@@ -21,12 +21,15 @@ pub struct MapGenerationPlugin;
 impl Plugin for MapGenerationPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(TilemapPlugin)
+            .add_plugins(ClayTilesPlugin)
             .init_resource::<MapGeneratorState>()
-            .add_systems(Startup, setup_tilemap)
+            .init_resource::<HexagonalMapConfig>()
+            .add_systems(Startup, (setup_tilemap, setup_3d_hexagonal_map))
             .add_systems(Update, (
                 generate_maps_for_dread_level,
                 update_tilemap_visuals,
                 apply_corruption_to_tilemap,
+                update_3d_hexagonal_tiles,
             ));
     }
 }
@@ -38,6 +41,33 @@ pub struct MapGeneratorState {
     pub generation_seeds: HashMap<u8, u64>, // Dread level -> seed
     pub tile_storage: Option<TileStorage>,
     pub tilemap_entity: Option<Entity>,
+    pub hex_3d_entities: Vec<Entity>, // 3D hexagonal tile entities
+}
+
+/// Configuration for 3D hexagonal map generation
+#[derive(Resource)]
+pub struct HexagonalMapConfig {
+    pub use_3d_tiles: bool,
+    pub hex_radius: f32,
+    pub hex_height: f32,
+    pub hex_spacing: f32,
+    pub layout: HexLayout,
+}
+
+impl Default for HexagonalMapConfig {
+    fn default() -> Self {
+        Self {
+            use_3d_tiles: false, // Can be toggled for 3D mode
+            hex_radius: 1.0,
+            hex_height: 0.5,
+            hex_spacing: 0.1,
+            layout: HexLayout {
+                orientation: HexOrientation::Pointy,
+                origin: Vec2::ZERO,
+                hex_size: Vec2::splat(1.0),
+            },
+        }
+    }
 }
 
 /// Generated map with metadata
@@ -501,3 +531,149 @@ fn get_tile_appearance(map: &GeneratedMap, idx: usize) -> (u32, Color) {
 }
 
 use std::collections::HashMap;
+
+/// Setup 3D hexagonal map generation
+fn setup_3d_hexagonal_map(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    hex_config: Res<HexagonalMapConfig>,
+) {
+    if !hex_config.use_3d_tiles {
+        return;
+    }
+    
+    info!("Setting up 3D hexagonal map generation");
+    
+    // Create a hexagonal mesh using clay tiles
+    let hex_mesh = create_hexagonal_mesh(hex_config.hex_radius, hex_config.hex_height);
+    let hex_mesh_handle = meshes.add(hex_mesh);
+    
+    // Store mesh handle for later use
+    commands.insert_resource(HexMeshHandle(hex_mesh_handle));
+}
+
+/// Create a 3D hexagonal mesh
+fn create_hexagonal_mesh(radius: f32, height: f32) -> Mesh {
+    let mut mesh = Mesh::new(bevy::render::render_resource::PrimitiveTopology::TriangleList, bevy::render::render_asset::RenderAssetUsages::all());
+    
+    // Create vertices for a hexagon
+    let mut vertices = Vec::new();
+    let mut normals = Vec::new();
+    let mut uvs = Vec::new();
+    
+    // Top face vertices
+    for i in 0..6 {
+        let angle = std::f32::consts::PI / 3.0 * i as f32;
+        let x = radius * angle.cos();
+        let z = radius * angle.sin();
+        
+        // Top vertex
+        vertices.push([x, height / 2.0, z]);
+        normals.push([0.0, 1.0, 0.0]);
+        uvs.push([0.5 + x / (2.0 * radius), 0.5 + z / (2.0 * radius)]);
+        
+        // Bottom vertex
+        vertices.push([x, -height / 2.0, z]);
+        normals.push([0.0, -1.0, 0.0]);
+        uvs.push([0.5 + x / (2.0 * radius), 0.5 + z / (2.0 * radius)]);
+    }
+    
+    // Center vertices for top and bottom
+    vertices.push([0.0, height / 2.0, 0.0]);
+    normals.push([0.0, 1.0, 0.0]);
+    uvs.push([0.5, 0.5]);
+    
+    vertices.push([0.0, -height / 2.0, 0.0]);
+    normals.push([0.0, -1.0, 0.0]);
+    uvs.push([0.5, 0.5]);
+    
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    
+    // Create indices for triangles
+    let mut indices = Vec::new();
+    
+    // Top face
+    for i in 0..6 {
+        let next = (i + 1) % 6;
+        indices.extend_from_slice(&[12, i * 2, next * 2]); // Center to edge
+    }
+    
+    // Bottom face
+    for i in 0..6 {
+        let next = (i + 1) % 6;
+        indices.extend_from_slice(&[13, next * 2 + 1, i * 2 + 1]); // Center to edge
+    }
+    
+    // Side faces
+    for i in 0..6 {
+        let next = (i + 1) % 6;
+        let top1 = i * 2;
+        let top2 = next * 2;
+        let bottom1 = i * 2 + 1;
+        let bottom2 = next * 2 + 1;
+        
+        indices.extend_from_slice(&[top1, bottom1, bottom2]);
+        indices.extend_from_slice(&[top1, bottom2, top2]);
+    }
+    
+    mesh.insert_indices(bevy::render::mesh::Indices::U32(indices));
+    mesh
+}
+
+/// Update 3D hexagonal tiles based on map data
+fn update_3d_hexagonal_tiles(
+    mut commands: Commands,
+    mut map_state: ResMut<MapGeneratorState>,
+    hex_config: Res<HexagonalMapConfig>,
+    mesh_handle: Option<Res<HexMeshHandle>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if !hex_config.use_3d_tiles || mesh_handle.is_none() {
+        return;
+    }
+    
+    let Some(ref map) = map_state.current_map else {
+        return;
+    };
+    
+    // Clear existing 3D hex entities
+    for entity in map_state.hex_3d_entities.drain(..) {
+        commands.entity(entity).despawn_recursive();
+    }
+    
+    let mesh_handle = mesh_handle.unwrap();
+    
+    // Generate 3D hexagonal tiles based on map data
+    for y in 0..map.map_data.height {
+        for x in 0..map.map_data.width {
+            let idx = map.map_data.xy_idx(x, y);
+            let hex = Hex::new(x as i32, y as i32);
+            let world_pos = hex_config.layout.hex_to_world_pos(hex);
+            
+            let (tile_type, color) = get_tile_appearance(&map, idx);
+            let height = if map.map_data.is_walkable(idx) { 0.0 } else { hex_config.hex_height };
+            
+            let material = materials.add(StandardMaterial {
+                base_color: color,
+                perceptual_roughness: 0.8,
+                metallic: 0.1,
+                ..default()
+            });
+            
+            let entity = commands.spawn(PbrBundle {
+                mesh: mesh_handle.0.clone(),
+                material,
+                transform: Transform::from_xyz(world_pos.x, height, world_pos.y),
+                ..default()
+            }).id();
+            
+            map_state.hex_3d_entities.push(entity);
+        }
+    }
+}
+
+#[derive(Resource)]
+struct HexMeshHandle(Handle<Mesh>);
