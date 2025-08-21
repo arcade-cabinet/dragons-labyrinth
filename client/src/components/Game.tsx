@@ -4,6 +4,7 @@ import CharacterSprite from './CharacterSprite';
 import PathfindingSystem from './PathfindingSystem';
 import Camera from './Camera';
 import Lighting from './Lighting';
+import LabyrinthEntrance from './LabyrinthEntrance';
 import QuestSystem from './QuestSystem';
 import BossEncounter from './BossEncounter';
 import AudioManager from './AudioManager';
@@ -45,6 +46,9 @@ export default function Game() {
       <Lighting />
       <HexagonalWorld />
       <PathfindingSystem />
+      {currentStage >= 3 && (
+        <LabyrinthEntrance position={[Math.sqrt(3) * 10 + Math.sqrt(3)/2 * (-5), 1, 3/2 * (-5)]} />
+      )}
       <CharacterSprite type="player" position={playerPosition} name="You" />
       {companions.filter(c => c.isActive).map(companion => (
         <CharacterSprite 

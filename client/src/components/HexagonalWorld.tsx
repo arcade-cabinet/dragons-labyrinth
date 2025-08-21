@@ -39,56 +39,67 @@ export default function HexagonalWorld() {
         let elevation = 0;
         const biomeFeatures: string[] = [];
         
-        // Create biome regions
+        // Biome regions based on narrative document
         if (distance < 3) {
-          // Starting village area
+          // Peace: Village, Market, Farmland
           tileType = 'grass';
           if (Math.random() < 0.1) biomeFeatures.push('flowers');
-        } else if (distance < 6) {
-          // Forest ring
-          tileType = Math.random() < 0.7 ? 'forest' : 'grass';
-          if (tileType === 'forest') {
+          if (Math.random() < 0.05) biomeFeatures.push('house');
+        } else if (distance < 6 && currentStage >= 1) {
+          // Unease: Forest, Town, Crypt Outskirts
+          const rand = Math.random();
+          if (rand < 0.6) {
+            tileType = 'forest';
             elevation = 0.1;
             biomeFeatures.push('trees');
-          }
-        } else if (distance < 9) {
-          // Mixed terrain
-          const rand = Math.random();
-          if (rand < 0.3) {
-            tileType = 'stone';
-            elevation = 0.2;
-          } else if (rand < 0.5) {
-            tileType = 'water';
-            elevation = -0.1;
+          } else if (rand < 0.8) {
+            tileType = 'stone'; // Town areas
+            elevation = 0.15;
           } else {
             tileType = 'grass';
+            if (currentStage >= 1) biomeFeatures.push('tombstone');
           }
-        } else {
-          // Outer regions - progressively more corrupted
-          if (currentStage >= 2) {
-            tileType = Math.random() < (currentStage * 0.2) ? 'corrupted' : 'stone';
+        } else if (distance < 9 && currentStage >= 2) {
+          // Dread: Swamp, Ruins, Abandoned Fort, Cavern
+          const rand = Math.random();
+          if (rand < 0.3) {
+            tileType = 'water'; // Swamp
+            elevation = -0.1;
+            biomeFeatures.push('murk');
+          } else if (rand < 0.6) {
+            tileType = 'stone'; // Ruins and fort
+            elevation = 0.2;
+            if (Math.random() < 0.3) biomeFeatures.push('ruins');
           } else {
-            tileType = 'stone';
-          }
-          elevation = 0.3;
-        }
-        
-        // Stage-based corruption spreading
-        if (currentStage >= 3 && distance > 4) {
-          const corruptionChance = (currentStage - 2) * 0.15 * (distance / mapRadius);
-          if (Math.random() < corruptionChance) {
-            tileType = 'corrupted';
+            tileType = 'forest'; // Dark forest
+            elevation = 0.1;
+            biomeFeatures.push('trees');
             biomeFeatures.push('darkness');
           }
-        }
-        
-        // Dragon's influence in Horror stage
-        if (currentStage === 4 && distance < 5) {
-          if (Math.random() < 0.3) {
-            tileType = 'void';
-            elevation = -0.5;
-            biomeFeatures.push('whispers');
+        } else if (distance >= 9 && currentStage >= 3) {
+          // Terror: Ghost Town, Warped City, Mirror Lake, Labyrinth Outskirts
+          const rand = Math.random();
+          if (rand < 0.3) {
+            tileType = 'corrupted'; // Warped areas
+            biomeFeatures.push('warped');
+          } else if (rand < 0.5) {
+            tileType = 'water'; // Mirror lake
+            elevation = -0.05;
+            biomeFeatures.push('mirror');
+          } else {
+            tileType = 'stone'; // Ghost town
+            elevation = 0.25;
+            biomeFeatures.push('abandoned');
           }
+          
+          // Labyrinth entrance (specific location in Terror stage)
+          if (q === 10 && r === -5 && currentStage >= 3) {
+            biomeFeatures.push('labyrinth_entrance');
+          }
+        } else {
+          // Default outer areas
+          tileType = distance < 6 ? 'grass' : 'stone';
+          elevation = distance < 6 ? 0 : 0.2;
         }
         
         tiles.push({
@@ -270,7 +281,7 @@ export default function HexagonalWorld() {
                 castShadow
               >
                 <coneGeometry args={[0.2, 1, 6]} />
-                <meshStandardMaterial color="#1B5E20" />
+                <meshStandardMaterial color={currentStage >= 2 ? "#0D2818" : "#1B5E20"} />
               </mesh>
             );
           } else if (feature === 'darkness') {
@@ -283,6 +294,42 @@ export default function HexagonalWorld() {
                 <meshBasicMaterial color="#000000" transparent opacity={0.7} />
               </mesh>
             );
+          } else if (feature === 'house') {
+            return (
+              <mesh
+                key={`${tile.q}_${tile.r}_house_${idx}`}
+                position={[position.x, 0.4, position.z]}
+                castShadow
+              >
+                <boxGeometry args={[0.6, 0.8, 0.6]} />
+                <meshStandardMaterial color={currentStage === 0 ? "#8D6E63" : "#424242"} />
+              </mesh>
+            );
+          } else if (feature === 'tombstone') {
+            return (
+              <mesh
+                key={`${tile.q}_${tile.r}_tomb_${idx}`}
+                position={[position.x, 0.3, position.z]}
+                castShadow
+              >
+                <boxGeometry args={[0.3, 0.6, 0.1]} />
+                <meshStandardMaterial color="#616161" />
+              </mesh>
+            );
+          } else if (feature === 'ruins') {
+            return (
+              <mesh
+                key={`${tile.q}_${tile.r}_ruin_${idx}`}
+                position={[position.x, 0.4, position.z]}
+                castShadow
+              >
+                <boxGeometry args={[0.7, 0.4, 0.7]} />
+                <meshStandardMaterial color="#424242" roughness={1} />
+              </mesh>
+            );
+          } else if (feature === 'labyrinth_entrance') {
+            // This will be handled by a separate component
+            return null;
           }
           return null;
         });
