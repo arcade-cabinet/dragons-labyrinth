@@ -208,7 +208,7 @@ export default function HexagonalWorld() {
           <mesh
             key={`${tile.q}_${tile.r}`}
             position={position}
-            rotation={[-Math.PI / 2, 0, 0]}
+            rotation={[0, Math.PI / 6, 0]} // Rotate to align hex properly
             userData={{ elevation: tile.elevation, q: tile.q, r: tile.r }}
             receiveShadow
             onClick={(e) => {
@@ -226,7 +226,7 @@ export default function HexagonalWorld() {
               document.body.style.cursor = 'default';
             }}
           >
-            <cylinderGeometry args={[1, 1, 0.3, 6]} />
+            <cylinderGeometry args={[1, 1, 0.2, 6, 1, false]} />
             <meshStandardMaterial
               map={
                 tile.type === 'grass' ? grassTex :
