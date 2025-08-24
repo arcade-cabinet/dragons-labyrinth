@@ -1,14 +1,31 @@
 # Dragon's Labyrinth - Progress Tracker
 
-## Project Status: Phase 5 - HBF Export Integration 🎯
+## Project Status: Phase 6 - Database-Driven Game Engine Architecture 🎯
 
-### Latest Achievement (2025-01-20 Evening - Hexroll Pivot)
-**PIVOTED TO HBF EXPORT APPROACH**
+### Latest Achievement (2025-08-24 - HBF Integration Complete + Architectural Revelation)
+**HBF IMPORT SYSTEM FULLY INTEGRATED**
+- ✅ Complete HBF import pipeline with 70k+ entities
+- ✅ Extended database-orm with settlements, dungeons, NPCs, weather
+- ✅ Direct SQLite database reading (no HTML file dependencies)
+- ✅ Full D&D 5e stat block parsing for combat integration
+- ✅ Horror progression integrated at entity level
+- ✅ Coordinate system conversion (HBF axial → cube hex)
+- ✅ Weather systems with seasonal mechanics
+- ✅ City GeoJSON data processing
+- ✅ NPC personality and dialogue system integration
+
+**ARCHITECTURAL REVELATION: DATABASE-DRIVEN ENGINE**
+🎯 **game-database** = THE ACTUAL GAME ENGINE (contains all logic, systems, content)
+🎯 **game-engine** = FACILITATOR (interface between database-engine and player)
+🎯 **player-database** = YET TO BUILD (player state/saves separate from world)
+
+### Previous Achievement (2025-01-20 Evening - Hexroll Pivot)
+**HEXROLL RESEARCH COMPLETED**
 - ✅ Researched Hexroll/SCROLL language extensively
-- ✅ Created comprehensive SCROLL modules (then stashed for future)
-- ✅ User discovered direct HBF export is more efficient
-- 🔄 Preparing for SQLite DB analysis (70k HTML files)
-- 🔄 Will correlate Hexroll data to ECS components
+- ✅ Created comprehensive SCROLL modules (stashed for future)
+- ✅ Discovered direct HBF export approach
+- ✅ Analyzed SQLite DB structure (70k HTML files)
+- ✅ Successfully correlated Hexroll data to ECS components
 
 ### Previous Achievement (2025-01-20 - Comprehensive Systems Implementation)
 **MASSIVE PROGRESS ON CORE GAME SYSTEMS**
