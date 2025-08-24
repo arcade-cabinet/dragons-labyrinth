@@ -6,11 +6,7 @@ members = [
     "crates/game-assets",
     "crates/game-dialogue",
     "crates/game-database",
-    "crates/database-orm",
     "crates/game-engine",
-    "crates/style-guide", 
-    "crates/dragons-docs", 
-    "crates/hbf-parser",
 ]
 
 resolver = "2"

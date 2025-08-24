@@ -12,7 +12,6 @@ use toml;
 
 /// Template-based asset processor
 pub struct TemplateProcessor {
-    template_env: Environment<'static>,
     template_dir: PathBuf,
     texture_base_path: PathBuf,
 }
@@ -20,24 +19,30 @@ pub struct TemplateProcessor {
 impl TemplateProcessor {
     /// Create new template processor
     pub fn new<P: AsRef<Path>>(template_dir: P, texture_base: P) -> Result<Self> {
-        let mut env = Environment::new();
         let template_path = template_dir.as_ref().to_path_buf();
         
-        // Load all template files
-        for template_file in ["hex_tile.py.j2", "overworld_tiles.py.j2", "companion.py.j2", "fps_monster.py.j2", "fps_dungeon_room.py.j2"] {
-            let template_path = template_path.join(template_file);
-            if template_path.exists() {
-                let template_content = std::fs::read_to_string(&template_path)?;
-                let template_name = template_file.strip_suffix(".py.j2").unwrap_or(template_file);
-                env.add_template(template_name, &template_content)?;
-            }
+        // Verify template directory exists
+        if !template_path.exists() {
+            return Err(anyhow::anyhow!("Template directory does not exist: {}", template_path.display()));
         }
         
         Ok(Self {
-            template_env: env,
             template_dir: template_path,
             texture_base_path: texture_base.as_ref().to_path_buf(),
         })
+    }
+    
+    /// Load template on-demand to avoid lifetime issues
+    fn load_template(&self, template_name: &str) -> Result<String> {
+        let template_file = format!("{}.py.j2", template_name);
+        let template_path = self.template_dir.join(&template_file);
+        
+        if template_path.exists() {
+            std::fs::read_to_string(&template_path)
+                .map_err(|e| anyhow::anyhow!("Failed to read template {}: {}", template_file, e))
+        } else {
+            Err(anyhow::anyhow!("Template not found: {}", template_file))
+        }
     }
     
     /// Generate Blender script from TOML asset request
@@ -49,36 +54,37 @@ impl TemplateProcessor {
         let toml_content = std::fs::read_to_string(toml_path)?;
         let request: AssetRequest = toml::from_str(&toml_content)?;
         
+        let output_base = output_base.as_ref();
         let mut scripts = Vec::new();
         
         // Process hex tiles for overworld
-        if let Some(tiles) = request.tiles {
+        if let Some(ref tiles) = request.tiles {
             for (name, tile_data) in tiles {
-                let script = self.generate_hex_tile_script(&name, &tile_data, &request, &output_base)?;
+                let script = self.generate_hex_tile_script(&name, &tile_data, &request, output_base)?;
                 scripts.push(script);
             }
         }
         
         // Process companions for both perspectives
-        if let Some(companions) = request.companions {
+        if let Some(ref companions) = request.companions {
             for (name, companion_data) in companions {
-                let script = self.generate_companion_script(&name, &companion_data, &request, &output_base)?;
+                let script = self.generate_companion_script(&name, &companion_data, &request, output_base)?;
                 scripts.push(script);
             }
         }
         
         // Process dungeons for FPS perspective
-        if let Some(dungeons) = request.dungeons {
+        if let Some(ref dungeons) = request.dungeons {
             for (name, dungeon_data) in dungeons {
-                let script = self.generate_dungeon_script(&name, &dungeon_data, &request, &output_base)?;
+                let script = self.generate_dungeon_script(&name, &dungeon_data, &request, output_base)?;
                 scripts.push(script);
             }
         }
         
         // Process weapons for FPS perspective
-        if let Some(weapons) = request.weapons {
+        if let Some(ref weapons) = request.weapons {
             for (name, weapon_data) in weapons {
-                let script = self.generate_weapon_script(&name, &weapon_data, &request, &output_base)?;
+                let script = self.generate_weapon_script(&name, &weapon_data, &request, output_base)?;
                 scripts.push(script);
             }
         }
@@ -101,7 +107,10 @@ impl TemplateProcessor {
             "overworld_tiles"  // 2.5D optimized for top-down
         };
         
-        let template = self.template_env.get_template(template_name)?;
+        let template_content = self.load_template(template_name)?;
+        let mut env = Environment::new();
+        env.add_template(template_name, &template_content)?;
+        let template = env.get_template(template_name)?;
         
         let output_path = output_base.join("tiles").join(format!("{}.glb", name));
         
@@ -136,7 +145,11 @@ impl TemplateProcessor {
         request: &AssetRequest,
         output_base: &Path,
     ) -> Result<GeneratedScript> {
-        let template = self.template_env.get_template("companion")?;
+        let template_content = self.load_template("companion")?;
+        let mut env = Environment::new();
+        env.add_template("companion", &template_content)?;
+        let template = env.get_template("companion")?;
+        
         let output_path = output_base.join("companions").join(format!("{}.glb", name));
         
         let script_content = template.render(context! {
@@ -171,7 +184,11 @@ impl TemplateProcessor {
         request: &AssetRequest,
         output_base: &Path,
     ) -> Result<GeneratedScript> {
-        let template = self.template_env.get_template("fps_dungeon_room")?;
+        let template_content = self.load_template("fps_dungeon_room")?;
+        let mut env = Environment::new();
+        env.add_template("fps_dungeon_room", &template_content)?;
+        let template = env.get_template("fps_dungeon_room")?;
+        
         let output_path = output_base.join("dungeons").join(format!("{}.glb", name));
         
         let script_content = template.render(context! {
@@ -206,8 +223,12 @@ impl TemplateProcessor {
         request: &AssetRequest,
         output_base: &Path,
     ) -> Result<GeneratedScript> {
-        // Weapons need FPS detail for first-person usage
-        let template = self.template_env.get_template("companion")?; // Reuse for now
+        // Weapons need FPS detail for first-person usage - reuse companion template for now
+        let template_content = self.load_template("companion")?;
+        let mut env = Environment::new();
+        env.add_template("companion", &template_content)?;
+        let template = env.get_template("companion")?;
+        
         let output_path = output_base.join("weapons").join(format!("{}.glb", name));
         
         let script_content = template.render(context! {
@@ -372,6 +393,7 @@ pub fn process_toml_directory<P: AsRef<Path>>(
     output_base: P,
 ) -> Result<Vec<GeneratedScript>> {
     let processor = TemplateProcessor::new(template_dir, texture_base)?;
+    let output_base_path = output_base.as_ref();
     let mut all_scripts = Vec::new();
     
     for entry in std::fs::read_dir(toml_dir)? {
@@ -379,7 +401,7 @@ pub fn process_toml_directory<P: AsRef<Path>>(
         let path = entry.path();
         
         if path.extension().and_then(|s| s.to_str()) == Some("toml") {
-            let scripts = processor.generate_script_from_toml(&path, &output_base)?;
+            let scripts = processor.generate_script_from_toml(path, output_base_path.to_path_buf())?;
             all_scripts.extend(scripts);
         }
     }
