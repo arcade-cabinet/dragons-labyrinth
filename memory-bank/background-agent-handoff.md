@@ -10,7 +10,7 @@ You are a background agent tasked with processing a massive HBF (Hexroll Backpac
 - **SQLite Database**: `nTR8nJOW.hbf` (24MB)
   - `Entities` table: 70,801 records (uuid TEXT PRIMARY KEY, value TEXT)
   - `Refs` table: 1,570 records (value, details, uuid, type, icon, anchor)
-- **HTML Files**: `/hbf-export/hbf_export_data/entities/` - 70,800 HTML files
+- **HTML Files**: `/hbf-export/hbf_export_data/entities/` - 2,244 HTML files (68,556 empty files removed!)
   - Named by UUID (e.g., `1l4YQODC.html`)
   - Contains dungeon rooms, NPCs, locations, treasures
   - Fully rendered HTML with stats, descriptions, rolls
