@@ -37,6 +37,12 @@ async-trait = "0.1"
 # Logging for sophisticated system debugging
 tracing = { workspace = true }
 
+# Regular expressions for parsing
+regex = { workspace = true }
+
+# HTML parsing for HBF import
+scraper = { workspace = true }
+
 # Bevy ECS integration
 bevy = "0.16.1"
 # bevy_sqlx = "0.1.9"  # Commented out - requires nightly

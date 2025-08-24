@@ -30,6 +30,11 @@ pub mod ai_workflows;
 pub mod generated_assets;
 pub mod asset_dependencies;
 
+// HBF integration modules
+pub mod settlements;
+pub mod dungeons;
+pub mod npcs;
+
 // Re-export entities for easy access
 pub use players::Entity as Players;
 pub use companions::Entity as Companions;
@@ -50,6 +55,14 @@ pub use game_states::Entity as GameStates;
 pub use ai_workflows::Entity as AiWorkflows;
 pub use generated_assets::Entity as GeneratedAssets;
 pub use asset_dependencies::Entity as AssetDependencies;
+
+// HBF integration entities
+pub use settlements::Entity as Settlements;
+pub use settlements::weather::Entity as SettlementWeather;
+pub use dungeons::Entity as Dungeons;
+pub use dungeons::rooms::Entity as DungeonRooms;
+pub use dungeons::doorways::Entity as DungeonDoorways;
+pub use npcs::Entity as Npcs;
 
 // Re-export sea-orm for build scripts
 pub use sea_orm;
@@ -93,6 +106,14 @@ pub async fn create_all_tables(db: &DatabaseConnection) -> Result<(), DbErr> {
     db.execute(db.get_database_backend().build(&schema.create_table_from_entity(GeneratedAssets))).await?;
     db.execute(db.get_database_backend().build(&schema.create_table_from_entity(AssetDependencies))).await?;
     
+    // HBF integration tables
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(Settlements))).await?;
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(SettlementWeather))).await?;
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(Dungeons))).await?;
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(DungeonRooms))).await?;
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(DungeonDoorways))).await?;
+    db.execute(db.get_database_backend().build(&schema.create_table_from_entity(Npcs))).await?;
+    
     tracing::info!("All sophisticated system database tables created successfully");
     Ok(())
 }
@@ -124,5 +145,12 @@ pub fn get_all_entities() -> Vec<&'static str> {
         "ai_workflows",
         "generated_assets",
         "asset_dependencies",
+        // HBF integration
+        "settlements",
+        "settlement_weather",
+        "dungeons",
+        "dungeon_rooms",
+        "dungeon_doorways",
+        "npcs",
     ]
 }

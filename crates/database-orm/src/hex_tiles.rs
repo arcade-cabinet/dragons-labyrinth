@@ -17,9 +17,19 @@ pub struct Model {
     pub r: i32, // Hex r coordinate 
     pub s: i32, // Hex s coordinate (q + r + s = 0)
     
+    // HBF import compatibility
+    pub hbf_x: Option<i32>, // Original HBF x coordinate
+    pub hbf_y: Option<i32>, // Original HBF y coordinate
+    #[sea_orm(column_type = "Text", nullable)]
+    pub hbf_uuid: Option<String>, // Original HBF UUID if imported
+    
     // Tile data
     #[sea_orm(column_type = "Text")]
     pub biome_type: String, // "forest", "mountain", "swamp", "ruins", "village", "cursed_ground"
+    
+    // HBF biome compatibility 
+    #[sea_orm(column_type = "Text", nullable)]
+    pub hbf_biome: Option<String>, // Original HBF biome type (JungleHex, etc.)
     
     #[sea_orm(column_type = "Text")]
     pub tile_variant: String, // Specific variant within biome

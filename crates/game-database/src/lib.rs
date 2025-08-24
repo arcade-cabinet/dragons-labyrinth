@@ -11,6 +11,7 @@ pub mod bevy_integration;
 pub mod error;
 pub mod tools;
 pub mod save_system;
+pub mod hbf_import;
 
 pub use engine::{DatabaseConnection, GameDatabase};
 pub use error::{DatabaseError, DatabaseResult};
