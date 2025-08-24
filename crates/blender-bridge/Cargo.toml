@@ -1,0 +1,22 @@
+[package]
+name = "blender-bridge"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+blr = "0.1.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = "0.10"
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+walkdir = "2.5"
+pyo3 = "0.20"
+lazy_static = "1.5.0"
+xdg = "3.0.0"
+ron = "0.10.1"

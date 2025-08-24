@@ -1,0 +1,60 @@
+# Asset organization rules for Dragon's Labyrinth
+
+# Keywords that make assets relevant to our horror medieval RPG  
+relevant_keywords = [
+  "zombie", "monster", "skeleton", "ghost", "demon", "evil", "dark",
+  "horror", "creepy", "nightmare", "dead", "undead", "cursed",
+  "medieval", "castle", "dungeon", "knight", "sword", "shield", "armor",
+  "dragon", "goblin", "orc", "troll", "wizard", "magic", "spell",
+  "village", "tavern", "blacksmith", "church", "ruins", "tower",
+  "character", "hero", "warrior", "rogue", "mage", "priest",
+  "weapon", "potion", "chest", "treasure", "coin", "key",
+  "forest", "swamp", "mountain", "cave", "river", "bridge",
+  "tree", "rock", "grass", "path", "road",
+  "wall", "door", "window", "roof", "floor", "stairs",
+  "furniture", "table", "chair", "bed", "barrel", "crate"
+]
+
+# Keywords that exclude assets (modern/sci-fi content)
+exclude_keywords = [
+  "cyberpunk", "sci-fi", "scifi", "space", "spaceship", "robot", "cyber", "futuristic",
+  "car", "vehicle", "gun", "rifle", "pistol", "modern", "city",
+  "computer", "tech", "electronic", "neon", "laser"
+]
+
+# Tokens to strip from filenames during processing
+strip_tokens = [
+  "pack", "megakit", "kit", "bundle", "ultimate", "updated", "modular", "standard",
+  "redux", "legacy", "classic", "sample", "samples", "sources", "source"
+]
+
+# Asset categories mapped to file extensions
+[asset_categories]
+models = [".glb", ".gltf", ".obj", ".mtl", ".fbx"]
+textures = [".png", ".jpg", ".jpeg", ".tga", ".bmp", ".gif", ".webp", ".tif", ".tiff"]
+audio = [".ogg", ".mp3", ".wav", ".flac"]
+fonts = [".ttf", ".otf", ".woff", ".woff2"]
+sprites = [".svg", ".psd", ".ai"]
+docs = [".txt", ".md", ".pdf", ".html", ".url", ".rtf"]
+
+# Theme-based categorization keywords
+[theme_keywords]
+medieval = ["medieval", "village", "tavern", "castle", "keep", "knight", "squire", "blacksmith", "church"]
+horror = ["horror", "cursed", "undead", "zombie", "skeleton", "ghost", "demon", "nightmare", "forsaken"]
+fantasy = ["wizard", "magic", "spell", "dragon", "orc", "goblin", "troll", "rune", "altar"]
+
+# Domain-based categorization keywords
+[domain_keywords]
+dungeon = ["dungeon", "crypt", "catacomb", "ruin", "ruins"]
+village = ["village", "town", "hamlet", "market", "stall"]
+weapons = ["sword", "axe", "mace", "bow", "dagger", "shield", "weapon"]
+doors = ["door", "gate", "portcullis"]
+floors = ["floor", "tile", "flagstone", "plank"]
+walls = ["wall", "rampart", "battlement"]
+furniture = ["table", "chair", "bed", "stool", "shelf", "shelves", "cabinet", "wardrobe", "bench"]
+props = ["barrel", "crate", "box", "book", "scroll", "torch", "lantern", "bucket", "anvil"]
+architecture = ["tower", "church", "house", "hut", "roof", "window", "stairs", "bridge"]
+characters = ["character", "npc", "villager", "man", "woman", "knight", "goblin", "orc", "zombie", "skeleton"]
+nature = ["tree", "rock", "bush", "grass", "swamp", "mushroom"]
+ui = ["ui", "icon", "cursor", "border"]
+audio = ["ambience", "sfx", "voice", "music", "footstep"]

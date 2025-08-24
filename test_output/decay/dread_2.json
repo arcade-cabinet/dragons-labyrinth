@@ -1,0 +1,13 @@
+{
+  "dread_level": 2,
+  "environmental_decay_rate": 0.5,
+  "npc_fear_threshold": 0.6,
+  "economic_stability": 0.7,
+  "reality_distortion_effects": [
+    "Ghostly apparitions begin to appear in peripheral vision",
+    "Objects in the world subtly change position when not in direct sight",
+    "Shadows move independently of their source",
+    "Whispers are heard when alone",
+    "NPCs begin to behave erratically or forget their routines"
+  ]
+}

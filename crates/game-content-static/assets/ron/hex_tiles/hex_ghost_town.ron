@@ -1,0 +1,74 @@
+(
+    name: "HexGhostTownTile",
+    materials: [
+        (
+            name: "OldWood",
+            base_color: (0.25, 0.2, 0.15, 1.0),
+            metallic: 0.0,
+            roughness: 0.95,
+        ),
+        (
+            name: "BrokenStone",
+            base_color: (0.4, 0.38, 0.35, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+        (
+            name: "Ash",
+            base_color: (0.3, 0.3, 0.3, 1.0),
+            metallic: 0.0,
+            roughness: 1.0,
+        ),
+    ],
+    objects: [
+        // Base ground
+        (
+            type: "Cylinder",
+            name: "ground",
+            vertices: 6,
+            location: (0, 0, 0),
+            scale: (0.5, 0.5, 0.03),
+            material: "Ash",
+            shading: "flat",
+        ),
+        // Ruined house wall
+        (
+            type: "Cube",
+            name: "house_wall",
+            location: (0.2, 0.15, 0.1),
+            scale: (0.15, 0.03, 0.1),
+            rotation: (0, 0, 0.2),
+            material: "OldWood",
+            shading: "flat",
+        ),
+        // Broken door frame
+        (
+            type: "Cube",
+            name: "door_frame",
+            location: (0.1, 0.15, 0.12),
+            scale: (0.04, 0.02, 0.12),
+            material: "OldWood",
+            shading: "flat",
+        ),
+        // Rubble pile
+        (
+            type: "IcoSphere",
+            name: "rubble",
+            subdivisions: 1,
+            location: (-0.1, -0.1, 0.04),
+            scale: (0.1, 0.1, 0.05),
+            material: "BrokenStone",
+            shading: "flat",
+        ),
+        // Broken well
+        (
+            type: "Cylinder",
+            name: "well",
+            vertices: 8,
+            location: (-0.2, 0.1, 0.03),
+            scale: (0.06, 0.06, 0.06),
+            material: "BrokenStone",
+            shading: "flat",
+        ),
+    ],
+)

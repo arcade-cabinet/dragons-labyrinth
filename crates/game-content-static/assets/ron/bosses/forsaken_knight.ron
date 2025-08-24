@@ -1,0 +1,106 @@
+(
+    name: "ForsakenKnight",
+    materials: [
+        (
+            name: "DarkArmor",
+            base_color: (0.15, 0.15, 0.2, 1.0),
+            metallic: 0.7,
+            roughness: 0.4,
+        ),
+        (
+            name: "VoidEnergy",
+            base_color: (0.5, 0.0, 0.8, 0.7),
+            metallic: 0.2,
+            roughness: 0.1,
+        ),
+        (
+            name: "TornCloth",
+            base_color: (0.1, 0.08, 0.1, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+    ],
+    objects: [
+        // Body armor
+        (
+            type: "Cube",
+            name: "chest_plate",
+            location: (0, 0, 0.5),
+            scale: (0.3, 0.2, 0.4),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+        // Helmet
+        (
+            type: "Cone",
+            name: "helmet",
+            vertices: 8,
+            location: (0, 0, 1.0),
+            scale: (0.15, 0.15, 0.2),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+        // Left pauldron
+        (
+            type: "UVSphere",
+            name: "pauldron_left",
+            segments: 8,
+            rings: 4,
+            location: (0.35, 0, 0.7),
+            scale: (0.12, 0.1, 0.1),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+        // Right pauldron
+        (
+            type: "UVSphere",
+            name: "pauldron_right",
+            segments: 8,
+            rings: 4,
+            location: (-0.35, 0, 0.7),
+            scale: (0.12, 0.1, 0.1),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+        // Void core
+        (
+            type: "IcoSphere",
+            name: "void_core",
+            subdivisions: 2,
+            location: (0, 0.05, 0.5),
+            scale: (0.08, 0.08, 0.08),
+            material: "VoidEnergy",
+            shading: "smooth",
+        ),
+        // Tattered cape
+        (
+            type: "Cube",
+            name: "cape",
+            location: (0, -0.15, 0.3),
+            scale: (0.25, 0.05, 0.5),
+            rotation: (0.2, 0, 0),
+            material: "TornCloth",
+            shading: "flat",
+        ),
+        // Left leg
+        (
+            type: "Cylinder",
+            name: "leg_left",
+            vertices: 6,
+            location: (0.1, 0, -0.2),
+            scale: (0.08, 0.08, 0.3),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+        // Right leg
+        (
+            type: "Cylinder",
+            name: "leg_right",
+            vertices: 6,
+            location: (-0.1, 0, -0.2),
+            scale: (0.08, 0.08, 0.3),
+            material: "DarkArmor",
+            shading: "flat",
+        ),
+    ],
+)

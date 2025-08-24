@@ -1,0 +1,75 @@
+(
+    name: "HexSwampTile",
+    materials: [
+        (
+            name: "Water",
+            base_color: (0.1, 0.2, 0.15, 0.9),
+            metallic: 0.1,
+            roughness: 0.2,
+        ),
+        (
+            name: "Mud",
+            base_color: (0.15, 0.12, 0.08, 1.0),
+            metallic: 0.0,
+            roughness: 0.95,
+        ),
+        (
+            name: "DeadWood",
+            base_color: (0.2, 0.18, 0.15, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+    ],
+    objects: [
+        // Base water layer
+        (
+            type: "Cylinder",
+            name: "water",
+            vertices: 6,
+            location: (0, 0, -0.02),
+            scale: (0.5, 0.5, 0.02),
+            material: "Water",
+            shading: "smooth",
+        ),
+        // Mud patches
+        (
+            type: "IcoSphere",
+            name: "mud_1",
+            subdivisions: 1,
+            location: (0.2, 0.1, 0),
+            scale: (0.15, 0.15, 0.03),
+            material: "Mud",
+            shading: "flat",
+        ),
+        (
+            type: "IcoSphere",
+            name: "mud_2",
+            subdivisions: 1,
+            location: (-0.15, -0.2, 0),
+            scale: (0.12, 0.12, 0.03),
+            material: "Mud",
+            shading: "flat",
+        ),
+        // Dead tree stump
+        (
+            type: "Cylinder",
+            name: "stump",
+            vertices: 6,
+            location: (0.1, -0.15, 0.05),
+            scale: (0.04, 0.04, 0.1),
+            material: "DeadWood",
+            shading: "flat",
+        ),
+        // Fallen branch
+        (
+            type: "Cylinder",
+            name: "branch",
+            vertices: 4,
+            location: (-0.1, 0.1, 0.02),
+            scale: (0.02, 0.15, 0.02),
+            rotation: (0, 0, 0.785),
+            material: "DeadWood",
+            shading: "flat",
+        ),
+    ],
+)

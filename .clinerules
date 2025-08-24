@@ -1,0 +1,113 @@
+# Cline's Rules for Dragon's Labyrinth
+
+## Project Context
+
+Dragon's Labyrinth is a horror-driven narrative masterpiece built with Rust and Bevy. 
+
+### Documentation Structure
+
+For project vision, design, and architecture:
+- See `crates/dragons-docs/book/` for all static documentation
+- Player manual, game design, and technical architecture live there
+
+For active development context:
+- See `memory-bank/active-development/` for current work
+- `activeContext.md` - Current focus and next steps
+- `progress.md` - What's been completed
+- `cursor-prompt.md` - Development guidelines
+
+### Core Files (Read First)
+1. `crates/dragons-docs/book/design/projectbrief.md`
+   - Foundation document for the entire game
+   - Core requirements and goals
+   
+2. `memory-bank/active-development/productContext.md`
+   - Why this project exists
+   - Problems it solves
+   - User experience goals
+
+3. `memory-bank/active-development/activeContext.md`
+   - Current work focus
+   - Recent changes
+   - Next steps
+   - Active decisions
+
+4. `memory-bank/active-development/systemPatterns.md`
+   - System architecture
+   - Key technical decisions
+   - Design patterns in use
+
+5. `memory-bank/active-development/techContext.md`
+   - Technologies used
+   - Development setup
+   - Technical constraints
+   - Dependencies
+   - Tool usage patterns
+
+6. `progress.md`
+   - What works
+   - What's left to build
+   - Current status
+   - Known issues
+   - Evolution of project decisions
+
+### Additional Context
+Create additional files/folders within memory-bank/ when they help organize:
+- Complex feature documentation
+- Integration specifications
+- API documentation
+- Testing strategies
+- Deployment procedures
+
+## Core Workflows
+
+### Plan Mode
+```
+flowchart TD
+    Start[Start] --> ReadFiles[Read Memory Bank]
+    ReadFiles --> CheckFiles{Files Complete?}
+
+    CheckFiles -->|No| Plan[Create Plan]
+    Plan --> Document[Document in Chat]
+
+    CheckFiles -->|Yes| Verify[Verify Context]
+    Verify --> Strategy[Develop Strategy]
+    Strategy --> Present[Present Approach]
+```
+
+### Act Mode
+```
+flowchart TD
+    Start[Start] --> Context[Check Memory Bank]
+    Context --> Update[Update Documentation]
+    Update --> Execute[Execute Task]
+    Execute --> Document[Document Changes]
+```
+
+## Documentation Updates
+
+Memory Bank updates occur when:
+1. Discovering new project patterns
+2. After implementing significant changes
+3. When user requests with **update memory bank** (MUST review ALL files)
+4. When context needs clarification
+
+```
+flowchart TD
+    Start[Update Process]
+
+    subgraph Process
+        P1[Review ALL Files]
+        P2[Document Current State]
+        P3[Clarify Next Steps]
+        P4[Document Insights & Patterns]
+
+        P1 --> P2 --> P3 --> P4
+    end
+
+    Start --> Process
+```
+
+Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
+
+REMEMBER: After every memory reset, I begin completely fresh. The Memory Bank is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.

@@ -1,0 +1,36 @@
+[project]
+name = "generator"
+version = "0.1.0"
+description = "AI-powered game generator for Dragon's Labyrinth"
+authors = [{ name = "Dragon's Labyrinth Team" }]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pydantic>=2.0",
+    "xdg-base-dirs>=6.0.2,<7",
+    "bpy>=4.5.0",
+    "openai>=1.0.0",
+]
+
+[tool.uv]
+required-version = ">=0.5.0"
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
+
+[project.scripts]
+dl = "generator.__main__:main"
+
+[dependency-groups]
+dev = [
+    "black>=24.8.0,<25",
+    "mypy>=1.11.2,<2",
+    "pytest>=8.3.3,<9",
+]
+
+[tool.uv.sources]
+freesound-python = { git = "https://github.com/MTG/freesound-python" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

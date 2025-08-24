@@ -1,0 +1,85 @@
+(
+    name: "HexForestTile",
+    materials: [
+        (
+            name: "Ground",
+            base_color: (0.08, 0.06, 0.04, 1.0),
+            metallic: 0.0,
+            roughness: 0.95,
+        ),
+        (
+            name: "TreeBark",
+            base_color: (0.15, 0.1, 0.08, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+        (
+            name: "Leaves",
+            base_color: (0.05, 0.25, 0.05, 1.0),
+            metallic: 0.0,
+            roughness: 0.8,
+        ),
+    ],
+    objects: [
+        // Base hexagon
+        (
+            type: "Cylinder",
+            name: "base",
+            vertices: 6,
+            location: (0, 0, 0),
+            scale: (0.5, 0.5, 0.08),
+            material: "Ground",
+            shading: "flat",
+        ),
+        // Tree trunk 1
+        (
+            type: "Cylinder",
+            name: "trunk_1",
+            vertices: 8,
+            location: (0.15, 0.1, 0.08),
+            scale: (0.04, 0.04, 0.25),
+            material: "TreeBark",
+            shading: "flat",
+        ),
+        // Tree canopy 1
+        (
+            type: "IcoSphere",
+            name: "canopy_1",
+            subdivisions: 1,
+            location: (0.15, 0.1, 0.33),
+            scale: (0.12, 0.12, 0.15),
+            material: "Leaves",
+            shading: "flat",
+        ),
+        // Tree trunk 2
+        (
+            type: "Cylinder",
+            name: "trunk_2",
+            vertices: 8,
+            location: (-0.1, -0.15, 0.08),
+            scale: (0.03, 0.03, 0.2),
+            material: "TreeBark",
+            shading: "flat",
+        ),
+        // Tree canopy 2
+        (
+            type: "IcoSphere",
+            name: "canopy_2",
+            subdivisions: 1,
+            location: (-0.1, -0.15, 0.28),
+            scale: (0.1, 0.1, 0.12),
+            material: "Leaves",
+            shading: "flat",
+        ),
+        // Small bush
+        (
+            type: "IcoSphere",
+            name: "bush",
+            subdivisions: 1,
+            location: (0.2, -0.2, 0.1),
+            scale: (0.08, 0.08, 0.06),
+            material: "Leaves",
+            shading: "flat",
+        ),
+    ],
+)

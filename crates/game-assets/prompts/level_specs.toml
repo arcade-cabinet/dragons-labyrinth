@@ -1,0 +1,111 @@
+# Level Design Specifications  
+# For LevelsAgent to generate complete gameplay scenarios
+
+[[level_prompts]]
+id = "encounter_placement"
+category = "combat_encounters"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate encounter placements for level {level_name}.
+Difficulty: {difficulty_curve}
+Enemy types: {available_enemies}
+Dread level: {dread_level}
+Player level: {expected_player_level}
+
+Requirements:
+- Enemy spawn positions
+- Patrol paths/behaviors
+- Ambush triggers
+- Horror transformations
+- Loot tables
+"""
+
+[[level_prompts]]
+id = "sentimental_items"
+category = "narrative_items"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate sentimental item placement and backstory.
+Item type: {item_category}
+Emotional weight: {significance_level}
+Dread corruption: {dread_level}
+Associated companion: {companion_id}
+
+Include:
+- Item description (pristine to corrupted)
+- Discovery location/context
+- Emotional memory trigger
+- Gameplay effect
+- Corruption mechanics
+"""
+
+[[level_prompts]]
+id = "puzzle_sequence"
+category = "environmental_puzzles"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Design environmental puzzle for {location}.
+Puzzle type: {puzzle_mechanism}
+Complexity: {difficulty}
+Dread level: {dread_level}
+Required items: {key_items}
+
+Requirements:
+- Step-by-step solution
+- Red herrings at high dread
+- Horror elements in mechanics
+- Multiple solution paths
+- Failure consequences
+"""
+
+[[level_prompts]]
+id = "boss_arena"
+category = "boss_encounters"
+dread_levels = [2, 3, 4]
+template = """
+Design boss arena and encounter mechanics.
+Boss name: {boss_entity}
+Arena theme: {environment_type}
+Dread level: {dread_level}
+Phase count: {battle_phases}
+
+Include:
+- Arena layout with hazards
+- Phase transition triggers
+- Attack patterns per phase
+- Environmental interactions
+- Psychological horror elements
+"""
+
+[[level_prompts]]
+id = "safe_room"
+category = "respite_areas"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate safe room/respite area design.
+Room purpose: {safe_room_type}
+Services available: {room_features}
+Dread level: {dread_level}
+Corruption state: {corruption_percentage}
+
+Requirements:
+- Layout and atmosphere
+- NPC placements
+- Service mechanics
+- Gradual corruption signs
+- False safety at high dread
+"""
+
+# Batch generation rules
+[generation_rules]
+encounters_per_level = 15
+items_per_level = 8
+puzzles_per_area = 5
+boss_arenas_total = 12
+safe_rooms_per_chapter = 3
+
+[difficulty_curves]
+tutorial = { enemy_density = 0.2, puzzle_complexity = 1, loot_quality = "common" }
+standard = { enemy_density = 0.5, puzzle_complexity = 3, loot_quality = "uncommon" }
+challenging = { enemy_density = 0.8, puzzle_complexity = 5, loot_quality = "rare" }
+nightmare = { enemy_density = 1.0, puzzle_complexity = 7, loot_quality = "cursed" }

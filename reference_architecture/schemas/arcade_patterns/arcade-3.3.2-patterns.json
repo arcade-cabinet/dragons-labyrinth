@@ -1,0 +1,622 @@
+{
+  "LOAD_SPRITESHEET": {
+    "opcode": "LOAD_SPRITESHEET",
+    "source": "arcade.load_spritesheet",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(file_name: str | pathlib._local.Path) -> arcade.texture.spritesheet.SpriteSheet",
+    "parameters": [
+      {
+        "name": "file_name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "str | pathlib._local.Path"
+      }
+    ],
+    "docstring": "Loads an image from disk returning a sprite sheet that can\nfurther be used to slice out smaller images.\n\nArgs:\n    file_name: Path to the image file",
+    "template": "arcade.load_spritesheet({{ file_name }})"
+  },
+  "DRAW_LINE_STRIP": {
+    "opcode": "DRAW_LINE_STRIP",
+    "source": "arcade.draw_line_strip",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(point_list: collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2], color: tuple[int, int, int] | tuple[int, int, int, int], line_width: float = 1) -> None",
+    "parameters": [
+      {
+        "name": "point_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2]"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "line_width",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a multi-point line.\n\nArgs:\n    point_list:\n        List of x, y points that make up this strip\n    color:\n        A color, specified as an RGBA tuple or a\n        :py:class:`.Color` instance.\n    line_width:\n        Width of the line",
+    "template": "arcade.draw_line_strip({{ point_list }}, {{ color }}, {{ line_width | default(1) }})"
+  },
+  "DRAW_LINES": {
+    "opcode": "DRAW_LINES",
+    "source": "arcade.draw_lines",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(point_list: collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2], color: tuple[int, int, int] | tuple[int, int, int, int], line_width: float = 1) -> None",
+    "parameters": [
+      {
+        "name": "point_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2]"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "line_width",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a set of lines.\n\nDraw a line between each pair of points specified.\n\nArgs:\n    point_list:\n        List of points making up the lines. Each point is in a list.\n        So it is a list of lists.\n    color:\n        A color, specified as an RGBA tuple or a\n        :py:class:`.Color` instance.\n    line_width:\n        Width of the line in pixels.",
+    "template": "arcade.draw_lines({{ point_list }}, {{ color }}, {{ line_width | default(1) }})"
+  },
+  "DRAW_POINT": {
+    "opcode": "DRAW_POINT",
+    "source": "arcade.draw_point",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(x: float, y: float, color: tuple[int, int, int] | tuple[int, int, int, int], size: float = 1.0) -> None",
+    "parameters": [
+      {
+        "name": "x",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'float'>"
+      },
+      {
+        "name": "y",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'float'>"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "size",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1.0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a 2D point at ``(x, y)`` as a square ``size`` pixels wide.\n\nThe square will be centered on ``(x, y)`` with the given ``color``\nas its fill value.\n\nTo draw more rounded shapes, please see:\n\n* :py:func:`arcade.draw.circle.draw_circle_filled`\n* :py:func:`pyglet.shapes.Circle`\n\nArgs:\n    x:\n        The center of the square along the x axis.\n    y:\n        The center of the square along the y axis.\n    color:\n        The fill color of the square as an RGBA :py:class:`tuple`,\n        RGB py:class:`tuple`, or a :py:class:`.Color` instance.\n    size:\n         The width and height of the square in pixels.",
+    "template": "arcade.draw_point({{ x }}, {{ y }}, {{ color }}, {{ size | default(1.0) }})"
+  },
+  "DRAW_POINTS": {
+    "opcode": "DRAW_POINTS",
+    "source": "arcade.draw_points",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(point_list: collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2], color: tuple[int, int, int] | tuple[int, int, int, int], size: float = 1.0) -> None",
+    "parameters": [
+      {
+        "name": "point_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2]"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "size",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1.0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw 2D points as squares ``size`` pixels  wide.\n\nEach point in ``point_list`` will be drawn centered on its x and y\nvalue with the same ``color`` and square ``size`` in pixels.\n\nTo draw more rounded shapes, please see:\n\n* :py:func:`arcade.draw.circle.draw_circle_filled`\n* :py:func:`pyglet.shapes.Circle`\n\nArgs:\n    point_list:\n        A :py:class:`list` or :py:class:`tuple` of 2D points.\n    color:\n        The fill color for the points as an RGBA :py:class:`tuple`,\n        RGB :py:class:`tuple`, or :py:class:`.Color` instance.\n    size:\n        The width and height of each point's square in pixels.",
+    "template": "arcade.draw_points({{ point_list }}, {{ color }}, {{ size | default(1.0) }})"
+  },
+  "DRAW_POLYGON_FILLED": {
+    "opcode": "DRAW_POLYGON_FILLED",
+    "source": "arcade.draw_polygon_filled",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(point_list: collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2], color: tuple[int, int, int] | tuple[int, int, int, int]) -> None",
+    "parameters": [
+      {
+        "name": "point_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2]"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      }
+    ],
+    "docstring": "Draw a polygon that is filled in.\n\nArgs:\n    point_list:\n        List of points making up the lines. Each point is\n        in a list. So it is a list of lists.\n    color:\n        The color, specified in RGB or RGBA format.",
+    "template": "arcade.draw_polygon_filled({{ point_list }}, {{ color }})"
+  },
+  "DRAW_POLYGON_OUTLINE": {
+    "opcode": "DRAW_POLYGON_OUTLINE",
+    "source": "arcade.draw_polygon_outline",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(point_list: collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2], color: tuple[int, int, int] | tuple[int, int, int, int], line_width: float = 1.0) -> None",
+    "parameters": [
+      {
+        "name": "point_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Sequence[tuple[float | int, float | int] | pyglet.math.Vec2]"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "line_width",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1.0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a polygon outline. Also known as a \"line loop.\"\n\nArgs:\n    point_list:\n        List of points making up the lines. Each point is\n        in a list. So it is a list of lists.\n    color:\n        The color of the outline as an RGBA :py:class:`tuple` or\n        :py:class:`.Color` instance.\n    line_width:\n        Width of the line in pixels.",
+    "template": "arcade.draw_polygon_outline({{ point_list }}, {{ color }}, {{ line_width | default(1.0) }})"
+  },
+  "DRAW_RECT_FILLED": {
+    "opcode": "DRAW_RECT_FILLED",
+    "source": "arcade.draw_rect_filled",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(rect: arcade.types.rect.Rect, color: tuple[int, int, int] | tuple[int, int, int, int], tilt_angle: float = 0) -> None",
+    "parameters": [
+      {
+        "name": "rect",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.types.rect.Rect'>"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "tilt_angle",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a filled-in rectangle.\n\nArgs:\n    rect:\n        The rectangle to draw. a :py:class:`~arcade.Rect` instance.\n    color:\n        The fill color as an RGBA :py:class:`tuple`,\n        RGB :py:class:`tuple`, or :py:class:`.Color` instance.\n    tilt_angle:\n        rotation of the rectangle (clockwise). Defaults to zero.",
+    "template": "arcade.draw_rect_filled({{ rect }}, {{ color }}, {{ tilt_angle | default(0) }})"
+  },
+  "DRAW_RECT_OUTLINE": {
+    "opcode": "DRAW_RECT_OUTLINE",
+    "source": "arcade.draw_rect_outline",
+    "category": "visual",
+    "complexity": 1,
+    "signature": "(rect: arcade.types.rect.Rect, color: tuple[int, int, int] | tuple[int, int, int, int], border_width: float = 1, tilt_angle: float = 0) -> None",
+    "parameters": [
+      {
+        "name": "rect",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.types.rect.Rect'>"
+      },
+      {
+        "name": "color",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[int, int, int] | tuple[int, int, int, int]"
+      },
+      {
+        "name": "border_width",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1",
+        "annotation": "<class 'float'>"
+      },
+      {
+        "name": "tilt_angle",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Draw a rectangle outline.\n\nArgs:\n    rect:\n        The rectangle to draw. a :py:class:`~arcade.Rect` instance.\n    color:\n        The outline color as an RGBA :py:class:`tuple`,\n        RGB :py:class:`tuple`, or :py:class:`.Color` instance.\n    border_width:\n        width of the lines, in pixels.\n    tilt_angle:\n        rotation of the rectangle. Defaults to zero (clockwise).",
+    "template": "arcade.draw_rect_outline({{ rect }}, {{ color }}, {{ border_width | default(1) }}, {{ tilt_angle | default(0) }})"
+  },
+  "DRAW_SPRITE": {
+    "opcode": "DRAW_SPRITE",
+    "source": "arcade.draw_sprite",
+    "category": "visual",
+    "complexity": 2,
+    "signature": "(sprite: arcade.sprite.base.BasicSprite, *, blend: bool = True, alpha=255, pixelated=False, atlas: arcade.texture_atlas.base.TextureAtlasBase | None = None) -> None",
+    "parameters": [
+      {
+        "name": "sprite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "blend",
+        "kind": "KEYWORD_ONLY",
+        "default": "True",
+        "annotation": "<class 'bool'>"
+      },
+      {
+        "name": "alpha",
+        "kind": "KEYWORD_ONLY",
+        "default": "255",
+        "annotation": "any"
+      },
+      {
+        "name": "pixelated",
+        "kind": "KEYWORD_ONLY",
+        "default": "False",
+        "annotation": "any"
+      },
+      {
+        "name": "atlas",
+        "kind": "KEYWORD_ONLY",
+        "default": "None",
+        "annotation": "arcade.texture_atlas.base.TextureAtlasBase | None"
+      }
+    ],
+    "docstring": "Draw a sprite.\n\nArgs:\n    sprite:\n        The sprite to draw.\n    blend:\n        Draw the sprite with or without alpha blending\n    alpha:\n        Fade the sprite from completely transparent to opaque (range: 0 to 255)\n    pixelated:\n        If true the sprite will be render in pixelated style. Otherwise smooth/linear\n    atlas:\n        The texture atlas the texture resides in.\n        if not supplied the default texture atlas is used",
+    "template": "arcade.draw_sprite({{ sprite }}, {{ blend | default(True) }}, {{ alpha | default(255) }}, {{ pixelated | default(False) }}, {{ atlas | default(None) }})"
+  },
+  "DRAW_SPRITE_RECT": {
+    "opcode": "DRAW_SPRITE_RECT",
+    "source": "arcade.draw_sprite_rect",
+    "category": "visual",
+    "complexity": 2,
+    "signature": "(sprite: arcade.sprite.base.BasicSprite, rect: arcade.types.rect.Rect, *, blend: bool = True, alpha=255, pixelated=False, atlas: arcade.texture_atlas.base.TextureAtlasBase | None = None) -> None",
+    "parameters": [
+      {
+        "name": "sprite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "rect",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.types.rect.Rect'>"
+      },
+      {
+        "name": "blend",
+        "kind": "KEYWORD_ONLY",
+        "default": "True",
+        "annotation": "<class 'bool'>"
+      },
+      {
+        "name": "alpha",
+        "kind": "KEYWORD_ONLY",
+        "default": "255",
+        "annotation": "any"
+      },
+      {
+        "name": "pixelated",
+        "kind": "KEYWORD_ONLY",
+        "default": "False",
+        "annotation": "any"
+      },
+      {
+        "name": "atlas",
+        "kind": "KEYWORD_ONLY",
+        "default": "None",
+        "annotation": "arcade.texture_atlas.base.TextureAtlasBase | None"
+      }
+    ],
+    "docstring": "Draw a sprite.\n\nArgs:\n    sprite:\n        The sprite to draw.\n    rect:\n        The location and size of the sprite\n    blend:\n        Draw the sprite with or without alpha blending\n    alpha:\n        Fade the sprite from completely transparent to opaque (range: 0 to 255)\n    pixelated:\n        If true the sprite will be render in pixelated style.\n        Otherwise smooth/linear\n    atlas:\n        The texture atlas the texture resides in.\n        if not supplied the default texture atlas is used",
+    "template": "arcade.draw_sprite_rect({{ sprite }}, {{ rect }}, {{ blend | default(True) }}, {{ alpha | default(255) }}, {{ pixelated | default(False) }}, {{ atlas | default(None) }})"
+  },
+  "LOAD_SOUND": {
+    "opcode": "LOAD_SOUND",
+    "source": "arcade.load_sound",
+    "category": "audio",
+    "complexity": 1,
+    "signature": "(path: str | pathlib._local.Path, streaming: bool = False) -> arcade.sound.Sound",
+    "parameters": [
+      {
+        "name": "path",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "str | pathlib._local.Path"
+      },
+      {
+        "name": "streaming",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "False",
+        "annotation": "<class 'bool'>"
+      }
+    ],
+    "docstring": "Load a file as a :py:class:`Sound` data object.\n\n.. important:: A :py:class:`Sound` with ``streaming=True`` loses features!\n\n               Neither ``loop`` nor simultaneous playbacks will work. See\n               :py;class:`Sound` and :ref:`sound-loading-modes`.\n\nArgs:\n    path: a path which may be prefixed with a\n        :ref:`resource_handle <resource_handles>`.\n    streaming: Boolean for determining if we stream the sound or\n        load it all into memory. Set to ``True`` for long sounds to\n        save memory, ``False`` for short sounds to speed playback.\n\nReturns:\n    A :ref:playable <sound-basics-playing>` instance of a\n    :py:class:`Sound` object.",
+    "template": "arcade.load_sound({{ path }}, {{ streaming | default(False) }})"
+  },
+  "PLAY_SOUND": {
+    "opcode": "PLAY_SOUND",
+    "source": "arcade.play_sound",
+    "category": "audio",
+    "complexity": 3,
+    "signature": "(sound: arcade.sound.Sound | None, volume: float = 1.0, pan: float = 0.0, loop: bool = False, speed: float = 1.0) -> pyglet.media.player.Player | None",
+    "parameters": [
+      {
+        "name": "sound",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sound.Sound | None"
+      },
+      {
+        "name": "volume",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1.0",
+        "annotation": "<class 'float'>"
+      },
+      {
+        "name": "pan",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "0.0",
+        "annotation": "<class 'float'>"
+      },
+      {
+        "name": "loop",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "False",
+        "annotation": "<class 'bool'>"
+      },
+      {
+        "name": "speed",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1.0",
+        "annotation": "<class 'float'>"
+      }
+    ],
+    "docstring": "Try to play the ``sound`` and return a |pyglet Player|.\n\nThe ``sound`` must be a loaded :py:class:`Sound` object. If you\npass a path or :py:class:`str`, the function will raise a\n:py:class:`TypeError.`\n\n.. important:: A :py:class:`Sound` with ``streaming=True`` loses features!\n\n               Neither ``loop`` nor simultaneous playbacks will work. See\n               :py;class:`Sound` and :ref:`sound-loading-modes`.\n\nThe output and return value depend on whether playback succeeded:\n.. # Note: substitutions don't really work inside tables, so the\n.. # pyglet player below is left as a normal class cross-reference.\n\n.. list-table::\n   :header-rows: 1\n\n   * - Success?\n     - Console output\n     - Return value\n\n   * - No / ``sound`` is ``None``\n     - Log a warning\n     - ``None``\n\n   * - Yes\n     - N/A\n     - A pyglet :py:class:`~pyglet.media.player.Player`\n\nTo learn more about the ``streaming`` keyword and restrictions, please see:\n\n* :py:class:`Sound`\n* :ref:`sound-intermediate-playback-change-aspects-ongoing`\n* :ref:`sound-intermediate-playback-change-aspects-new`\n\nArgs:\n    sound: A :py:class:`Sound` instance or ``None``.\n    volume: From ``0.0`` (silent) to ``1.0`` (max volume).\n    pan: The left / right ear balance (``-1`` is left, ``0`` is center,\n    and ``1`` is right)\n    loop: ``True`` makes playback restart each time it reaches the end.\n    speed: How fast to play. Slower than ``1.0`` deepens sound while\n        values higher than ``1.0`` raise the pitch.\n\nReturns:\n    A |pyglet Player| instance for this playback or\n    ``None`` if playback failed.",
+    "template": "arcade.play_sound({{ sound }}, {{ volume | default(1.0) }}, {{ pan | default(0.0) }}, {{ loop | default(False) }}, {{ speed | default(1.0) }})"
+  },
+  "STOP_SOUND": {
+    "opcode": "STOP_SOUND",
+    "source": "arcade.stop_sound",
+    "category": "audio",
+    "complexity": 1,
+    "signature": "(player: pyglet.media.player.Player) -> None",
+    "parameters": [
+      {
+        "name": "player",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'pyglet.media.player.Player'>"
+      }
+    ],
+    "docstring": "Stop and delete a |pyglet Player| which is currently playing.\n\nArgs:\n    player: A pyglet |pyglet Player| from :py:func:`play_sound`\n        or :py:meth:`Sound.play`.",
+    "template": "arcade.stop_sound({{ player }})"
+  },
+  "CHECK_FOR_COLLISION": {
+    "opcode": "CHECK_FOR_COLLISION",
+    "source": "arcade.check_for_collision",
+    "category": "collision",
+    "complexity": 1,
+    "signature": "(sprite1: arcade.sprite.base.BasicSprite, sprite2: arcade.sprite.base.BasicSprite) -> bool",
+    "parameters": [
+      {
+        "name": "sprite1",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "sprite2",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      }
+    ],
+    "docstring": "Check for a collision between two sprites.\n\nArgs:\n    sprite1: First sprite\n    sprite2: Second sprite\n\nReturns:\n    ``True`` or ``False`` depending if the sprites intersect.",
+    "template": "arcade.check_for_collision({{ sprite1 }}, {{ sprite2 }})"
+  },
+  "CHECK_FOR_COLLISION_WITH_LISTS": {
+    "opcode": "CHECK_FOR_COLLISION_WITH_LISTS",
+    "source": "arcade.check_for_collision_with_lists",
+    "category": "collision",
+    "complexity": 2,
+    "signature": "(sprite: arcade.sprite.base.BasicSprite, sprite_lists: collections.abc.Iterable[arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]], method=1) -> list[~SpriteType]",
+    "parameters": [
+      {
+        "name": "sprite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "sprite_lists",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "collections.abc.Iterable[arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]]"
+      },
+      {
+        "name": "method",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "1",
+        "annotation": "any"
+      }
+    ],
+    "docstring": "Check for a collision between a Sprite, and a list of SpriteLists.\n\nArgs:\n    sprite:\n        Sprite to check\n    sprite_lists:\n        SpriteLists to check against\n    method:\n        Collision check method. 1 is Spatial Hashing if available,\n        2 is GPU based, 3 is slow CPU-bound check-everything. Defaults to 1.\n\nReturns:\n    List of sprites colliding, or an empty list.",
+    "template": "arcade.check_for_collision_with_lists({{ sprite }}, {{ sprite_lists }}, {{ method | default(1) }})"
+  },
+  "CHECK_FOR_COLLISION_WITH_LIST": {
+    "opcode": "CHECK_FOR_COLLISION_WITH_LIST",
+    "source": "arcade.check_for_collision_with_list",
+    "category": "collision",
+    "complexity": 2,
+    "signature": "(sprite: arcade.sprite.base.BasicSprite, sprite_list: arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType], method: int = 0) -> list[~SpriteType]",
+    "parameters": [
+      {
+        "name": "sprite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "sprite_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]"
+      },
+      {
+        "name": "method",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": "0",
+        "annotation": "<class 'int'>"
+      }
+    ],
+    "docstring": "Check for a collision between a sprite, and a list of sprites.\n\nArgs:\n    sprite:\n        Sprite to check\n    sprite_list:\n        SpriteList to check against\n    method:\n        Collision check method. Defaults to 0.\n\n        - 0: auto-select. (spatial if available, GPU if 1500+ sprites, else simple)\n        - 1: Spatial Hashing if available,\n        - 2: GPU based\n        - 3: Simple check-everything.\n\n        Note that while the GPU method is very fast when you cannot use spatial hashing,\n        it's also very slow if you are calling this function many times per frame.\n        What method is the most appropriate depends entirely on your use case.\n\nReturns:\n    List of sprites colliding, or an empty list.",
+    "template": "arcade.check_for_collision_with_list({{ sprite }}, {{ sprite_list }}, {{ method | default(0) }})"
+  },
+  "GET_CLOSEST_SPRITE": {
+    "opcode": "GET_CLOSEST_SPRITE",
+    "source": "arcade.get_closest_sprite",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(sprite: arcade.sprite.base.BasicSprite, sprite_list: arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]) -> tuple[~SpriteType, float] | None",
+    "parameters": [
+      {
+        "name": "sprite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.sprite.base.BasicSprite'>"
+      },
+      {
+        "name": "sprite_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]"
+      }
+    ],
+    "docstring": "Given a Sprite and SpriteList, returns the closest sprite, and its distance.\n\nArgs:\n    sprite:\n        Target sprite\n    sprite_list:\n        List to search for closest sprite.\n\nReturns:\n    A tuple containing the closest sprite and the minimum distance.\n    If the spritelist is empty we return ``None``.",
+    "template": "arcade.get_closest_sprite({{ sprite }}, {{ sprite_list }})"
+  },
+  "GET_DISTANCE_BETWEEN_SPRITES": {
+    "opcode": "GET_DISTANCE_BETWEEN_SPRITES",
+    "source": "arcade.get_distance_between_sprites",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(sprite1: ~SpriteType, sprite2: ~SpriteType) -> float",
+    "parameters": [
+      {
+        "name": "sprite1",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "~SpriteType"
+      },
+      {
+        "name": "sprite2",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "~SpriteType"
+      }
+    ],
+    "docstring": "Returns the distance between the center of two given sprites\n\nArgs:\n    sprite1: Sprite one\n    sprite2: Sprite two",
+    "template": "arcade.get_distance_between_sprites({{ sprite1 }}, {{ sprite2 }})"
+  },
+  "GET_SPRITES_AT_EXACT_POINT": {
+    "opcode": "GET_SPRITES_AT_EXACT_POINT",
+    "source": "arcade.get_sprites_at_exact_point",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(point: tuple[float | int, float | int] | pyglet.math.Vec2 | tuple[float | int, float | int, float | int] | pyglet.math.Vec3, sprite_list: arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]) -> list[~SpriteType]",
+    "parameters": [
+      {
+        "name": "point",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[float | int, float | int] | pyglet.math.Vec2 | tuple[float | int, float | int, float | int] | pyglet.math.Vec3"
+      },
+      {
+        "name": "sprite_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]"
+      }
+    ],
+    "docstring": "Get a list of sprites whose center_x, center_y match the given point.\nThis does NOT return sprites that overlap the point, the center has to be an exact match.\n\nArgs:\n    point: Point to check\n    sprite_list: SpriteList to check against\nReturns:\n    List of sprites colliding, or an empty list.",
+    "template": "arcade.get_sprites_at_exact_point({{ point }}, {{ sprite_list }})"
+  },
+  "GET_SPRITES_AT_POINT": {
+    "opcode": "GET_SPRITES_AT_POINT",
+    "source": "arcade.get_sprites_at_point",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(point: tuple[float | int, float | int] | pyglet.math.Vec2 | tuple[float | int, float | int, float | int] | pyglet.math.Vec3, sprite_list: arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]) -> list[~SpriteType]",
+    "parameters": [
+      {
+        "name": "point",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "tuple[float | int, float | int] | pyglet.math.Vec2 | tuple[float | int, float | int, float | int] | pyglet.math.Vec3"
+      },
+      {
+        "name": "sprite_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]"
+      }
+    ],
+    "docstring": "Get a list of sprites at a particular point. This function sees if any sprite overlaps\nthe specified point. If a sprite has a different center_x/center_y but touches the point,\nthis will return that sprite.\n\nArgs:\n    point: Point to check\n    sprite_list: SpriteList to check against\n\n:returns: List of sprites colliding, or an empty list.",
+    "template": "arcade.get_sprites_at_point({{ point }}, {{ sprite_list }})"
+  },
+  "GET_SPRITES_IN_RECT": {
+    "opcode": "GET_SPRITES_IN_RECT",
+    "source": "arcade.get_sprites_in_rect",
+    "category": "sprites",
+    "complexity": 1,
+    "signature": "(rect: arcade.types.rect.Rect, sprite_list: arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]) -> list[~SpriteType]",
+    "parameters": [
+      {
+        "name": "rect",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "<class 'arcade.types.rect.Rect'>"
+      },
+      {
+        "name": "sprite_list",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null,
+        "annotation": "arcade.sprite_list.sprite_list.SpriteSequence[~SpriteType]"
+      }
+    ],
+    "docstring": "Get a list of sprites in a particular rectangle. This function sees if any\nsprite overlaps the specified rectangle. If a sprite has a different\ncenter_x/center_y but touches the rectangle, this will return that sprite.\n\nThe rectangle is specified as a tuple of (left, right, bottom, top).\n\nArgs:\n    rect: Rectangle to check\n    sprite_list: SpriteList to check against\n\nReturns:\n    List of sprites colliding, or an empty list.",
+    "template": "arcade.get_sprites_in_rect({{ rect }}, {{ sprite_list }})"
+  }
+}

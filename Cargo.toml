@@ -1,0 +1,71 @@
+[workspace]
+members = [
+    "crates/blender-bridge",
+    "crates/game-engine",
+    "crates/game-assets",
+    "crates/build-tools",
+    "crates/game-database", "crates/database-orm",
+    "crates/style-guide", 
+    "crates/dragons-docs", 
+    "crates/game-content-static",
+    "crates/game-content-generated",
+]
+
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Dragon's Labyrinth Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/dragons-labyrinth/dragons-labyrinth"
+rust-version = "1.88"
+
+[workspace.dependencies]
+# Game engine - used by game-engine, game-assets
+bevy = "0.16.1"
+
+# Serialization - used by most crates
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.9"
+
+# Date/Time - used by dragons-docs, build-tools
+chrono = "0.4"
+
+# Async runtime - used by build-tools, game-database
+tokio = { version = "1.47", features = ["rt", "rt-multi-thread", "macros", "time"] }
+async-trait = "0.1"
+
+# Error handling - used by all crates
+anyhow = "1.0"
+thiserror = "2.0"
+
+# Logging - used by all crates
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# File system utilities - used by multiple crates
+walkdir = "2.5"
+regex = "1.11"
+sha2 = "0.10"
+
+# Output utilities - used by build tools and game crates
+colored = "3.0"
+indicatif = "0.18"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.release-wasm]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+panic = "abort"

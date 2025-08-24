@@ -1,0 +1,6 @@
+dread_level = 1
+base_opacity = 0.8999999761581421
+corruption_overlay = false
+trauma_indicators = ["heartbeat", "heavy_breathing", "blurred_vision"]
+interface_degradation = 0.10000000149011612
+color_scheme = "warm"

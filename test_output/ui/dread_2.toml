@@ -1,0 +1,6 @@
+dread_level = 2
+base_opacity = 0.699999988079071
+corruption_overlay = true
+trauma_indicators = ["shaking_text", "blurred_vision", "distorted_audio"]
+interface_degradation = 0.4000000059604645
+color_scheme = "corrupted"

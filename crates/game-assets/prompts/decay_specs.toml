@@ -1,0 +1,111 @@
+# Environmental Decay Specifications
+# For DecayAgent to generate corruption patterns
+
+[[decay_prompts]]
+id = "texture_corruption"
+category = "visual_decay"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate texture decay progression.
+Base material: {material_type}
+Decay stage: {corruption_level}
+Dread: {dread_level}
+Environmental factor: {decay_catalyst}
+
+Requirements:
+- Color shift parameters
+- Roughness modifications
+- Normal map distortions
+- Emission properties
+- Shader parameters
+"""
+
+[[decay_prompts]]
+id = "structural_collapse"
+category = "geometry_decay"
+dread_levels = [1, 2, 3, 4]
+template = """
+Design structural decay patterns.
+Structure type: {building_element}
+Integrity: {stability_percentage}
+Dread: {dread_level}
+Time elapsed: {decay_duration}
+
+Include:
+- Vertex displacement
+- Crack propagation
+- Debris generation
+- Collapse triggers
+- Physics parameters
+"""
+
+[[decay_prompts]]
+id = "organic_corruption"
+category = "biological_decay"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate organic corruption effects.
+Organism type: {life_form}
+Infection stage: {corruption_stage}
+Dread: {dread_level}
+Spread rate: {propagation_speed}
+
+Requirements:
+- Growth patterns
+- Color mutations
+- Tentacle/vine generation
+- Spore effects
+- Transformation stages
+"""
+
+[[decay_prompts]]
+id = "reality_distortion"
+category = "spatial_decay"
+dread_levels = [2, 3, 4]
+template = """
+Create reality distortion effects.
+Distortion type: {anomaly_category}
+Intensity: {distortion_strength}
+Dread: {dread_level}
+Affected radius: {influence_area}
+
+Include:
+- Space warping parameters
+- Time dilation effects
+- Dimensional rifts
+- Gravity anomalies
+- Non-Euclidean geometry
+"""
+
+[[decay_prompts]]
+id = "atmospheric_corruption"
+category = "environmental_effects"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Design atmospheric decay effects.
+Weather type: {base_weather}
+Corruption: {corruption_intensity}
+Dread: {dread_level}
+Visibility: {fog_density}
+
+Requirements:
+- Particle systems
+- Fog parameters
+- Light scattering
+- Color grading
+- Post-processing effects
+"""
+
+# Decay progression rules
+[decay_stages]
+pristine = { corruption = 0.0, integrity = 1.0, horror_visible = false }
+touched = { corruption = 0.2, integrity = 0.9, horror_visible = false }
+infected = { corruption = 0.5, integrity = 0.7, horror_visible = true }
+corrupted = { corruption = 0.8, integrity = 0.4, horror_visible = true }
+consumed = { corruption = 1.0, integrity = 0.1, horror_visible = true }
+
+[generation_rules]
+decay_variations_per_material = 20
+corruption_stages = 5
+distortion_patterns = 50
+particle_effects = 100

@@ -1,0 +1,72 @@
+[package]
+name = "game-database"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "game_database"
+path = "src/lib.rs"
+
+[dependencies]
+# Internal crates for model definitions
+database-orm = { path = "../database-orm" }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+
+# Time and UUID for sophisticated tracking
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.18", features = ["v4", "serde"] }
+
+# Async runtime for complex operations
+tokio = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Async trait support for database operations
+async-trait = "0.1"
+
+# Logging for sophisticated system debugging
+tracing = { workspace = true }
+
+# Bevy ECS integration
+bevy = "0.16.1"
+# bevy_sqlx = "0.1.9"  # Commented out - requires nightly
+
+# MCP server framework for cross-system queries
+jsonrpc-core = "18.0"
+jsonrpc-http-server = "18.0"
+
+# Tracing for MCP server
+tracing-subscriber = "0.3"
+futures = "0.3.31"
+sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
+dirs = "6.0.0"
+
+[build-dependencies]
+# Build script dependencies - using database-orm instead of raw sqlx
+database-orm = { path = "../database-orm" }
+game-assets = { path = "../game-assets" }
+sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
+walkdir = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.18", features = ["v4"] }
+anyhow = { workspace = true }
+
+[[bin]]
+name = "mcp-server"
+path = "src/bin/mcp-server.rs"
+
+[dev-dependencies]
+tokio-test = "0.4"

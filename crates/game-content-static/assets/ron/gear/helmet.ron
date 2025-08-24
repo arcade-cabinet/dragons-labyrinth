@@ -1,0 +1,59 @@
+(
+    name: "Helmet",
+    materials: [
+        (
+            name: "Steel",
+            base_color: (0.6, 0.6, 0.65, 1.0),
+            metallic: 0.8,
+            roughness: 0.3,
+        ),
+        (
+            name: "Leather",
+            base_color: (0.25, 0.2, 0.15, 1.0),
+            metallic: 0.0,
+            roughness: 0.8,
+        ),
+    ],
+    objects: [
+        // Main helmet bowl
+        (
+            type: "UVSphere",
+            name: "bowl",
+            segments: 16,
+            rings: 8,
+            location: (0, 0, 0),
+            scale: (0.12, 0.12, 0.13),
+            material: "Steel",
+            shading: "smooth",
+        ),
+        // Face guard
+        (
+            type: "Cube",
+            name: "face_guard",
+            location: (0, 0.12, -0.02),
+            scale: (0.08, 0.02, 0.08),
+            material: "Steel",
+            shading: "flat",
+        ),
+        // Neck guard
+        (
+            type: "Cylinder",
+            name: "neck_guard",
+            vertices: 8,
+            location: (0, -0.05, -0.08),
+            scale: (0.1, 0.08, 0.04),
+            material: "Steel",
+            shading: "flat",
+        ),
+        // Chin strap
+        (
+            type: "Cylinder",
+            name: "chin_strap",
+            vertices: 4,
+            location: (0, 0, -0.1),
+            scale: (0.11, 0.11, 0.01),
+            material: "Leather",
+            shading: "flat",
+        ),
+    ],
+)

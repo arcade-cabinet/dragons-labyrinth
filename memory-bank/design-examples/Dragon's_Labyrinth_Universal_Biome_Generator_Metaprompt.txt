@@ -1,0 +1,147 @@
+# Dragon's Labyrinth Universal Biome Generator Metaprompt
+
+## Core Template Structure
+
+Generate a low-poly 3D hexagonal terrain tile optimized for Dragon's Labyrinth RPG in Godot 4.x.
+
+### UNIVERSAL TECHNICAL SPECIFICATIONS
+- **Format**: .glb with embedded materials and vertex colors
+- **Geometry**: Regular hexagon, flat-top orientation, 2 units diameter  
+- **Polygon Budget**: 200-500 triangles (varies by complexity)
+- **Pivot**: Centered at base for seamless grid snapping
+- **Material Setup**: Single material slot named "{BiomeName}Material"
+- **LOD Support**: Include 2-3 LOD levels (full, medium 50%, simple 25%)
+- **Edge Treatment**: Standardized connection points for transitions
+- **Godot Integration**: Vertex colors, unlit materials, convex collision hull
+
+## BIOME CATEGORIES & GENERATION PARAMETERS
+
+### 1. OVERWORLD BIOMES (World Map Exploration)
+**Temperate Zones:**
+- `BIOME: {Grassland|Meadow|Prairie}` - Rolling green terrain, wildflowers, scattered rocks
+- `BIOME: Temperate Forest` - Mixed trees, undergrowth, fallen logs, mushrooms  
+- `BIOME: Autumn Woods` - Orange/red foliage, fallen leaves, bare branches
+- `BIOME: Farmland` - Crop rows, fence posts, scarecrows, plowed earth
+
+**Harsh Environments:**
+- `BIOME: {Desert|Badlands|Wasteland}` - Sand dunes, cacti, bleached bones, rock formations
+- `BIOME: Frozen Tundra` - Snow patches, ice crystals, frozen shrubs, animal tracks
+- `BIOME: Mountain Peaks` - Rocky outcrops, snow caps, sparse vegetation, crystal formations
+- `BIOME: Volcanic Slopes` - Obsidian chunks, sulfur deposits, heat vents, ash patches
+
+**Mystical Zones:**
+- `BIOME: Enchanted Grove` - Glowing mushrooms, floating particles, ethereal plants
+- `BIOME: Corrupted Lands` - Withered vegetation, dark crystals, poisonous pools
+- `BIOME: Crystal Fields` - Geometric crystal growths, prismatic reflections, mineral veins
+
+### 2. AQUATIC & WETLAND BIOMES
+- `BIOME: Shallow Waters` - Transparent water, underwater plants, pebble beds
+- `BIOME: Swampland` - Murky water, cattails, lily pads, twisted roots
+- `BIOME: Coastal Shore` - Sand, seashells, driftwood, seaweed patches
+- `BIOME: River Delta` - Flowing water channels, sediment deposits, reeds
+
+### 3. UNDERGROUND BIOMES (Dungeons & Caves)
+**Natural Caves:**
+- `BIOME: Limestone Cavern` - Stalactites, flowstone, underground pools
+- `BIOME: Crystal Cave` - Gem formations, reflective surfaces, mineral deposits  
+- `BIOME: Underground River` - Flowing water, smooth stone, echo chambers
+- `BIOME: Mushroom Grotto` - Bioluminescent fungi, spore clouds, organic growth
+
+**Constructed Dungeons:**
+- `BIOME: Ancient Ruins` - Cracked stone, moss growth, carved symbols, rubble
+- `BIOME: Dwarven Halls` - Worked stone, metal fixtures, geometric patterns
+- `BIOME: Tomb Chamber` - Sarcophagi, bone fragments, dust, ceremonial items
+- `BIOME: Prison Cells` - Iron bars, chains, straw, water stains
+
+**Elemental Dungeons:**
+- `BIOME: Lava Chambers` - Molten rock, heat distortion, obsidian formations
+- `BIOME: Ice Caverns` - Frozen walls, icicles, permafrost, blue-white coloring
+- `BIOME: Storm Sanctum` - Electrical discharge points, wind-worn stone, metal conductors
+
+### 4. SETTLEMENT BIOMES (Towns & Cities)
+**Rural Areas:**
+- `BIOME: Village Commons` - Cobblestone, market stalls, well, lamposts  
+- `BIOME: Farm Courtyard` - Hay bales, tool storage, animal pens, dirt paths
+- `BIOME: Trading Post` - Wooden platforms, supply crates, hitching posts
+
+**Urban Zones:**
+- `BIOME: City Streets` - Paved roads, gutters, manhole covers, urban debris
+- `BIOME: Noble District` - Marble tiles, fountains, decorative elements, gold inlays
+- `BIOME: Artisan Quarter` - Workshop debris, tool marks, material samples
+- `BIOME: Harbor Docks` - Wet wood, rope coils, anchor points, barnacle growth
+
+### 5. SPECIAL ENCOUNTER BIOMES
+- `BIOME: Battlefield` - Weapon fragments, armor pieces, scorched earth, craters
+- `BIOME: Ritual Circle` - Runic inscriptions, candle holders, salt lines, ritual components
+- `BIOME: Dragon Lair` - Treasure piles, scorch marks, massive claw gouges, scales
+- `BIOME: Fey Crossing` - Reality distortions, floating objects, color shifts, portal remnants
+
+## DYNAMIC GENERATION PARAMETERS
+
+### Biome Intensity Levels
+- **Subtle**: Minimal decorative elements, clean base geometry
+- **Standard**: Moderate detail, 3-5 decorative objects  
+- **Rich**: High detail, 6-10 elements, complex surface variation
+- **Epic**: Maximum detail, unique landmarks, story elements
+
+### Transition Support
+- **Edge Blending**: Smoothed borders for adjacent biome mixing
+- **Height Transitions**: Gradual elevation changes (±0.5 units)
+- **Color Gradients**: Vertex color blending zones
+- **Element Bridging**: Shared decorative elements across borders
+
+### Seasonal Variations
+For any biome, append:
+- `SEASON: Spring` - Fresh growth, bright colors, budding elements
+- `SEASON: Summer` - Full bloom, vibrant, maximum vegetation  
+- `SEASON: Autumn` - Fading colors, fallen elements, harvest themes
+- `SEASON: Winter` - Snow coverage, ice, dormant vegetation, cold blues
+
+### Lighting Conditions  
+- `LIGHTING: Daylight` - Bright, clear visibility, sharp shadows
+- `LIGHTING: Twilight` - Purple/orange tints, long shadows, mystical atmosphere
+- `LIGHTING: Underground` - No natural light, torch-friendly, dark ambiance
+- `LIGHTING: Magical` - Unnatural colors, glowing elements, ethereal effects
+
+## USAGE INSTRUCTIONS
+
+### Basic Generation:
+```
+[Use this metaprompt] + BIOME: [BiomeName] + INTENSITY: [Subtle|Standard|Rich|Epic]
+```
+
+### Advanced Generation:
+```  
+[Use this metaprompt] + BIOME: [BiomeName] + INTENSITY: [Level] + SEASON: [Season] + LIGHTING: [Condition] + SPECIAL: [Any unique requirements]
+```
+
+### Example Calls:
+1. `BIOME: Enchanted Grove + INTENSITY: Rich + LIGHTING: Magical`
+2. `BIOME: Desert + INTENSITY: Standard + SEASON: Summer + SPECIAL: Oasis elements`
+3. `BIOME: Ancient Ruins + INTENSITY: Epic + LIGHTING: Underground + SPECIAL: Dragon damage`
+
+## QUALITY ASSURANCE CHECKLIST
+
+For each generated tile:
+- [ ] Hexagonal base with exact 2-unit diameter
+- [ ] Proper pivot point for grid alignment  
+- [ ] Vertex colors applied (no external textures required)
+- [ ] Edge vertices prepared for seamless connections
+- [ ] LOD levels included
+- [ ] Material slot correctly named
+- [ ] Polygon count within budget
+- [ ] Gameplay clarity from 45-degree camera angle
+- [ ] Distinct visual identity for biome recognition
+- [ ] Performance optimized for MultiMeshInstance3D
+
+## INTEGRATION WITH DRAGON'S LABYRINTH GENERATOR
+
+This metaprompt system can replace the existing asset libraries by:
+
+1. **Batch Generation**: Generate complete biome sets (20-50 tiles per biome)
+2. **Automatic Integration**: Generate corresponding GDScript libraries
+3. **Procedural Variation**: Create 3-5 variants per biome type
+4. **Transition Sets**: Generate edge pieces for smooth biome blending
+5. **Special Tiles**: Create unique landmark/event tiles for each biome
+
+The generator can then use these AI-created models instead of purchased assets, maintaining the same sophisticated asset library system while having complete creative control over the visual style and ensuring perfect integration with the hex-based gameplay mechanics.

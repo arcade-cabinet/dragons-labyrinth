@@ -1,0 +1,106 @@
+# Master Orchestration Configuration
+# Coordinates all agent prompt specifications
+
+[orchestration]
+name = "Dragon's Labyrinth Asset Generation Pipeline"
+version = "1.0.0"
+description = "Complete prompt orchestration for overnight generation"
+
+# Agent registry with their spec files
+[agents]
+dialogue = { spec = "dialogue_specs.toml", agent = "DialogueAgent", priority = 1 }
+maps = { spec = "map_specs.toml", agent = "MapsAgent", priority = 2 }
+levels = { spec = "level_specs.toml", agent = "LevelsAgent", priority = 3 }
+ui = { spec = "ui_specs.toml", agent = "UIAgent", priority = 4 }
+audio = { spec = "audio_specs.toml", agent = "AudioAgent", priority = 5 }
+decay = { spec = "decay_specs.toml", agent = "DecayAgent", priority = 6 }
+mounts = { spec = "mount_specs.toml", agent = "MountAgent", priority = 7 }
+forge = { spec = "forge_specs.toml", agent = "ForgeAgent", priority = 8 }
+psychology = { spec = "psychology_specs.toml", agent = "PsychologyAgent", priority = 9 }
+philosophy = { spec = "philosophy_specs.toml", agent = "PhilosophyAgent", priority = 10 }
+narrative = { spec = "narrative_specs.toml", agent = "NarrativeAgent", priority = 11 }
+
+# Generation phases for overnight execution
+[[generation_phases]]
+name = "Foundation"
+duration_hours = 2
+agents = ["maps", "levels"]
+description = "Generate base world structure and level layouts"
+
+[[generation_phases]]
+name = "Narrative"
+duration_hours = 3
+agents = ["dialogue", "narrative", "philosophy", "psychology"]
+description = "Create all dialogue trees and story content"
+
+[[generation_phases]]
+name = "Atmosphere"
+duration_hours = 2
+agents = ["decay", "audio", "ui"]
+description = "Generate horror atmosphere and sensory elements"
+
+[[generation_phases]]
+name = "Companions"
+duration_hours = 1
+agents = ["mounts", "forge"]
+description = "Create companion systems and interactions"
+
+[[generation_phases]]
+name = "Integration"
+duration_hours = 2
+agents = ["all"]
+description = "Cross-reference and validate all generated content"
+
+# Batch sizes for overnight generation
+[batch_config]
+parallel_agents = 4
+items_per_batch = 100
+max_retries = 3
+checkpoint_interval = 500
+
+# API configuration
+[api_config]
+openai_model = "gpt-4"
+openai_temperature = 0.8
+dalle_model = "dall-e-3"
+dalle_quality = "hd"
+freesound_batch_size = 50
+
+# Output configuration
+[output]
+base_dir = "target/generated"
+format = "json"
+compression = true
+manifest_generation = true
+
+# Scene generation rules
+[scene_rules]
+min_scenes_per_chapter = 10
+dread_variations_per_scene = 5
+companion_interactions_per_scene = 3
+environmental_states_per_scene = 4
+
+# Complete game content targets
+[generation_targets]
+total_dialogues = 5000
+total_maps = 500
+total_encounters = 1000
+total_items = 2000
+total_audio_clips = 5000
+total_ui_variations = 500
+total_decay_patterns = 1000
+
+# Validation rules
+[validation]
+require_all_dread_levels = true
+require_companion_coverage = true
+require_biome_diversity = true
+require_narrative_coherence = true
+
+# Overnight execution plan
+[overnight_plan]
+start_time = "00:00"
+end_time = "08:00"
+checkpoints = ["02:00", "04:00", "06:00"]
+failure_recovery = "continue_from_checkpoint"
+completion_notification = "write_manifest"

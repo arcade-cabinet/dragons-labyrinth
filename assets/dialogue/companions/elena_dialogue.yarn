@@ -1,0 +1,178 @@
+title: Elena_Introduction
+tags: companion, elena, level_1
+---
+<<if $first_meeting>>
+Elena: *looks at you with concern* I heard about the birds... and your father.
+-> I need a friend for this journey
+    Elena: *takes your hand gently* Of course. We've been friends since we were children. I won't let you face this alone.
+    <<set $companion to "elena">>
+    <<set $companion_trust to 1.0>>
+    Elena: Your mother is worried sick. But I understand why you have to go.
+    -> She doesn't understand
+        Elena: Parents never do. But that's because they love us.
+    -> Father would want this
+        Elena: *nods* He was brave. You have his eyes, you know.
+===
+
+title: Elena_Combat_Starving_Wolf
+tags: elena, combat, level_2
+---
+Elena: Oh no... look how thin it is. The poor creature is starving.
+-> We have to defend ourselves
+    Elena: I know, but... *readies shield reluctantly* Try not to hurt it more than necessary.
+-> Maybe we can scare it off
+    Elena: *brightens* Yes! Make noise, appear larger!
+    <<if $combat_ended_peacefully>>
+        Elena: See? Sometimes mercy is the strongest choice.
+        <<set $companion_trust to $companion_trust + 0.1>>
+    <<endif>>
+===
+
+title: Elena_Wolf_Mother
+tags: elena, moral_choice, level_2
+---
+Elena: *gasps* Wait! She has cubs! Look behind that rock.
+-> We still need to pass
+    Elena: Can't we go around? Those cubs need their mother.
+    -> You're right, let's go around
+        Elena: *smiles warmly* Thank you. Every life matters.
+        <<set $philosophy_harmony to $philosophy_harmony + 0.1>>
+    -> We don't have time for detours
+        Elena: *looks disappointed* I... I understand. But this feels wrong.
+        <<set $companion_trust to $companion_trust - 0.1>>
+-> The cubs will die anyway without her protecting them from other predators
+    Elena: That's... that's horrible logic! We're not predators!
+    <<set $companion_trust to $companion_trust - 0.2>>
+===
+
+title: Elena_First_Village_Evening
+tags: elena, village, level_3
+---
+Elena: *yawns* It's getting late. Most of the village is already at evening meal.
+-> Let's find an inn
+    Elena: Good idea. We can talk to more people in the morning when they're fresh.
+    Elena: Besides, you look exhausted. When did you last eat?
+-> We should investigate immediately
+    Elena: *concerned* You're pushing yourself too hard. Your father's fate won't change if we rest one night.
+===
+
+title: Elena_Missing_Child
+tags: elena, quest, level_4
+---
+<<if $found_wooden_horse>>
+Elena: *picks up the toy* This... this is yours, isn't it? I remember when your father carved it.
+-> How did Emma get this?
+    Elena: You gave it to her last summer, remember? At the harvest festival. You said she reminded you of yourself at that age.
+    -> I'd forgotten...
+        Elena: You were kind to her. That's why her mother came to us for help.
+<<endif>>
+
+<<if $found_emma>>
+Elena: *whispers* Her eyes... do you see that? The way they reflect light?
+-> What do you mean?
+    Elena: It's subtle but... there's something otherworldly about them. Like she's seen something she shouldn't have.
+    -> The void?
+        Elena: *shivers* Don't say that word. Not here. Not near her.
+<<endif>>
+===
+
+title: Elena_Level_10_MiniBoss
+tags: elena, boss, combat, level_10
+---
+Elena: He's mounted and we're not. This isn't a fair fight.
+-> Any ideas?
+    Elena: The campfire! If we can spook his horse...
+    -> Good thinking
+        Elena: I'll create a distraction. You get ready with those burning branches.
+    -> Too risky
+        Elena: Then I'll try to grab the reins when he charges. Cover me!
+===
+
+title: Elena_First_Death_Scar
+tags: elena, death, scar
+---
+<<if $death_count == 1>>
+Elena: *treating your wounds* This scar... it's not healing properly. It's like the wound remembers the blade.
+-> I'm fine
+    Elena: No, you're not. You died. I saw it happen. Your heart stopped.
+    Elena: *voice breaking* And then you came back, but different. There's a coldness in that scar.
+-> The void touched me
+    Elena: *pulls back* Don't say that! We can fight this. We can find a healer who--
+    -> There's no cure for death, Elena
+        Elena: *tears forming* There has to be. I won't lose you to the darkness.
+<<endif>>
+===
+
+title: Elena_Mount_Introduction
+tags: elena, mount, level_13
+---
+Elena: *recognizes the horse* That's the same horse the bandit lieutenant was riding!
+-> How did it get here?
+    Elena: It must have fled after the fight. Look, its leg is injured from running.
+    -> We should help it
+        Elena: *smiles* Yes! Let me see... *approaches slowly* Easy there, girl. We're friends.
+        <<set $mount_bond to 0.3>>
+    -> The merchant will want it back
+        Elena: Of course. It's the right thing to do. But maybe he'll let us help care for it?
+===
+
+title: Elena_Bandit_Cave_Entry
+tags: elena, dungeon, level_20
+---
+Elena: *looking at the cave entrance* The architecture... it's different. Older. The stones are perfectly fitted without mortar.
+-> Dragon construction?
+    Elena: *nods slowly* Father Timothy at the temple showed me drawings once. This matches the old kingdom's style.
+    Elena: Before the dragon came. When humans and the ancient ones lived together.
+-> Why would bandits choose this place?
+    Elena: Maybe they didn't choose it. Maybe it called to them. Desperate people seek desperate shelters.
+===
+
+title: Elena_Bandit_Boss_Children
+tags: elena, moral_choice, level_20
+---
+<<if $children_present>>
+Elena: *horrified whisper* There are children watching! They're his children!
+-> They shouldn't see this
+    Elena: Then we need to find another way. Violence in front of children scars them forever.
+    -> You're right. Let's try talking
+        Elena: *relieved* Thank you. Let me try to reach him first. Parent to parent.
+    -> Sometimes there's no choice
+        Elena: *angry* There's ALWAYS a choice! If you do this, I'll never forgive you!
+        <<set $elena_ultimatum to true>>
+<<endif>>
+===
+
+title: Elena_Level_20_Aftermath
+tags: elena, consequences, philosophy
+---
+<<if $showed_mercy>>
+Elena: *exhausted but smiling* You did the right thing. Those children will remember your mercy.
+-> It was weakness
+    Elena: No. It was strength. The hardest battles are the ones we choose not to fight.
+-> You were right
+    Elena: *hugs you* We're going to make it through this. Together. With our souls intact.
+    <<set $companion_trust to $companion_trust + 0.3>>
+<<elseif $executed_bandit>>
+Elena: *can't look at you* Those children... they watched their father die.
+-> He was a criminal
+    Elena: He was desperate! Did you see how thin those children were?
+    Elena: *crying* We're becoming the monsters we set out to fight.
+    <<set $companion_trust to $companion_trust - 0.5>>
+<<endif>>
+===
+
+title: Elena_Philosophy_Crystal_Harmony
+tags: elena, philosophy, observation
+---
+<<if $philosophy_crystal == "blue">>
+Elena: *notices the crystal's glow* It's turning blue. Like a summer sky.
+-> What does that mean?
+    Elena: I think... I think it reflects your choices. Blue like mercy. Like harmony.
+    Elena: *smiles* Like the person I've always known you to be.
+<<elseif $philosophy_crystal == "red">>
+Elena: *worried* The crystal is turning red. Like blood.
+-> Is that bad?
+    Elena: Not bad, just... different from who I thought you were.
+    Elena: Are you changing? Or were you always this way and I didn't see it?
+<<endif>>
+===

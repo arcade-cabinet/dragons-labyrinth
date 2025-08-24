@@ -1,0 +1,179 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+.cursor/
+
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+*.pdb
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# Node.js (for any web components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated files
+/assets/generated/
+/ai-output/
+/out/
+/systems/
+*.tar.gz
+
+# Build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Test coverage
+*.gcda
+*.gcno
+*.gcov
+*.profraw
+*.profdata
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.envrc
+
+# WebAssembly build artifacts
+/pkg/
+/wasm-pack.log
+*.wasm
+
+# Blender temp files
+*.blend1
+*.blend2
+
+# Generated documentation
+/docs/_build/
+/docs/site/
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# Vite/Build configs
+vite.config.ts.*
+server/public
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# Cache directories
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# Asset processing
+/raw/
+/processed/
+/library/interim/
+*.blend_autosave
+
+# MCP/AI generation
+.mcp/
+mcp-cache/
+ai-cache/
+generation-queue/
+src/generator/ai/venv/

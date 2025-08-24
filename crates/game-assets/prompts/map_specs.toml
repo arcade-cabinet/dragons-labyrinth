@@ -1,0 +1,91 @@
+# Map Generation Specifications
+# For MapsAgent to generate complete level layouts
+
+[[map_prompts]]
+id = "hex_board_layout"
+category = "board_generation"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate a hex-based game board layout.
+Board size: {width}x{height} hexes
+Theme: {biome_type}
+Dread level: {dread_level}
+Complexity: {complexity_level}
+
+Requirements:
+- Hex coordinate system (axial or cube)
+- Terrain types per hex
+- Movement costs
+- Horror elements increase with dread
+- JSON output with hex positions
+"""
+
+[[map_prompts]]
+id = "dungeon_room"
+category = "interior_spaces"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate a dungeon room layout.
+Room purpose: {room_type}
+Size: {dimensions}
+Dread level: {dread_level}
+Connected exits: {exit_directions}
+
+Include:
+- Tile-based layout (ASCII or JSON)
+- Interactive elements placement
+- Horror transformation at dread > 2
+- Trap/hazard positions
+- Item spawn points
+"""
+
+[[map_prompts]]
+id = "overworld_region"
+category = "world_map"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate overworld region with points of interest.
+Region name: {region_name}
+Biome: {biome_type}
+Size: {km_squared}
+Dread: {dread_level}
+
+Requirements:
+- Major landmarks
+- Settlement locations
+- Path networks
+- Corruption spread patterns
+- Fog of war rules
+"""
+
+[[map_prompts]]
+id = "cobweb_narrative_map"
+category = "narrative_structure"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate a Cobweb-format narrative map.
+Story arc: {arc_name}
+Node count: {num_nodes}
+Dread progression: {dread_level}
+
+Output format:
+- Nodes with story beats
+- Edges with trigger conditions
+- Branching possibilities
+- Horror escalation paths
+- Player choice consequences
+"""
+
+# Generation parameters
+[generation_rules]
+maps_per_biome = 20
+rooms_per_dungeon = 50
+regions_per_world = 10
+variations_per_dread = 5
+output_formats = ["json", "ascii", "tiled", "cobweb"]
+
+[biome_types]
+forest = { base_tiles = ["grass", "tree", "path"], horror_tiles = ["dead_tree", "blood_grass", "shadow"] }
+mountain = { base_tiles = ["rock", "snow", "cliff"], horror_tiles = ["bone_pile", "frozen_corpse", "abyss"] }
+swamp = { base_tiles = ["water", "mud", "vegetation"], horror_tiles = ["quicksand", "tentacles", "miasma"] }
+ruins = { base_tiles = ["stone", "rubble", "moss"], horror_tiles = ["whispering_walls", "moving_statues", "void"] }

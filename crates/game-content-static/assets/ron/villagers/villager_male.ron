@@ -1,0 +1,99 @@
+(
+    name: "VillagerMale",
+    materials: [
+        (
+            name: "Skin",
+            base_color: (0.8, 0.65, 0.5, 1.0),
+            metallic: 0.0,
+            roughness: 0.7,
+        ),
+        (
+            name: "Clothes",
+            base_color: (0.3, 0.25, 0.2, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+        (
+            name: "Hair",
+            base_color: (0.15, 0.1, 0.08, 1.0),
+            metallic: 0.0,
+            roughness: 0.8,
+        ),
+    ],
+    objects: [
+        // Head
+        (
+            type: "UVSphere",
+            name: "head",
+            segments: 16,
+            rings: 8,
+            location: (0, 0, 1.5),
+            scale: (0.1, 0.1, 0.12),
+            material: "Skin",
+            shading: "smooth",
+        ),
+        // Body
+        (
+            type: "Cylinder",
+            name: "body",
+            vertices: 8,
+            location: (0, 0, 0.9),
+            scale: (0.15, 0.12, 0.35),
+            material: "Clothes",
+            shading: "flat",
+        ),
+        // Left arm
+        (
+            type: "Cylinder",
+            name: "arm_left",
+            vertices: 6,
+            location: (0.2, 0, 1.0),
+            scale: (0.04, 0.04, 0.25),
+            rotation: (0, 0.523, 0), // 30 degrees
+            material: "Skin",
+            shading: "flat",
+        ),
+        // Right arm
+        (
+            type: "Cylinder",
+            name: "arm_right",
+            vertices: 6,
+            location: (-0.2, 0, 1.0),
+            scale: (0.04, 0.04, 0.25),
+            rotation: (0, -0.523, 0), // -30 degrees
+            material: "Skin",
+            shading: "flat",
+        ),
+        // Left leg
+        (
+            type: "Cylinder",
+            name: "leg_left",
+            vertices: 6,
+            location: (0.08, 0, 0.3),
+            scale: (0.05, 0.05, 0.3),
+            material: "Clothes",
+            shading: "flat",
+        ),
+        // Right leg
+        (
+            type: "Cylinder",
+            name: "leg_right",
+            vertices: 6,
+            location: (-0.08, 0, 0.3),
+            scale: (0.05, 0.05, 0.3),
+            material: "Clothes",
+            shading: "flat",
+        ),
+        // Hair
+        (
+            type: "UVSphere",
+            name: "hair",
+            segments: 12,
+            rings: 6,
+            location: (0, 0, 1.58),
+            scale: (0.11, 0.11, 0.08),
+            material: "Hair",
+            shading: "flat",
+        ),
+    ],
+)

@@ -1,0 +1,36 @@
+# Dragon's Labyrinth AI Generation Framework
+# Core AI Libraries
+langchain==0.3.14
+langchain-openai==0.2.14
+langgraph==0.2.69
+openai==1.58.1
+
+# Database & Processing
+sqlalchemy==2.0.36
+pandas==2.2.3
+numpy==2.0.2
+Pillow==11.0.0
+
+# Vector Search for CC0 Assets
+sentence-transformers==3.3.1
+chromadb==0.5.24
+
+# Job Queue & Workflow
+huey==2.5.2
+schedule==1.2.2
+
+# Audio Processing
+librosa==0.10.2.post1
+soundfile==0.12.1
+
+# API Integration
+requests==2.32.3
+python-dotenv==1.0.1
+
+# Development Tools
+pytest==8.3.4
+black==24.10.0
+ipython==8.31.0
+
+# PyO3 Bridge (will be built from Rust crate)
+# dragon-assets-inspector (local install)

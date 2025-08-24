@@ -1,0 +1,67 @@
+Generate a quest for Dragon's Labyrinth as JSON:
+
+DREAD LEVEL: {{ dread_level }} (0=Peace, 4=Madness)
+QUEST TYPE: {{ quest_type }}
+MORAL COMPLEXITY: {{ moral_complexity }}
+
+Context for this dread level:
+{% if dread_level == 0 %}
+- World is peaceful, people are helpful
+- Choices have clear right/wrong answers
+- Consequences are minor and reversible
+{% elif dread_level == 1 %}
+- Unease creeping in, people are nervous
+- Choices have trade-offs
+- Some consequences can't be undone
+{% elif dread_level == 2 %}
+- Anxiety pervades, trust breaking down
+- No perfect choices exist
+- Consequences affect relationships
+{% elif dread_level == 3 %}
+- Horror manifest, survival mode
+- Every choice costs something precious
+- Someone will be hurt no matter what
+{% elif dread_level == 4 %}
+- Madness reigns, reality breaking
+- Impossible choices only
+- All paths lead to suffering
+{% endif %}
+
+Requirements:
+- Title should reflect the moral weight
+- Description sets appropriate stakes
+- 3-5 stages with clear objectives
+- Choices have companion reactions
+- Outcomes match the horror level
+
+Generate a complete quest structure:
+{
+  "id": "quest_{{ dread_level }}_{{ quest_type | lower }}",
+  "title": "...",
+  "description": "...",
+  "quest_type": "{{ quest_type }}",
+  "moral_weight": "{{ moral_complexity }}",
+  "stages": [
+    {
+      "description": "...",
+      "objectives": ["..."],
+      "choices": [
+        {
+          "text": "...",
+          "requirements": [],
+          "consequences": ["..."],
+          "companion_reactions": [["Name", 0.5]]
+        }
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "choice_path": "...",
+      "description": "...",
+      "world_changes": ["..."],
+      "companion_impacts": [["Name", "Impact"]]
+    }
+  ],
+  "dialogue_nodes": ["node1", "node2"]
+}

@@ -1,0 +1,102 @@
+# Narrative Orchestration Specifications
+# For NarrativeAgent to generate overarching story structures
+
+[[narrative_prompts]]
+id = "chapter_structure"
+category = "story_architecture"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Design chapter narrative structure.
+Chapter number: {chapter_id}
+Theme: {chapter_theme}
+Dread progression: {dread_start} to {dread_end}
+Key companions: {featured_companions}
+
+Requirements:
+- Opening scene setup
+- 5-7 story beats
+- Horror escalation points
+- Companion revelations
+- Chapter climax design
+- Transition to next chapter
+"""
+
+[[narrative_prompts]]
+id = "companion_backstory"
+category = "character_development"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate complete companion backstory.
+Companion name: {companion_name}
+Archetype: {character_archetype}
+Dark secret: {hidden_truth}
+Player discovery: dread level {reveal_dread}
+
+Include:
+- Pre-apocalypse life
+- Transformation event
+- Current motivations
+- Relationship dynamics
+- Betrayal conditions
+"""
+
+[[narrative_prompts]]
+id = "world_lore"
+category = "worldbuilding"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Create world lore entry.
+Topic: {lore_category}
+Historical period: {time_frame}
+Corruption influence: {dread_level}
+Discovery method: {how_player_learns}
+
+Requirements:
+- Historical facts
+- Mythological elements
+- Scientific explanations
+- Unreliable narration
+- Hidden truths
+"""
+
+[[narrative_prompts]]
+id = "emotional_arc"
+category = "psychological_progression"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Design player emotional journey.
+Starting emotion: {initial_state}
+Ending emotion: {target_state}
+Duration: {arc_length}
+Dread influence: {dread_level}
+
+Include:
+- Emotional milestones
+- Trigger events
+- Companion influences
+- Environmental factors
+- Choice consequences
+"""
+
+# YarnSpinner format specifications
+[yarnspinner_config]
+node_prefix = "DL_"
+variable_prefix = "$"
+function_prefix = "game_"
+max_node_size = 500
+default_tags = ["horror", "rpg", "psychological"]
+
+# Cobweb narrative mapping
+[cobweb_config]
+node_types = ["story_beat", "decision_point", "revelation", "combat", "exploration"]
+edge_types = ["requires", "unlocks", "branches_to", "merges_with", "corrupts"]
+max_branches = 5
+convergence_points = true
+
+# Narrative generation rules
+[generation_rules]
+stories_per_companion = 20
+lore_entries = 500
+emotional_arcs = 50
+chapter_variations = 3
+ending_variations = 12

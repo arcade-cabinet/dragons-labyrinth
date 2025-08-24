@@ -1,0 +1,108 @@
+# Audio Generation Specifications
+# For AudioAgent to generate sound configurations
+
+[[audio_prompts]]
+id = "ambient_soundscape"
+category = "environmental"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate ambient soundscape configuration.
+Environment: {biome_type}
+Time of day: {time_period}
+Dread level: {dread_level}
+Weather: {weather_condition}
+
+Requirements:
+- Base ambient loops
+- Layered sound effects
+- Dynamic volume curves
+- Horror elements introduction
+- Freesound API queries
+"""
+
+[[audio_prompts]]
+id = "combat_sfx"
+category = "action_sounds"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Design combat sound effect set.
+Weapon type: {weapon_category}
+Impact material: {surface_type}
+Dread: {dread_level}
+
+Include:
+- Attack swooshes
+- Impact sounds
+- Critical hit variations
+- Distortion at high dread
+- Blood/gore effects
+"""
+
+[[audio_prompts]]
+id = "creature_vocalizations"
+category = "creature_sounds"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate creature sound profiles.
+Creature type: {entity_type}
+Emotional state: {creature_mood}
+Dread: {dread_level}
+Distance: {proximity}
+
+Requirements:
+- Idle sounds
+- Alert vocalizations
+- Attack sounds
+- Death cries
+- Horror transformations
+"""
+
+[[audio_prompts]]
+id = "ui_feedback"
+category = "interface_sounds"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Create UI interaction sounds.
+Action type: {ui_action}
+Interface element: {element_type}
+Dread: {dread_level}
+
+Include:
+- Button clicks
+- Menu transitions
+- Notification chimes
+- Error sounds
+- Glitch audio
+"""
+
+[[audio_prompts]]
+id = "musical_themes"
+category = "dynamic_music"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate dynamic music configuration.
+Scene type: {scene_category}
+Emotional tone: {target_emotion}
+Dread: {dread_level}
+Tempo: {bpm_range}
+
+Requirements:
+- Intro/loop/outro segments
+- Layer introduction rules
+- Transition triggers
+- Dissonance increase
+- Silence usage
+"""
+
+# Freesound API search patterns
+[freesound_queries]
+ambient = ["forest ambience", "cave echo", "wind howling", "water dripping", "creaking wood"]
+horror = ["whisper", "breathing", "heartbeat", "scream", "static", "reverse", "distorted"]
+impact = ["metal hit", "flesh impact", "bone crack", "wood break", "stone crumble"]
+ui = ["click", "swoosh", "notification", "error", "success", "hover"]
+
+[generation_rules]
+sounds_per_category = 100
+variations_per_sound = 5
+freesound_downloads = 500
+compression_quality = "high"

@@ -1,0 +1,196 @@
+
+/* Dragon's Labyrinth Theme - Generated from Style Guide */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+    --sidebar-width: 300px;
+    --page-padding: 15px;
+    --content-max-width: 750px;
+    --menu-bar-height: 50px;
+
+    /* Dread Level 0 */
+    --dread-0-primary: #4495e5;
+    --dread-0-bg: #f2f2ed;
+    --dread-0-text: #191919;
+    --dread-0-accent: #7cd321;
+    --dread-0-corruption: 0%;
+
+    /* Dread Level 1 */
+    --dread-1-primary: #2fd295;
+    --dread-1-bg: #bcbcb8;
+    --dread-1-text: #4c4c4c;
+    --dread-1-accent: #f4a523;
+    --dread-1-corruption: 25%;
+
+    /* Dread Level 2 */
+    --dread-2-primary: #45bf1c;
+    --dread-2-bg: #858583;
+    --dread-2-text: #7f7f7f;
+    --dread-2-accent: #d85e4f;
+    --dread-2-corruption: 50%;
+
+    /* Dread Level 3 */
+    --dread-3-primary: #ac980c;
+    --dread-3-bg: #4f4f4e;
+    --dread-3-text: #b2b2b2;
+    --dread-3-accent: #8c4484;
+    --dread-3-corruption: 75%;
+
+    /* Dread Level 4 */
+    --dread-4-primary: #980000;
+    --dread-4-bg: #191918;
+    --dread-4-text: #e5e5e5;
+    --dread-4-accent: #212121;
+    --dread-4-corruption: 100%;
+
+}
+
+/* Base styling */
+body {
+    font-family: 'Crimson Text', serif;
+    background: var(--dread-0-bg);
+    color: var(--dread-0-text);
+    transition: all 0.5s ease;
+}
+
+/* Dread level classes */
+.dread-0 { 
+    background: var(--dread-0-bg);
+    color: var(--dread-0-text);
+}
+.dread-1 {
+    background: var(--dread-1-bg);
+    color: var(--dread-1-text);
+}
+.dread-2 {
+    background: var(--dread-2-bg);
+    color: var(--dread-2-text);
+}
+.dread-3 {
+    background: var(--dread-3-bg);
+    color: var(--dread-3-text);
+    filter: contrast(1.1) saturate(0.9);
+}
+.dread-4 {
+    background: var(--dread-4-bg);
+    color: var(--dread-4-text);
+    filter: contrast(1.2) saturate(0.7) hue-rotate(10deg);
+    animation: corruption 2s infinite;
+}
+
+/* Horror effects */
+@keyframes corruption {
+    0% { filter: contrast(1.2) saturate(0.7) hue-rotate(10deg); }
+    50% { filter: contrast(1.5) saturate(0.5) hue-rotate(-10deg); }
+    100% { filter: contrast(1.2) saturate(0.7) hue-rotate(10deg); }
+}
+
+@keyframes glitch {
+    0% { 
+        text-shadow: 0.05em 0 0 rgba(255,0,0,0.75),
+                    -0.025em -0.05em 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+    }
+    15% {
+        text-shadow: 0.05em 0 0 rgba(255,0,0,0.75),
+                    -0.05em -0.025em 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+    }
+    100% {
+        text-shadow: 0.05em 0 0 rgba(255,0,0,0.75),
+                    -0.025em -0.05em 0 rgba(0,255,0,0.75),
+                    0.025em 0.05em 0 rgba(0,0,255,0.75);
+    }
+}
+
+.dread-3 h1, .dread-3 h2,
+.dread-4 h1, .dread-4 h2 {
+    animation: glitch 0.5s infinite;
+}
+
+/* Code blocks with horror tint */
+pre {
+    background: #0A0A0A !important;
+    border: 1px solid #8B0000;
+    padding: 1em;
+    border-radius: 4px;
+}
+
+code {
+    background: rgba(139, 0, 0, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+/* Companion quotes */
+.companion-quote {
+    font-style: italic;
+    border-left: 3px solid #2F4F2F;
+    padding-left: 1em;
+    margin: 1em 0;
+    opacity: 0.9;
+}
+
+/* Warning blocks */
+.warning {
+    border-left: 4px solid #8B0000;
+    background: rgba(139, 0, 0, 0.1);
+    padding: 1em;
+    margin: 1em 0;
+}
+
+/* Sidebar theming */
+.sidebar {
+    background: rgba(0, 0, 0, 0.8);
+    border-right: 1px solid #8B0000;
+}
+
+.chapter li.chapter-item a:hover {
+    color: #8B0000;
+}
+
+/* Menu bar */
+.menu-bar {
+    background: rgba(0, 0, 0, 0.9);
+    border-bottom: 1px solid #8B0000;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background: rgba(139, 0, 0, 0.2);
+    padding: 0.5em;
+    border: 1px solid #8B0000;
+}
+
+td {
+    padding: 0.5em;
+    border: 1px solid rgba(139, 0, 0, 0.3);
+}
+
+/* Search */
+.searchbar {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #8B0000;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8B0000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #A00000;
+}

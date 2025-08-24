@@ -1,0 +1,208 @@
+title: Marcus_Introduction
+tags: companion, marcus, level_1
+---
+<<if $first_meeting>>
+Marcus: *grins eagerly* Finally! The birds going silent, mysterious danger - this is the opportunity we've been waiting for!
+-> Come with me, we'll split the glory
+    Marcus: *clasps your shoulder* Exactly what I wanted to hear! Fifty-fifty, right down the middle.
+    <<set $companion to "marcus">>
+    <<set $companion_trust to 1.0>>
+    Marcus: Your old man went alone and look what happened. Two swords are better than one!
+    -> And twice the glory
+        Marcus: *laughs* Now you're thinking! We'll be legends!
+    -> I need someone I can trust
+        Marcus: Trust? We've been competing since we were kids. That's better than trust - that's respect!
+===
+
+title: Marcus_Combat_Starving_Wolf
+tags: marcus, combat, level_2
+---
+Marcus: *draws sword immediately* Hah! First blood of the journey! This one's mine!
+-> Wait, it's just hungry
+    Marcus: So? It's a threat. Kill or be killed out here.
+    -> There might be another way
+        Marcus: *annoyed* Another way? It's a wolf! Stop overthinking!
+-> Get ready!
+    Marcus: *charges* That's more like it! Watch how a real warrior does it!
+    <<if $combat_ended_quickly>>
+        Marcus: See? Quick and clean. No hesitation.
+        <<set $companion_trust to $companion_trust + 0.1>>
+    <<endif>>
+===
+
+title: Marcus_Wolf_Mother
+tags: marcus, moral_choice, level_2
+---
+Marcus: Cubs or not, she's in our way. One swift strike and we move on.
+-> The cubs need her
+    Marcus: *scoffs* The cubs will find another pack or die. That's nature.
+    -> We're not animals
+        Marcus: *frustrated* No, we're predators. Top of the food chain. Act like it!
+        <<set $companion_trust to $companion_trust - 0.1>>
+    -> You're right, do it
+        Marcus: *grins* Finally, some sense! Watch and learn!
+        <<set $philosophy_strength to $philosophy_strength + 0.1>>
+-> Let me handle this
+    Marcus: *shrugs* Your call. But if she attacks, I'm not holding back.
+===
+
+title: Marcus_First_Village_Evening
+tags: marcus, village, level_3
+---
+Marcus: *impatient* Half the shops are closed! We should have pushed harder to get here earlier.
+-> We need rest anyway
+    Marcus: Rest? We just started! The early bird gets the worm - and the best quest rewards!
+-> Tomorrow we'll have full access
+    Marcus: *grumbles* Tomorrow the good opportunities might be taken. But fine, let's at least check the inn for rumors.
+===
+
+title: Marcus_Missing_Child
+tags: marcus, quest, level_4
+---
+<<if $found_wooden_horse>>
+Marcus: A toy? We're wasting time on a child's toy?
+-> It's mine from childhood
+    Marcus: *surprised* Yours? Huh. Still seems like a distraction from the real mission.
+    -> Every quest builds reputation
+        Marcus: *perks up* True! Save a kid, become heroes. Good thinking!
+<<endif>>
+
+<<if $found_emma>>
+Marcus: *uneasy* Is it just me or are that kid's eyes... wrong?
+-> What do you mean?
+    Marcus: *hand on sword* They're too bright. Like there's a light behind them that shouldn't be there.
+    -> You're paranoid
+        Marcus: Paranoid keeps you alive. Mark my words, that kid's trouble.
+<<endif>>
+===
+
+title: Marcus_Level_10_MiniBoss
+tags: marcus, boss, combat, level_10
+---
+Marcus: *excited* Finally! A real opponent! Look at that armor, that horse - this guy's the real deal!
+-> He has an advantage
+    Marcus: So? Makes victory sweeter! I say we rush him!
+    -> That's suicide
+        Marcus: *annoyed* Then what's your brilliant plan?
+    -> Together, then
+        Marcus: *grins* Now you're talking! For glory!
+-> We need tactics
+    Marcus: *grudgingly* Fine. I'll admit the horse is a problem. Got any fire? Or maybe...
+    Marcus: *eyes light up* I could grab the reins while you go for his legs!
+===
+
+title: Marcus_First_Death_Scar
+tags: marcus, death, scar
+---
+<<if $death_count == 1>>
+Marcus: *staring at your scar* That's... that's not natural. You were dead. I checked for a pulse.
+-> I got better
+    Marcus: *nervous laugh* Got better? From death? That's not how it works!
+    Marcus: *backing up slightly* What brought you back?
+-> The void wouldn't take me
+    Marcus: *hand on sword* Don't joke about that! The void... that's...
+    -> I'm still me, Marcus
+        Marcus: Are you? Because that scar says otherwise. It's like a mark of ownership.
+<<endif>>
+===
+
+title: Marcus_Mount_Introduction
+tags: marcus, mount, level_13
+---
+Marcus: *recognizes the horse* Ha! That's the lieutenant's horse! The one that threw him!
+-> It's injured
+    Marcus: So? Not our problem. Unless... *calculating* Wait, we could claim it as spoils of war!
+    -> The merchant owns it
+        Marcus: *disappointed* Damn. I forgot about him. Still, maybe he'll reward us?
+    -> Let's keep it
+        Marcus: *excited* Yes! Victor's spoils! Who's going to argue with us?
+        <<set $marcus_greed to $marcus_greed + 0.2>>
+===
+
+title: Marcus_Bandit_Cave_Entry
+tags: marcus, dungeon, level_20
+---
+Marcus: *whistles* Look at this architecture! This isn't some random cave - this is ancient!
+-> Pre-dragon construction
+    Marcus: Which means treasure! Ancient places always have treasure!
+    Marcus: *eager* Forget the bandits, let's explore deeper!
+-> Stay focused
+    Marcus: *rolls eyes* Fine, bandits first. But after we deal with them, we're searching every corner!
+===
+
+title: Marcus_Bandit_Boss_Children
+tags: marcus, moral_choice, level_20
+---
+<<if $children_present>>
+Marcus: *uncomfortable* Kids. Why did there have to be kids?
+-> They're watching their father
+    Marcus: *hardens* Then they'll learn what happens to criminals. It's a lesson.
+    -> That's cruel
+        Marcus: Cruel? It's reality! Better they learn now!
+        <<set $companion_trust to $companion_trust - 0.2>>
+    -> You're right
+        Marcus: *surprised* I am? I mean... of course I am. Let's finish this.
+-> Send them away first
+    Marcus: And let them get help? Or ambush us later? No way!
+<<endif>>
+===
+
+title: Marcus_Level_20_Aftermath
+tags: marcus, consequences, philosophy
+---
+<<if $showed_mercy>>
+Marcus: *disgusted* We had him! He was beaten! And you let him walk?
+-> He had children
+    Marcus: So do the people he robbed! You think they care about his sob story?
+    Marcus: *spits* This weakness will get us killed.
+    <<set $companion_trust to $companion_trust - 0.3>>
+<<elseif $executed_bandit>>
+Marcus: *satisfied* Good. Swift justice. That's how you handle bandits.
+-> The children saw
+    Marcus: They saw their father face consequences. Important lesson.
+    Marcus: *claps your shoulder* You did what had to be done. I respect that.
+    <<set $companion_trust to $companion_trust + 0.2>>
+<<endif>>
+===
+
+title: Marcus_Philosophy_Crystal_Strength
+tags: marcus, philosophy, observation
+---
+<<if $philosophy_crystal == "red">>
+Marcus: *notices the crystal* It's turning red. Like fire. Like blood. Like victory!
+-> Is that what you see?
+    Marcus: What else would it be? Red is the color of strength, of action!
+    Marcus: *grins* Looks like you're finally embracing your warrior side!
+<<elseif $philosophy_crystal == "blue">>
+Marcus: *frowns* Why is it turning blue? Like water. Soft. Weak.
+-> Harmony isn't weakness
+    Marcus: *scoffs* Tell that to the dead. They were probably very harmonious.
+    Marcus: Are you going soft on me?
+<<endif>>
+===
+
+title: Marcus_Competition_Kills
+tags: marcus, combat, rivalry
+---
+Marcus: *after combat* That's three for me, two for you. Keeping score?
+-> This isn't a game
+    Marcus: Everything's a game if you're winning! Come on, makes the journey more fun!
+-> You got lucky
+    Marcus: *laughs* Lucky? That was pure skill! Want to bet on the next fight?
+    -> You're on
+        Marcus: *excited* Yes! Loser buys drinks at the next tavern!
+        <<set $marcus_rivalry to $marcus_rivalry + 0.1>>
+===
+
+title: Marcus_Reputation_Talk
+tags: marcus, reputation, ambition
+---
+Marcus: *dreamily* You know what they'll call us when we get back? Heroes. Legends, maybe.
+-> If we survive
+    Marcus: *confident* Of course we'll survive! We're the protagonists of this story!
+-> Fame isn't everything
+    Marcus: *shocked* Not everything? It's immortality! Our names will live forever!
+    Marcus: Don't you want to be remembered?
+    -> I want to do what's right
+        Marcus: *shakes head* Right doesn't get you statues. Victory does.
+===

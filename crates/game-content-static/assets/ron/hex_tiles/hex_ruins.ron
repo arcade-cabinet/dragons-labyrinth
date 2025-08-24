@@ -1,0 +1,69 @@
+(
+    name: "HexRuinsTile",
+    materials: [
+        (
+            name: "Stone",
+            base_color: (0.35, 0.32, 0.3, 1.0),
+            metallic: 0.0,
+            roughness: 0.95,
+        ),
+        (
+            name: "Moss",
+            base_color: (0.15, 0.3, 0.15, 1.0),
+            metallic: 0.0,
+            roughness: 0.9,
+        ),
+    ],
+    objects: [
+        // Base hexagon
+        (
+            type: "Cylinder",
+            name: "base",
+            vertices: 6,
+            location: (0, 0, 0),
+            scale: (0.5, 0.5, 0.05),
+            material: "Stone",
+            shading: "flat",
+        ),
+        // Broken pillar 1
+        (
+            type: "Cylinder",
+            name: "pillar_1",
+            vertices: 8,
+            location: (0.2, 0.1, 0.05),
+            scale: (0.06, 0.06, 0.15),
+            material: "Stone",
+            shading: "flat",
+        ),
+        // Broken wall segment
+        (
+            type: "Cube",
+            name: "wall",
+            location: (-0.15, 0.2, 0.05),
+            scale: (0.2, 0.03, 0.12),
+            rotation: (0, 0, 0.523), // 30 degrees
+            material: "Stone",
+            shading: "flat",
+        ),
+        // Rubble pile 1
+        (
+            type: "IcoSphere",
+            name: "rubble_1",
+            subdivisions: 1,
+            location: (0.1, -0.2, 0.05),
+            scale: (0.08, 0.08, 0.04),
+            material: "Stone",
+            shading: "flat",
+        ),
+        // Moss patch
+        (
+            type: "IcoSphere",
+            name: "moss",
+            subdivisions: 1,
+            location: (-0.1, 0, 0.06),
+            scale: (0.12, 0.12, 0.02),
+            material: "Moss",
+            shading: "flat",
+        ),
+    ],
+)

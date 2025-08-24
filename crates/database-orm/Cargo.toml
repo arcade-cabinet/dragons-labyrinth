@@ -1,0 +1,16 @@
+[package]
+name = "database-orm"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+chrono = { version = "0.4.41", features = ["serde"] }
+sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing.workspace = true
+uuid = { version = "1.18.0", features = ["v4", "serde"] }

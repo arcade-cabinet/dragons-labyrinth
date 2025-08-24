@@ -1,0 +1,62 @@
+(
+    name: "Sword",
+    materials: [
+        (
+            name: "Blade",
+            base_color: (0.7, 0.7, 0.75, 1.0),
+            metallic: 0.9,
+            roughness: 0.2,
+        ),
+        (
+            name: "Hilt",
+            base_color: (0.2, 0.15, 0.1, 1.0),
+            metallic: 0.3,
+            roughness: 0.6,
+        ),
+        (
+            name: "Pommel",
+            base_color: (0.5, 0.4, 0.2, 1.0),
+            metallic: 0.7,
+            roughness: 0.3,
+        ),
+    ],
+    objects: [
+        // Blade
+        (
+            type: "Cube",
+            name: "blade",
+            location: (0, 0, 0.5),
+            scale: (0.02, 0.08, 0.4),
+            material: "Blade",
+            shading: "smooth",
+        ),
+        // Cross guard
+        (
+            type: "Cube",
+            name: "crossguard",
+            location: (0, 0, 0.1),
+            scale: (0.02, 0.2, 0.02),
+            material: "Hilt",
+            shading: "flat",
+        ),
+        // Handle
+        (
+            type: "Cylinder",
+            name: "handle",
+            vertices: 8,
+            location: (0, 0, -0.05),
+            scale: (0.02, 0.02, 0.1),
+            material: "Hilt",
+            shading: "flat",
+        ),
+        // Pommel
+        (
+            type: "UVSphere",
+            name: "pommel",
+            location: (0, 0, -0.15),
+            scale: (0.03, 0.03, 0.03),
+            material: "Pommel",
+            shading: "smooth",
+        ),
+    ],
+)

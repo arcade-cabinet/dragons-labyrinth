@@ -1,0 +1,77 @@
+# Dialogue Generation Specifications
+# For DialogueAgent to generate complete conversation trees
+
+[[dialogue_prompts]]
+id = "companion_introduction"
+category = "first_meeting"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate a dialogue tree for first meeting with companion {companion_name}.
+Character traits: {traits}
+Player state: Dread level {dread_level}
+Setting: {location}
+
+Requirements:
+- Multiple dialogue branches based on player choices
+- Emotional progression matching dread level
+- Hidden hints about companion's true nature
+- YarnSpinner format output
+"""
+
+[[dialogue_prompts]]
+id = "horror_revelation"
+category = "story_beats"
+dread_levels = [2, 3, 4]
+template = """
+Generate a horror revelation dialogue sequence.
+Context: {story_context}
+Dread level: {dread_level}
+Reveal type: {reveal_type}
+
+Must include:
+- Gradual buildup of tension
+- Multiple false reassurances
+- Sudden horrific revelation
+- Player response options (fight/flee/freeze)
+"""
+
+[[dialogue_prompts]]
+id = "therapy_session"
+category = "companion_therapy"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate therapeutic dialogue with companion acting as therapist.
+Issue: {player_trauma}
+Companion specialty: {therapy_type}
+Current dread: {dread_level}
+
+Include:
+- Validation of player's feelings
+- Subtle manipulation if dread > 2
+- Coping strategies that become twisted at high dread
+- Branching based on player openness
+"""
+
+[[dialogue_prompts]]
+id = "philosophical_debate"
+category = "philosophy"
+dread_levels = [0, 1, 2, 3, 4]
+template = """
+Generate philosophical debate about {philosophical_topic}.
+Companion position: {companion_stance}
+Player options: agree/challenge/deflect
+Dread influence: {dread_level}
+
+Requirements:
+- Deep existential questions
+- References to game's horror themes
+- Dialogue becomes more nihilistic with dread
+- Hidden truths in companion arguments
+"""
+
+# Batch generation rules
+[generation_rules]
+min_dialogues_per_companion = 50
+min_branches_per_dialogue = 3
+max_dialogue_depth = 8
+formats = ["yarnspinner", "ink", "json"]

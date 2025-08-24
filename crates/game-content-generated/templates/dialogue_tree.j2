@@ -1,0 +1,69 @@
+Generate a dialogue tree as a JSON spanning tree structure.
+
+CHARACTER: {{ character_name }} ({{ archetype }})
+PERSONALITY: {{ personality }}
+BACKSTORY: {{ backstory }}
+FEAR: {{ fear }}
+BREAKING POINT: {{ breaking_point }}
+DREAD LEVEL: {{ dread_level }} (0=Peace, 4=Madness)
+CONTEXT: {{ context }}
+
+Generate a tree with:
+- Root node (initial dialogue reflecting character's state at dread {{ dread_level }})
+- At least 2-3 player choice points
+- Different branches based on choices
+- Emotional progression showing {{ emotion_state }}
+- Trust/relationship consequences
+
+Return as JSON matching this structure:
+{
+  "root": "node_1",
+  "nodes": {
+    "node_1": {
+      "id": "node_1",
+      "content": {
+        "Dialogue": {
+          "speaker": "{{ character_name }}",
+          "text": "...",
+          "emotion": "..."
+        }
+      },
+      "metadata": {
+        "dread_level": {{ dread_level }},
+        "context": "{{ context }}",
+        "tags": [],
+        "weight": 1.0
+      }
+    },
+    "node_2": {
+      "id": "node_2", 
+      "content": {
+        "Choice": {
+          "prompt": "How do you respond?",
+          "options": [
+            {
+              "text": "Choice 1",
+              "requirements": [],
+              "consequences": [
+                {
+                  "type_": "ModifyTrust",
+                  "value": "+1"
+                }
+              ],
+              "next_node": "node_3"
+            }
+          ]
+        }
+      },
+      "metadata": ...
+    }
+  },
+  "edges": [
+    {
+      "from": "node_1",
+      "to": "node_2",
+      "condition": null,
+      "weight": 1.0
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+[package]
+name = "game-engine"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Dragon's Labyrinth - Horror-First RPG Game Engine"
+
+[lib]
+name = "game_engine"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dragons-labyrinth"
+path = "src/main.rs"
+
+[dependencies]
+# Internal crates
+game-database = { path = "../game-database" }
+game-assets = { path = "../game-assets" }
+
+# Game engine core
+bevy = { version = "0.16.1", features = ["default"] }
+
+# Serialization (common utilities)
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Hex grid system (game-specific)
+hexx = { version = "0.21", features = ["algorithms", "serde"] }
+
+# Map generation (game-specific)
+mapgen = "0.6"
+
+# ECS Tilemap (game-specific)
+bevy_ecs_tilemap = "0.16"
+
+# Database (shared with game-database)
+sea-orm = { version = "1.1", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio-rustls"] }
+
+# Async runtime (common utility)
+tokio = { workspace = true }
+
+# Random number generation (game-specific)
+rand = "0.9"
+fastrand = "2.3"
+
+# Concurrency (game-specific)
+dashmap = "6.1"
+parking_lot = "0.12"
+
+# Logging (common utilities)
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+indicatif = { workspace = true }
+
+# Output (common utilities)
+colored = { workspace = true }
+
+# Audio (game-specific)
+rodio = { version = "0.21", features = ["vorbis", "wav"] }
+bevy_kira_audio = "0.23"
+
+# Cross-platform directories (game-specific)
+directories = "6.0"
+
+# Error handling (common utilities)
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Game-specific dependencies
+noise = "0.9"
+pathfinding = "4.14"
+bevy_hanabi = "0.16"
+bevy-yoleck = "0.28.0"
+bevy_yarnspinner = "0.5.0"
+bevy_cobweb_ui = "0.21.1"
+bevy_cobweb = "0.17.2"
+avian3d = "0.3.1"
+game-content-static = { version = "0.1.0", path = "../game-content-static" }
+
+[build-dependencies]
+# Build-time AI generation tools
+build-tools = { path = "../build-tools" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+
+[dev-dependencies]
+criterion = "0.7"
+proptest = "1.7"

@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html lang="{{ language }}" class="sidebar-visible no-js {{ default_theme }}">
+<head>
+    <!-- Book generated using mdBook -->
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    {{#if is_print }}
+    <meta name="robots" content="noindex" />
+    {{/if}}
+    {{#if base_url}}
+    <base href="{{ base_url }}">
+    {{/if}}
+
+    <!-- Custom fonts -->
+    <link rel="stylesheet" href="{{ path_to_root }}FontAwesome/css/font-awesome.css">
+    {{#if copy_fonts}}
+    <link rel="stylesheet" href="{{ path_to_root }}fonts/fonts.css">
+    {{/if}}
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ path_to_root }}css/variables.css">
+    <link rel="stylesheet" href="{{ path_to_root }}css/general.css">
+    <link rel="stylesheet" href="{{ path_to_root }}css/chrome.css">
+    {{#if print_enable}}
+    <link rel="stylesheet" href="{{ path_to_root }}css/print.css" media="print">
+    {{/if}}
+
+    <!-- Dragon's Labyrinth Theme -->
+    <link rel="stylesheet" href="{{ path_to_root }}variables.css">
+
+    <!-- Provide site root to javascript -->
+    <script type="text/javascript">
+        var path_to_root = "{{ path_to_root }}";
+        var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "{{ preferred_dark_theme }}" : "{{ default_theme }}";
+    </script>
+
+    <!-- Work around some values being stored in localStorage wrapped in quotes -->
+    <script type="text/javascript">
+        try {
+            var theme = localStorage.getItem('mdbook-theme');
+            var sidebar = localStorage.getItem('mdbook-sidebar');
+            if (theme.startsWith('"') && theme.endsWith('"')) {
+                localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+            }
+            if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+            }
+        } catch (e) { }
+    </script>
+
+    <!-- Set the theme before any content is loaded -->
+    <script type="text/javascript">
+        var theme;
+        try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+        if (theme === null || theme === undefined) { theme = default_theme; }
+        var html = document.querySelector('html');
+        html.classList.remove('no-js')
+        html.classList.remove('{{ default_theme }}')
+        html.classList.add(theme);
+        html.classList.add('js');
+        // Start at dread level 0
+        html.classList.add('dread-0');
+    </script>
+</head>
+<body>
+    <!-- Main mdBook content will be inserted here -->
+    {{{ content }}}
+
+    <!-- mdBook JS -->
+    <script src="{{ path_to_root }}book.js" type="text/javascript" charset="utf-8"></script>
+    
+    <!-- Dragon's Labyrinth Interactive System -->
+    <script src="{{ path_to_root }}book.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

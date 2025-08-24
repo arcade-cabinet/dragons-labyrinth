@@ -1,0 +1,50 @@
+[package]
+name = "game-content-generated"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "AI-powered narrative content generation for Dragon's Labyrinth"
+
+[[bin]]
+name = "generate-content"
+path = "src/bin/generate.rs"
+
+[dependencies]
+# Async runtime
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# OpenAI integration
+openai_dive = "1.2"
+
+# UUID generation
+uuid = { version = "1.18", features = ["v4", "serde"] }
+
+# Logging
+tracing = { workspace = true }
+
+# Template engine
+minijinja = "2.11"
+
+# Compression for token optimization
+flate2 = "1.1"
+tiktoken-rs = "0.7.0"
+regex.workspace = true
+md5 = "0.8.0"
+chrono.workspace = true
+game-content-static = { version = "0.1.0", path = "../game-content-static" }
+
+[dev-dependencies]
+tokio-test = "0.4"

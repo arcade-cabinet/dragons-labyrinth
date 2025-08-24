@@ -1,0 +1,56 @@
+(
+    name: "LightArmor",
+    materials: [
+        (
+            name: "Leather",
+            base_color: (0.3, 0.2, 0.15, 1.0),
+            metallic: 0.0,
+            roughness: 0.8,
+        ),
+        (
+            name: "Metal",
+            base_color: (0.6, 0.6, 0.65, 1.0),
+            metallic: 0.8,
+            roughness: 0.3,
+        ),
+    ],
+    objects: [
+        // Chest piece
+        (
+            type: "Cube",
+            name: "chest",
+            location: (0, 0, 0),
+            scale: (0.25, 0.15, 0.3),
+            material: "Leather",
+            shading: "flat",
+        ),
+        // Shoulder pad left
+        (
+            type: "Cube",
+            name: "shoulder_left",
+            location: (0.3, 0, 0.25),
+            scale: (0.08, 0.12, 0.08),
+            material: "Metal",
+            shading: "flat",
+        ),
+        // Shoulder pad right
+        (
+            type: "Cube",
+            name: "shoulder_right",
+            location: (-0.3, 0, 0.25),
+            scale: (0.08, 0.12, 0.08),
+            material: "Metal",
+            shading: "flat",
+        ),
+        // Belt
+        (
+            type: "Cylinder",
+            name: "belt",
+            vertices: 16,
+            location: (0, 0, -0.2),
+            scale: (0.28, 0.28, 0.03),
+            material: "Leather",
+            shading: "flat",
+        ),
+    ],
+)
