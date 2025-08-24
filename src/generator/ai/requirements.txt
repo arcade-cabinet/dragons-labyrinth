@@ -24,7 +24,7 @@ librosa==0.10.2.post1
 soundfile==0.12.1
 
 # API Integration
-requests==2.32.3
+requests==2.32.5
 python-dotenv==1.0.1
 
 # Development Tools
