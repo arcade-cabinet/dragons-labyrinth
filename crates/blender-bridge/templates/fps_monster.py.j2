@@ -1,0 +1,233 @@
+# FPS Monster Generation Template - 3D First-Person Perspective
+# Asset: {{ name }} - {{ description }}
+# Optimized for DOOM-style FPS combat at eye level
+
+import bpy
+import os
+from mathutils import Vector, Euler
+import bmesh
+
+# Clear existing objects
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+# Create monster base geometry for FPS view
+{% if base_geometry == "humanoid_zombie" %}
+# Create zombie optimized for FPS encounters
+bpy.ops.mesh.primitive_cube_add(size=1.8)
+monster = bpy.context.active_object
+monster.scale = (0.8, 0.6, 1.8)
+# Slight forward lean for aggressive posture
+monster.rotation_euler = (0.1, 0, 0)
+
+{% elif base_geometry == "humanoid_skeleton" %}
+# Create skeleton with visible bone structure
+bpy.ops.mesh.primitive_cube_add(size=1.7)
+monster = bpy.context.active_object
+monster.scale = (0.7, 0.5, 1.7)
+# More hunched posture
+monster.rotation_euler = (0.2, 0, 0)
+
+{% elif base_geometry == "floating_ghost" %}
+# Create ghost with ethereal properties
+bpy.ops.mesh.primitive_ico_sphere_add(radius=0.9)
+monster = bpy.context.active_object
+monster.scale = (1.0, 1.0, 1.2)
+# Float above ground
+monster.location.z = 0.3
+
+{% elif base_geometry == "large_demon" %}
+# Create imposing demon for boss encounters
+bpy.ops.mesh.primitive_cube_add(size=2.5)
+monster = bpy.context.active_object
+monster.scale = (1.2, 0.8, 2.5)
+# Intimidating upright posture
+monster.rotation_euler = (-0.1, 0, 0)
+
+{% elif base_geometry == "animal_corrupted" %}
+# Create corrupted animal (dog, etc.)
+bpy.ops.mesh.primitive_cube_add(size=1.0)
+monster = bpy.context.active_object
+monster.scale = (1.5, 0.6, 0.8)
+# Low to ground, ready to pounce
+monster.rotation_euler = (0, 0, 0)
+{% endif %}
+
+monster.name = "{{ name }}"
+
+# Add detail geometry for FPS close inspection
+bpy.context.view_layer.objects.active = monster
+bpy.ops.object.mode_set(mode='EDIT')
+
+# Add facial details for horror impact at eye level
+bpy.ops.mesh.subdivide(number_cuts=2)
+
+{% if "zombie" in base_geometry %}
+# Add zombie decay details
+bpy.ops.mesh.select_all(action='DESELECT')
+# Select face vertices for decay effects
+bpy.ops.mesh.select_random(ratio=0.3)
+bpy.ops.transform.vertex_random(offset=0.05)
+{% elif "skeleton" in base_geometry %}
+# Add bone structure detail
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_random(ratio=0.4)
+bpy.ops.mesh.extrude_vertices_move(TRANSFORM_OT_translate={"value": (0, 0, 0.02)})
+{% endif %}
+
+bpy.ops.object.mode_set(mode='OBJECT')
+
+# Create material with horror textures
+material = bpy.data.materials.new(name="{{ name }}_material")
+material.use_nodes = True
+monster.data.materials.append(material)
+
+nodes = material.node_tree.nodes
+links = material.node_tree.links
+
+# Clear default nodes
+for node in nodes:
+    nodes.remove(node)
+
+# Add principled BSDF for FPS lighting
+bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
+output = nodes.new(type='ShaderNodeOutputMaterial')
+links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+
+# Configure for horror FPS lighting
+{% if "ghost" in base_geometry %}
+bsdf.inputs['Transmission'].default_value = 0.3
+bsdf.inputs['Alpha'].default_value = 0.7
+material.blend_method = 'BLEND'
+{% elif "demon" in base_geometry %}
+bsdf.inputs['Metallic'].default_value = 0.2
+bsdf.inputs['Roughness'].default_value = 0.6
+{% else %}
+bsdf.inputs['Roughness'].default_value = 0.9
+bsdf.inputs['Specular'].default_value = 0.1
+{% endif %}
+
+# Primary monster texture
+{% if primary_texture %}
+if os.path.exists("{{ texture_base_path }}/{{ primary_texture }}"):
+    primary_tex = nodes.new(type='ShaderNodeTexImage')
+    primary_tex.image = bpy.data.images.load("{{ texture_base_path }}/{{ primary_texture }}")
+    
+    # UV mapping for detailed FPS viewing
+    mapping = nodes.new(type='ShaderNodeMapping')
+    coord = nodes.new(type='ShaderNodeTexCoord')
+    
+    links.new(coord.outputs['UV'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], primary_tex.inputs['Vector'])
+    links.new(primary_tex.outputs['Color'], bsdf.inputs['Base Color'])
+{% endif %}
+
+# Gore/decay overlays for horror impact
+{% for gore_texture in gore_overlays %}
+if os.path.exists("{{ texture_base_path }}/{{ gore_texture }}"):
+    gore_tex_{{ loop.index }} = nodes.new(type='ShaderNodeTexImage')
+    gore_tex_{{ loop.index }}.image = bpy.data.images.load("{{ texture_base_path }}/{{ gore_texture }}")
+    
+    # Mix gore overlay
+    gore_mix_{{ loop.index }} = nodes.new(type='ShaderNodeMixRGB')
+    gore_mix_{{ loop.index }}.blend_type = 'MULTIPLY'
+    gore_mix_{{ loop.index }}.inputs['Fac'].default_value = 0.7
+    
+    {% if loop.index == 1 %}
+    links.new(primary_tex.outputs['Color'], gore_mix_{{ loop.index }}.inputs['Color1'])
+    {% else %}
+    links.new(gore_mix_{{ loop.index - 1 }}.outputs['Color'], gore_mix_{{ loop.index }}.inputs['Color1'])
+    {% endif %}
+    links.new(gore_tex_{{ loop.index }}.outputs['Color'], gore_mix_{{ loop.index }}.inputs['Color2'])
+    
+    {% if loop.last %}
+    links.new(gore_mix_{{ loop.index }}.outputs['Color'], bsdf.inputs['Base Color'])
+    {% endif %}
+{% endfor %}
+
+# Add emission for glowing eyes effect
+{% if "demon" in base_geometry or "ghost" in base_geometry %}
+# Create glowing eyes
+emission_tex = nodes.new(type='ShaderNodeTexImage')
+if os.path.exists("{{ texture_base_path }}/horror/glowing_eyes.png"):
+    emission_tex.image = bpy.data.images.load("{{ texture_base_path }}/horror/glowing_eyes.png")
+    
+    emission_mix = nodes.new(type='ShaderNodeMixRGB')
+    emission_mix.blend_type = 'ADD'
+    emission_mix.inputs['Fac'].default_value = 0.8
+    
+    links.new(emission_tex.outputs['Color'], bsdf.inputs['Emission'])
+    bsdf.inputs['Emission Strength'].default_value = 2.0
+{% endif %}
+
+# Dread progression variants
+{% if dread_level %}
+{% if dread_level >= 2 %}
+# Add visual corruption for higher dread levels
+corruption_noise = nodes.new(type='ShaderNodeTexNoise')
+corruption_noise.inputs['Scale'].default_value = 20.0
+corruption_noise.inputs['Detail'].default_value = 3.0
+
+corruption_ramp = nodes.new(type='ShaderNodeColorRamp')
+corruption_ramp.color_ramp.elements[0].color = (0.0, 0.0, 0.0, 1.0)  # Pure corruption
+corruption_ramp.color_ramp.elements[1].color = (0.2, 0.1, 0.1, 1.0)   # Dark red
+
+# Mix corruption effect
+final_corruption_mix = nodes.new(type='ShaderNodeMixRGB')
+final_corruption_mix.blend_type = 'OVERLAY'
+final_corruption_mix.inputs['Fac'].default_value = {{ dread_level * 0.2 }}
+
+links.new(corruption_noise.outputs['Fac'], corruption_ramp.inputs['Fac'])
+links.new(corruption_ramp.outputs['Color'], final_corruption_mix.inputs['Color2'])
+
+# Connect to final output
+if 'gore_mix_{{ gore_overlays|length }}' in locals():
+    links.new(gore_mix_{{ gore_overlays|length }}.outputs['Color'], final_corruption_mix.inputs['Color1'])
+elif 'primary_tex' in locals():
+    links.new(primary_tex.outputs['Color'], final_corruption_mix.inputs['Color1'])
+
+links.new(final_corruption_mix.outputs['Color'], bsdf.inputs['Base Color'])
+{% endif %}
+{% endif %}
+
+# Add collision mesh for FPS interactions
+{% if generation.include_collision_mesh %}
+# Duplicate for collision
+bpy.ops.object.duplicate()
+collision_mesh = bpy.context.active_object
+collision_mesh.name = "{{ name }}_collision"
+# Simplify collision mesh
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.dissolve_limited(angle_limit=0.1)
+bpy.ops.object.mode_set(mode='OBJECT')
+{% endif %}
+
+# Apply final generation parameters
+{% if generation.subdivision_level and generation.subdivision_level > 1 %}
+# Higher subdivision for FPS detail
+bpy.context.view_layer.objects.active = monster
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.subdivide(number_cuts={{ generation.subdivision_level - 1 }})
+bpy.ops.object.mode_set(mode='OBJECT')
+{% endif %}
+
+{% if generation.edge_smoothing %}
+bpy.ops.object.shade_smooth()
+{% endif %}
+
+# Export optimized for FPS rendering
+output_path = "{{ output_path }}"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+bpy.ops.export_scene.gltf(
+    filepath=output_path,
+    export_format='GLB',
+    {% if generation.optimize_for_mobile %}
+    export_draco_mesh_compression_enable=True,
+    export_draco_mesh_compression_level=4,  # Less compression for FPS detail
+    {% endif %}
+    export_normals=True,     # Needed for FPS lighting
+    export_tangents=True,    # Needed for normal mapping
+    use_selection=False
+)
+
+print(f"Generated FPS monster: {{ name }} -> {output_path}")

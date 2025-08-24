@@ -20,3 +20,6 @@ pyo3 = "0.20"
 lazy_static = "1.5.0"
 xdg = "3.0.0"
 ron = "0.10.1"
+# Template and configuration support
+minijinja = "2.3.1"
+toml = "0.8.14"

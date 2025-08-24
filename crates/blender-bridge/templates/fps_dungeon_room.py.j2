@@ -1,0 +1,253 @@
+# FPS Dungeon Room Generation Template - 3D First-Person Perspective
+# Asset: {{ name }} - {{ description }}
+# Optimized for DOOM-style room-by-room exploration
+
+import bpy
+import os
+from mathutils import Vector, Euler
+import bmesh
+
+# Clear existing objects
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+# Create room base geometry for FPS navigation
+{% if base_geometry == "room_large_arched" %}
+# Large chamber with arched ceiling
+room_width = 8.0
+room_depth = 8.0
+room_height = 4.0
+
+# Floor
+bpy.ops.mesh.primitive_cube_add(size=1.0)
+floor = bpy.context.active_object
+floor.scale = (room_width, room_depth, 0.2)
+floor.location = (0, 0, -0.1)
+floor.name = "{{ name }}_floor"
+
+# Walls
+for i, (x, y, sx, sy) in enumerate([
+    (-room_width/2, 0, 0.2, room_depth),  # Left wall
+    (room_width/2, 0, 0.2, room_depth),   # Right wall
+    (0, -room_depth/2, room_width, 0.2),  # Front wall
+    (0, room_depth/2, room_width, 0.2)    # Back wall
+]):
+    bpy.ops.mesh.primitive_cube_add(size=1.0)
+    wall = bpy.context.active_object
+    wall.scale = (sx, sy, room_height)
+    wall.location = (x, y, room_height/2)
+    wall.name = f"{{ name }}_wall_{i}"
+
+# Arched ceiling
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=room_width/2, depth=room_depth)
+ceiling = bpy.context.active_object
+ceiling.rotation_euler = (1.5708, 0, 0)  # 90 degrees X rotation
+ceiling.location = (0, 0, room_height)
+ceiling.scale = (1.0, 1.0, 0.5)
+ceiling.name = "{{ name }}_ceiling"
+
+{% elif base_geometry == "corridor_narrow" %}
+# Narrow corridor for claustrophobic effect
+corridor_length = 6.0
+corridor_width = 2.0
+corridor_height = 2.5
+
+# Floor
+bpy.ops.mesh.primitive_cube_add(size=1.0)
+floor = bpy.context.active_object
+floor.scale = (corridor_length, corridor_width, 0.1)
+floor.location = (0, 0, -0.05)
+floor.name = "{{ name }}_floor"
+
+# Walls
+for x in [-corridor_width/2, corridor_width/2]:
+    bpy.ops.mesh.primitive_cube_add(size=1.0)
+    wall = bpy.context.active_object
+    wall.scale = (corridor_length, 0.2, corridor_height)
+    wall.location = (0, x, corridor_height/2)
+    wall.name = f"{{ name }}_wall_{abs(x)}"
+
+# Low ceiling for oppressive feel
+bpy.ops.mesh.primitive_cube_add(size=1.0)
+ceiling = bpy.context.active_object
+ceiling.scale = (corridor_length, corridor_width, 0.2)
+ceiling.location = (0, 0, corridor_height)
+ceiling.name = "{{ name }}_ceiling"
+
+{% elif base_geometry == "chamber_circular_tiered" %}
+# Boss chamber with raised platform
+chamber_radius = 6.0
+chamber_height = 5.0
+platform_radius = 2.0
+
+# Main floor
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=chamber_radius, depth=0.2)
+floor = bpy.context.active_object
+floor.location = (0, 0, -0.1)
+floor.name = "{{ name }}_floor"
+
+# Raised platform in center
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=platform_radius, depth=0.8)
+platform = bpy.context.active_object
+platform.location = (0, 0, 0.4)
+platform.name = "{{ name }}_platform"
+
+# Circular walls
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=chamber_radius)
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.extrude_faces_move(TRANSFORM_OT_translate={"value": (0, 0, chamber_height)})
+bpy.ops.mesh.select_all(action='DESELECT')
+# Select inner faces and delete to create hollow
+bpy.ops.mesh.select_interior_faces()
+bpy.ops.mesh.delete(type='FACE')
+bpy.ops.object.mode_set(mode='OBJECT')
+walls = bpy.context.active_object
+walls.name = "{{ name }}_walls"
+
+# Domed ceiling
+bpy.ops.mesh.primitive_uv_sphere_add(radius=chamber_radius)
+ceiling = bpy.context.active_object
+ceiling.location = (0, 0, chamber_height)
+ceiling.scale = (1.0, 1.0, 0.3)
+ceiling.name = "{{ name }}_ceiling"
+{% endif %}
+
+# Apply materials to each component
+components = [obj for obj in bpy.data.objects if obj.name.startswith("{{ name }}")]
+
+for i, component in enumerate(components):
+    # Create material for each component
+    comp_material = bpy.data.materials.new(name=f"{{ name }}_{component.name.split('_')[-1]}")
+    comp_material.use_nodes = True
+    component.data.materials.append(comp_material)
+    
+    comp_nodes = comp_material.node_tree.nodes
+    comp_links = comp_material.node_tree.links
+    
+    # Clear default nodes
+    for node in comp_nodes:
+        comp_nodes.remove(node)
+    
+    # Add principled BSDF
+    comp_bsdf = comp_nodes.new(type='ShaderNodeBsdfPrincipled')
+    comp_output = comp_nodes.new(type='ShaderNodeOutputMaterial')
+    comp_links.new(comp_bsdf.outputs['BSDF'], comp_output.inputs['Surface'])
+    
+    # Apply appropriate texture based on component
+    texture_path = None
+    {% if floor_texture %}
+    if "floor" in component.name:
+        texture_path = "{{ texture_base_path }}/{{ floor_texture }}"
+    {% endif %}
+    {% if wall_texture %}
+    elif "wall" in component.name:
+        texture_path = "{{ texture_base_path }}/{{ wall_texture }}"
+    {% endif %}
+    {% if ceiling_texture %}
+    elif "ceiling" in component.name:
+        texture_path = "{{ texture_base_path }}/{{ ceiling_texture }}"
+    {% endif %}
+    {% if platform_texture %}
+    elif "platform" in component.name:
+        texture_path = "{{ texture_base_path }}/{{ platform_texture }}"
+    {% endif %}
+    
+    if texture_path and os.path.exists(texture_path):
+        comp_tex = comp_nodes.new(type='ShaderNodeTexImage')
+        comp_tex.image = bpy.data.images.load(texture_path)
+        
+        # UV mapping for FPS detail
+        comp_mapping = comp_nodes.new(type='ShaderNodeMapping')
+        comp_coord = comp_nodes.new(type='ShaderNodeTexCoord')
+        
+        comp_links.new(comp_coord.outputs['UV'], comp_mapping.inputs['Vector'])
+        comp_links.new(comp_mapping.outputs['Vector'], comp_tex.inputs['Vector'])
+        comp_links.new(comp_tex.outputs['Color'], comp_bsdf.inputs['Base Color'])
+        
+        # Scale textures for appropriate detail level in FPS
+        if "floor" in component.name:
+            comp_mapping.inputs['Scale'].default_value = (4.0, 4.0, 1.0)
+        elif "wall" in component.name:
+            comp_mapping.inputs['Scale'].default_value = (2.0, 2.0, 1.0)
+        elif "ceiling" in component.name:
+            comp_mapping.inputs['Scale'].default_value = (3.0, 3.0, 1.0)
+
+# Add atmospheric lighting for FPS mood
+{% if lighting_style %}
+{% if lighting_style == "torch_flickering" %}
+# Add point lights for torch effect
+for i in range(4):
+    bpy.ops.object.light_add(type='POINT')
+    light = bpy.context.active_object
+    light.data.energy = 100
+    light.data.color = (1.0, 0.7, 0.3)  # Warm torch light
+    angle = i * 1.57  # 90 degrees apart
+    light.location = (
+        3.0 * cos(angle),
+        3.0 * sin(angle),
+        2.0
+    )
+    light.name = f"{{ name }}_torch_{i}"
+{% elif lighting_style == "dim_torches" %}
+# Dimmer lighting for corridors
+bpy.ops.object.light_add(type='POINT')
+light = bpy.context.active_object
+light.data.energy = 50
+light.data.color = (0.8, 0.6, 0.2)
+light.location = (0, 0, 2.0)
+light.name = "{{ name }}_dim_light"
+{% elif lighting_style == "dramatic_overhead" %}
+# Dramatic lighting for boss chambers
+bpy.ops.object.light_add(type='SPOT')
+light = bpy.context.active_object
+light.data.energy = 200
+light.data.spot_size = 1.2
+light.location = (0, 0, 8.0)
+light.rotation_euler = (0, 0, 0)
+light.name = "{{ name }}_spotlight"
+{% endif %}
+{% endif %}
+
+# Apply horror atmosphere effects
+{% if ambient_effect %}
+{% if ambient_effect == "dread_aura" %}
+# Add subtle red emission to walls
+for component in components:
+    if "wall" in component.name and component.data.materials:
+        wall_material = component.data.materials[0]
+        if wall_material.use_nodes:
+            wall_bsdf = wall_material.node_tree.nodes.get('Principled BSDF')
+            if wall_bsdf:
+                wall_bsdf.inputs['Emission'].default_value = (0.1, 0.0, 0.0, 1.0)
+                wall_bsdf.inputs['Emission Strength'].default_value = 0.2
+{% elif ambient_effect == "supernatural_chill" %}
+# Add blue-tinted ambient lighting
+world = bpy.context.scene.world
+if world and world.use_nodes:
+    world_nodes = world.node_tree.nodes
+    bg_node = world_nodes.get('Background')
+    if bg_node:
+        bg_node.inputs['Color'].default_value = (0.7, 0.8, 1.0, 1.0)  # Cool blue
+{% endif %}
+{% endif %}
+
+# Export optimized for FPS rendering
+output_path = "{{ output_path }}"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+bpy.ops.export_scene.gltf(
+    filepath=output_path,
+    export_format='GLB',
+    {% if generation.optimize_for_mobile %}
+    export_draco_mesh_compression_enable=True,
+    export_draco_mesh_compression_level=4,
+    {% endif %}
+    export_normals=True,
+    export_tangents=True,
+    {% if generation.include_collision_mesh %}
+    export_extras=True,  # Include collision data
+    {% endif %}
+    use_selection=False
+)
+
+print(f"Generated FPS dungeon room: {{ name }} -> {output_path}")

@@ -1,0 +1,200 @@
+# Companion Character Generation Template
+# Asset: {{ name }} - {{ description }}
+
+import bpy
+import os
+from mathutils import Vector
+
+# Clear existing objects
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+# Create character base geometry
+{% if base_geometry == "humanoid_female" %}
+bpy.ops.mesh.primitive_cube_add(size=1.8)
+character = bpy.context.active_object
+character.scale = (0.8, 0.6, 1.8)  # Female proportions
+{% elif base_geometry == "humanoid_male" %}
+bpy.ops.mesh.primitive_cube_add(size=1.8)
+character = bpy.context.active_object
+character.scale = (0.9, 0.7, 1.9)  # Male proportions
+{% elif base_geometry == "humanoid_young_adult" %}
+bpy.ops.mesh.primitive_cube_add(size=1.6)
+character = bpy.context.active_object
+character.scale = (0.7, 0.5, 1.6)  # Younger proportions
+{% elif base_geometry == "humanoid_female_distressed" %}
+bpy.ops.mesh.primitive_cube_add(size=1.8)
+character = bpy.context.active_object
+character.scale = (0.8, 0.6, 1.6)  # Crouched/defensive posture
+character.rotation_euler = (0.1, 0, 0)  # Slight forward lean
+{% elif base_geometry == "humanoid_female_ethereal" %}
+bpy.ops.mesh.primitive_cube_add(size=1.8)
+character = bpy.context.active_object
+character.scale = (0.8, 0.6, 1.8)
+# Add transparency for memory palace visualization
+{% endif %}
+
+character.name = "{{ name }}"
+
+# Create character material
+material = bpy.data.materials.new(name="{{ name }}_material")
+material.use_nodes = True
+character.data.materials.append(material)
+
+# Get material node tree
+nodes = material.node_tree.nodes
+links = material.node_tree.links
+
+# Clear default nodes
+for node in nodes:
+    nodes.remove(node)
+
+# Add principled BSDF
+bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
+output = nodes.new(type='ShaderNodeOutputMaterial')
+links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+
+# Primary character texture (skin/base)
+{% if primary_texture %}
+if os.path.exists("{{ texture_base_path }}/{{ primary_texture }}"):
+    primary_tex = nodes.new(type='ShaderNodeTexImage')
+    primary_tex.image = bpy.data.images.load("{{ texture_base_path }}/{{ primary_texture }}")
+    links.new(primary_tex.outputs['Color'], bsdf.inputs['Base Color'])
+{% endif %}
+
+# Clothing textures
+{% for clothing_texture in clothing_textures %}
+if os.path.exists("{{ texture_base_path }}/{{ clothing_texture }}"):
+    clothing_tex_{{ loop.index }} = nodes.new(type='ShaderNodeTexImage')
+    clothing_tex_{{ loop.index }}.image = bpy.data.images.load("{{ texture_base_path }}/{{ clothing_texture }}")
+    
+    # Layer clothing over base
+    clothing_mix_{{ loop.index }} = nodes.new(type='ShaderNodeMixRGB')
+    clothing_mix_{{ loop.index }}.blend_type = 'OVERLAY'
+    clothing_mix_{{ loop.index }}.inputs['Fac'].default_value = 0.8
+    
+    {% if loop.index == 1 %}
+    links.new(primary_tex.outputs['Color'], clothing_mix_{{ loop.index }}.inputs['Color1'])
+    {% else %}
+    links.new(clothing_mix_{{ loop.index - 1 }}.outputs['Color'], clothing_mix_{{ loop.index }}.inputs['Color1'])
+    {% endif %}
+    links.new(clothing_tex_{{ loop.index }}.outputs['Color'], clothing_mix_{{ loop.index }}.inputs['Color2'])
+{% endfor %}
+
+# Emotion overlays (tears, stress, etc.)
+{% for emotion_overlay in emotion_overlays %}
+if os.path.exists("{{ texture_base_path }}/{{ emotion_overlay }}"):
+    emotion_tex_{{ loop.index }} = nodes.new(type='ShaderNodeTexImage')
+    emotion_tex_{{ loop.index }}.image = bpy.data.images.load("{{ texture_base_path }}/{{ emotion_overlay }}")
+    
+    # Blend emotion overlay
+    emotion_mix_{{ loop.index }} = nodes.new(type='ShaderNodeMixRGB')
+    emotion_mix_{{ loop.index }}.blend_type = 'SOFT_LIGHT'
+    emotion_mix_{{ loop.index }}.inputs['Fac'].default_value = 0.6
+    
+    # Connect to last clothing layer or primary
+    {% if clothing_textures %}
+    links.new(clothing_mix_{{ clothing_textures|length }}.outputs['Color'], emotion_mix_{{ loop.index }}.inputs['Color1'])
+    {% else %}
+    links.new(primary_tex.outputs['Color'], emotion_mix_{{ loop.index }}.inputs['Color1'])
+    {% endif %}
+    links.new(emotion_tex_{{ loop.index }}.outputs['Color'], emotion_mix_{{ loop.index }}.inputs['Color2'])
+    
+    {% if loop.last %}
+    links.new(emotion_mix_{{ loop.index }}.outputs['Color'], bsdf.inputs['Base Color'])
+    {% endif %}
+{% endfor %}
+
+# Equipment textures (weapons, armor)
+{% for equipment_texture in equipment_textures %}
+if os.path.exists("{{ texture_base_path }}/{{ equipment_texture }}"):
+    # Create separate equipment object
+    bpy.ops.mesh.primitive_cube_add(size=0.2)
+    equipment_{{ loop.index }} = bpy.context.active_object
+    equipment_{{ loop.index }}.name = "{{ name }}_equipment_{{ loop.index }}"
+    
+    # Position equipment appropriately
+    {% if "weapon" in equipment_texture %}
+    equipment_{{ loop.index }}.location = (0.5, 0, 0.8)  # Weapon position
+    {% elif "armor" in equipment_texture %}
+    equipment_{{ loop.index }}.location = (0, 0, 0.9)    # Chest armor position
+    {% endif %}
+    
+    # Apply equipment texture
+    equip_material = bpy.data.materials.new(name="equipment_{{ loop.index }}")
+    equip_material.use_nodes = True
+    equipment_{{ loop.index }}.data.materials.append(equip_material)
+    
+    equip_nodes = equip_material.node_tree.nodes
+    equip_links = equip_material.node_tree.links
+    
+    for node in equip_nodes:
+        equip_nodes.remove(node)
+    
+    equip_bsdf = equip_nodes.new(type='ShaderNodeBsdfPrincipled')
+    equip_output = equip_nodes.new(type='ShaderNodeOutputMaterial')
+    equip_links.new(equip_bsdf.outputs['BSDF'], equip_output.inputs['Surface'])
+    
+    equip_tex = equip_nodes.new(type='ShaderNodeTexImage')
+    equip_tex.image = bpy.data.images.load("{{ texture_base_path }}/{{ equipment_texture }}")
+    equip_links.new(equip_tex.outputs['Color'], equip_bsdf.inputs['Base Color'])
+{% endfor %}
+
+# Shader effects for special states
+{% for shader_effect in shader_effects %}
+{% if shader_effect == "transparency_50" %}
+bsdf.inputs['Alpha'].default_value = 0.5
+material.blend_method = 'BLEND'
+{% elif shader_effect == "soft_glow" %}
+bsdf.inputs['Emission'].default_value = (0.1, 0.1, 0.2, 1.0)
+bsdf.inputs['Emission Strength'].default_value = 0.3
+{% elif shader_effect == "memory_shimmer" %}
+# Add iridescent effect for memory palace
+bsdf.inputs['Metallic'].default_value = 0.2
+bsdf.inputs['Roughness'].default_value = 0.1
+{% endif %}
+{% endfor %}
+
+# Trauma level effects
+{% if trauma_level %}
+{% if trauma_level >= 3 %}
+# High trauma - add visual distortion
+bsdf.inputs['Roughness'].default_value = 0.8
+bsdf.inputs['Metallic'].default_value = 0.1
+# Desaturate colors
+if 'primary_tex' in locals():
+    desat_node = nodes.new(type='ShaderNodeHueSaturation')
+    desat_node.inputs['Saturation'].default_value = 0.3
+    links.new(primary_tex.outputs['Color'], desat_node.inputs['Color'])
+    links.new(desat_node.outputs['Color'], bsdf.inputs['Base Color'])
+{% endif %}
+{% endif %}
+
+# Apply generation parameters
+{% if generation.subdivision_level %}
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.subdivide(number_cuts={{ generation.subdivision_level }})
+bpy.ops.object.mode_set(mode='OBJECT')
+{% endif %}
+
+{% if generation.edge_smoothing %}
+bpy.ops.object.shade_smooth()
+{% endif %}
+
+# Export to GLB
+output_path = "{{ output_path }}"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+bpy.ops.export_scene.gltf(
+    filepath=output_path,
+    export_format='GLB',
+    {% if generation.optimize_for_mobile %}
+    export_draco_mesh_compression_enable=True,
+    export_draco_mesh_compression_level=6,
+    {% endif %}
+    {% if generation.include_animations %}
+    export_animations=True,
+    {% endif %}
+    use_selection=False
+)
+
+print(f"Generated companion: {{ name }} -> {output_path}")

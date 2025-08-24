@@ -1,0 +1,123 @@
+# Companion Character Asset Generation Requests  
+# Utilizes textures from ../textures/characters/ and ../textures/horror/ for rich character variety
+
+[metadata]
+category = "companions"
+output_format = "glb"
+target_scale = 1.0
+texture_base_path = "../textures"
+
+# Elena - Primary companion with trauma progression
+[companions.elena_baseline]
+description = "Elena in her normal, composed state - confident researcher"
+base_geometry = "humanoid_female"
+primary_texture = "characters/q_characters_character_female_1.png"
+clothing_textures = [
+    "medieval/k_medieval_character_researcher.png",
+    "props/k_props_backpack_researcher.png"
+]
+emotion_state = "confident"
+trauma_level = 0
+animation_set = "researcher_idle"
+corruption_variants = [
+    { level = 0, texture = "characters/q_characters_character_female_1.png" },
+    { level = 1, texture = "characters/q_characters_character_female_1.png", overlay = "stress_light" },
+    { level = 2, texture = "characters/q_characters_character_female_2.png" },
+    { level = 3, texture = "horror/characters/k_horror_characters_character_ghost.png" },
+    { level = 4, texture = "horror/characters/k_horror_characters_character_skeleton.png" }
+]
+
+[companions.elena_breakdown]
+description = "Elena during psychological breakdown - tears, shaking, defensive posture"
+base_geometry = "humanoid_female_distressed"
+primary_texture = "characters/q_characters_character_female_2.png"
+emotion_overlays = [
+    "characters/emotion_tears.png",
+    "characters/emotion_stress_lines.png"
+]
+posture = "defensive_crouch"
+trauma_level = 4
+animation_set = "breakdown_cycle"
+
+[companions.marcus_soldier]
+description = "Marcus in military gear - tactical vest, determined expression"
+base_geometry = "humanoid_male_soldier"
+primary_texture = "characters/q_characters_character_soldier.png"
+equipment_textures = [
+    "weapons/q_weapons_weapon_sword_1.png",
+    "medieval/k_medieval_armor_chest.png"
+]
+stance = "combat_ready"
+corruption_variants = [
+    { level = 0, texture = "characters/q_characters_character_soldier.png" },
+    { level = 1, texture = "characters/q_characters_character_soldier.png", overlay = "battle_worn" },
+    { level = 2, texture = "characters/q_characters_character_hazmat.png" },
+    { level = 3, texture = "horror/characters/q_horror_characters_zombie_basic.png" },
+    { level = 4, texture = "horror/characters/q_horror_characters_zombie_atlas.png" }
+]
+
+[companions.quinn_survivor]
+description = "Quinn as street-smart survivor - practical clothing, alert expression"
+base_geometry = "humanoid_young_adult"
+primary_texture = "characters/q_characters_character_male_1.png"
+clothing_textures = [
+    "characters/k_characters_character_skate_boy.png",
+    "props/k_props_survival_gear.png"
+]
+expression = "wary_alert"
+corruption_variants = [
+    { level = 0, texture = "characters/q_characters_character_male_1.png" },
+    { level = 1, texture = "characters/q_characters_character_male_2.png" },
+    { level = 2, texture = "characters/k_characters_character_gamer.png" },
+    { level = 3, texture = "horror/characters/k_horror_characters_character_zombie.png" },
+    { level = 4, texture = "horror/characters/q_horror_characters_zombietexture.png" }
+]
+
+# Therapy visualization versions
+[companions.elena_memory_palace]
+description = "Elena in memory palace therapy space - ethereal, translucent"
+base_geometry = "humanoid_female_ethereal"
+primary_texture = "characters/q_characters_character_female_1.png"
+shader_effects = [
+    "transparency_50",
+    "soft_glow",
+    "memory_shimmer"
+]
+environment_lighting = "therapy_warm"
+
+# Companion animals
+[companions.therapy_dog]
+description = "Emotional support dog for companion therapy sessions"
+base_geometry = "canine_medium"
+primary_texture = "horror/characters/q_horror_characters_characters_germanshepherd.png"
+behavior_state = "calm_supportive"
+animation_set = "therapy_dog_idle"
+
+# Generation parameters
+[generation]
+subdivision_level = 3
+edge_smoothing = true
+uv_unwrap_method = "smart_projection"
+texture_blend_mode = "mix"
+normal_map_strength = 1.0
+subsurface_scattering = true # For realistic skin
+export_format = "glb"
+optimize_for_mobile = true
+include_animations = true
+animation_fps = 24
+
+# Emotion and trauma mapping
+[emotion_mapping]
+confidence = { texture_modifier = "brightness_110", posture = "upright" }
+fear = { texture_modifier = "saturation_70", posture = "defensive" }
+trauma = { texture_modifier = "contrast_150", posture = "withdrawn" }
+breakdown = { texture_modifier = "desaturated", posture = "collapsed" }
+recovery = { texture_modifier = "soft_glow", posture = "hopeful" }
+
+# Animation state mappings
+[animation_states]
+idle_confident = "base_idle_confident.fbx"
+idle_stressed = "base_idle_nervous.fbx"
+breakdown_cycle = "trauma_breakdown_loop.fbx"
+therapy_session = "therapy_sitting_calm.fbx"
+memory_recall = "memory_palace_navigation.fbx"

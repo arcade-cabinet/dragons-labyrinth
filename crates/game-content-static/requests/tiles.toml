@@ -1,0 +1,80 @@
+# Hex Tile Asset Generation Requests
+# Uses blender-bridge textures and templates
+
+[metadata]
+category = "hex_tiles"
+output_format = "glb"
+target_scale = 1.0
+template = "overworld_tiles"  # Template to use for generation
+
+# Grass-based hex tiles with corruption variants
+[tiles.grass_meadow]
+description = "Peaceful meadow with wildflowers and soft grass"
+base_geometry = "hexagon_flat"
+perspective = "overworld"  # 2.5D top-down view
+primary_texture = "nature/k_nature_grass_forest.png"
+detail_textures = [
+    "nature/k_nature_patch_grass_foliage.png",
+    "nature/k_nature_grass_patch.png"
+]
+height_variation = 0.1
+corruption_variants = [
+    { level = 0, texture = "nature/k_nature_grass_forest.png" },
+    { level = 1, texture = "nature/k_nature_grass_brown1.png" },
+    { level = 2, texture = "nature/k_nature_grass_brown2.png" },
+    { level = 3, texture = "nature/k_nature_dirt_grass.png" },
+    { level = 4, texture = "horror/k_horror_ghost_normal.png" }
+]
+
+[tiles.dark_forest]
+description = "Dense forest with towering trees and dappled shadows"
+base_geometry = "hexagon_elevated"
+primary_texture = "nature/k_nature_grass_forest.png"
+detail_textures = [
+    "nature/k_nature_detail_tree_large.png",
+    "nature/k_nature_floor_tree.png"
+]
+tree_placement = "dense_canopy"
+corruption_variants = [
+    { level = 0, texture = "nature/k_nature_grass_forest.png" },
+    { level = 1, texture = "nature/k_nature_grass_brown.png" },
+    { level = 2, texture = "nature/k_nature_stone_grass.png" },
+    { level = 3, texture = "horror/k_horror_ghost_dead.png" },
+    { level = 4, texture = "horror/k_horror_ghost_hit.png" }
+]
+
+[tiles.cursed_swamp]
+description = "Fetid swampland with murky water and twisted vegetation"
+base_geometry = "hexagon_depressed"
+primary_texture = "nature/k_nature_grass_water.png"
+detail_textures = [
+    "nature/k_nature_grass_waterriver.png",
+    "nature/k_nature_patch_grass.png"
+]
+water_level = 0.3
+fog_density = 0.7
+corruption_variants = [
+    { level = 0, texture = "nature/k_nature_grass_water.png" },
+    { level = 1, texture = "nature/k_nature_grass_waterconcave.png" },
+    { level = 2, texture = "nature/k_nature_grass_waterconvex.png" },
+    { level = 3, texture = "horror/k_horror_ship_ghost.png" },
+    { level = 4, texture = "horror/k_horror_ship_small_ghost.png" }
+]
+
+[tiles.ancient_ruins]
+description = "Crumbling stone foundations with overgrown vegetation"
+base_geometry = "hexagon_ruined"
+primary_texture = "nature/k_nature_rock_moss.png"
+detail_textures = [
+    "nature/k_nature_rock_flat.png",
+    "nature/k_nature_stone_grass.png"
+]
+ruin_density = 0.8
+vegetation_overgrowth = 0.4
+corruption_variants = [
+    { level = 0, texture = "nature/k_nature_rock_moss.png" },
+    { level = 1, texture = "nature/k_nature_rock_packed.png" },
+    { level = 2, texture = "nature/k_nature_rock_sand.png" },
+    { level = 3, texture = "horror/q_horror_demon_texture.png" },
+    { level = 4, texture = "horror/q_horror_ghost_texture.png" }
+]

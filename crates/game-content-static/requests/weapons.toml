@@ -1,0 +1,142 @@
+# Weapon Asset Generation Requests
+# Utilizes textures from ../textures/weapons/ for material-specific weapon variants
+
+[metadata]
+category = "weapons"
+output_format = "glb" 
+target_scale = 1.0
+texture_base_path = "../textures"
+
+# Sword progression through materials
+[weapons.sword_wood]
+description = "Basic wooden training sword with leather grip"
+base_geometry = "sword_single_handed"
+blade_texture = "weapons/q_weapons_sword_wood.png"
+handle_texture = "furniture/k_furniture_wood_natural.png"
+grip_texture = "medieval/k_medieval_leather_brown.png"
+material_tier = 1
+damage_range = "1d6"
+weight = 2.0
+enchantability = "low"
+
+[weapons.sword_iron]
+description = "Standard iron sword with crossguard and leather-wrapped handle"
+base_geometry = "sword_single_handed"
+blade_texture = "weapons/q_weapons_sword_stone.png"
+handle_texture = "weapons/k_weapons_metal_iron.png"
+grip_texture = "medieval/k_medieval_leather_black.png"
+material_tier = 2
+damage_range = "1d8"
+weight = 3.0
+enchantability = "medium"
+
+[weapons.sword_gold]
+description = "Gleaming golden sword with ornate pommel and fine leather grip"
+base_geometry = "sword_single_handed_ornate"
+blade_texture = "weapons/q_weapons_sword_gold.png"
+handle_texture = "weapons/k_weapons_metal_gold.png"
+grip_texture = "medieval/k_medieval_leather_fine.png"
+gem_inlays = ["ruby_small", "emerald_accent"]
+material_tier = 3
+damage_range = "1d8+1"
+weight = 3.5
+enchantability = "high"
+
+[weapons.sword_diamond]
+description = "Legendary diamond-edged sword with ethereal glow"
+base_geometry = "sword_single_handed_legendary"
+blade_texture = "weapons/q_weapons_sword_diamond.png"
+handle_texture = "weapons/k_weapons_metal_mythril.png"
+grip_texture = "medieval/k_medieval_leather_enchanted.png"
+glow_effect = "diamond_sparkle"
+particle_effect = "light_trail"
+material_tier = 4
+damage_range = "1d8+2"
+weight = 2.5
+enchantability = "legendary"
+
+# Specialized weapons
+[weapons.battle_axe]
+description = "Heavy two-handed battle axe with worn wooden handle"
+base_geometry = "axe_two_handed"
+head_texture = "weapons/q_weapons_weapon_axe.png"
+handle_texture = "furniture/k_furniture_wood_worn.png"
+binding_texture = "medieval/k_medieval_rope.png"
+damage_range = "1d12"
+weight = 7.0
+weapon_type = "two_handed"
+
+[weapons.rogue_dagger]
+description = "Sleek dagger with blackened blade and wrapped handle"
+base_geometry = "dagger_curved"
+blade_texture = "weapons/q_weapons_rogue_dagger.png"
+handle_texture = "weapons/k_weapons_metal_dark.png"
+wrap_texture = "medieval/k_medieval_cloth_black.png"
+damage_range = "1d4"
+weight = 1.0
+weapon_type = "finesse"
+stealth_bonus = true
+
+# Sentimental weapon variants (Forge system integration)
+[weapons.elena_heirloom_sword]
+description = "Elena's family sword - emotional resonance and trauma echoes"
+base_geometry = "sword_single_handed_heirloom"
+blade_texture = "weapons/q_weapons_sword_gold.png"
+handle_texture = "weapons/k_weapons_metal_silver.png"
+sentimental_overlays = [
+    "forge/memory_echoes.png",
+    "forge/family_crest.png"
+]
+emotional_weight = 8.5
+trauma_resonance = "elena_family_loss"
+forge_path = "light"
+sacrifice_resistance = 9.0
+
+[weapons.marcus_service_rifle]
+description = "Marcus's military service weapon - duty and brotherhood memories"
+base_geometry = "rifle_assault"
+stock_texture = "weapons/k_weapons_stock_military.png"
+metal_texture = "weapons/k_weapons_metal_gunmetal.png"
+wear_patterns = [
+    "weapons/military_scratches.png",
+    "weapons/service_marks.png"
+]
+emotional_weight = 9.2
+trauma_resonance = "marcus_war_brotherhood"
+forge_path = "dark"
+sacrifice_resistance = 8.5
+
+# Animation and audio mapping
+[audio_mapping]
+sword_draw = "audio/k_swordslide1.ogg"
+sword_sheath = "audio/k_swordslide2.ogg"
+sword_clash = ["audio/k_sword1.ogg", "audio/k_sword2.ogg", "audio/k_sword3.ogg"]
+metal_impact = ["audio/k_swordmetal1.ogg", "audio/k_swordmetal2.ogg"]
+stone_scrape = ["audio/k_swordstone1.ogg", "audio/k_swordstone2.ogg"]
+
+# Material progression system
+[material_progression]
+wood = { durability = 50, sharpness = 0.6, weight_modifier = 0.8 }
+iron = { durability = 150, sharpness = 0.8, weight_modifier = 1.0 }
+gold = { durability = 100, sharpness = 0.9, weight_modifier = 1.2, enchant_bonus = 0.3 }
+diamond = { durability = 500, sharpness = 1.0, weight_modifier = 0.7, enchant_bonus = 0.5 }
+
+# Generation parameters
+[generation]
+subdivision_level = 3
+edge_smoothing = true
+uv_unwrap_method = "smart_projection"
+texture_blend_mode = "multiply"
+normal_map_strength = 1.5
+metallic_workflow = true
+roughness_mapping = true
+export_format = "glb"
+optimize_for_mobile = true
+include_physics_shapes = true
+
+# Forge system integration
+[forge_integration]
+light_path_effects = { glow_color = "golden_white", particle_trail = "light_wisps" }
+dark_path_effects = { glow_color = "crimson_red", particle_trail = "blood_droplets" }
+sentimental_resonance = { visual_echo = "memory_shimmer", audio_echo = "whispered_names" }
+sacrifice_visualization = { corruption_spread = "emotional_decay", resistance_glow = "protective_aura" }

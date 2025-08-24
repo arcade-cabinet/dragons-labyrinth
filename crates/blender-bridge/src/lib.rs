@@ -11,6 +11,7 @@ pub mod batch;
 pub mod project;
 pub mod ron_models;
 pub mod simple_gltf;
+pub mod template_processor;
 
 // Re-export main types for convenience
 pub use error::BlenderBridgeError;

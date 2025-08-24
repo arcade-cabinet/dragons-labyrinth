@@ -1,0 +1,190 @@
+# Overworld Hex Tile Generation Template - 2.5D Top-Down Perspective
+# Asset: {{ name }} - {{ description }}
+# Optimized for isometric/top-down viewing angle
+
+import bpy
+import os
+from mathutils import Vector, Euler
+
+# Clear existing objects
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete(use_global=False)
+
+# Create hex tile optimized for top-down viewing
+{% if base_geometry == "hexagon_flat" %}
+bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1.0, depth=0.1)
+{% elif base_geometry == "hexagon_elevated" %}
+bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1.0, depth=0.2)
+# Add elevation details visible from above
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.inset_faces(thickness=0.1, depth=0.05)
+bpy.ops.object.mode_set(mode='OBJECT')
+{% elif base_geometry == "hexagon_depressed" %}
+bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1.0, depth=0.05)
+bpy.context.active_object.location.z = -0.05
+{% elif base_geometry == "hexagon_village" %}
+# Village tile with buildings visible from top-down
+bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=1.0, depth=0.1)
+# Add simple building shapes
+for i in range({{ building_count | default(3) }}):
+    bpy.ops.mesh.primitive_cube_add(size=0.2)
+    building = bpy.context.active_object
+    building.location = (
+        (i - 1) * 0.3,
+        0,
+        0.15
+    )
+    building.name = f"{{ name }}_building_{i}"
+{% endif %}
+
+hex_tile = bpy.context.object if "building" not in bpy.context.object.name else bpy.data.objects["Cylinder"]
+hex_tile.name = "{{ name }}"
+
+# Optimize UV mapping for top-down view
+bpy.context.view_layer.objects.active = hex_tile
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
+# Scale UV to show more detail from top-down perspective
+bpy.ops.transform.resize(value=(1.2, 1.2, 1.0))
+bpy.ops.object.mode_set(mode='OBJECT')
+
+# Create material optimized for top-down lighting
+material = bpy.data.materials.new(name="{{ name }}_material")
+material.use_nodes = True
+hex_tile.data.materials.append(material)
+
+nodes = material.node_tree.nodes
+links = material.node_tree.links
+
+# Clear default nodes
+for node in nodes:
+    nodes.remove(node)
+
+# Add principled BSDF with top-down optimizations
+bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
+output = nodes.new(type='ShaderNodeOutputMaterial')
+links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+
+# Optimize for ambient lighting (common in top-down games)
+bsdf.inputs['Roughness'].default_value = 0.8
+bsdf.inputs['Specular'].default_value = 0.1
+
+# Primary texture - ensure good visibility from above
+{% if primary_texture %}
+if os.path.exists("{{ texture_base_path }}/{{ primary_texture }}"):
+    primary_tex = nodes.new(type='ShaderNodeTexImage')
+    primary_tex.image = bpy.data.images.load("{{ texture_base_path }}/{{ primary_texture }}")
+    
+    # UV mapping node for better top-down texture control
+    mapping = nodes.new(type='ShaderNodeMapping')
+    coord = nodes.new(type='ShaderNodeTexCoord')
+    
+    links.new(coord.outputs['UV'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], primary_tex.inputs['Vector'])
+    links.new(primary_tex.outputs['Color'], bsdf.inputs['Base Color'])
+    
+    # Scale texture for optimal top-down visibility
+    mapping.inputs['Scale'].default_value = (2.0, 2.0, 1.0)
+{% endif %}
+
+# Detail textures with top-down blending
+{% for detail_texture in detail_textures %}
+if os.path.exists("{{ texture_base_path }}/{{ detail_texture }}"):
+    detail_tex_{{ loop.index }} = nodes.new(type='ShaderNodeTexImage')
+    detail_tex_{{ loop.index }}.image = bpy.data.images.load("{{ texture_base_path }}/{{ detail_texture }}")
+    
+    # Create detail mapping for varied placement
+    detail_mapping_{{ loop.index }} = nodes.new(type='ShaderNodeMapping')
+    detail_coord_{{ loop.index }} = nodes.new(type='ShaderNodeTexCoord')
+    
+    # Offset detail textures for natural variation
+    detail_mapping_{{ loop.index }}.inputs['Location'].default_value = ({{ loop.index * 0.1 }}, {{ loop.index * 0.15 }}, 0)
+    detail_mapping_{{ loop.index }}.inputs['Scale'].default_value = (3.0, 3.0, 1.0)
+    
+    links.new(detail_coord_{{ loop.index }}.outputs['UV'], detail_mapping_{{ loop.index }}.inputs['Vector'])
+    links.new(detail_mapping_{{ loop.index }}.outputs['Vector'], detail_tex_{{ loop.index }}.inputs['Vector'])
+    
+    # Mix with base texture using appropriate blend mode
+    mix_node_{{ loop.index }} = nodes.new(type='ShaderNodeMixRGB')
+    mix_node_{{ loop.index }}.blend_type = 'OVERLAY'
+    mix_node_{{ loop.index }}.inputs['Fac'].default_value = 0.3
+    
+    {% if loop.index == 1 %}
+    links.new(primary_tex.outputs['Color'], mix_node_{{ loop.index }}.inputs['Color1'])
+    {% else %}
+    links.new(mix_node_{{ loop.index - 1 }}.outputs['Color'], mix_node_{{ loop.index }}.inputs['Color1'])
+    {% endif %}
+    links.new(detail_tex_{{ loop.index }}.outputs['Color'], mix_node_{{ loop.index }}.inputs['Color2'])
+    
+    {% if loop.last %}
+    links.new(mix_node_{{ loop.index }}.outputs['Color'], bsdf.inputs['Base Color'])
+    {% endif %}
+{% endfor %}
+
+# Corruption effects optimized for top-down view
+{% if corruption_variants %}
+# Add corruption shader effects that read well from above
+corruption_strength = {{ corruption_level | default(0.0) }}
+if corruption_strength > 0.1:
+    # Dark veins effect visible from top-down
+    voronoi = nodes.new(type='ShaderNodeTexVoronoi')
+    voronoi.inputs['Scale'].default_value = 15.0
+    voronoi.feature = 'DISTANCE_TO_EDGE'
+    
+    corruption_ramp = nodes.new(type='ShaderNodeColorRamp')
+    corruption_ramp.color_ramp.elements[0].color = (0.1, 0.05, 0.0, 1.0)  # Dark corruption
+    corruption_ramp.color_ramp.elements[1].color = (0.8, 0.6, 0.4, 1.0)   # Normal ground
+    
+    links.new(voronoi.outputs['Distance'], corruption_ramp.inputs['Fac'])
+    
+    # Mix corruption with base texture
+    corruption_mix = nodes.new(type='ShaderNodeMixRGB')
+    corruption_mix.blend_type = 'MULTIPLY'
+    corruption_mix.inputs['Fac'].default_value = corruption_strength
+    
+    if 'mix_node_{{ detail_textures|length }}' in locals():
+        links.new(mix_node_{{ detail_textures|length }}.outputs['Color'], corruption_mix.inputs['Color1'])
+    elif 'primary_tex' in locals():
+        links.new(primary_tex.outputs['Color'], corruption_mix.inputs['Color1'])
+    
+    links.new(corruption_ramp.outputs['Color'], corruption_mix.inputs['Color2'])
+    links.new(corruption_mix.outputs['Color'], bsdf.inputs['Base Color'])
+{% endif %}
+
+# Apply generation parameters
+{% if generation.subdivision_level %}
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.subdivide(number_cuts={{ generation.subdivision_level }})
+bpy.ops.object.mode_set(mode='OBJECT')
+{% endif %}
+
+{% if generation.edge_smoothing %}
+bpy.ops.object.shade_smooth()
+{% endif %}
+
+# Set up lighting for top-down view
+# Add slight ambient lighting typical of strategy/board games
+world = bpy.context.scene.world
+if world:
+    world.use_nodes = True
+    world_nodes = world.node_tree.nodes
+    env_tex = world_nodes.get('Environment Texture')
+    if env_tex:
+        env_tex.inputs['Color'].default_value = (0.8, 0.8, 0.9, 1.0)  # Soft ambient
+
+# Export optimized for top-down rendering
+output_path = "{{ output_path }}"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+bpy.ops.export_scene.gltf(
+    filepath=output_path,
+    export_format='GLB',
+    {% if generation.optimize_for_mobile %}
+    export_draco_mesh_compression_enable=True,
+    export_draco_mesh_compression_level=6,
+    {% endif %}
+    export_normals=False,  # Not needed for top-down view
+    export_tangents=False, # Not needed for simple lighting
+    use_selection=False
+)
+
+print(f"Generated overworld hex tile: {{ name }} -> {output_path}")

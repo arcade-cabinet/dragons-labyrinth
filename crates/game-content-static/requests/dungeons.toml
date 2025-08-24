@@ -1,0 +1,136 @@
+# Dungeon Asset Generation Requests
+# Utilizes textures from ../textures/dungeon/, ../textures/walls/, ../textures/floors/ for atmospheric dungeons
+
+[metadata]
+category = "dungeons"
+output_format = "glb"
+target_scale = 1.0
+texture_base_path = "../textures"
+
+# Dungeon room components
+[dungeons.stone_chamber]
+description = "Large stone chamber with arched ceiling and worn flagstones"
+base_geometry = "room_large_arched"
+floor_texture = "floors/k_floors_floor_detail.png"
+wall_texture = "walls/k_walls_wall.png"
+ceiling_texture = "dungeon/k_dungeon_crypt_large_roof.png"
+ambient_lighting = "torch_flickering"
+corruption_variants = [
+    { level = 0, wall_texture = "walls/k_walls_wall.png" },
+    { level = 1, wall_texture = "walls/k_walls_wall_aged.png" },
+    { level = 2, wall_texture = "walls/k_walls_wall_cracked.png" },
+    { level = 3, wall_texture = "horror/k_horror_ghost_normal.png" },
+    { level = 4, wall_texture = "horror/k_horror_ghost_dead.png" }
+]
+
+[dungeons.narrow_corridor]
+description = "Claustrophobic stone corridor with low ceiling"
+base_geometry = "corridor_narrow"
+floor_texture = "floors/k_floors_floor.png"
+wall_texture = "walls/k_walls_wall_narrow.png"
+ceiling_height = 2.2
+lighting_style = "dim_torches"
+corruption_variants = [
+    { level = 0, atmosphere = "musty_old" },
+    { level = 1, atmosphere = "damp_decay" },
+    { level = 2, atmosphere = "growing_mold" },
+    { level = 3, atmosphere = "supernatural_chill" },
+    { level = 4, atmosphere = "otherworldly_horror" }
+]
+
+[dungeons.boss_chamber]
+description = "Massive circular chamber with raised platform for boss encounters"
+base_geometry = "chamber_circular_tiered"
+floor_texture = "floors/k_floors_floor_detail.png"
+wall_texture = "walls/k_walls_wall.png"
+platform_texture = "dungeon/k_dungeon_rocks.png"
+ceiling_height = 8.0
+lighting_style = "dramatic_overhead"
+special_features = [
+    "raised_platform_center",
+    "pillars_around_perimeter",
+    "elevated_viewing_areas"
+]
+
+# Dungeon furniture and props
+[dungeons.treasure_chest]
+description = "Ornate chest with iron bindings and mystical lock"
+base_geometry = "chest_ornate"
+primary_texture = "props/k_props_chest_ornate.png"
+metal_texture = "weapons/k_weapons_metal_iron.png"
+lock_texture = "props/k_props_lock_mystical.png"
+glow_effect = "soft_magical"
+
+[dungeons.torture_device]
+description = "Ominous torture device - rusty chains and bloodstained wood"
+base_geometry = "rack_torture"
+wood_texture = "furniture/k_furniture_wood_aged.png"
+metal_texture = "weapons/k_weapons_metal_rusted.png"
+stain_overlays = [
+    "horror/bloodstains_old.png",
+    "horror/rust_streaks.png"
+]
+ambient_effect = "dread_aura"
+
+# Door and entrance components
+[dungeons.stone_door]
+description = "Heavy stone door with ancient runes and iron reinforcement"
+base_geometry = "door_stone_heavy"
+primary_texture = "doors/k_doors_door_stone.png"
+rune_overlay = "dungeon/k_dungeon_runes_ancient.png"
+metal_texture = "weapons/k_weapons_metal_iron.png"
+animation_set = "door_heavy_swing"
+
+[dungeons.crypt_door]
+description = "Ornate crypt entrance with death imagery and warning inscriptions"
+base_geometry = "door_crypt_ornate"
+primary_texture = "dungeon/k_dungeon_crypt_door.png"
+inscription_overlay = "dungeon/k_dungeon_warning_text.png"
+death_imagery = "horror/k_horror_ghost_skull.png"
+ambient_effect = "supernatural_chill"
+
+# Environmental storytelling props
+[dungeons.skeletal_remains]
+description = "Scattered bones and skull - remnants of previous adventurers"
+base_geometry = "bones_scattered"
+bone_texture = "horror/characters/k_horror_characters_skeleton_body.png"
+skull_texture = "horror/characters/k_horror_characters_skeleton_head.png"
+aging_effects = "ancient_yellowing"
+placement_style = "naturalistic_scatter"
+
+[dungeons.ancient_altar]
+description = "Stone altar with carved symbols and stained surface"
+base_geometry = "altar_rectangular"
+stone_texture = "dungeon/k_dungeon_altar_stone.png"
+carving_overlay = "dungeon/k_dungeon_symbols_carved.png"
+stain_texture = "horror/bloodstains_ritual.png"
+ambient_effect = "mystical_energy"
+
+# Generation parameters
+[generation]
+subdivision_level = 2
+edge_smoothing = true
+uv_unwrap_method = "cube_projection"
+texture_blend_mode = "multiply"
+normal_map_strength = 1.2
+ambient_occlusion = true
+shadow_casting = true
+export_format = "glb"
+optimize_for_mobile = true
+include_collision_mesh = true
+
+# Lighting configuration
+[lighting]
+torch_positions = "wall_mounted_alternating"
+torch_intensity = 0.7
+shadow_quality = "medium"
+ambient_darkness = 0.2
+flickering_effect = true
+
+# Horror progression atmosphere
+[horror_atmosphere]
+level_0 = { fog_density = 0.1, temperature = "cool", sounds = "distant_dripping" }
+level_1 = { fog_density = 0.2, temperature = "cold", sounds = "whispers_faint" }
+level_2 = { fog_density = 0.4, temperature = "freezing", sounds = "chains_rattling" }
+level_3 = { fog_density = 0.7, temperature = "supernatural_cold", sounds = "screams_echoing" }
+level_4 = { fog_density = 1.0, temperature = "otherworldly", sounds = "reality_distortion" }
