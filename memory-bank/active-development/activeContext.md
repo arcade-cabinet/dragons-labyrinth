@@ -1,156 +1,154 @@
 # Dragon's Labyrinth - Active Context
-## Current Sprint: Dragon's Labyrinth Unique Systems Implementation - COMPLETE ✅
+## Current Sprint: Asset Integration Architecture Planning - COMPLETE ✅
 ### Date: 2025-08-24
 
-## MAJOR BREAKTHROUGH ACHIEVED: DRAGON'S LABYRINTH UNIQUE SYSTEMS IMPLEMENTED
+## MAJOR BREAKTHROUGH ACHIEVED: ASSET INTEGRATION ARCHITECTURE DESIGNED
 
-### 🎯 MISSION ACCOMPLISHED: Three Core Unique Systems Built
-**✅ COMPANION PSYCHOLOGY & THERAPY SYSTEM (PRODUCTION-READY)**
-- Full ECS architecture: components, systems, resources, events, queries, mod.rs
-- Complete database integration with existing `companions` and `psychology` models
-- Memory palace 3D therapy visualization system
-- Trauma progression (0-5 scale), therapy quests, breakthrough tracking
+### 🎯 MISSION ACCOMPLISHED: Complete Asset-Database Integration Plan
+**✅ COMPREHENSIVE ASSET INVENTORY COMPLETE**
+- **Hex Tiles**: 6 complete biome models (forest, ghost_town, grass, labyrinth, ruins, swamp)
+- **Horror Characters**: Extensive zombie, ghost, skeleton, survivor variants
+- **Human Characters**: Multiple profession and demographic variants
+- **Dungeon Architecture**: Complete building toolkit (walls, floors, stairs, doors, props)
+- **Weapons & Combat**: Full material progression (wood→stone→gold→diamond)
+- **Audio Library**: Combat sounds, environmental audio, UI effects, voice clips
+- **Supporting Assets**: Fonts, textures, sprites for complete game experience
+
+**✅ ASSET-DATABASE MAPPING STRATEGY DEFINED**
+- Hex tiles perfectly map to `hex_tiles.biome_type` field (asset refs already exist!)
+- Character assets map to NPC race/role/corruption combinations
+- Weapon assets map to item type/material combinations with audio integration
+- Dungeon assets map to room components with modular building system
+- Audio events map to system triggers and environmental ambience
+
+**✅ INTEGRATION ARCHITECTURE COMPLETE**
+- **Asset Registry System**: Comprehensive indexing with dread progression variants
+- **Database Model Enhancements**: Asset reference fields for all entity types
+- **Build System Evolution**: Transform from HBF patterns to entity+asset generation
+- **Bevy Integration**: Viewport-based loading with performance optimization
+- **Horror Progression**: Dynamic asset swapping based on dread levels (0-4)
+
+### 🏗️ PREVIOUS ACHIEVEMENT: DRAGON'S LABYRINTH UNIQUE SYSTEMS (PRODUCTION-READY)
+**✅ COMPANION PSYCHOLOGY & THERAPY SYSTEM**
+- Memory palace 3D therapy visualization, trauma progression, breakthrough tracking
 - Professional support integration, crisis intervention protocols
-- Bevy plugin with proper system scheduling and reflection
 
-**✅ DREAD PROGRESSION CONTROLLER (PRODUCTION-READY)**
-- Master horror orchestrator that transforms ALL existing systems based on dread level (0-4)
-- Full ECS architecture with sophisticated state management
-- Dragon presence dread curves, narrative dread spikes, environmental dread
-- Reality distortion at high dread levels (3-4)
-- Player adaptation, habituation curves, dread contagion systems
-- Complete system transformation configuration for combat, hex_rendering, dialogue, psychology
-- Emergency protocols for system corruption management
+**✅ DREAD PROGRESSION CONTROLLER**
+- Master horror orchestrator transforming ALL systems based on dread level (0-4)
+- Dragon presence, reality distortion, environmental corruption
 
-**✅ SENTIMENTAL ITEM & FORGE SYSTEM (PRODUCTION-READY)**
-- Light path (High Elves - essence) vs Dark path (Cursed - blood) dual morality
-- Sentimental items become forge reagents with emotional weight and sacrifice resistance
-- Complete forge trial system testing ALL game systems
+**✅ SENTIMENTAL ITEM & FORGE SYSTEM**
+- Light/dark paths, emotional sacrifice mechanics, mythic gear creation
 - Second chances system (unique Dragon's Labyrinth mechanic)
-- Mythic gear creation with sentimental resonance and evolution
-- Database integration with existing `forge` models and `forge_progress` submodule
 
-### 🏗️ SYSTEM INTEGRATION COMPLETE
-**Database Architecture:**
-- All systems use production SeaORM queries with proper error handling
-- Full integration with existing 70k+ HBF entities
-- Transaction-safe database operations with proper rollback
-- Complete type safety throughout the system stack
+### 🏗️ PREVIOUS ACHIEVEMENT: DATABASE ARCHITECTURE CONSOLIDATION (COMPLETE)
+- **Dual-database architecture**: `game.db` (bundled content) + `player.db` (XDG state)
+- **Intelligent routing**: Automatic query routing between read-only and read-write databases
+- **70k+ HBF entities**: Complete world content with production ECS systems
+- **MCP server removed**: No longer needed with comprehensive game.db
 
-**Bevy ECS Integration:**
-- All systems registered as proper Bevy plugins in `bevy_integration.rs`
-- Complete component reflection for debugging and serialization
-- Proper system scheduling with startup, update, and fixed update phases
-- Event-driven communication between systems
+## Current State: READY FOR ASSET INTEGRATION IMPLEMENTATION
 
-**System Orchestration:**
-- Dread Progression Controller acts as master orchestrator
-- All systems respond to dread level changes (0-4)
-- Psychology system integrates with dread amplification
-- Forge system integrates with both psychology (trauma from sacrifice) and dread (difficulty scaling)
+**✅ PLANNING PHASE COMPLETE:**
+1. **Asset Inventory**: All static assets catalogued and categorized
+2. **Architecture Design**: Complete integration plan with performance optimization
+3. **Build System Plan**: Detailed evolution from HBF patterns to entity+asset generation
+4. **Performance Strategy**: Viewport loading, dread progression, distribution optimization
 
-## CRITICAL ARCHITECTURAL REALIZATION ACHIEVED
+**🎯 NEXT PHASE: IMPLEMENTATION**
+Asset integration planning is complete. Ready to implement:
 
-**🎯 DATABASE = GAME ENGINE ARCHITECTURE PROVEN:**
-- `game-database` = THE ACTUAL GAME ENGINE (all logic, systems, content)
-- `game-engine` = FACILITATOR (input/output coordination)  
-- Database with 70k+ HBF entities drives all mechanics
-- ECS components are projections of database state
-- All unique Dragon's Labyrinth systems built on this foundation
+1. **Asset Registry Module**: Create `crates/game-database/src/assets/` with scanner, registry, binding logic
+2. **Database Model Updates**: Add asset reference fields to all entity models
+3. **Build System Evolution**: Transform build.rs to generate ECS data from entities + assets
+4. **Bevy Integration**: Viewport loading, dread progression asset swapping
+5. **Distribution Optimization**: Asset bundles with only used assets
 
-**🎯 DRAGON'S LABYRINTH TRANSFORMATION COMPLETE:**
-The excellent D&D foundation has been successfully transformed into the unique horror-first RPG that Dragon's Labyrinth is designed to be:
+## Architecture Status
 
-- **Horror Experience:** Dread progression (0-4) drives emotional journey from Peace → Horror
-- **Companion Psychology:** Authentic trauma, therapy quests, memory palaces, breakdown/recovery
-- **Dual Morality:** Light/dark forge paths with sentimental item sacrifice mechanics
-- **System Integration:** All systems now respond to horror progression and psychological state
-- **Database Driven:** 70k+ HBF entities power sophisticated mechanics beyond typical RPGs
+**✅ FOUNDATION SYSTEMS (11 total):**
+1. **D&D Foundation (8):** Combat, hex_rendering, settlement, weather, faction, dungeon, encounter, corruption
+2. **Dragon's Labyrinth Unique (3):** Companion psychology, dread progression, forge system
 
-## Current State (As of 2025-08-24 12:54 PM)
+**✅ DATABASE ARCHITECTURE:**
+- **Dual-database**: `game.db` + `player.db` with intelligent routing
+- **70k+ entities**: Complete HBF world content with sophisticated horror mechanics
+- **Production ECS**: All systems use proper components, resources, events, queries pattern
 
-**✅ PRODUCTION SYSTEMS ACTIVE:**
-1. **D&D Foundation Systems (8 systems):**
-   - Combat: Full D&D 5e mechanics with tactical positioning
-   - Hex Rendering: Database-driven visualization with corruption overlays
-   - Settlement: NPC interaction, trade, inn/tavern mechanics
-   - Weather: Seasonal effects with environmental modifiers
-   - Faction: Political mechanics from HBF data
-   - Dungeon: Room navigation with doorway systems
-   - Encounter: Biome-based spawning with creature templates
-   - Corruption: Horror spread mechanics
+**🎯 ASSET INTEGRATION READY:**
+- **Static Assets**: Comprehensive CC0 library inventoried and ready
+- **Integration Plan**: Complete architecture for connecting 70k+ entities to assets
+- **Performance Plan**: Viewport loading, dread progression, mobile optimization
+- **Horror Progression**: Asset variants for progressive corruption experience
 
-2. **Dragon's Labyrinth Unique Systems (3 systems):**
-   - Companion Psychology: Trauma/therapy/memory palace system
-   - Dread Progression: Master orchestrator transforming all systems
-   - Forge System: Sentimental items → mythic gear via light/dark paths
+## Implementation Strategy
 
-**✅ SYSTEM INTEGRATION VERIFIED:**
-- `cargo build --package game-database` SUCCESS ✅
-- All 11 systems registered in `systems/mod.rs`
-- GameSystems coordinator updated with Dragon's Labyrinth systems
-- Bevy plugins active in `bevy_integration.rs`
-- Complete database integration with SeaORM
+### Phase 1: Asset Registry Foundation
+```rust
+// crates/game-database/src/assets/
+├── mod.rs              # Public API
+├── registry.rs         # AssetRegistry core with dread variants
+├── scanner.rs          # Directory scanning and indexing
+├── binding.rs          # Entity-asset binding logic
+└── loading.rs          # Performance loading strategies
+```
 
-**✅ KEY INTEGRATION POINTS ACTIVE:**
-- Dread level changes trigger system transformations across ALL systems
-- Companion trauma accumulates and affects dread levels
-- Forge sacrifice mechanics integrate with psychology trauma system
-- Reality distortion affects navigation and combat at high dread
-- Professional support systems integrate with in-world NPCs
+### Phase 2: Build System Evolution
+```rust
+// Enhanced build.rs process:
+1. Import 70k+ HBF entities ✅
+2. Scan assets → Generate registry 🆕
+3. Link entities → Asset bindings 🆕
+4. Generate ECS world data 🆕
+5. Create distribution bundles 🆕
+```
 
-## Next Development Priorities
+### Phase 3: Horror Progression Integration
+```rust
+// Dread-responsive asset system:
+- Clean assets (dread 0-1): Standard models, calm audio
+- Corruption variants (dread 2-3): Progressive horror effects
+- Maximum horror (dread 4): Full horror assets, terrifying audio
+- Runtime swapping for smooth progression
+```
 
-### IMMEDIATE: Additional Dragon's Labyrinth Systems (7 remaining)
-The foundation is now solid. Ready to implement remaining unique systems:
+## Success Criteria
 
-4. **3D First-Person Dungeon System** (Avian physics, raycasting navigation)
-5. **Dragon Presence & Stalking System** (Intelligent AI, proximity effects)
-6. **Philosophy & Light/Dark Path System** (Moral choices affect physics/reality)
-7. **180-Level Narrative Orchestration** (Level progression, emotional stage tracking)
-8. **Reality Distortion System** (Non-Euclidean geometry at high dread)
-9. **Memory Palace & Trauma Visualization** (Extended 3D psychological spaces)
-10. **Player Growth & Achievement System** (Inner/outer growth separate from D&D)
+**🎯 COMPLETE TRANSFORMATION:**
+- 70k+ database entities → Fully playable, visually rich horror RPG world
+- Static assets → Dynamic, dread-responsive environmental storytelling
+- HBF patterns → Production ECS world data with asset integration
+- Individual systems → Orchestrated horror experience with progressive corruption
 
-### TECHNICAL FOUNDATION COMPLETE
-- **Database-driven ECS architecture** proven and scalable
-- **System integration patterns** established and validated
-- **Horror progression mechanics** implemented and active
-- **Production-ready code quality** with proper error handling, logging, and monitoring
+**🎯 TECHNICAL EXCELLENCE:**
+- Viewport loading for 70k+ entities without performance issues
+- Asset streaming optimized for mobile/web deployment
+- Distribution bundles containing only necessary assets
+- Smooth dread progression with preloaded variants
+
+**🎯 HORROR EXPERIENCE:**
+- Progressive visual corruption from clean → terrifying
+- Audio landscapes that evolve with psychological state
+- Environmental storytelling through asset-driven atmosphere
+- Emotional journey supported by sophisticated asset integration
 
 ## Build Commands
 ```bash
-# Database (builds lib + all systems)
+# Database (includes all systems + asset integration)
 cargo build --package game-database
 
-# Game (builds lib + game binary)  
+# Game (facilitator with input/output coordination)
 cargo build --package game-engine
 
-# Run game with all Dragon's Labyrinth systems
+# Run complete game with asset integration
 cargo run --package game-engine
-
-# Run MCP server with full system access
-cargo run --package game-database
 ```
 
-## Known Working Systems
-✅ **Database Architecture**: 70k+ HBF entities loaded and accessible  
-✅ **ECS Integration**: Bevy components, systems, resources, events all functional  
-✅ **Horror Progression**: Dread levels 0-4 with system transformation  
-✅ **Companion Psychology**: Trauma, therapy, memory palaces  
-✅ **Forge System**: Sentimental items, dual paths, mythic gear  
-✅ **System Orchestration**: Master dread controller transforming all systems  
-✅ **Database Operations**: SeaORM with proper transactions and error handling  
+## Environment Status
+- **Architecture**: Database-driven ECS with dual-database routing ✅
+- **Systems**: 11 production systems with horror progression ✅
+- **Content**: 70k+ HBF entities with sophisticated mechanics ✅
+- **Assets**: CC0 library inventoried and integration planned ✅
+- **Next**: Implement asset registry and entity-asset binding system
 
-## Environment
-- Rust: Latest stable with Bevy 0.16.1
-- Database: SQLite with SeaORM 1.1.14  
-- Architecture: Database-driven ECS with 70k+ entity foundation
-- Horror Mechanics: Complete dread progression system (0-4 levels)
-- Psychology: Authentic companion trauma and therapy systems
-- Morality: Light/dark forge paths with sentimental sacrifice mechanics
-
-## Ready for Next Development Phase
-The core Dragon's Labyrinth unique systems are now implemented and integrated. The horror-first RPG transformation is complete at the system level. Ready to implement remaining systems and polish the emotional journey through all 180 levels of progression.
-
-**All three priority systems delivered as production-ready implementations with full database integration, proper ECS architecture, and complete system integration. The foundation for Dragon's Labyrinth as a unique horror-first RPG is now solid and extensible.**
+**The asset integration planning phase is complete. Dragon's Labyrinth now has a clear path from 70k+ database entities + comprehensive CC0 assets → fully playable, visually rich horror RPG experience with progressive corruption driven by the dread system.**
