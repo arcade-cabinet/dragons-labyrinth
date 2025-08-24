@@ -1,15 +1,73 @@
-//! Hex Rendering System - Database-driven hex tile visualization
+//! Hex Rendering System - Full ECS implementation with bevy_ecs_tilemap integration
 //!
-//! This system queries the database for hex tile data and converts it to 
-//! rendering data for bevy_ecs_tilemap integration.
+//! Database-driven hex tile visualization powered by HBF data,
+//! integrated as Bevy ECS components, systems, and resources.
 
-use anyhow::Result;
-use database_orm::*;
-use sea_orm::{DatabaseConnection, EntityTrait, ColumnTrait, QueryFilter};
-use std::collections::HashMap;
-use tracing::{debug, info};
-use super::{HexPosition, Viewport, TileRenderData};
+use bevy::prelude::*;
+use sea_orm::DatabaseConnection;
 
+pub mod components;
+pub mod systems;
+pub mod resources;
+
+pub use components::*;
+pub use systems::*;
+pub use resources::*;
+
+/// Hex rendering system plugin for Bevy ECS integration
+pub struct HexRenderingPlugin;
+
+impl Plugin for HexRenderingPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            // Add resources
+            .init_resource::<HexViewport>()
+            .init_resource::<PlayerPosition>()
+            .init_resource::<GlobalWeatherState>()
+            .init_resource::<CursorWorldPosition>()
+            .init_resource::<HexRenderingSettings>()
+            .init_resource::<TileTextureAtlas>()
+            
+            // Add systems
+            .add_systems(Startup, (
+                setup_hex_tilemap_system,
+                load_tile_textures_system,
+            ))
+            .add_systems(Update, (
+                // Core rendering
+                load_hex_tiles_system,
+                viewport_management_system,
+                
+                // Visual updates
+                update_corruption_visuals_system,
+                weather_effects_system,
+                corruption_particle_system,
+                
+                // Player interaction
+                tile_discovery_system,
+                tile_interaction_system,
+                
+                // Performance optimization
+                tile_culling_system,
+                animation_update_system,
+            ))
+            
+            // Register component reflection for debugging
+            .register_type::<HexTile>()
+            .register_type::<TileVisuals>()
+            .register_type::<CorruptionVisuals>()
+            .register_type::<TileFeatures>()
+            .register_type::<DiscoveryState>()
+            .register_type::<TileWeather>()
+            .register_type::<TileInteraction>()
+            .register_type::<ViewportTile>()
+            .register_type::<TileSelection>()
+            .register_type::<TileAudio>()
+            .register_type::<PathfindingData>();
+    }
+}
+
+/// Legacy hex rendering system for compatibility
 pub struct HexRenderingSystem {
     db: DatabaseConnection,
     biome_texture_map: HashMap<String, String>,

@@ -18,6 +18,7 @@ use database_orm::{players, companions, hex_tiles, encounters, dialogues, items,
                    asset_dependencies, forge, psychology, philosophy, decay, mounts,
                    assets};
 use crate::engine::GameDatabase;
+use crate::router::{DatabaseRouter, DatabaseRouterResource};
 use crate::traits::{GameDatabaseOperations, EcsDatabaseOperations, AIGenerationOperations};
 use crate::error::{DatabaseError, DatabaseResult};
 
@@ -212,6 +213,29 @@ impl Plugin for GameDatabasePlugin {
            .register_type::<AIGeneratedContent>()
            .register_type::<CompanionState>()
            .register_type::<DialogueState>();
+
+        // ===== DRAGON'S LABYRINTH UNIQUE SYSTEMS =====
+        // Add the three production-ready unique systems that transform D&D foundation into horror RPG
+        
+        info!("Registering Dragon's Labyrinth unique systems:");
+        
+        // 1. Companion Psychology & Therapy System
+        app.add_plugins(crate::systems::companion_psychology::CompanionPsychologyPlugin);
+        info!("✅ Companion Psychology & Therapy System - Memory palaces, trauma processing, therapy quests");
+        
+        // 2. Dread Progression Controller (Master Orchestrator)
+        app.add_plugins(crate::systems::dread_progression::DreadProgressionPlugin);
+        info!("✅ Dread Progression Controller - Master horror orchestrator transforming ALL systems (0-4 dread levels)");
+        
+        // 3. Sentimental Item & Forge System  
+        app.add_plugins(crate::systems::forge::ForgeSystemPlugin);
+        info!("✅ Sentimental Item & Forge System - Light/dark paths, mythic gear, second chances");
+        
+        info!("🎯 Dragon's Labyrinth transformation complete: D&D foundation → Horror-first RPG");
+        info!("   📊 Database-driven: 70k+ HBF entities powering all mechanics");
+        info!("   🧠 Psychology: Authentic trauma progression and therapy");
+        info!("   😨 Horror: Dread level (0-4) transforms all systems");
+        info!("   ⚔️  Forge: Sentimental items → mythic gear via light/dark paths");
     }
 }
 

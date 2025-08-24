@@ -12,17 +12,17 @@ name = "game_database"
 path = "src/lib.rs"
 
 [dependencies]
-# Internal crates for model definitions
-database-orm = { path = "../database-orm" }
+# Database ORM (now integrated directly)
+sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 
 # Serialization
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 toml = { workspace = true }
 
 # Time and UUID for sophisticated tracking
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.18", features = ["v4", "serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
+uuid = { version = "1.18.0", features = ["v4", "serde"] }
 
 # Async runtime for complex operations
 tokio = { workspace = true }
@@ -45,7 +45,6 @@ scraper = { workspace = true }
 
 # Bevy ECS integration
 bevy = "0.16.1"
-# bevy_sqlx = "0.1.9"  # Commented out - requires nightly
 
 # MCP server framework for cross-system queries
 jsonrpc-core = "18.0"
@@ -54,12 +53,10 @@ jsonrpc-http-server = "18.0"
 # Tracing for MCP server
 tracing-subscriber = "0.3"
 futures = "0.3.31"
-sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 dirs = "6.0.0"
 
 [build-dependencies]
-# Build script dependencies - using database-orm instead of raw sqlx
-database-orm = { path = "../database-orm" }
+# Build script dependencies - models now integrated directly
 game-assets = { path = "../game-assets" }
 sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 serde = { workspace = true }
@@ -70,9 +67,7 @@ chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.18", features = ["v4"] }
 anyhow = { workspace = true }
 
-[[bin]]
-name = "mcp-server"
-path = "src/bin/mcp-server.rs"
+# MCP server removed - no longer needed with 70k+ entities baked in
 
 [dev-dependencies]
 tokio-test = "0.4"

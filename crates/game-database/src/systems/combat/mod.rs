@@ -1,18 +1,120 @@
-//! Combat Engine - Database-driven D&D 5e combat mechanics
+//! Combat System - Full ECS implementation with bevy_sqlx integration
 //!
-//! This system queries creature stat blocks from the database and implements
-//! full D&D 5e combat mechanics using the HBF-imported creature data.
+//! Complete D&D 5e combat mechanics powered by HBF creature data,
+//! integrated as Bevy ECS components, systems, and resources.
 
-use anyhow::Result;
-use database_orm::*;
-use sea_orm::{DatabaseConnection, EntityTrait, ColumnTrait, QueryFilter};
-use serde_json::Value;
-use std::collections::HashMap;
-use tracing::{debug, info, warn};
-use uuid::Uuid;
-use rand::Rng;
-use super::{HexPosition, CombatEncounter, CreatureInstance, CreatureAbilities, CreatureAction, EncounterEnvironment, WeatherCondition};
+use bevy::prelude::*;
+use sea_orm::DatabaseConnection;
 
+pub mod components;
+pub mod systems;
+pub mod resources;
+pub mod events;
+pub mod queries;
+
+pub use components::*;
+pub use systems::*;
+pub use resources::*;
+pub use events::*;
+pub use queries::*;
+
+/// Combat system plugin for Bevy ECS integration
+pub struct CombatSystemPlugin;
+
+impl Plugin for CombatSystemPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            // Add resources
+            .init_resource::<CombatState>()
+            .init_resource::<CreatureTemplateCache>()
+            .init_resource::<EncounterTables>()
+            .init_resource::<CombatSettings>()
+            .init_resource::<ActiveTurn>()
+            .init_resource::<CombatStatistics>()
+            .init_resource::<TacticalGrid>()
+            
+            // Add events
+            .add_event::<CombatInitiatedEvent>()
+            .add_event::<AttackEvent>()
+            .add_event::<DamageEvent>()
+            .add_event::<CombatEndedEvent>()
+            .add_event::<CreatureDefeatedEvent>()
+            .add_event::<PlayerDefeatedEvent>()
+            .add_event::<StatusEffectEvent>()
+            .add_event::<HealingEvent>()
+            .add_event::<MovementEvent>()
+            .add_event::<SpellCastEvent>()
+            .add_event::<EnvironmentalEffectEvent>()
+            .add_event::<TurnProgressEvent>()
+            .add_event::<InitiativeEvent>()
+            .add_event::<OpportunityAttackEvent>()
+            .add_event::<DeathSaveEvent>()
+            .add_event::<HorrorEffectEvent>()
+            .add_event::<CompanionTraumaEvent>()
+            .add_event::<LootDropEvent>()
+            .add_event::<CombatDialogueEvent>()
+            
+            // Add systems
+            .add_systems(Startup, (
+                load_creature_templates_system,
+                load_encounter_tables_system,
+            ))
+            .add_systems(Update, (
+                // Combat management
+                combat_initiation_system,
+                turn_order_system,
+                combat_resolution_system,
+                
+                // Combat mechanics
+                attack_resolution_system,
+                damage_application_system,
+                status_effect_system,
+                combat_cleanup_system,
+                
+                // Environmental effects
+                weather_combat_effects_system,
+                terrain_combat_effects_system,
+                corruption_combat_effects_system,
+                
+                // AI behavior
+                creature_ai_system,
+                tactical_positioning_system,
+                
+                // Integration with other systems
+                companion_combat_system,
+                horror_progression_combat_system,
+            ).run_if(in_state(CombatPhase::PlayerTurn).or_else(in_state(CombatPhase::CreatureTurn))))
+            
+            // Add state
+            .init_state::<CombatPhase>()
+            
+            // Register component reflection for debugging
+            .register_type::<CombatCreature>()
+            .register_type::<CreatureStats>()
+            .register_type::<CombatPosition>()
+            .register_type::<CombatParticipant>()
+            .register_type::<TurnOrder>()
+            .register_type::<CombatActions>()
+            .register_type::<StatusEffects>()
+            .register_type::<DamageResistance>()
+            .register_type::<CombatAI>()
+            .register_type::<EnvironmentalEffect>();
+    }
+}
+
+/// Combat phases for state management
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum CombatPhase {
+    #[default]
+    None,
+    Initiative,
+    PlayerTurn,
+    CreatureTurn,
+    Resolution,
+    Cleanup,
+}
+
+/// Combat engine for database integration (legacy support)
 pub struct CombatEngine {
     db: DatabaseConnection,
     creature_cache: HashMap<String, CreatureTemplate>,
