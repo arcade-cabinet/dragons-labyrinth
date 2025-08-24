@@ -25,7 +25,7 @@ chrono = { version = "0.4.41", features = ["serde"] }
 uuid = { version = "1.18.0", features = ["v4", "serde"] }
 
 # Async runtime for complex operations
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
 
 # Error handling
 anyhow = { workspace = true }
@@ -36,6 +36,7 @@ async-trait = "0.1"
 
 # Logging for sophisticated system debugging
 tracing = { workspace = true }
+tracing-subscriber = "0.3"
 
 # Regular expressions for parsing
 regex = { workspace = true }
@@ -45,13 +46,6 @@ scraper = { workspace = true }
 
 # Bevy ECS integration
 bevy = "0.16.1"
-
-# MCP server framework for cross-system queries
-jsonrpc-core = "18.0"
-jsonrpc-http-server = "18.0"
-
-# Tracing for MCP server
-tracing-subscriber = "0.3"
 futures = "0.3.31"
 dirs = "6.0.0"
 

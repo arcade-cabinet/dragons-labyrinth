@@ -7,6 +7,7 @@ members = [
     "crates/game-dialogue",
     "crates/game-database",
     "crates/game-engine",
+    "crates/hexroll_exporter",
 ]
 
 resolver = "2"

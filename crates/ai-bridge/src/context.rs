@@ -5,16 +5,12 @@ use openai_dive::v1::api::Client;
 use openai_dive::v1::models::FlagshipModel;
 use openai_dive::v1::resources::chat::ChatCompletionTool;
 use tiktoken_rs::{p50k_base, CoreBPE};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
-#[cfg(feature = "with-database")]
-use game_database::GameDatabase;
 use crate::error::BuildToolError;
 use crate::memory::AgentMemory;
-use crate::tools;
 
 /// Configuration for build tools
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,9 +27,6 @@ pub struct BuildConfig {
     /// Enable caching of results
     pub enable_cache: bool,
     
-    /// Enable database tools
-    pub enable_database_tools: bool,
-    
     /// Dread level for horror progression (0-4)
     pub dread_level: u8,
     
@@ -48,7 +41,6 @@ impl Default for BuildConfig {
             max_tokens: 4000,
             temperature: 0.7,
             enable_cache: true,
-            enable_database_tools: true,
             dread_level: 0,
             asset_categories: vec![
                 "hex_tiles".to_string(),
@@ -68,10 +60,6 @@ pub struct BuildContext {
     
     /// Token counter for managing API costs
     tokenizer: CoreBPE,
-    
-    /// Database connection for game data and tools
-    #[cfg(feature = "with-database")]
-    database: Option<GameDatabase>,
     
     /// Output directory for generated assets
     output_dir: PathBuf,
@@ -95,8 +83,6 @@ impl BuildContext {
         Ok(Self {
             client,
             tokenizer,
-            #[cfg(feature = "with-database")]
-            database: None,
             output_dir: output_dir.as_ref().to_path_buf(),
             cache_dir: output_dir.as_ref().join(".cache"),
             config: BuildConfig::default(),
@@ -109,16 +95,6 @@ impl BuildContext {
         let mut context = Self::new(output_dir)?;
         context.config = config;
         Ok(context)
-    }
-    
-    /// Connect to game database for tool support
-    #[cfg(feature = "with-database")]
-    pub async fn connect_database(&mut self, database_url: &str) -> Result<()> {
-        let db = GameDatabase::connect(database_url)
-            .await
-            .context("Failed to connect to game database")?;
-        self.database = Some(db);
-        Ok(())
     }
     
     /// Get the configuration
@@ -134,17 +110,6 @@ impl BuildContext {
     /// Get the client
     pub fn client(&self) -> &Client {
         &self.client
-    }
-    
-    /// Get the database (if connected)
-    #[cfg(feature = "with-database")]
-    pub fn database(&self) -> Option<&GameDatabase> {
-        self.database.as_ref()
-    }
-    
-    #[cfg(not(feature = "with-database"))]
-    pub fn database(&self) -> Option<()> {
-        None
     }
     
     /// Get the output directory
@@ -184,28 +149,4 @@ impl BuildContext {
         Ok(())
     }
     
-    /// Get available tools based on configuration
-    pub fn get_available_tools(&self) -> Vec<ChatCompletionTool> {
-        let mut available_tools = vec![];
-        
-        // Add search tool
-        available_tools.push(tools::create_search_assets_tool());
-        
-        // Add database tools if enabled
-        #[cfg(feature = "with-database")]
-        if self.config.enable_database_tools && self.database.is_some() {
-            available_tools.push(tools::create_query_database_tool());
-            available_tools.push(tools::create_horror_progression_tool());
-        }
-        
-        // Add generation tool
-        available_tools.push(tools::create_generate_asset_tool());
-        
-        available_tools
-    }
-    
-    /// Execute a tool call
-    pub async fn execute_tool(&self, name: &str, arguments: &str) -> Result<Value> {
-        tools::execute_tool(self, name, arguments).await
-    }
 }

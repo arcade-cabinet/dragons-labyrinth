@@ -1,0 +1,81 @@
+{
+  "table_count": 2,
+  "total_records": 72371,
+  "table_info": {
+    "Entities": {
+      "name": "Entities",
+      "record_count": 70801,
+      "columns": [
+        {
+          "name": "uuid",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "name": "value",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "sample_data": null,
+      "html_patterns": []
+    },
+    "Refs": {
+      "name": "Refs",
+      "record_count": 1570,
+      "columns": [
+        {
+          "name": "value",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "name": "details",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "name": "uuid",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "name": "type",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "name": "icon",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "name": "anchor",
+          "data_type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "sample_data": null,
+      "html_patterns": []
+    }
+  },
+  "relationships": [],
+  "html_patterns_found": [],
+  "recommendations": []
+}

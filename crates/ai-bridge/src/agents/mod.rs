@@ -1,31 +1,28 @@
-pub mod audio;
-pub mod decay;
-pub mod dialogue;
-pub mod levels;
-pub mod maps;
-pub mod mounts;
-pub mod ui;
-pub mod quests;  // Quest chain generation for narrative complexity
+//! Agent system for AI-bridge
+//! 
+//! This module provides a spec-driven agent architecture that loads agent
+//! specifications from TOML files instead of hardcoding agents in Rust.
 
-pub use audio::AudioAgent;
-pub use decay::DecayAgent;
-pub use dialogue::DialogueAgent;
-pub use levels::LevelsAgent;
-pub use maps::MapsAgent;
-pub use mounts::MountAgent;
-pub use ui::UIAgent;
+pub mod spec_driven;
 
-// Export the Agent trait
-pub use self::Agent;
+// Re-export the main types from the spec-driven system
+pub use spec_driven::{
+    SpecDrivenOrchestrator,
+    SpecDrivenGenerationReport,
+    DreadLevelReport,
+    AgentInfo,
+};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use std::path::Path;
 use crate::context::BuildContext;
 use crate::generation::{GenerationRequest, GenerationResult};
-use crate::mcp_client::MCPClient;
 
-/// Common trait for all AI agents
+/// Simplified Agent trait for backwards compatibility
+/// 
+/// This trait provides a bridge between the old agent system and the new 
+/// spec-driven system. New agents should be implemented as spec files
+/// rather than implementing this trait directly.
 #[async_trait]
 pub trait Agent: Send + Sync {
     /// Generate content based on the request
@@ -40,166 +37,80 @@ pub trait Agent: Send + Sync {
     }
 }
 
-/// Orchestrates all AI agents to generate content for a specific dread level
+/// Backwards compatibility wrapper for the old orchestrator API
+/// 
+/// This provides the same interface as the old AgentOrchestrator but uses
+/// the new spec-driven system underneath.
 pub struct AgentOrchestrator {
-    dread_level: u8,
-    out_dir: std::path::PathBuf,
-    mcp_client: MCPClient,
+    orchestrator: SpecDrivenOrchestrator,
 }
 
 impl AgentOrchestrator {
-    pub fn new(dread_level: u8, out_dir: &Path, mcp_client: MCPClient) -> Self {
+    /// Create a new agent orchestrator with spec-driven backend
+    pub fn new(openai_client: crate::openai_client::OpenAIClient) -> Self {
         Self {
-            dread_level,
-            out_dir: out_dir.to_path_buf(),
-            mcp_client,
+            orchestrator: SpecDrivenOrchestrator::new(openai_client),
         }
     }
 
-    /// Generate all content for this dread level
-    pub async fn generate_all(&self) -> Result<GenerationReport> {
-        println!("AgentOrchestrator: Starting generation for dread level {}", self.dread_level);
-        
-        let mut report = GenerationReport {
-            dread_level: self.dread_level,
-            successful_agents: Vec::new(),
-            failed_agents: Vec::new(),
-            warnings: Vec::new(),
-        };
-
-        // Generate UI content
-        match self.generate_ui_content().await {
-            Ok(_) => {
-                report.successful_agents.push("UIAgent".to_string());
-                println!("AgentOrchestrator: UIAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("UIAgent: {}", e));
-                eprintln!("AgentOrchestrator: UIAgent failed: {}", e);
-            }
-        }
-
-        // Generate decay content
-        match self.generate_decay_content().await {
-            Ok(_) => {
-                report.successful_agents.push("DecayAgent".to_string());
-                println!("AgentOrchestrator: DecayAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("DecayAgent: {}", e));
-                eprintln!("AgentOrchestrator: DecayAgent failed: {}", e);
-            }
-        }
-
-        // Generate mount content
-        match self.generate_mount_content().await {
-            Ok(_) => {
-                report.successful_agents.push("MountAgent".to_string());
-                println!("AgentOrchestrator: MountAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("MountAgent: {}", e));
-                eprintln!("AgentOrchestrator: MountAgent failed: {}", e);
-            }
-        }
-
-        // Generate levels content
-        match self.generate_levels_content().await {
-            Ok(_) => {
-                report.successful_agents.push("LevelsAgent".to_string());
-                println!("AgentOrchestrator: LevelsAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("LevelsAgent: {}", e));
-                eprintln!("AgentOrchestrator: LevelsAgent failed: {}", e);
-            }
-        }
-
-        // Generate maps content (using existing agent)
-        match self.generate_maps_content().await {
-            Ok(_) => {
-                report.successful_agents.push("MapsAgent".to_string());
-                println!("AgentOrchestrator: MapsAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("MapsAgent: {}", e));
-                eprintln!("AgentOrchestrator: MapsAgent failed: {}", e);
-            }
-        }
-
-        // Generate dialogue content (using existing agent)
-        match self.generate_dialogue_content().await {
-            Ok(_) => {
-                report.successful_agents.push("DialogueAgent".to_string());
-                println!("AgentOrchestrator: DialogueAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("DialogueAgent: {}", e));
-                eprintln!("AgentOrchestrator: DialogueAgent failed: {}", e);
-            }
-        }
-
-        // Generate audio content (using existing agent)
-        match self.generate_audio_content().await {
-            Ok(_) => {
-                report.successful_agents.push("AudioAgent".to_string());
-                println!("AgentOrchestrator: AudioAgent completed successfully");
-            }
-            Err(e) => {
-                report.failed_agents.push(format!("AudioAgent: {}", e));
-                eprintln!("AgentOrchestrator: AudioAgent failed: {}", e);
-            }
-        }
-
-        println!("AgentOrchestrator: Generation complete for dread level {}. Success: {}, Failed: {}", 
-                 self.dread_level, report.successful_agents.len(), report.failed_agents.len());
-
-        Ok(report)
+    /// Add a directory to search for agent specifications
+    pub fn add_spec_directory<P: AsRef<std::path::Path>>(&mut self, path: P) {
+        self.orchestrator.add_spec_directory(path);
     }
 
-    async fn generate_ui_content(&self) -> Result<()> {
-        let agent = UIAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
+    /// Load all agent specifications
+    pub async fn load_specs(&mut self) -> Result<()> {
+        self.orchestrator.load_specs().await
     }
 
-    async fn generate_decay_content(&self) -> Result<()> {
-        let agent = DecayAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
+    /// Generate all content for all dread levels
+    pub async fn generate_all_dread_levels(
+        &self,
+        output_dir: &std::path::Path,
+        context: &BuildContext,
+    ) -> Result<SpecDrivenGenerationReport> {
+        self.orchestrator.generate_all_dread_levels(output_dir, context).await
     }
 
-    async fn generate_mount_content(&self) -> Result<()> {
-        let agent = MountAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
+    /// List all available agents
+    pub fn list_agents(&self) -> Vec<AgentInfo> {
+        self.orchestrator.list_agents()
     }
 
-    async fn generate_levels_content(&self) -> Result<()> {
-        let agent = LevelsAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
-    }
-
-    async fn generate_maps_content(&self) -> Result<()> {
-        let agent = MapsAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
-    }
-
-    async fn generate_dialogue_content(&self) -> Result<()> {
-        let agent = DialogueAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
-    }
-
-    async fn generate_audio_content(&self) -> Result<()> {
-        let agent = AudioAgent::new(self.dread_level, &self.out_dir, self.mcp_client.clone());
-        agent.generate().await?;
-        Ok(())
+    /// Execute a specific agent by name
+    pub async fn execute_agent(
+        &self,
+        agent_name: &str,
+        request: GenerationRequest,
+        context: &BuildContext,
+    ) -> Result<GenerationResult> {
+        self.orchestrator.execute_agent(agent_name, request, context).await
     }
 }
 
+/// Create output directories for agent generation
+pub fn create_output_directories(out_dir: &std::path::Path) -> Result<()> {
+    let dirs_to_create = [
+        "ui",
+        "decay",
+        "mounts", 
+        "levels",
+        "maps",
+        "dialogue",
+        "audio",
+        "hbf_analysis", // For HBF import functionality
+    ];
+    
+    for dir in &dirs_to_create {
+        let dir_path = out_dir.join(dir);
+        std::fs::create_dir_all(&dir_path)?;
+        tracing::info!("Created directory: {}", dir_path.display());
+    }
+    
+    Ok(())
+}
+
+/// Placeholder generation report for backwards compatibility
 #[derive(Debug, Clone)]
 pub struct GenerationReport {
     pub dread_level: u8,
@@ -215,7 +126,7 @@ impl GenerationReport {
 
     pub fn has_critical_failures(&self) -> bool {
         // Consider UI, Decay, Mount, and Levels as critical
-        let critical_agents = ["UIAgent", "DecayAgent", "MountAgent", "LevelsAgent"];
+        let critical_agents = ["ui_generation", "decay_modeling", "mount_system", "level_design"];
         
         for failed in &self.failed_agents {
             for critical in &critical_agents {
@@ -238,61 +149,82 @@ impl GenerationReport {
     }
 }
 
-/// Generate content for all dread levels (0-4)
-pub async fn generate_all_dread_levels(out_dir: &Path, mcp_client: MCPClient) -> Result<Vec<GenerationReport>> {
-    println!("AgentOrchestrator: Starting full generation pipeline for all dread levels");
-    
-    let mut reports = Vec::new();
-    
-    for dread_level in 0..=4 {
-        println!("AgentOrchestrator: Processing dread level {}", dread_level);
-        
-        let orchestrator = AgentOrchestrator::new(dread_level, out_dir, mcp_client.clone());
-        let report = orchestrator.generate_all().await?;
-        
-        println!("AgentOrchestrator: {}", report.summary());
-        
-        // Log any failures
-        for failure in &report.failed_agents {
-            eprintln!("AgentOrchestrator: FAILURE - {}", failure);
+/// Convert spec-driven report to old-style reports for backwards compatibility
+pub fn convert_spec_report_to_legacy(spec_report: SpecDrivenGenerationReport) -> Vec<GenerationReport> {
+    spec_report.dread_levels.into_iter().map(|level_report| {
+        GenerationReport {
+            dread_level: level_report.dread_level,
+            successful_agents: level_report.successful_agents,
+            failed_agents: level_report.failed_agents,
+            warnings: Vec::new(), // No warnings in new system yet
         }
-        
-        reports.push(report);
-    }
-    
-    // Summary statistics
-    let total_successful: usize = reports.iter().map(|r| r.successful_agents.len()).sum();
-    let total_failed: usize = reports.iter().map(|r| r.failed_agents.len()).sum();
-    let critical_failures = reports.iter().filter(|r| r.has_critical_failures()).count();
-    
-    println!("AgentOrchestrator: PIPELINE COMPLETE");
-    println!("AgentOrchestrator: Total successful: {}, Total failed: {}, Critical failures: {}", 
-             total_successful, total_failed, critical_failures);
-    
-    if critical_failures > 0 {
-        eprintln!("AgentOrchestrator: WARNING - {} dread levels have critical failures", critical_failures);
-    }
-    
-    Ok(reports)
+    }).collect()
 }
 
-/// Utility function to create all necessary output directories
-pub fn create_output_directories(out_dir: &Path) -> Result<()> {
-    let dirs_to_create = [
-        "ui",
-        "decay", 
-        "mounts",
-        "levels",
-        "maps",
-        "dialogue", 
-        "audio"
-    ];
+/// Generate content for all dread levels (backwards compatibility function)
+pub async fn generate_all_dread_levels(
+    out_dir: &std::path::Path,
+    openai_client: crate::openai_client::OpenAIClient,
+) -> Result<Vec<GenerationReport>> {
+    tracing::info!("Starting legacy generate_all_dread_levels with spec-driven backend");
     
-    for dir in &dirs_to_create {
-        let dir_path = out_dir.join(dir);
-        std::fs::create_dir_all(&dir_path)?;
-        println!("AgentOrchestrator: Created directory: {}", dir_path.display());
+    let mut orchestrator = AgentOrchestrator::new(openai_client);
+    
+    // Add default spec directories
+    orchestrator.add_spec_directory("crates/game-dialogue");
+    orchestrator.add_spec_directory("crates/hexroll_exporter");
+    orchestrator.add_spec_directory("crates/game-assets");
+    orchestrator.add_spec_directory("crates/ai-bridge/specs");
+    
+    // Load specs
+    orchestrator.load_specs().await?;
+    
+    // Create build context
+    let context = BuildContext::new(out_dir)?;
+    
+    // Generate content
+    let spec_report = orchestrator.generate_all_dread_levels(out_dir, &context).await?;
+    
+    // Convert to legacy format
+    let legacy_reports = convert_spec_report_to_legacy(spec_report);
+    
+    tracing::info!(
+        "Legacy generation complete: {} dread levels processed",
+        legacy_reports.len()
+    );
+    
+    Ok(legacy_reports)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_convert_spec_report_to_legacy() {
+        let spec_report = SpecDrivenGenerationReport {
+            dread_levels: vec![
+                DreadLevelReport {
+                    dread_level: 0,
+                    successful_agents: vec!["ui_generation".to_string()],
+                    failed_agents: vec!["audio_generation".to_string()],
+                },
+                DreadLevelReport {
+                    dread_level: 1,
+                    successful_agents: vec!["ui_generation".to_string(), "decay_modeling".to_string()],
+                    failed_agents: vec![],
+                },
+            ],
+        };
+        
+        let legacy_reports = convert_spec_report_to_legacy(spec_report);
+        
+        assert_eq!(legacy_reports.len(), 2);
+        assert_eq!(legacy_reports[0].dread_level, 0);
+        assert_eq!(legacy_reports[0].successful_agents.len(), 1);
+        assert_eq!(legacy_reports[0].failed_agents.len(), 1);
+        assert_eq!(legacy_reports[1].dread_level, 1);
+        assert_eq!(legacy_reports[1].successful_agents.len(), 2);
+        assert_eq!(legacy_reports[1].failed_agents.len(), 0);
     }
-    
-    Ok(())
 }

@@ -1,18 +1,12 @@
 //! Error types for build tools
 
 use thiserror::Error;
-#[cfg(feature = "with-database")]
-use game_database::DatabaseError;
 
 /// Build tools error types
 #[derive(Error, Debug)]
 pub enum BuildToolError {
     #[error("OpenAI API error: {0}")]
     OpenAIError(String),
-    
-    #[cfg(feature = "with-database")]
-    #[error("Database error: {0}")]
-    DatabaseError(#[from] DatabaseError),
     
     #[error("Token limit exceeded: {current}/{max}")]
     TokenLimitExceeded { current: usize, max: usize },
@@ -34,6 +28,12 @@ pub enum BuildToolError {
     
     #[error("Memory system error: {0}")]
     MemoryError(String),
+    
+    #[error("Agent specification error: {0}")]
+    AgentSpecError(String),
+    
+    #[error("Agent execution error: {0}")]
+    AgentExecutionError(String),
 }
 
 pub type Result<T> = std::result::Result<T, BuildToolError>;

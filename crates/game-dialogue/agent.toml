@@ -1,0 +1,188 @@
+# Dialogue Generation Agent Specification
+# This agent generates horror-driven narrative dialogue for Dragon's Labyrinth
+
+[metadata]
+name = "dialogue-generator"
+version = "1.0.0"
+description = "Horror-focused dialogue generation with dread level adaptation and companion trauma modeling"
+domain = "narrative_generation"
+author = "Dragon's Labyrinth"
+tags = ["dialogue", "narrative", "horror", "dread-progression", "companions"]
+
+# Agent capabilities
+capabilities = [
+    "dialogue_generation",
+    "horror_progression",
+    "companion_trauma_modeling",
+    "dread_adaptation",
+    "narrative_consistency"
+]
+
+# Input/output interface specification
+[interface]
+required_context = ["dread_level", "scene_context"]
+optional_context = ["companion_state", "player_history", "narrative_thread"]
+
+[[interface.inputs]]
+name = "dialogue_type"
+data_type = "string"
+description = "Type of dialogue: 'companion', 'npc', 'system', 'internal_monologue'"
+required = true
+
+[[interface.inputs]]
+name = "scene_description"
+data_type = "string"
+description = "Current scene context and environment"
+required = true
+
+[[interface.inputs]]
+name = "character_state"
+data_type = "object"
+description = "Current psychological and physical state of speaking character"
+required = false
+
+[[interface.outputs]]
+name = "dialogue_tree"
+data_type = "object"
+description = "Generated dialogue with branching options and emotional metadata"
+format = "yarn_spinner"
+
+[[interface.outputs]]
+name = "emotional_impact"
+data_type = "object"
+description = "Predicted emotional impact on player and companions"
+
+[[interface.outputs]]
+name = "dread_contribution"
+data_type = "float"
+description = "How much this dialogue contributes to overall dread progression"
+
+# Prompt templates for different dialogue generation scenarios
+[prompts.companion_dialogue]
+template = """
+Generate companion dialogue for Dragon's Labyrinth horror progression:
+
+Dread Level: {dread_level} (0=hope, 4=despair)
+Scene: {scene_description}
+Companion State: {character_state}
+
+Horror Progression Guidelines:
+- Dread 0-1: Cautious optimism, building unease
+- Dread 2: Growing fear, questioning reality
+- Dread 3: Psychological breakdown, paranoia
+- Dread 4: Complete despair, existential horror
+
+Character Psychology:
+- Companions develop trauma responses over time
+- Speech patterns degrade with psychological damage
+- Personal fears and backstory influence dialogue
+- Relationships strain under horror pressure
+
+Dialogue Requirements:
+1. Match dread level emotional intensity
+2. Show psychological evolution from previous encounters
+3. Include subtle horror elements building tension
+4. Provide meaningful player choice branches
+5. Advance narrative while maintaining immersion
+
+Generate YarnSpinner-compatible dialogue tree with:
+- Multiple conversation branches
+- Emotional state tracking
+- Dread level progression markers
+- Character development moments
+"""
+variables = ["dread_level", "scene_description", "character_state"]
+system_prompt = "You are a horror narrative specialist focusing on psychological character development and atmospheric tension building. Create dialogue that gradually erodes hope while maintaining player agency."
+temperature = 0.8
+max_tokens = 2500
+
+[prompts.npc_dialogue]
+template = """
+Generate NPC dialogue reflecting the horror corruption of Dragon's Labyrinth:
+
+Dread Level: {dread_level}
+NPC Context: {scene_description}
+Player History: {player_history}
+
+NPC Corruption Stages:
+- Dread 0-1: Subtle wrongness, uncanny valley effects
+- Dread 2: Obvious mental deterioration, contradictions
+- Dread 3: Hostile paranoia, reality distortion
+- Dread 4: Complete madness, incomprehensible speech
+
+Design Principles:
+1. NPCs reflect the world's psychological decay
+2. Information becomes less reliable at higher dread
+3. Social connections break down progressively
+4. Some NPCs may be helpful despite corruption
+
+Create dialogue that:
+- Shows gradual mental decay appropriate to dread level
+- Provides useful but potentially unreliable information
+- Builds atmosphere through subtle wrongness
+- Includes easter eggs hinting at deeper lore
+"""
+variables = ["dread_level", "scene_description", "player_history"]
+system_prompt = "You are an expert in psychological horror NPCs that reflect environmental corruption while serving gameplay needs."
+temperature = 0.7
+max_tokens = 2000
+
+[prompts.internal_monologue]
+template = """
+Generate player internal monologue for psychological horror progression:
+
+Dread Level: {dread_level}
+Current Scene: {scene_description}
+Mental State: {character_state}
+
+Internal Voice Evolution:
+- Dread 0-1: Rational analysis, growing concern
+- Dread 2: Questioning sanity, self-doubt
+- Dread 3: Competing mental voices, paranoid thoughts
+- Dread 4: Fragmented consciousness, reality breaks
+
+Psychological Elements:
+1. Gradual erosion of rational thought
+2. Increasing self-doubt and paranoia
+3. Intrusive thoughts and false memories
+4. Moments of clarity that may be illusions
+
+Generate introspective dialogue that:
+- Matches the dread level psychological state
+- Provides gameplay hints through mental analysis
+- Builds horror through self-awareness of decay
+- Creates doubt about player character's reliability
+"""
+variables = ["dread_level", "scene_description", "character_state"]
+system_prompt = "You are a specialist in psychological horror internal monologue that builds dread through self-awareness and unreliable narration."
+temperature = 0.6
+max_tokens = 1500
+
+# Configuration parameters
+[config]
+model = "gpt-4"
+temperature_base = 0.7
+max_retries = 3
+dialogue_length_target = 200
+max_conversation_branches = 5
+
+# Horror-specific configuration
+[config.horror_settings]
+dread_level_multiplier = 0.8
+psychological_consistency_check = true
+trauma_progression_tracking = true
+narrative_thread_validation = true
+
+# Dialogue formatting
+[config.yarn_spinner]
+include_metadata_tags = true
+generate_character_emotions = true
+include_dread_markers = true
+validate_syntax = true
+
+# Quality controls
+[config.quality_checks]
+emotional_consistency = true
+character_voice_matching = true
+horror_atmosphere_validation = true
+narrative_coherence_check = true

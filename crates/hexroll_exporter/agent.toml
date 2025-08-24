@@ -1,0 +1,171 @@
+# HBF Analysis Agent Specification
+# This agent provides AI-assisted analysis of HexRoll HBF files for 100% data extraction accuracy
+
+[metadata]
+name = "hbf-analyzer"
+version = "1.0.0"
+description = "AI-enhanced semantic analysis of HexRoll HBF table relationships for complete data extraction"
+domain = "hexroll_data_import"
+author = "Dragon's Labyrinth"
+tags = ["hbf", "hexroll", "data-analysis", "semantic-relationships", "import"]
+
+# Agent capabilities
+capabilities = [
+    "hbf_analysis", 
+    "semantic_relationship_discovery",
+    "html_content_parsing",
+    "data_validation",
+    "relationship_confidence_scoring"
+]
+
+# Input/output interface specification
+[interface]
+required_context = ["hbf_file_path", "analysis_mode"]
+optional_context = ["confidence_threshold", "validation_rules"]
+
+[[interface.inputs]]
+name = "hbf_content"
+data_type = "string"
+description = "Raw HBF file content or specific table data to analyze"
+required = true
+
+[[interface.inputs]]
+name = "table_type"
+data_type = "string" 
+description = "Type of table: 'entities' or 'refs'"
+required = true
+
+[[interface.inputs]]
+name = "relationship_hints"
+data_type = "object"
+description = "Known relationships and patterns to guide analysis"
+required = false
+
+[[interface.outputs]]
+name = "relationships"
+data_type = "array"
+description = "Discovered semantic relationships with confidence scores"
+format = "json"
+
+[[interface.outputs]]
+name = "validation_report"
+data_type = "object"
+description = "Data integrity validation results"
+format = "json"
+
+[[interface.outputs]]
+name = "extraction_suggestions"
+data_type = "array"
+description = "Suggested improvements for data extraction accuracy"
+
+# Prompt templates for different analysis modes
+[prompts.semantic_analysis]
+template = """
+Analyze this HexRoll HBF table data for semantic relationships:
+
+Table Type: {table_type}
+HBF Content: {hbf_content}
+
+Context:
+- HBF files contain gaming content with Entities and Refs tables
+- Entities table has: uuid, name, image_url, description (HTML), tags
+- Refs table has: uuid, entity_id, title, link_url, tags
+- Goal: 100% accuracy in discovering Entity ↔ Refs relationships
+
+Analysis Requirements:
+1. Parse HTML content in Entity descriptions for embedded links/references
+2. Identify semantic connections between Entities and Refs based on:
+   - Title/name similarities
+   - Tag correlations
+   - HTML link analysis
+   - Content context clues
+3. Assign confidence scores (0.0-1.0) for each relationship
+4. Flag ambiguous cases requiring human validation
+
+{relationship_hints}
+
+Provide structured analysis with:
+- Discovered relationships (entity_id, ref_id, confidence, reasoning)
+- Validation concerns
+- Suggestions for improving extraction accuracy
+"""
+variables = ["table_type", "hbf_content", "relationship_hints"]
+system_prompt = "You are a data analysis expert specializing in semantic relationship discovery for gaming content. Focus on accuracy and provide detailed reasoning for all findings."
+temperature = 0.3
+max_tokens = 2000
+
+[prompts.validation_check]
+template = """
+Validate the integrity of this HBF data extraction:
+
+Entities Count: {entity_count}
+Refs Count: {refs_count}
+Discovered Relationships: {relationship_count}
+
+Data Sample:
+{data_sample}
+
+Validation Criteria:
+1. Completeness: Are all logical relationships captured?
+2. Accuracy: Do the relationships make semantic sense?
+3. Consistency: Are similar patterns handled uniformly?
+4. Coverage: What percentage of Refs are linked to Entities?
+
+Provide validation report with:
+- Coverage statistics
+- Quality assessment
+- Recommendations for improvement
+- Confidence in overall extraction accuracy
+"""
+variables = ["entity_count", "refs_count", "relationship_count", "data_sample"]
+system_prompt = "You are a data quality analyst. Focus on thorough validation and practical recommendations."
+temperature = 0.2
+max_tokens = 1500
+
+[prompts.html_parsing]
+template = """
+Parse HTML content from HexRoll Entity descriptions to extract embedded references:
+
+Entity Name: {entity_name}
+HTML Description: {html_content}
+
+Extract:
+1. All embedded links and their targets
+2. References to other game elements
+3. Structural patterns that indicate relationships
+4. Context clues for semantic connections
+
+Focus on:
+- <a> tags with href attributes
+- Text patterns indicating cross-references
+- Gaming terminology and entity relationships
+- Implicit connections based on content context
+
+Output structured data suitable for relationship mapping.
+"""
+variables = ["entity_name", "html_content"]
+system_prompt = "You are an HTML parsing specialist with expertise in gaming content structure."
+temperature = 0.1
+max_tokens = 1000
+
+# Configuration parameters
+[config]
+model = "gpt-4"
+confidence_threshold = 0.7
+max_retries = 3
+batch_size = 50
+analysis_timeout_seconds = 300
+
+# HBF-specific configuration
+[config.hbf_settings]
+entity_batch_size = 100
+refs_batch_size = 500
+require_bidirectional_validation = true
+enable_cross_table_analysis = true
+
+# Validation rules
+[config.validation_rules]
+min_relationship_confidence = 0.6
+require_semantic_reasoning = true
+flag_orphaned_refs = true
+validate_html_link_targets = true

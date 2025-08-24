@@ -96,15 +96,16 @@ impl GenerationResult {
     
     /// Create a failed generation result
     pub fn failure(asset_id: impl Into<String>, reason: impl Into<String>) -> Self {
+        let reason_str = reason.into();
         let mut result = Self {
             success: false,
             asset_id: asset_id.into(),
             output_files: Vec::new(),
             metadata: HashMap::new(),
             source: AssetSource::Failed,
-            warnings: vec![reason.into()],
+            warnings: vec![reason_str.clone()],
         };
-        result.metadata.insert("failure_reason".to_string(), Value::String(reason.into()));
+        result.metadata.insert("failure_reason".to_string(), Value::String(reason_str));
         result
     }
     

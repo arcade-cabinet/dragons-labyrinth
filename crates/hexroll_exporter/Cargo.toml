@@ -1,0 +1,50 @@
+[package]
+name = "hexroll_exporter"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "HBF to ORM data converter - generates 70k+ entities for Dragon's Labyrinth"
+
+[dependencies]
+# Core dependencies
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+scraper = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+uuid = { version = "1.18.0", features = ["v4", "serde"] }
+
+# Direct SQLite access for HBF analysis
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# AI-powered analysis integration (needs ai-bridge fixes first)
+# ai-bridge = { path = "../ai-bridge" }
+
+# Async runtime for future AI integration
+tokio = { version = "1", features = ["full"] }
+
+# CLI interface
+clap = { version = "4", features = ["derive"] }
+
+# Regex for pattern matching
+regex = "1.8"
+
+# Hex grid support
+hexx = "0.21.0"
+
+# File I/O 
+walkdir = { workspace = true }
+
+# Template generation with minijinja2
+minijinja = "2.12.0"
+
+# No game-database dependency - we generate files into it independently
+
+[[bin]]
+name = "convert_hbf"
+path = "src/bin/convert_hbf.rs"

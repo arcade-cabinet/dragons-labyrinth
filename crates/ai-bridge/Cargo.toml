@@ -6,20 +6,17 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
-description = "AI coordination and generation bridge for Dragon's Labyrinth"
+description = "Pure AI coordination and generation bridge - standalone library"
 
 [lib]
 name = "ai_bridge"
 path = "src/lib.rs"
 
-[[bin]]
-name = "overnight-generator"
-path = "src/bin/overnight-generator.rs"
-
 [dependencies]
-game-database = { path = "../game-database", optional = true }
+# ZERO internal crate dependencies - pure bridge infrastructure
+# ALWAYS uses OpenAI - no optional features
 
-# OpenAI and AI integration
+# OpenAI and AI integration - ALWAYS included
 openai_dive = "1.2"
 tiktoken-rs = "0.7"
 async-trait = "0.1"
@@ -47,14 +44,6 @@ walkdir = { workspace = true }
 regex = { workspace = true }
 sha2 = { workspace = true }
 
-# Additional dependencies for our modules
+# Additional utilities
 uuid = { version = "1.18", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
-
-# MCP client for runtime intelligence queries
-jsonrpc-core = "18.0"
-reqwest = { version = "0.12", features = ["json"] }
-
-[features]
-default = []
-with-database = ["game-database"]

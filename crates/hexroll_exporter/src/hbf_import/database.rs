@@ -1,16 +1,12 @@
-//! Database access layer for HBF SQLite files
+//! HBF SQLite Analysis - discovers entity patterns to generate ORM models
 
 use anyhow::{Context, Result};
 use sea_orm::*;
 use serde_json::Value;
 use std::collections::HashMap;
 use tracing::{info, warn};
-use uuid::Uuid;
-use chrono::Utc;
-use database_orm::*;
-use super::stats::ImportStats;
 
-/// Complete HBF snapshot data loaded from SQLite
+/// Complete HBF snapshot data loaded from SQLite - for analysis only
 #[derive(Debug)]
 pub struct HbfSnapshot {
     pub map_data: HbfMapData,
@@ -58,18 +54,7 @@ pub struct HbfRef {
     pub anchor: Option<String>,
 }
 
-/// Converted entities ready for Dragon's Labyrinth database
-pub struct DragonEntities {
-    pub hex_tiles: Vec<database_orm::hex_tiles::ActiveModel>,
-    pub settlements: Vec<database_orm::settlements::ActiveModel>,
-    pub settlement_weather: Vec<database_orm::settlements::weather::ActiveModel>,
-    pub dungeons: Vec<database_orm::dungeons::ActiveModel>,
-    pub dungeon_rooms: Vec<database_orm::dungeons::rooms::ActiveModel>,
-    pub dungeon_doorways: Vec<database_orm::dungeons::doorways::ActiveModel>,
-    pub npcs: Vec<database_orm::npcs::ActiveModel>,
-}
-
-/// Load complete HBF snapshot from SQLite file
+/// Load complete HBF snapshot from SQLite file for analysis
 pub async fn load_hbf_snapshot(hbf_path: &str) -> Result<HbfSnapshot> {
     info!("Loading HBF snapshot from: {}", hbf_path);
     
@@ -263,114 +248,4 @@ async fn load_refs_data(db: &DatabaseConnection) -> Result<Vec<HbfRef>> {
     
     info!("Loaded {} refs entries", results.len());
     Ok(results)
-}
-
-/// Import converted entities into Dragon's Labyrinth database
-pub async fn import_entities(db: &DatabaseConnection, entities: DragonEntities) -> Result<ImportStats> {
-    let mut stats = ImportStats::default();
-    
-    info!("Starting database import...");
-    
-    // Import hex tiles first (other entities may reference them)
-    if !entities.hex_tiles.is_empty() {
-        match HexTiles::insert_many(entities.hex_tiles).exec(db).await {
-            Ok(_) => {
-                stats.hex_tiles = entities.hex_tiles.len();
-                info!("Imported {} hex tiles", stats.hex_tiles);
-            }
-            Err(e) => {
-                warn!("Failed to import hex tiles: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import settlements
-    if !entities.settlements.is_empty() {
-        match Settlements::insert_many(entities.settlements).exec(db).await {
-            Ok(_) => {
-                stats.settlements = entities.settlements.len();
-                info!("Imported {} settlements", stats.settlements);
-            }
-            Err(e) => {
-                warn!("Failed to import settlements: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import settlement weather data
-    if !entities.settlement_weather.is_empty() {
-        match SettlementWeather::insert_many(entities.settlement_weather).exec(db).await {
-            Ok(_) => {
-                stats.weather_systems = entities.settlement_weather.len();
-                info!("Imported {} weather systems", stats.weather_systems);
-            }
-            Err(e) => {
-                warn!("Failed to import weather systems: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import dungeons
-    if !entities.dungeons.is_empty() {
-        match Dungeons::insert_many(entities.dungeons).exec(db).await {
-            Ok(_) => {
-                stats.dungeons = entities.dungeons.len();
-                info!("Imported {} dungeons", stats.dungeons);
-            }
-            Err(e) => {
-                warn!("Failed to import dungeons: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import dungeon rooms
-    if !entities.dungeon_rooms.is_empty() {
-        match DungeonRooms::insert_many(entities.dungeon_rooms).exec(db).await {
-            Ok(_) => {
-                stats.dungeon_rooms = entities.dungeon_rooms.len();
-                info!("Imported {} dungeon rooms", stats.dungeon_rooms);
-            }
-            Err(e) => {
-                warn!("Failed to import dungeon rooms: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import dungeon doorways
-    if !entities.dungeon_doorways.is_empty() {
-        match DungeonDoorways::insert_many(entities.dungeon_doorways).exec(db).await {
-            Ok(_) => {
-                stats.dungeon_doorways = entities.dungeon_doorways.len();
-                info!("Imported {} dungeon doorways", stats.dungeon_doorways);
-            }
-            Err(e) => {
-                warn!("Failed to import dungeon doorways: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    // Import NPCs
-    if !entities.npcs.is_empty() {
-        match Npcs::insert_many(entities.npcs).exec(db).await {
-            Ok(_) => {
-                stats.npcs = entities.npcs.len();
-                info!("Imported {} NPCs", stats.npcs);
-            }
-            Err(e) => {
-                warn!("Failed to import NPCs: {}", e);
-                stats.errors += 1;
-            }
-        }
-    }
-    
-    info!("Database import completed: {}/{} entities imported successfully", 
-          stats.total_imported(), stats.total_imported() + stats.errors);
-    
-    Ok(stats)
 }
