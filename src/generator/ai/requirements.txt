@@ -1,6 +1,6 @@
 # Dragon's Labyrinth AI Generation Framework
 # Core AI Libraries
-langchain==0.3.14
+langchain==0.3.27
 langchain-openai==0.2.14
 langgraph==0.2.69
 openai==1.58.1
