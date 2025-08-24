@@ -64,6 +64,72 @@ src/
 
 ## Your Task: HBF Parser Implementation
 
+### CRITICAL ARCHITECTURAL CHANGE (User Direction)
+The user wants proper integration, not a quick parse:
+
+1. **Move the crate** (PARTIALLY DONE):
+   - ✅ Moved `hexroll_exporter` → `crates/hbf-parser`
+   - ✅ Created `crates/hbf-parser/import/` directory
+   - ✅ Moved `nTR8nJOW.hbf` → `crates/hbf-parser/import/`
+   - ⚠️ Still need to move HTML files to `import/` directory
+
+2. **Pattern Recognition Priority**:
+   - NOT all 70k HTML files are unique - find the patterns!
+   - Create `crates/hbf-parser/patterns/` directory
+   - Identify patterns for:
+     - Dungeons (rooms, layouts, themes)
+     - Inns (services, NPCs, rumors)
+     - NPCs (stat blocks, personalities, dialogue)
+     - Weather events
+     - Random encounters
+     - Treasure hoards
+     - Magic items
+     - Settlements
+     - Wilderness areas
+   - Store patterns as RON or TOML (determine optimal)
+
+3. **Build.rs Implementation**:
+   - Load HBF database
+   - Load pattern definitions
+   - Generate Bevy ECS systems
+   - Generate hex map data structures
+   - Output to `src/generated/` within the crate
+
+### NEW APPROACH: Pattern-Based Generation
+
+Instead of parsing all 70k files at runtime, the user wants:
+
+```rust
+// crates/hbf-parser/build.rs
+fn main() {
+    // 1. Analyze HTML files to find patterns
+    let patterns = extract_patterns("import/hbf_export_data/entities/");
+    
+    // 2. Save patterns to RON/TOML
+    save_patterns("patterns/", patterns);
+    
+    // 3. Generate Rust code from patterns
+    generate_dungeon_systems(patterns.dungeons);
+    generate_npc_systems(patterns.npcs);
+    generate_encounter_tables(patterns.encounters);
+    generate_hex_features(patterns.terrain);
+    
+    // 4. Output to src/generated/
+    println!("cargo:rerun-if-changed=import/");
+    println!("cargo:rerun-if-changed=patterns/");
+}
+```
+
+**Pattern Examples to Find**:
+- **Dungeon Rooms**: "Chamber", "Corridor", "Hall", "Vault"
+- **NPCs**: `<div class="statblock">`, CR ratings, stat arrays
+- **Treasures**: "gp worth", "Magic Items:", "artifacts"
+- **Encounters**: "will attack", "hostile", "friendly"
+- **Settlements**: "Inn", "Tavern", "Shop", "Temple"
+- **Features**: "ruins", "cave", "tower", "bridge"
+
+## Your Task: HBF Parser Implementation
+
 ### Phase 1: Analysis (✅ COMPLETED BY USER)
 
 **Discovered Structure**:
@@ -320,18 +386,41 @@ async fn parse_html_batch(files: Vec<PathBuf>) -> Result<Vec<ParsedContent>> {
 - `crates/dragons-docs/book/design/` - Full design specs
 - `crates/dragons-docs/book/tech/` - Architecture details
 
-## Workflow
+## Workflow (UPDATED)
 
-1. **Start**: Wait for `/hbf-export/` directory to appear
-2. **Analyze**: Examine SQLite schema and sample HTML files
-3. **Design**: Create parsing strategy document
-4. **Implement**: Build `hbf-parser` crate
-5. **Test**: Validate with subset of data
-6. **Scale**: Process full dataset
-7. **Integrate**: Connect to game systems
-8. **Validate**: Ensure narrative consistency
-9. **Document**: Update memory banks with progress
-10. **Commit**: Make checkpoint commits frequently
+1. **Complete Migration**: 
+   - Move `hbf-export/hbf_export_data/` → `crates/hbf-parser/import/`
+   - Update `Cargo.toml` to include in workspace
+   - Add to git and commit
+
+2. **Pattern Discovery Phase**:
+   - Sample 100-200 HTML files from each category
+   - Identify common HTML structures and patterns
+   - Document pattern templates in `patterns/README.md`
+   - Create RON/TOML definitions for each pattern type
+
+3. **Build.rs Implementation**:
+   - Create pattern extractor functions
+   - Generate Rust code from patterns
+   - Create ECS component definitions
+   - Generate encounter tables and loot tables
+   - Output to `src/generated/`
+
+4. **Integration**:
+   - Connect generated systems to existing game
+   - Map to 180-level progression
+   - Add horror progression overlays
+   - Test with sample data
+
+5. **Validation**:
+   - Ensure all major content types are captured
+   - Verify pattern coverage (aim for 90%+ of files)
+   - Test generated code compiles and runs
+
+6. **Documentation**:
+   - Update memory banks with discovered patterns
+   - Document pattern format for future content
+   - Create usage examples
 
 ## Environment Variables
 - `OPENAI_API_KEY` - Available for content enhancement
