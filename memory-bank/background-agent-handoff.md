@@ -7,8 +7,17 @@ You are a background agent tasked with processing a massive HBF (Hexroll Backpac
 
 ## Input Data Location
 - **Primary Input**: `/hbf-export/` (repository root)
-- **Expected Format**: SQLite database with embedded HTML content
-- **File Count**: ~70,000 HTML files containing world data
+- **SQLite Database**: `nTR8nJOW.hbf` (24MB)
+  - `Entities` table: 70,801 records (uuid TEXT PRIMARY KEY, value TEXT)
+  - `Refs` table: 1,570 records (value, details, uuid, type, icon, anchor)
+- **HTML Files**: `/hbf-export/hbf_export_data/entities/` - 70,800 HTML files
+  - Named by UUID (e.g., `1l4YQODC.html`)
+  - Contains dungeon rooms, NPCs, locations, treasures
+  - Fully rendered HTML with stats, descriptions, rolls
+- **JSON Files**:
+  - `map.json`: 146KB hex map with tiles, regions, realms, borders
+  - `refs.json`: 277KB reference/search metadata
+- **Exporter Tool**: `hexroll_exporter/` - Rust crate for processing HBF files
 - **Data Types**: Maps, NPCs, settlements, dungeons, encounters, items, quests
 
 ## Technical Stack
@@ -55,18 +64,47 @@ src/
 
 ## Your Task: HBF Parser Implementation
 
-### Phase 1: Analysis
-1. **Examine SQLite Schema**
-   ```rust
-   // Create crate: hbf-parser
-   // Dependencies: sqlx, serde, html_parser, regex
+### Phase 1: Analysis (✅ COMPLETED BY USER)
+
+**Discovered Structure**:
+1. **SQLite Schema**:
+   ```sql
+   CREATE TABLE Entities (uuid TEXT PRIMARY KEY, value TEXT);
+   CREATE TABLE Refs (value TEXT, details TEXT, uuid TEXT, type TEXT, icon TEXT, anchor TEXT);
    ```
 
-2. **Document Structure**
-   - Map table relationships
-   - Identify primary content tables
-   - Document HTML content patterns
-   - Note any JSON/XML embedded data
+2. **Key Entities**:
+   - `map` entity: Contains complete hex map as JSON (146KB)
+   - Individual entities: Most have empty values in DB, content is in HTML files
+   - Cross-references in Refs table for search/navigation
+
+3. **HTML Content Pattern** (from `1l4YQODC.html`):
+   ```html
+   <a class="map-coords" hex="ysvG50Pq" x="176" y="-25" zoom="2">
+   <h4><span id="editable-title">Chamber</span></h4>
+   <h5>Foreshadowing</h5>
+   <h5>Description</h5>
+   <blockquote>...</blockquote>
+   <div class="monster-block">...</div>
+   <ul>Monster Hoard: coins, artifacts, magic items</ul>
+   ```
+
+4. **Map JSON Structure** (from `map.json`):
+   ```json
+   {
+     "map": [{
+       "x": 0, "y": 0,
+       "type": "JungleHex",
+       "uuid": "gDhlZths",
+       "feature": "Other",
+       "rivers": [2, 1],
+       "trails": [2, 5],
+       "region": "FstfgXXx",
+       "realm": "X7li5Fcx"
+     }],
+     "realms": {}, "regions": {}, "borders": {}
+   }
+   ```
 
 ### Phase 2: Data Extraction
 1. **Core Entities to Extract**:
@@ -132,23 +170,36 @@ HexrollDungeon → Labyrinth {
 
 ### Phase 4: Integration Pipeline
 
-1. **Create Import Module**:
+1. **Use Existing Hexroll Exporter**:
+   The user has provided `hexroll_exporter` crate that already handles HBF parsing:
    ```rust
-   // src/import/hbf.rs
-   pub struct HbfImporter {
-       db_path: PathBuf,
-       progress: Arc<Mutex<ImportProgress>>,
+   // hexroll_exporter/src/loader.rs - Already implemented!
+   pub struct HexrollSnapshot {
+       pub map: MapData,
+       pub entities: HtmlEntities, // HashMap<String, String>
+       pub refs: Vec<RefRecord>,
    }
    
-   impl HbfImporter {
-       pub async fn import(&self) -> Result<GameWorld, ImportError> {
-           // 1. Connect to SQLite
-           // 2. Parse tables
-           // 3. Extract HTML content
-           // 4. Map to ECS
-           // 5. Validate consistency
-       }
+   pub struct MapTile {
+       pub x: i32, pub y: i32,
+       pub biome: String,
+       pub uuid: String,
+       pub feature: String,
+       pub rivers: Vec<u8>,
+       pub trails: Vec<u8>,
+       pub region: Option<String>,
+       pub realm: Option<String>,
    }
+   ```
+   
+   **Usage**:
+   ```rust
+   use hexroll_exporter::loader::load_snapshot;
+   
+   let snapshot = load_snapshot(&Path::new("nTR8nJOW.hbf"))?;
+   // snapshot.map.tiles - All hex tiles
+   // snapshot.entities - All HTML content by UUID
+   // snapshot.refs - Search/reference metadata
    ```
 
 2. **Progress Tracking**:
