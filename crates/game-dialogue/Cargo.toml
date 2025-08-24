@@ -1,12 +1,12 @@
 [package]
-name = "game-content-generated"
+name = "game-dialogue"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
-description = "AI-powered narrative content generation for Dragon's Labyrinth"
+description = "Dialogue generation and YarnSpinner integration for Dragon's Labyrinth"
 
 [[bin]]
 name = "generate-content"
@@ -36,7 +36,7 @@ uuid = { version = "1.18", features = ["v4", "serde"] }
 tracing = { workspace = true }
 
 # Template engine
-minijinja = "2.11"
+minijinja = "2.12"
 
 # Compression for token optimization
 flate2 = "1.1"
@@ -44,7 +44,7 @@ tiktoken-rs = "0.7.0"
 regex.workspace = true
 md5 = "0.8.0"
 chrono.workspace = true
-game-content-static = { version = "0.1.0", path = "../game-content-static" }
+game-assets = { version = "0.1.0", path = "../game-assets" }
 
 [dev-dependencies]
 tokio-test = "0.4"

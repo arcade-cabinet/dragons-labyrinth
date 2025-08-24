@@ -1,14 +1,15 @@
 [workspace]
 members = [
     "crates/blender-bridge",
-    "crates/game-engine",
+    "crates/ai-bridge", 
+    "crates/audio-bridge",
     "crates/game-assets",
-    "crates/build-tools",
-    "crates/game-database", "crates/database-orm",
+    "crates/game-dialogue",
+    "crates/game-database",
+    "crates/database-orm",
+    "crates/game-engine",
     "crates/style-guide", 
     "crates/dragons-docs", 
-    "crates/game-content-static",
-    "crates/game-content-generated",
     "crates/hbf-parser",
 ]
 
@@ -52,9 +53,9 @@ regex = "1.11"
 sha2 = "0.10"
 
 # HTML parsing - used by hbf-parser
-scraper = "0.18"
-ron = "0.8"
-rusqlite = { version = "0.31", features = ["bundled"] }
+scraper = "0.24"
+ron = "0.10"
+rusqlite = { version = "0.37", features = ["bundled"] }
 
 # Output utilities - used by build tools and game crates
 colored = "3.0"

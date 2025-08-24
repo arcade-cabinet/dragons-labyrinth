@@ -1,15 +1,15 @@
 [package]
-name = "build-tools"
+name = "ai-bridge"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
-description = "AI-powered build tools for Dragon's Labyrinth asset generation"
+description = "AI coordination and generation bridge for Dragon's Labyrinth"
 
 [lib]
-name = "build_tools"
+name = "ai_bridge"
 path = "src/lib.rs"
 
 [[bin]]
