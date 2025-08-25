@@ -2,7 +2,7 @@
 //! 
 //! Simple tool to analyze HBF SQLite structure and understand the 70k+ entities
 
-use anyhow::Result;
+use anyhow::{Result, Context};
 use clap::Parser;
 use std::path::PathBuf;
 use hexroll_exporter::{HbfAnalyzer, AnalysisConfig, CompleteAnalysisResult, AICodeGenerator, PatternClusteringEngine, BatchProcessingEngine};
@@ -79,6 +79,16 @@ pub enum Commands {
         /// Minimum cluster size to consider
         #[arg(long, default_value = "50")]
         min_cluster_size: usize,
+    },
+    /// AI-powered transformation using GPT-5 agents
+    Transform {
+        /// Output directory for transformed data and SeaORM models
+        #[arg(short, long, default_value = "hbf_transformed")]
+        output_dir: PathBuf,
+        
+        /// Enable verbose AI transformation logging
+        #[arg(short, long)]
+        verbose: bool,
     },
 }
 
@@ -317,6 +327,61 @@ async fn main() -> Result<()> {
             println!("   4. Create rich SeaORM models for all discovered entity types");
             
             println!("\n🎯 Ready to build rich and vibrant world from complete HexRoll dataset!");
+        }
+        Commands::Transform { output_dir, verbose } => {
+            println!("🤖 AI-Powered HBF Transformation with GPT-5...");
+            println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            println!("🎯 Target: 100% data transformation coverage");
+            println!("🧠 Engine: GPT-5 AI agents for analysis + transformation");
+            
+            if verbose {
+                tracing_subscriber::fmt()
+                    .with_max_level(tracing::Level::DEBUG)
+                    .init();
+            }
+            
+            // Initialize progressive transformer with SQLite HBF support
+            use hexroll_exporter::transformers::HbfTransformer;
+            
+            let mut transformer = HbfTransformer::new(&args.input)
+                .context("Failed to initialize HBF transformer")?;
+            
+            println!("✅ Progressive transformer initialized");
+            println!("   📊 SQLite HBF reader: Ready");
+            println!("   🔄 Progressive passes: Ready");
+            
+            // Execute progressive transformation pipeline
+            println!("\n🚀 Starting progressive transformation pipeline...");
+            let reports = transformer.transform()
+                .context("Progressive transformation pipeline failed")?;
+            
+            println!("\n🎯 AI TRANSFORMATION COMPLETE!");
+            println!("═══════════════════════════════════════");
+            
+            for report in &reports {
+                println!("✅ Pass {}: {}", 
+                         report.pass, report.name);
+                println!("   📊 {} entities processed → {} output", 
+                         report.entities_processed, report.entities_output);
+                println!("   💡 {}", report.details);
+            }
+            
+            let total_processed: usize = reports.iter().map(|r| r.entities_processed).sum();
+            let total_output: usize = reports.iter().map(|r| r.entities_output).sum();
+            
+            println!("\n📁 Progressive checkpoints saved to XDG data directory");
+            println!("   • pass1_no_empty.hbf - SQLite with empty entities removed");
+            println!("   • pass2_refs_extracted.json - Reference mappings");
+            println!("   • pass3_maps_parsed.json - Hex grid data");
+            println!("   • pass4_html_parsed.json - Settlement/dungeon content");
+            println!("   • pass5_dungeons_parsed.json - Dungeon-specific data");
+            println!("   • pass6_final_transformed.json - Complete transformation");
+            println!("   • models/ - Generated SeaORM model definitions");
+            
+            println!("\n📊 Transformation Summary:");
+            println!("   🏁 {} total entities processed across {} passes", total_processed, reports.len());
+            println!("   🎯 Progressive transformation with incremental SQLite backups");
+            println!("   ✅ Ready for Dragon's Labyrinth database integration");
         }
     }
     

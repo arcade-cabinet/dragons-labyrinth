@@ -4,6 +4,7 @@
 //! ORM models plus data files for Dragon's Labyrinth horror RPG.
 
 pub mod analyzer;
+pub mod models;
 pub mod templates; 
 pub mod transformers;
 

@@ -38,22 +38,27 @@ impl EmptyRemover {
             .collect()
     }
 
-    /// Check if an entity is empty (only has metadata fields)
+    /// Check if an entity is empty (only has uuid, no content)
     fn is_empty_entity(&self, entity: &Value) -> bool {
         let obj = match entity.as_object() {
             Some(o) => o,
             None => return false,
         };
 
-        // Empty entities have exactly 3 fields: created_at, updated_at, uuid
-        if obj.len() != 3 {
-            return false;
+        // Check if content field is empty/null
+        if let Some(content_obj) = obj.get("content") {
+            if let Some(content_map) = content_obj.as_object() {
+                if let Some(content_str) = content_map.get("content") {
+                    if let Some(content_text) = content_str.as_str() {
+                        // Empty if content is null, empty string, or just whitespace
+                        return content_text.trim().is_empty() || content_text == "null";
+                    }
+                }
+            }
         }
-
-        // Must have these exact fields
-        obj.contains_key("created_at") 
-            && obj.contains_key("updated_at") 
-            && obj.contains_key("uuid")
+        
+        // Also empty if no content field at all
+        !obj.contains_key("content") || obj.get("content").is_none()
     }
 
     /// Get statistics about removed entities
@@ -65,7 +70,7 @@ impl EmptyRemover {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct EmptyRemovalStats {
     pub removed_count: usize,
     pub removed_uuids: HashSet<String>,

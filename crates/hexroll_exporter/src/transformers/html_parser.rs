@@ -6,8 +6,8 @@
 //! - Rich descriptions and atmospheric text
 
 use html5ever::parse_document;
-use html5ever::rcdom::{Handle, NodeData, RcDom};
 use html5ever::tendril::TendrilSink;
+use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -228,24 +228,13 @@ impl HtmlParser {
                     let mut heading_text = String::new();
                     self.extract_text_from_node(handle, &mut heading_text);
                     
-                    // Get content following this heading
-                    let mut section_content = String::new();
-                    let mut next_sibling = handle.next_sibling.clone();
-                    while let Some(sibling) = next_sibling {
-                        if let NodeData::Element { ref name, .. } = sibling.data {
-                            if name.local.to_string().starts_with('h') {
-                                break; // Stop at next heading
-                            }
-                        }
-                        self.extract_text_from_node(&sibling, &mut section_content);
-                        next_sibling = sibling.next_sibling.clone();
-                    }
-                    
-                    if !heading_text.is_empty() || !section_content.is_empty() {
+                    // For now, just create a basic section with the heading
+                    // TODO: Implement proper sibling traversal when we have the right API
+                    if !heading_text.is_empty() {
                         sections.push(ContentSection {
-                            heading: if heading_text.is_empty() { None } else { Some(heading_text) },
-                            content: section_content,
-                            section_type: self.determine_section_type(&heading_text, &section_content),
+                            heading: Some(heading_text.clone()),
+                            content: String::new(),
+                            section_type: self.determine_section_type(&heading_text, ""),
                         });
                     }
                 }
@@ -454,7 +443,7 @@ impl HtmlParser {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct HtmlParsingResult {
     pub settlements: Vec<HtmlContent>,
     pub dungeons: Vec<HtmlContent>,

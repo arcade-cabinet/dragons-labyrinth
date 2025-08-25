@@ -698,7 +698,7 @@ impl DungeonParser {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct DungeonParsingResult {
     pub dungeons: Vec<DungeonData>,
     pub total_rooms: usize,

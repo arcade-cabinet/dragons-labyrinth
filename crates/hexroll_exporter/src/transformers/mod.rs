@@ -6,9 +6,11 @@ pub mod json_parser;
 pub mod html_parser;
 pub mod dungeon_parser;
 pub mod progressive;
+pub mod ai_progressive;
 
-// Re-export the main transformer types
+// Re-export the main transformer types  
 pub use progressive::{HbfTransformer, TransformReport};
+pub use ai_progressive::{AiHbfTransformer, TransformReport as AiTransformReport};
 
 // Re-export individual parsers for direct use
 pub use empty_remover::{EmptyRemover, EmptyRemovalStats};

@@ -4,13 +4,13 @@
 //! each building on the previous to extract increasingly rich game content.
 
 use super::{
-    empty_remover::{EmptyRemover, EmptyRemovalStats},
-    refs_extractor::{RefsExtractor, RefsExtractionResult},
-    json_parser::{JsonParser, JsonParsingResult},
-    html_parser::{HtmlParser, HtmlParsingResult},
-    dungeon_parser::{DungeonParser, DungeonParsingResult},
+    empty_remover::EmptyRemover,
+    refs_extractor::RefsExtractor,
+    json_parser::JsonParser,
+    html_parser::HtmlParser,
+    dungeon_parser::DungeonParser,
 };
-use crate::models::hbf::{HbfData, HbfEntity, HbfRef};
+use crate::models::hbf::{HbfData, HbfRef};
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -56,52 +56,297 @@ impl HbfTransformer {
         })
     }
 
-    /// Run the complete transformation pipeline
+    /// Run the complete transformation pipeline using existing analyzer clustering
     pub fn transform(&mut self) -> Result<Vec<TransformReport>> {
-        println!("Starting progressive HBF transformation...");
+        println!("🚀 Starting Progressive HBF Transformation with Pattern Clustering...");
         
-        // Load the original HBF data
-        let hbf_data = self.load_hbf_data()?;
+        // Pass 1: Use existing analyzer to cluster entities by pattern
+        let clusters = self.analyze_and_cluster_entities()?;
         
-        // Pass 1: Remove empty entities
-        let pass1_data = self.pass1_remove_empty(hbf_data)?;
+        // Pass 2: Process each cluster as a batch using transformers
+        let transformed_clusters = self.process_clusters_with_transformers(clusters)?;
         
-        // Pass 2: Extract and process Refs
-        let pass2_data = self.pass2_extract_refs(pass1_data)?;
+        // Pass 3: Generate SeaORM models from clustered data
+        let _models = self.generate_models_from_clusters(transformed_clusters)?;
         
-        // Pass 3: Parse JSON map entities
-        let pass3_data = self.pass3_parse_json(pass2_data)?;
-        
-        // Pass 4: Parse HTML content entities
-        let pass4_data = self.pass4_parse_html(pass3_data)?;
-        
-        // Pass 5: Extract dungeon-specific content
-        let pass5_data = self.pass5_parse_dungeons(pass4_data)?;
-        
-        // Pass 6: Generate final SeaORM models
-        let _final_data = self.pass6_generate_models(pass5_data)?;
-        
-        println!("\nTransformation complete!");
-        println!("Results saved to: {}", self.output_dir.display());
+        println!("\n✅ Cluster-based transformation complete!");
+        println!("📁 Results saved to: {}", self.output_dir.display());
         
         Ok(self.reports.clone())
     }
 
-    /// Load HBF data from file
+    /// Pass 1: Use existing analyzer pattern clustering instead of manual parsing  
+    fn analyze_and_cluster_entities(&mut self) -> Result<Vec<HTMLPatternCluster>> {
+        self.current_pass = 1;
+        println!("\n=== Pass 1: Pattern Clustering with Existing Analyzer ===");
+        
+        use crate::analyzer::{HbfAnalyzer, PatternClusteringEngine, CoreAnalyzer};
+        
+        // Use existing analyzer infrastructure
+        let analyzer = HbfAnalyzer::new(&self.hbf_path)?;
+        let analysis = analyzer.analyze_structure(2)?;
+        
+        println!("📊 Basic analysis: {} entities, {} refs", 
+                 analysis.table_info.get("Entities").map(|t| t.record_count).unwrap_or(0),
+                 analysis.table_info.get("Refs").map(|t| t.record_count).unwrap_or(0));
+        
+        // Use existing pattern clustering
+        let conn = CoreAnalyzer::open_hbf_connection(&self.hbf_path)?;
+        let mut analysis_mut = analysis.clone();
+        let html_clusters = PatternClusteringEngine::analyze_html_pattern_clusters(&conn, &mut analysis_mut)?;
+        
+        // Print found clusters
+        for cluster in &html_clusters {
+            println!("🎯 Found cluster: {} ({} entities)", cluster.cluster_id, cluster.entity_count);
+        }
+        
+        // Create report
+        let report = TransformReport {
+            pass: 1,
+            name: "Pattern Clustering Analysis".to_string(),
+            entities_processed: analysis.total_records,
+            entities_output: html_clusters.len(),
+            details: format!("Clustered {} entities into {} semantic groups using existing analyzer", 
+                           analysis.total_records, html_clusters.len()),
+            stats: None,
+        };
+        self.reports.push(report);
+        
+        Ok(html_clusters)
+    }
+
+    /// Pass 2: Process each cluster using appropriate transformer
+    fn process_clusters_with_transformers(&mut self, clusters: Vec<HTMLPatternCluster>) -> Result<Vec<TransformedCluster>> {
+        self.current_pass = 2;
+        println!("\n=== Pass 2: Batch Transform Clusters ===");
+        
+        let mut transformed = Vec::new();
+        use rusqlite::Connection;
+        let conn = Connection::open(&self.hbf_path)?;
+        
+        for cluster in &clusters {
+            println!("🔄 Transforming cluster: {} ({} entities)", cluster.cluster_id, cluster.entity_count);
+            
+            // Build SQL to get cluster entities
+            let where_clause = self.build_cluster_where_clause(&cluster);
+            let entities_sql = format!("SELECT uuid, value FROM Entities WHERE {}", where_clause);
+            
+            // Load cluster entities using SQL
+            let mut entities = Vec::new();
+            let mut stmt = conn.prepare(&entities_sql)?;
+            let rows = stmt.query_map([], |row| {
+                let uuid: String = row.get(0)?;
+                let value: String = row.get(1)?;
+                Ok(serde_json::json!({
+                    "uuid": uuid,
+                    "content": {"content": value}
+                }))
+            })?;
+            
+            for row in rows {
+                entities.push(row?);
+            }
+            
+            // Transform based on cluster patterns using existing transformers
+            let transformed_data = if cluster.cluster_id.contains("empty") {
+                println!("   ❌ Removing {} empty entities", entities.len());
+                Vec::new() // Remove empty entities
+            } else if cluster.semantic_tags.iter().any(|tag| tag.contains("dungeon")) {
+                println!("   🏰 Processing {} dungeon entities", entities.len());
+                let mut parser = DungeonParser::new();
+                let result = parser.process(entities);
+                println!("      → {} dungeons with {} rooms", result.dungeons.len(), result.total_rooms);
+                result.dungeons.into_iter().map(|d| serde_json::to_value(d).unwrap()).collect()
+            } else {
+                println!("   🏗️  Processing {} HTML entities", entities.len());
+                let mut parser = HtmlParser::new();
+                let result = parser.process(entities);
+                println!("      → {} settlements, {} dungeons", result.settlements.len(), result.dungeons.len());
+                let mut all_html: Vec<Value> = Vec::new();
+                all_html.extend(result.settlements.into_iter().map(|s| serde_json::to_value(s).unwrap()));
+                all_html.extend(result.dungeons.into_iter().map(|d| serde_json::to_value(d).unwrap()));
+                all_html.extend(result.other_content.into_iter().map(|o| serde_json::to_value(o).unwrap()));
+                all_html
+            };
+            
+            // Save cluster checkpoint as HBF
+            self.save_cluster_checkpoint(&transformed_data, &cluster.cluster_id)?;
+            
+            transformed.push(TransformedCluster {
+                cluster_id: cluster.cluster_id.clone(),
+                original_count: cluster.entity_count,
+                transformed_count: transformed_data.len(),
+                data: transformed_data,
+            });
+        }
+        
+        let report = TransformReport {
+            pass: 2,
+            name: "Cluster Batch Transformation".to_string(),
+            entities_processed: clusters.iter().map(|c| c.entity_count).sum(),
+            entities_output: transformed.iter().map(|c| c.transformed_count).sum(),
+            details: format!("Batch processed {} clusters using existing transformers", clusters.len()),
+            stats: None,
+        };
+        self.reports.push(report);
+        
+        Ok(transformed)
+    }
+
+    /// Pass 3: Generate models from transformed clusters
+    fn generate_models_from_clusters(&mut self, clusters: Vec<TransformedCluster>) -> Result<Vec<ModelDefinition>> {
+        self.current_pass = 3;
+        println!("\n=== Pass 3: Generate SeaORM Models from Clusters ===");
+        
+        let models = self.generate_seaorm_models(&TransformedData {
+            entities: clusters.iter().flat_map(|c| c.data.clone()).collect(),
+            refs: Vec::new(),
+            metadata: HashMap::new(),
+        })?;
+        
+        self.save_models(&models)?;
+        
+        let report = TransformReport {
+            pass: 3,
+            name: "Generate SeaORM Models".to_string(),
+            entities_processed: clusters.iter().map(|c| c.transformed_count).sum(),
+            entities_output: models.len(),
+            details: format!("Generated {} SeaORM models from {} transformed clusters", models.len(), clusters.len()),
+            stats: None,
+        };
+        self.reports.push(report);
+        
+        Ok(models)
+    }
+
+    /// Determine transformation approach from pattern cluster
+    fn should_transform_as_html(&self, cluster: &HTMLPatternCluster) -> bool {
+        cluster.semantic_tags.iter().any(|tag| tag.contains("html")) || 
+        !cluster.cluster_id.contains("empty")
+    }
+
+    /// Check if cluster contains dungeon content
+    fn is_dungeon_cluster(&self, cluster: &HTMLPatternCluster) -> bool {
+        cluster.semantic_tags.iter().any(|tag| tag.contains("dungeon"))
+    }
+
+    /// Build WHERE clause for cluster entities
+    fn build_cluster_where_clause(&self, cluster: &HTMLPatternCluster) -> String {
+        // Use the cluster's pattern indicators to build SQL
+        let mut conditions = Vec::new();
+        
+        for tag in &cluster.semantic_tags {
+            conditions.push(format!("value LIKE '%{}%'", tag));
+        }
+        
+        if conditions.is_empty() {
+            "1=1".to_string() // All entities if no specific conditions
+        } else {
+            conditions.join(" OR ")
+        }
+    }
+
+    /// Save cluster checkpoint
+    fn save_cluster_checkpoint(&self, data: &[Value], cluster_name: &str) -> Result<()> {
+        use rusqlite::Connection;
+        
+        let checkpoint_path = self.backup_dir.join(format!("cluster_{}.hbf", cluster_name));
+        let conn = Connection::open(&checkpoint_path)?;
+        
+        // Create simplified table for cluster data
+        conn.execute(
+            "CREATE TABLE ClusterData (
+                uuid TEXT PRIMARY KEY,
+                cluster_id TEXT,
+                transformed_data TEXT
+            )",
+            [],
+        )?;
+        
+        // Insert cluster data
+        for entity in data {
+            if let Some(uuid) = entity.get("uuid").and_then(|v| v.as_str()) {
+                conn.execute(
+                    "INSERT INTO ClusterData (uuid, cluster_id, transformed_data) VALUES (?1, ?2, ?3)",
+                    rusqlite::params![uuid, cluster_name, serde_json::to_string(entity)?],
+                )?;
+            }
+        }
+        
+        println!("      💾 Cluster checkpoint: {} ({} entities)", cluster_name, data.len());
+        Ok(())
+    }
+
+    /// Load HBF data from SQLite file
     fn load_hbf_data(&self) -> Result<HbfData> {
-        println!("Loading HBF data from: {}", self.hbf_path.display());
+        use rusqlite::Connection;
+        use crate::analyzer::CoreAnalyzer;
         
-        let content = fs::read_to_string(&self.hbf_path)
-            .with_context(|| format!("Failed to read HBF file: {}", self.hbf_path.display()))?;
+        println!("Loading HBF SQLite from: {}", self.hbf_path.display());
         
-        let data: HbfData = serde_json::from_str(&content)
-            .with_context(|| "Failed to parse HBF JSON")?;
+        let conn = Connection::open(&self.hbf_path)?;
         
-        println!("Loaded {} entities and {} refs", 
-                 data.Entities.len(), 
-                 data.Refs.as_ref().map(|r| r.len()).unwrap_or(0));
+        // Load entities using correct HBF schema: uuid, value
+        let mut entities = Vec::new();
+        let mut stmt = conn.prepare("SELECT uuid, value FROM Entities")?;
+        let rows = stmt.query_map([], |row| {
+            let uuid: String = row.get(0)?;
+            let value_str: Option<String> = row.get(1).ok();
+            
+            let mut content = std::collections::HashMap::new();
+            if let Some(content_text) = value_str {
+                content.insert("content".to_string(), serde_json::Value::String(content_text));
+            }
+            
+            Ok(crate::models::hbf::HbfEntity {
+                uuid,
+                created_at: None,
+                updated_at: None,
+                content,
+            })
+        })?;
         
-        Ok(data)
+        for row in rows {
+            entities.push(row?);
+        }
+        
+        // Load refs using correct schema: value, details, uuid, type, icon, anchor
+        let mut refs = Vec::new();
+        let mut refs_stmt = conn.prepare("SELECT uuid, type, value, details FROM Refs")?;
+        let refs_rows = refs_stmt.query_map([], |row| {
+            let uuid: String = row.get(0)?;
+            let ref_type: Option<String> = row.get(1).ok();
+            let value: Option<String> = row.get(2).ok();
+            let details: Option<String> = row.get(3).ok();
+            
+            let mut data = std::collections::HashMap::new();
+            if let Some(v) = value {
+                data.insert("value".to_string(), serde_json::Value::String(v));
+            }
+            if let Some(d) = details {
+                data.insert("details".to_string(), serde_json::Value::String(d));
+            }
+            
+            Ok(crate::models::hbf::HbfRef {
+                uuid,
+                entity_uuid: None,
+                target_uuid: None,
+                ref_type,
+                data,
+            })
+        })?;
+        
+        for row in refs_rows {
+            refs.push(row?);
+        }
+        
+        println!("Loaded {} entities and {} refs from SQLite", entities.len(), refs.len());
+        
+        Ok(HbfData {
+            Entities: entities,
+            Refs: Some(refs),
+            metadata: std::collections::HashMap::new(),
+        })
     }
 
     /// Pass 1: Remove empty placeholder entities
@@ -204,6 +449,7 @@ impl HbfTransformer {
         
         println!("Found {} potential JSON entities", json_entities.len());
         
+        let entities_processed = json_entities.len();
         let result = parser.process(json_entities);
         
         println!("{}", result.summary());
@@ -215,7 +461,7 @@ impl HbfTransformer {
         let report = TransformReport {
             pass: 3,
             name: "Parse JSON Maps".to_string(),
-            entities_processed: json_entities.len(),
+            entities_processed,
             entities_output: result.maps.len(),
             details: result.summary(),
             stats: Some(serde_json::to_value(&result)?),
@@ -248,6 +494,7 @@ impl HbfTransformer {
         
         println!("Found {} potential HTML entities", html_entities.len());
         
+        let entities_processed = html_entities.len();
         let result = parser.process(html_entities);
         
         println!("{}", result.summary());
@@ -259,7 +506,7 @@ impl HbfTransformer {
         let report = TransformReport {
             pass: 4,
             name: "Parse HTML Content".to_string(),
-            entities_processed: html_entities.len(),
+            entities_processed,
             entities_output: result.settlements.len() + result.dungeons.len() + result.other_content.len(),
             details: result.summary(),
             stats: Some(serde_json::to_value(&result)?),
@@ -292,6 +539,7 @@ impl HbfTransformer {
         
         println!("Found {} potential dungeon entities", dungeon_entities.len());
         
+        let entities_processed = dungeon_entities.len();
         let result = parser.process(dungeon_entities);
         
         println!("{}", result.summary());
@@ -303,7 +551,7 @@ impl HbfTransformer {
         let report = TransformReport {
             pass: 5,
             name: "Parse Dungeons".to_string(),
-            entities_processed: dungeon_entities.len(),
+            entities_processed,
             entities_output: result.dungeons.len(),
             details: result.summary(),
             stats: Some(serde_json::to_value(&result)?),
@@ -522,12 +770,50 @@ impl HbfTransformer {
         Ok(())
     }
 
-    /// Save checkpoint data
+    /// Save checkpoint as new HBF SQLite file
     fn save_checkpoint(&self, data: &[Value], name: &str) -> Result<()> {
-        let checkpoint_path = self.backup_dir.join(format!("{}.json", name));
-        let json = serde_json::to_string_pretty(&data)?;
-        fs::write(&checkpoint_path, json)?;
-        println!("Checkpoint saved: {}", checkpoint_path.display());
+        use rusqlite::Connection;
+        
+        let checkpoint_path = self.backup_dir.join(format!("{}.hbf", name));
+        let conn = Connection::open(&checkpoint_path)?;
+        
+        // Create tables
+        conn.execute(
+            "CREATE TABLE Entities (
+                uuid TEXT PRIMARY KEY,
+                created_at INTEGER,
+                updated_at INTEGER,
+                content TEXT
+            )",
+            [],
+        )?;
+        
+        conn.execute(
+            "CREATE TABLE Refs (
+                uuid TEXT PRIMARY KEY,
+                entity_uuid TEXT,
+                type TEXT
+            )",
+            [],
+        )?;
+        
+        // Insert transformed entities
+        for entity in data {
+            if let Some(obj) = entity.as_object() {
+                let uuid = obj.get("uuid").and_then(|v| v.as_str()).unwrap_or("");
+                let created_at = obj.get("created_at").and_then(|v| v.as_i64());
+                let updated_at = obj.get("updated_at").and_then(|v| v.as_i64());
+                let content = obj.get("content").and_then(|v| v.as_str()).unwrap_or("");
+                
+                conn.execute(
+                    "INSERT INTO Entities (uuid, created_at, updated_at, content) VALUES (?1, ?2, ?3, ?4)",
+                    rusqlite::params![uuid, created_at, updated_at, content],
+                )?;
+            }
+        }
+        
+        println!("✅ Progressive HBF checkpoint saved: {}", checkpoint_path.display());
+        println!("   📊 {} entities in transformed state", data.len());
         Ok(())
     }
 
@@ -542,7 +828,7 @@ impl HbfTransformer {
 }
 
 /// Intermediate transformed data structure
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 struct TransformedData {
     entities: Vec<Value>,
     refs: Vec<HbfRef>,
@@ -550,6 +836,7 @@ struct TransformedData {
 }
 
 /// Model definition for code generation
+#[derive(Debug, Clone, Serialize)]
 struct ModelDefinition {
     name: String,
     table_name: String,
@@ -611,4 +898,15 @@ impl TransformReport {
             self.pass, self.name, self.entities_processed, self.entities_output, self.details
         )
     }
+}
+
+// Use existing analyzer types instead of creating new ones
+use crate::analyzer::HTMLPatternCluster;
+
+#[derive(Debug, Clone, Serialize)]
+struct TransformedCluster {
+    cluster_id: String,
+    original_count: usize,
+    transformed_count: usize,
+    data: Vec<Value>,
 }

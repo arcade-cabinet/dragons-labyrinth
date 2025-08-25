@@ -156,7 +156,7 @@ impl RefsExtractor {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct RefsExtractionResult {
     pub locations: Vec<RefEntry>,
     pub hexes: Vec<RefEntry>,

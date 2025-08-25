@@ -1,0 +1,164 @@
+[metadata]
+name = "hbf-transformer"
+version = "1.0.0"
+description = "AI-powered HBF data transformation to SeaORM models with 100% coverage"
+domain = "hexroll_data_transformation"
+author = "Dragon's Labyrinth"
+tags = ["hbf", "transformation", "seaorm", "ai-powered", "production"]
+
+capabilities = [
+    "hbf_transformation", 
+    "seaorm_model_generation",
+    "html_content_extraction",
+    "dungeon_parsing",
+    "settlement_extraction",
+    "npc_generation",
+    "relationship_mapping"
+]
+
+[interface]
+required_context = ["transformation_phase", "entity_data", "refs_data"]
+optional_context = ["target_models", "validation_rules"]
+
+[[interface.inputs]]
+name = "raw_entities"
+data_type = "string"
+description = "Raw entity data from HBF file to transform"
+required = true
+
+[[interface.inputs]]
+name = "refs_data"
+data_type = "string"
+description = "Reference data linking entities"
+required = true
+
+[[interface.inputs]]
+name = "transformation_target"
+data_type = "string"
+description = "Target: 'settlements', 'dungeons', 'npcs', 'hexes', 'seaorm_models'"
+required = true
+
+[[interface.outputs]]
+name = "transformed_data"
+data_type = "string"
+description = "Fully transformed data ready for database insertion"
+format = "json"
+
+[[interface.outputs]]
+name = "seaorm_models"
+data_type = "string"
+description = "Complete SeaORM model definitions"
+format = "rust_code"
+
+[prompts.entity_transformation]
+template = """
+Transform raw HBF entity data into structured game content:
+
+Transformation Target: {transformation_target}
+Raw Entities: {raw_entities}
+Refs Data: {refs_data}
+
+TRANSFORMATION REQUIREMENTS:
+1. **HTML Content Parsing**: Extract all settlements, dungeons, NPCs from HTML descriptions
+2. **Smart Entity Classification**: Automatically classify entities as settlements, dungeons, encounters, etc.
+3. **Relationship Extraction**: Map all entity references using Refs data
+4. **Data Enrichment**: Extract names, locations, descriptions, stats from content
+5. **SeaORM Model Generation**: Create complete model definitions with relationships
+
+SPECIFIC EXTRACTION PATTERNS:
+- **Settlements**: Extract name, population, buildings, NPCs, description
+- **Dungeons**: Parse rooms, encounters, traps, treasure, danger level
+- **NPCs**: Extract name, occupation, dialogue, stats, location
+- **Hexes**: Map coordinates, terrain, features, connected locations
+- **Items**: Parse equipment, treasure, magical properties
+
+OUTPUT REQUIREMENTS:
+- Complete JSON data structures ready for database insertion
+- Full SeaORM model code with proper relationships
+- Validation of all extracted relationships
+- Statistics on transformation completeness
+
+FOCUS: 100% data coverage with intelligent AI-powered extraction
+"""
+variables = ["transformation_target", "raw_entities", "refs_data"]
+system_prompt = "You are an expert AI system specializing in RPG content extraction and database design. Transform raw game data into structured, production-ready content with complete relationship mapping."
+temperature = 0.2
+max_tokens = 8000
+
+[prompts.seaorm_generation]
+template = """
+Generate complete SeaORM models for Dragon's Labyrinth database:
+
+Extracted Data: {extracted_data}
+Entity Types: {entity_types}
+Relationships: {relationships}
+
+SEAORM MODEL REQUIREMENTS:
+1. **Complete Entity Models**: Realm, Hex, Settlement, Dungeon, NPC, Item, Encounter
+2. **Proper Relationships**: Foreign keys, one-to-many, many-to-many mappings
+3. **JSON Fields**: For complex data like HTML content, dungeon layouts
+4. **Validation**: Field constraints, required fields, data types
+5. **Indexing**: Performance optimization for game queries
+
+SPECIFIC MODELS TO GENERATE:
+```rust
+// Example structure
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
+#[sea_orm(table_name = "settlements")]
+pub struct SettlementModel {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    pub hex_id: Option<i32>,
+    pub name: String,
+    pub population: Option<i32>,
+    pub description: Text,
+    pub buildings: Json,
+    pub npcs: Json,
+    // ... complete fields
+}
+```
+
+Generate ALL required models with proper relationships and validation.
+"""
+variables = ["extracted_data", "entity_types", "relationships"]
+system_prompt = "You are a senior Rust developer and database architect specializing in SeaORM and game database design."
+temperature = 0.1
+max_tokens = 6000
+
+[prompts.validation_and_stats]
+template = """
+Validate transformation completeness and generate statistics:
+
+Original Entity Count: {original_count}
+Transformed Entities: {transformed_data}
+Relationships Mapped: {relationships}
+
+VALIDATION CHECKLIST:
+1. **Coverage**: What percentage of entities were successfully transformed?
+2. **Data Quality**: Are all required fields populated?
+3. **Relationships**: Are entity references properly mapped?
+4. **Duplicates**: Any duplicate or malformed entries?
+5. **Performance**: Ready for production database insertion?
+
+GENERATE STATISTICS:
+- Transformation success rate
+- Entity type breakdown (settlements, dungeons, NPCs, etc.)
+- Relationship mapping success
+- Data quality metrics
+- Performance recommendations
+
+Provide production-ready validation report.
+"""
+variables = ["original_count", "transformed_data", "relationships"]
+system_prompt = "You are a data quality engineer specializing in large-scale game content validation and production deployment."
+temperature = 0.1
+max_tokens = 3000
+
+[config]
+model = "gpt-5"
+batch_size = 50
+max_entities_per_batch = 100
+transformation_timeout_seconds = 900
+enable_progressive_processing = true
+save_checkpoints = true
+target_coverage_percentage = 100.0

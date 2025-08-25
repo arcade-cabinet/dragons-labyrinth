@@ -349,7 +349,7 @@ impl JsonParser {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct JsonParsingResult {
     pub maps: Vec<MapData>,
     pub total_hexes: usize,
