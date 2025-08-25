@@ -1,0 +1,10 @@
+{
+  "total_entities": 70801,
+  "entities_with_content": 70801,
+  "empty_entities": 0,
+  "unique_entity_types": 1,
+  "total_references": 1570,
+  "type_distribution": {
+    "unknown": 70801
+  }
+}

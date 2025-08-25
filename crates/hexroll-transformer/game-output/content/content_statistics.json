@@ -1,0 +1,18 @@
+{
+  "total_entities_processed": 0,
+  "entities_by_type": {},
+  "entities_with_html": 0,
+  "entities_with_references": 0,
+  "entities_with_quest_hooks": 0,
+  "entities_with_stat_blocks": 0,
+  "total_references": 0,
+  "total_quest_hooks": 0,
+  "spatial_relationships": 0,
+  "reference_graph_nodes": 0,
+  "reference_graph_edges": 0,
+  "orphaned_references": 0,
+  "avg_title_length": 0,
+  "avg_description_length": 0,
+  "avg_references_per_entity": 0,
+  "coverage_with_content": 0
+}

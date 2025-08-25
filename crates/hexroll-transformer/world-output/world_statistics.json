@@ -1,0 +1,28 @@
+{
+  "total_hex_tiles": 617,
+  "hex_types": {
+    "JungleHex": 126,
+    "MountainsHex": 83,
+    "ForestHex": 127,
+    "PlainsHex": 109,
+    "SwampsHex": 50,
+    "DesertHex": 94,
+    "TundraHex": 28
+  },
+  "features": {
+    "Other": 438,
+    "Village": 7,
+    "Inn": 9,
+    "Residency": 11,
+    "None": 131,
+    "Dungeon": 18,
+    "Town": 1,
+    "City": 2
+  },
+  "realms_count": 1,
+  "regions_count": 28,
+  "features_with_content": 37,
+  "total_entities": 70801,
+  "processed_entities": 654,
+  "processing_ratio": 0.9237157667264586
+}

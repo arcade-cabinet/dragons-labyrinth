@@ -13,6 +13,9 @@ from rich.logging import RichHandler
 
 from dragons_labyrinth.models import HBFConfig
 from dragons_labyrinth.hbf.orchestrator import HBFOrchestrator
+from dragons_labyrinth.hbf.content_processor import HBFContentProcessor
+from dragons_labyrinth.hbf.game_transformer import GameTransformer
+from dragons_labyrinth.hbf.hbf_processor import process_hbf_to_game_world
 
 # Setup logging and console
 console = Console()
@@ -217,6 +220,130 @@ def convert(
         
     except Exception as e:
         log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def transform(
+    hbf_path: Path = typer.Argument(
+        Path("crates/hexroll-transformer/game.hbf"),
+        help="Path to HBF database file"
+    ),
+    output_dir: Path = typer.Option(
+        Path("crates/hexroll-transformer/game-output"),
+        "--output", "-o",
+        help="Output directory for game files"
+    ),
+    content_only: bool = typer.Option(
+        False,
+        "--content-only",
+        help="Only process content, skip game transformation"
+    )
+):
+    """
+    Complete HBF to Game transformation pipeline
+    """
+    console.print(Panel.fit(
+        "[bold cyan]🐲 HBF to Game Transformer[/bold cyan]",
+        subtitle="Complete pipeline transformation"
+    ))
+    
+    try:
+        # Step 1: Load HBF data
+        console.rule("[cyan]Step 1: Loading HBF Data[/cyan]")
+        config = HBFConfig(hbf_path=hbf_path, output_dir=output_dir)
+        orchestrator = HBFOrchestrator(config)
+        orchestrator.load_data()
+        orchestrator.display_summary()
+        
+        # Step 2: Process content
+        console.rule("[cyan]Step 2: Processing Content[/cyan]")
+        processor = HBFContentProcessor()
+        processed_content = processor.process_entities(orchestrator.state.entities_df)
+        
+        # Display processing results
+        stats = processed_content['content_statistics']
+        console.print(f"📊 Processed [bold magenta]{stats['total_entities_processed']:,}[/bold magenta] entities")
+        console.print(f"🔗 Found [bold magenta]{stats['total_references']:,}[/bold magenta] references")
+        console.print(f"🎯 Extracted [bold magenta]{stats['total_quest_hooks']:,}[/bold magenta] quest hooks")
+        console.print(f"🗺️ Built [bold magenta]{stats['spatial_relationships']:,}[/bold magenta] spatial relationships")
+        
+        # Export processed content
+        content_files = processor.export_for_game_engine(processed_content, str(output_dir / "content"))
+        console.print(f"💾 Exported content to [bold green]{len(content_files)}[/bold green] files")
+        
+        if content_only:
+            console.print("\n[bold green]✨ Content processing complete![/bold green]")
+            return
+        
+        # Step 3: Transform to game format
+        console.rule("[cyan]Step 3: Transforming to Game Format[/cyan]")
+        transformer = GameTransformer()
+        game_data = transformer.transform_to_game_format(processed_content)
+        
+        # Display transformation results
+        console.print(f"🎮 Generated [bold magenta]{len(game_data['entities']):,}[/bold magenta] game entities")
+        console.print(f"🗺️ Built [bold magenta]{len(game_data['spatial_grid']['hex_grid']):,}[/bold magenta] hex grid")
+        console.print(f"⚔️ Found [bold magenta]{len(game_data['quest_system']['quest_givers']):,}[/bold magenta] quest givers")
+        console.print(f"🏛️ Identified [bold magenta]{len(game_data['faction_network']['factions']):,}[/bold magenta] factions")
+        console.print(f"🎨 Generated [bold magenta]{len(game_data['asset_requirements']):,}[/bold magenta] asset requirements")
+        
+        # Export game data
+        game_files = transformer.export_game_data(game_data, str(output_dir / "game"))
+        console.print(f"💾 Exported game data to [bold green]{len(game_files)}[/bold green] files")
+        
+        # List generated files
+        console.rule("[cyan]Generated Files[/cyan]")
+        all_files = {**content_files, **game_files}
+        for file_type, file_path in all_files.items():
+            console.print(f"  [cyan]{file_type}:[/cyan] {file_path}")
+        
+        console.print("\n[bold green]✨ Complete transformation pipeline finished![/bold green]")
+        console.print(f"[yellow]🎯 Output directory: {output_dir}[/yellow]")
+        
+    except Exception as e:
+        log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        import traceback
+        traceback.print_exc()
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def world(
+    hbf_path: Path = typer.Argument(
+        Path("crates/hexroll-transformer/game.hbf"),
+        help="Path to HBF database file"
+    ),
+    output_dir: Path = typer.Option(
+        Path("crates/hexroll-transformer/world-output"),
+        "--output", "-o",
+        help="Output directory for world files"
+    )
+):
+    """
+    Process HBF world data with proper structure understanding
+    """
+    console.print(Panel.fit(
+        "[bold cyan]🐲 HBF World Processor[/bold cyan]",
+        subtitle="Understanding HBF structure properly"
+    ))
+    
+    try:
+        # Use the specialized processor that understands HBF structure
+        result = process_hbf_to_game_world(str(hbf_path), str(output_dir))
+        
+        # Display generated files
+        console.rule("[cyan]Generated Files[/cyan]")
+        for file_type, file_path in result['generated_files'].items():
+            console.print(f"  [cyan]{file_type}:[/cyan] {file_path}")
+        
+        console.print(f"\n[bold green]✨ World processing complete![/bold green]")
+        console.print(f"[yellow]🎯 Output directory: {output_dir}[/yellow]")
+        
+    except Exception as e:
+        log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        import traceback
+        traceback.print_exc()
         raise typer.Exit(code=1)
 
 

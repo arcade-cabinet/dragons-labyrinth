@@ -32,6 +32,7 @@ from dragons_labyrinth.hbf.compressor import EntityCompressor
 from dragons_labyrinth.hbf.analysis import HBFAnalysis
 from dragons_labyrinth.hbf.diagnostics import HBFDiagnostics
 from dragons_labyrinth.hbf.reporter import HBFReporter
+from dragons_labyrinth.hbf.entity_classifier import classify_entity_smart
 
 # Setup logging
 FORMAT = "%(message)s"
@@ -124,10 +125,8 @@ class HBFOrchestrator(
         # Parse JSON values in entities
         self.state.entities_df['data'] = self.state.entities_df['value'].apply(self._parse_json)
         
-        # Extract entity types
-        self.state.entities_df['entity_type'] = self.state.entities_df['data'].apply(
-            lambda x: x.get('entity_type', 'unknown') if x else 'unknown'
-        )
+        # Extract entity types using smart classifier
+        self.state.entities_df['entity_type'] = self.state.entities_df['value'].apply(classify_entity_smart)
         
         log.info(f"[green]✓ Loaded {len(self.state.entities_df):,} entities[/green]", extra={"markup": True})
         log.info(f"[green]✓ Loaded {len(self.state.refs_df):,} references[/green]", extra={"markup": True})
