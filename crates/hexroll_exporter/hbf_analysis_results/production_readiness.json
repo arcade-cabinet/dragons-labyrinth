@@ -1,0 +1,14 @@
+{
+  "ai_accuracy_prediction": 0.0,
+  "ai_confidence_score": 0.0,
+  "critical_issues": [
+    "AI analysis not performed"
+  ],
+  "data_completeness_score": 1.0,
+  "overall_score": 0.6666666666666666,
+  "production_ready": false,
+  "recommendation": "❌ NOT READY - Significant issues must be resolved",
+  "relationship_quality_score": 1.0,
+  "total_entities": 70801,
+  "total_refs": 1570
+}

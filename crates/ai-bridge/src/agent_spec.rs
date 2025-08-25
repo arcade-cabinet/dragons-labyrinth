@@ -1,6 +1,7 @@
 //! Agent specification system for spec-driven AI agents
 
 use anyhow::Result;
+use config::{Config, ConfigError};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -10,9 +11,6 @@ use std::path::{Path, PathBuf};
 pub struct AgentSpec {
     /// Agent metadata
     pub metadata: AgentMetadata,
-    
-    /// Capabilities this agent provides
-    pub capabilities: Vec<String>,
     
     /// Input/output specifications
     pub interface: AgentInterface,
@@ -24,6 +22,7 @@ pub struct AgentSpec {
     pub config: HashMap<String, AgentConfigValue>,
 }
 
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentMetadata {
     pub name: String,
@@ -32,6 +31,9 @@ pub struct AgentMetadata {
     pub domain: String,
     pub author: Option<String>,
     pub tags: Vec<String>,
+    
+    /// Capabilities this agent provides - moved here to match TOML structure
+    pub capabilities: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -164,16 +166,44 @@ impl AgentSpecLoader {
         Ok(())
     }
 
-    /// Load a single agent spec from a file
+    /// Load a single agent spec from a file using config.rs
     pub fn load_spec_from_file<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
         let path = path.as_ref();
-        let content = std::fs::read_to_string(path)?;
-        let spec: AgentSpec = toml::from_str(&content)?;
+        
+        // Use config.rs to properly handle TOML parsing
+        let settings = Config::builder()
+            .add_source(config::File::from(path))
+            .build()
+            .map_err(|e| anyhow::anyhow!("Failed to build config from {}: {}", path.display(), e))?;
+        
+        // Deserialize directly to AgentSpec
+        let spec: AgentSpec = settings.try_deserialize()
+            .map_err(|e| anyhow::anyhow!("Failed to deserialize AgentSpec from {}: {}", path.display(), e))?;
         
         tracing::info!("Loaded agent spec: {} v{}", spec.metadata.name, spec.metadata.version);
         self.loaded_specs.insert(spec.metadata.name.clone(), spec);
         
         Ok(())
+    }
+    
+    /// Load comprehensive agent spec directly using config.rs
+    pub fn load_comprehensive_spec<P: AsRef<Path>>(&mut self, path: P) -> Result<AgentSpec> {
+        let path = path.as_ref();
+        
+        // Use config.rs to properly handle TOML parsing
+        let settings = Config::builder()
+            .add_source(config::File::from(path))
+            .build()
+            .map_err(|e| anyhow::anyhow!("Failed to build config from {}: {}", path.display(), e))?;
+        
+        // Deserialize directly to AgentSpec
+        let spec: AgentSpec = settings.try_deserialize()
+            .map_err(|e| anyhow::anyhow!("Failed to deserialize AgentSpec from {}: {}", path.display(), e))?;
+        
+        tracing::info!("Loaded comprehensive agent spec: {} v{}", spec.metadata.name, spec.metadata.version);
+        self.loaded_specs.insert(spec.metadata.name.clone(), spec.clone());
+        
+        Ok(spec)
     }
 
     /// Get a loaded agent spec by name
@@ -190,7 +220,7 @@ impl AgentSpecLoader {
     pub fn get_agents_by_capability(&self, capability: &str) -> Vec<&AgentSpec> {
         self.loaded_specs
             .values()
-            .filter(|spec| spec.capabilities.contains(&capability.to_string()))
+            .filter(|spec| spec.metadata.capabilities.contains(&capability.to_string()))
             .collect()
     }
 
@@ -233,8 +263,8 @@ mod tests {
                 domain: "testing".to_string(),
                 author: Some("Test Author".to_string()),
                 tags: vec!["test".to_string()],
+                capabilities: vec!["generate".to_string(), "analyze".to_string()],
             },
-            capabilities: vec!["generate".to_string(), "analyze".to_string()],
             interface: AgentInterface {
                 inputs: vec![
                     InputSpec {
@@ -282,7 +312,7 @@ mod tests {
         let deserialized: AgentSpec = toml::from_str(&toml_str).unwrap();
         
         assert_eq!(spec.metadata.name, deserialized.metadata.name);
-        assert_eq!(spec.capabilities, deserialized.capabilities);
+        assert_eq!(spec.metadata.capabilities, deserialized.metadata.capabilities);
     }
 
     #[test]

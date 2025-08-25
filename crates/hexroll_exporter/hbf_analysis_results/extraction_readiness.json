@@ -1,0 +1,13 @@
+{
+  "confidence_level": 0.5714285714285714,
+  "critical_issues": [
+    "AI analysis failed - fallback to pattern analysis"
+  ],
+  "estimated_accuracy": 0.5142857142857142,
+  "ready_for_extraction": false,
+  "recommendations": [
+    "Perform manual validation on critical relationships",
+    "Investigate conflicts between pattern and AI analysis",
+    "Verify HTML content parsing - no embedded references found"
+  ]
+}

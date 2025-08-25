@@ -24,10 +24,11 @@ async-trait = "0.1"
 # Async runtime
 tokio = { workspace = true }
 
-# Serialization
+# Serialization and Configuration
 serde = { workspace = true }
 serde_json = { workspace = true }
 toml = { workspace = true }
+config = "0.14"
 
 # Error handling
 anyhow = { workspace = true }

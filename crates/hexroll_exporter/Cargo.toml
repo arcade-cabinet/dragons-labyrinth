@@ -16,14 +16,15 @@ serde_json = { workspace = true }
 scraper = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
 chrono = { workspace = true }
 uuid = { version = "1.18.0", features = ["v4", "serde"] }
 
 # Direct SQLite access for HBF analysis
 rusqlite = { version = "0.32", features = ["bundled"] }
 
-# AI-powered analysis integration (needs ai-bridge fixes first)
-# ai-bridge = { path = "../ai-bridge" }
+# AI-powered analysis integration (ai-bridge fixes complete)
+ai-bridge = { path = "../ai-bridge" }
 
 # Async runtime for future AI integration
 tokio = { version = "1", features = ["full"] }
@@ -40,6 +41,9 @@ hexx = "0.21.0"
 # File I/O 
 walkdir = { workspace = true }
 
+# XDG directories for data storage (same as game-database)
+xdg = "2.5"
+
 # Template generation with minijinja2
 minijinja = "2.12.0"
 
@@ -48,3 +52,7 @@ minijinja = "2.12.0"
 [[bin]]
 name = "convert_hbf"
 path = "src/bin/convert_hbf.rs"
+
+[[bin]]
+name = "test_agent_loading"
+path = "src/test_agent_loading.rs"

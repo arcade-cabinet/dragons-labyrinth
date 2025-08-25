@@ -1,6 +1,3 @@
-# HBF Analysis Agent Specification
-# This agent provides AI-assisted analysis of HexRoll HBF files for 100% data extraction accuracy
-
 [metadata]
 name = "hbf-analyzer"
 version = "1.0.0"
@@ -9,7 +6,6 @@ domain = "hexroll_data_import"
 author = "Dragon's Labyrinth"
 tags = ["hbf", "hexroll", "data-analysis", "semantic-relationships", "import"]
 
-# Agent capabilities
 capabilities = [
     "hbf_analysis", 
     "semantic_relationship_discovery",
@@ -18,9 +14,8 @@ capabilities = [
     "relationship_confidence_scoring"
 ]
 
-# Input/output interface specification
 [interface]
-required_context = ["hbf_file_path", "analysis_mode"]
+required_context = ["analysis_mode", "hbf_file_path"]
 optional_context = ["confidence_threshold", "validation_rules"]
 
 [[interface.inputs]]
@@ -31,15 +26,21 @@ required = true
 
 [[interface.inputs]]
 name = "table_type"
-data_type = "string" 
+data_type = "string"
 description = "Type of table: 'entities' or 'refs'"
 required = true
 
 [[interface.inputs]]
 name = "relationship_hints"
-data_type = "object"
+data_type = "string"
 description = "Known relationships and patterns to guide analysis"
 required = false
+
+[[interface.outputs]]
+name = "result"
+data_type = "string"
+description = "Analysis result with discovered relationships and insights"
+format = "text"
 
 [[interface.outputs]]
 name = "relationships"
@@ -47,125 +48,115 @@ data_type = "array"
 description = "Discovered semantic relationships with confidence scores"
 format = "json"
 
-[[interface.outputs]]
-name = "validation_report"
-data_type = "object"
-description = "Data integrity validation results"
-format = "json"
-
-[[interface.outputs]]
-name = "extraction_suggestions"
-data_type = "array"
-description = "Suggested improvements for data extraction accuracy"
-
-# Prompt templates for different analysis modes
 [prompts.semantic_analysis]
 template = """
-Analyze this HexRoll HBF table data for semantic relationships:
+Analyze this HexRoll HBF table data for semantic relationships and generate SeaORM models:
 
 Table Type: {table_type}
 HBF Content: {hbf_content}
 
-Context:
-- HBF files contain gaming content with Entities and Refs tables
-- Entities table has: uuid, name, image_url, description (HTML), tags
-- Refs table has: uuid, entity_id, title, link_url, tags
-- Goal: 100% accuracy in discovering Entity ↔ Refs relationships
-
-Analysis Requirements:
+COMPREHENSIVE ANALYSIS REQUIREMENTS:
 1. Parse HTML content in Entity descriptions for embedded links/references
-2. Identify semantic connections between Entities and Refs based on:
+2. Identify ALL semantic connections between Entities and Refs:
    - Title/name similarities
-   - Tag correlations
+   - Tag correlations  
    - HTML link analysis
    - Content context clues
-3. Assign confidence scores (0.0-1.0) for each relationship
-4. Flag ambiguous cases requiring human validation
+3. Generate production-ready SeaORM model code with:
+   - Proper derive macros
+   - Foreign key relationships
+   - Validation annotations
+   - JSON field handling for HTML content
+4. Create minijinja templates for data transformation
+5. Assign confidence scores (0.0-1.0) for each relationship
+6. Flag ambiguous cases requiring human validation
 
 {relationship_hints}
 
-Provide structured analysis with:
-- Discovered relationships (entity_id, ref_id, confidence, reasoning)
-- Validation concerns
-- Suggestions for improving extraction accuracy
+OUTPUT REQUIREMENTS:
+- Complete Rust SeaORM entity model code
+- Minijinja transformation templates  
+- Discovered relationships with confidence scores
+- Validation concerns and suggestions
+- Production-ready code with full error handling
+
+FOCUS ON 100% ACCURACY AND COMPREHENSIVE COVERAGE.
 """
 variables = ["table_type", "hbf_content", "relationship_hints"]
-system_prompt = "You are a data analysis expert specializing in semantic relationship discovery for gaming content. Focus on accuracy and provide detailed reasoning for all findings."
+system_prompt = "You are a senior Rust developer specializing in SeaORM models, data analysis, and gaming content structure. Generate production-ready code with comprehensive error handling and validation."
 temperature = 0.3
-max_tokens = 2000
-
-[prompts.validation_check]
-template = """
-Validate the integrity of this HBF data extraction:
-
-Entities Count: {entity_count}
-Refs Count: {refs_count}
-Discovered Relationships: {relationship_count}
-
-Data Sample:
-{data_sample}
-
-Validation Criteria:
-1. Completeness: Are all logical relationships captured?
-2. Accuracy: Do the relationships make semantic sense?
-3. Consistency: Are similar patterns handled uniformly?
-4. Coverage: What percentage of Refs are linked to Entities?
-
-Provide validation report with:
-- Coverage statistics
-- Quality assessment
-- Recommendations for improvement
-- Confidence in overall extraction accuracy
-"""
-variables = ["entity_count", "refs_count", "relationship_count", "data_sample"]
-system_prompt = "You are a data quality analyst. Focus on thorough validation and practical recommendations."
-temperature = 0.2
-max_tokens = 1500
+max_tokens = 4000
 
 [prompts.html_parsing]
 template = """
-Parse HTML content from HexRoll Entity descriptions to extract embedded references:
+Parse HTML content from HexRoll Entity descriptions and generate comprehensive templates:
 
 Entity Name: {entity_name}
 HTML Description: {html_content}
 
-Extract:
-1. All embedded links and their targets
-2. References to other game elements
-3. Structural patterns that indicate relationships
-4. Context clues for semantic connections
+COMPREHENSIVE HTML ANALYSIS:
+1. Extract ALL embedded links and their targets
+2. Identify references to other game elements
+3. Parse structural patterns for relationships
+4. Extract context clues for semantic connections
+5. Generate minijinja templates for:
+   - HTML content sanitization
+   - Link extraction and validation
+   - Relationship mapping
+   - Data transformation to SeaORM entities
 
-Focus on:
-- <a> tags with href attributes
-- Text patterns indicating cross-references
-- Gaming terminology and entity relationships
-- Implicit connections based on content context
+TEMPLATE REQUIREMENTS:
+- Handle all HTML patterns found in content
+- Maintain referential integrity  
+- Error handling for malformed HTML
+- Performance optimized for 70k+ records
+- Comprehensive validation and logging
 
-Output structured data suitable for relationship mapping.
+Focus on production-ready templates that can process the complete HBF dataset.
 """
 variables = ["entity_name", "html_content"]
-system_prompt = "You are an HTML parsing specialist with expertise in gaming content structure."
-temperature = 0.1
-max_tokens = 1000
+system_prompt = "You are an expert in HTML parsing, template generation, and large-scale data processing. Create efficient, production-ready minijinja templates."
+temperature = 0.2
+max_tokens = 3000
 
-# Configuration parameters
+[prompts.validation_check]
+template = """
+Validate the integrity and completeness of HBF data extraction:
+
+Entities Count: {entity_count}
+Refs Count: {refs_count}
+Discovered Relationships: {relationship_count}
+Data Sample: {data_sample}
+
+COMPREHENSIVE VALIDATION CRITERIA:
+1. Completeness: Are ALL logical relationships captured?
+2. Accuracy: Do relationships make semantic and gaming sense?
+3. Consistency: Are similar patterns handled uniformly?
+4. Coverage: What percentage of Refs are linked to Entities?
+5. Performance: Can this scale to 70k+ entities?
+6. Data Quality: Are there empty/invalid records to filter?
+
+PRODUCTION VALIDATION REQUIREMENTS:
+- Coverage statistics with detailed breakdown
+- Quality assessment with confidence metrics
+- Performance recommendations for large-scale processing
+- Comprehensive recommendations for 100% accuracy
+- Identification of problematic data patterns
+- Validation of referential integrity constraints
+
+Provide detailed validation report suitable for production deployment.
+"""
+variables = ["entity_count", "refs_count", "relationship_count", "data_sample"]
+system_prompt = "You are a senior data quality engineer specializing in large-scale gaming content validation and production database systems."
+temperature = 0.1
+max_tokens = 2500
+
 [config]
 model = "gpt-4"
-confidence_threshold = 0.7
+confidence_threshold = 0.8
 max_retries = 3
-batch_size = 50
-analysis_timeout_seconds = 300
-
-# HBF-specific configuration
-[config.hbf_settings]
-entity_batch_size = 100
-refs_batch_size = 500
-require_bidirectional_validation = true
-enable_cross_table_analysis = true
-
-# Validation rules
-[config.validation_rules]
-min_relationship_confidence = 0.6
-require_semantic_reasoning = true
-flag_orphaned_refs = true
-validate_html_link_targets = true
+batch_size = 100
+analysis_timeout_seconds = 600
+enable_comprehensive_analysis = true
+filter_empty_entities = true
+prioritize_rich_content = true

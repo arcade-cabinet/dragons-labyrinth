@@ -47,7 +47,7 @@ impl SpecDrivenOrchestrator {
                 name,
                 spec.metadata.version,
                 spec.metadata.domain,
-                spec.capabilities
+                spec.metadata.capabilities
             );
         }
 
@@ -190,7 +190,7 @@ impl SpecDrivenOrchestrator {
                 version: spec.metadata.version.clone(),
                 description: spec.metadata.description.clone(),
                 domain: spec.metadata.domain.clone(),
-                capabilities: spec.capabilities.clone(),
+                capabilities: spec.metadata.capabilities.clone(),
             })
             .collect()
     }
