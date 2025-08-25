@@ -1,36 +1,57 @@
-[project]
-name = "generator"
-version = "0.1.0"
-description = "AI-powered game generator for Dragon's Labyrinth"
-authors = [{ name = "Dragon's Labyrinth Team" }]
-requires-python = ">=3.11,<3.12"
-dependencies = [
-    "pydantic>=2.0",
-    "xdg-base-dirs>=6.0.2,<7",
-    "bpy>=4.5.0",
-    "openai>=1.0.0",
-]
-
-[tool.uv]
-required-version = ">=0.5.0"
-
-[tool.hatch.envs.default]
-type = "virtual"
-path = ".venv"
-
-[project.scripts]
-dl = "generator.__main__:main"
-
-[dependency-groups]
-dev = [
-    "black>=24.8.0,<25",
-    "mypy>=1.11.2,<2",
-    "pytest>=8.3.3,<9",
-]
-
-[tool.uv.sources]
-freesound-python = { git = "https://github.com/MTG/freesound-python" }
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project]
+name = "dragons-labyrinth"
+dynamic = ["version"]
+description = "Dragon's Labyrinth"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Jon Bogaty", email = "jon@flipsidecrypto.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/jbcom/dragons-labyrinth#readme"
+Issues = "https://github.com/jbcom/dragons-labyrinth/issues"
+Source = "https://github.com/jbcom/dragons-labyrinth"
+
+[tool.hatch.version]
+path = "src/dragons_labyrinth/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/dragons_labyrinth tests}"
+
+[tool.coverage.run]
+source_pkgs = ["dragons_labyrinth", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/dragons_labyrinth/__about__.py",
+]
+
+[tool.coverage.paths]
+dragons_labyrinth = ["src/dragons_labyrinth", "*/dragons-labyrinth/src/dragons_labyrinth"]
+tests = ["tests", "*/dragons-labyrinth/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
