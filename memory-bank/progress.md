@@ -1,127 +1,108 @@
-# Dragon's Labyrinth Progress
+# Dragon's Labyrinth - Development Progress
 
-## Project Status: Phase Transition Design Complete ✅
+## Recent Accomplishments (Jan 25, 2025)
 
-### Overview
-Dragon's Labyrinth has evolved into a revolutionary dual-path horror RPG where every player experiences a fundamentally different game based on their choices. The journey IS the game, with 12 major phase transitions creating branching narratives that lock players into their chosen philosophy.
+### Python HBF Analysis Package Restructuring ✅
+Successfully restructured the Python HBF analysis package at `src/dragons_labyrinth/` with:
 
-## Completed Milestones
+#### Clean Architecture Implemented
+```
+src/dragons_labyrinth/
+├── __init__.py          
+├── __main__.py          # Minimal entry point
+├── cli.py               # CLI commands using Typer
+├── models.py            # Pydantic models for data structures
+├── types.py             # Type definitions and aliases
+└── hbf/                 # HBF subpackage
+    ├── __init__.py      
+    ├── base.py          # Base mixins (SQLiteMixin, DataFrameMixin)
+    ├── orchestrator.py  # Main orchestrator with integrated loader
+    ├── analysis.py      # Analysis mixin (compression, clustering, graphs)
+    ├── diagnostics.py   # Diagnostics mixin (SQLite operations)
+    ├── filter.py        # Filter mixin (DataFrame operations)
+    ├── compressor.py    # Compressor mixin (data optimization)
+    └── reporter.py      # Reporter mixin (HTML/JSON/Markdown reports)
+```
 
-### Phase Transition System (100% Complete)
-All 12 phase transitions + 1 special transition have been designed and implemented:
+#### Key Improvements
+1. **Mixin Pattern**: Created `SQLiteMixin` and `DataFrameMixin` base classes that provide common property accessors, eliminating code duplication
+2. **Pydantic Models**: Replaced dataclasses with Pydantic models for robust validation and serialization
+3. **Unified Orchestrator**: Merged loader functionality directly into orchestrator, which inherits from all mixins
+4. **Shared State Pattern**: All mixins share a single `OrchestratorState` that holds DataFrames, connections, and utilities
+5. **Clean Separation**: Each mixin focuses on specific functionality while accessing shared state through properties
 
-**Act 1: Journey TO Labyrinth (WHO ARE YOU?)**
-- ✅ Peace → Unease: Bandit Cave (Strength) / Lost Child (Harmony)
-- ✅ Unease → Dread: Fighting Pit (Strength) / Crossroads Meeting (Harmony)
-- ✅ Dread → Terror: Siege Command (Strength) / Dying Village (Harmony)
+#### Working CLI Commands
+- `dl_cli quick` - Quick summary of HBF database
+- `dl_cli analyze` - Full analysis with compression, clustering, and relationships
+- `dl_cli convert` - Convert HBF to Parquet format
+- `dl_cli report` - Generate HTML/JSON/Markdown reports
 
-**Act 2: Approaching Labyrinth (WHAT WILL YOU BECOME?)**
-- ✅ Terror → Despair: Blood Pact (Dark) / Cleansing Ritual (Light)
-- ✅ Despair → Madness: The Harvesting (Dark) / Last Sanctuary (Light)
-- ✅ Madness → Void: The Consumption (Dark) / Final Prayer (Light)
+#### Test Results
+Successfully loaded and analyzed `crates/hexroll-transformer/game.hbf`:
+- 70,801 entities loaded
+- 1,570 references loaded
+- 100% entities have content (0 empty)
+- All entities currently marked as "unknown" type (needs entity_type extraction fix)
 
-**Special Content:**
-- ✅ Forge of High Elves: Legendary weapon creation with moral weight
+## Previous Progress
 
-### Core Systems
-- ✅ Trait System: Central identity tracker connecting all systems
-- ✅ Hex Grid: Exploration mechanics with biome generation
-- ✅ Combat System: Philosophy-driven combat (violence vs understanding)
-- ✅ Companion System: Deep relationships that persist through death
-- ✅ Quest System: Narrative threads that adapt to player philosophy
-- ✅ Achievement System: Recognizes transformation, not just completion
-- ✅ Labyrinth System: First-person horror climax
+### HBF Analysis Infrastructure
+- Created Python package structure for HBF analysis
+- Implemented comprehensive HBF diagnostic tools
+- Set up dual data access (SQLite + pandas DataFrames)
+- Created Jinja2 templates for report generation
 
-### Technical Architecture
-- ✅ Jinja2 template system with embedded GDScript
-- ✅ Generator system with mechanical prompts
-- ✅ Audio architecture (Music21 + Freesound + PyOgg)
-- ✅ Python 3.13 compatibility
-- ✅ Memory bank structure for AI context
-- ✅ Idempotent generation system
+### Build System Evolution
+- Migrated from Make to Hatch for Python tooling
+- Configured pyproject.toml with proper dependencies
+- Set up development environment with hatch
 
-## Current State
+### Asset Generation Pipeline
+- Established asset generation architecture
+- Created prompts for horror characters, hex tiles, dungeons, audio
+- Set up Blender bridge for 3D asset generation
 
-### What Works
-- Complete narrative structure from peaceful morning to cosmic horror
-- All phase transitions designed with meaningful mechanical differences
-- Dual-path system where Strength/Harmony leads to Light/Dark
-- Every choice permanently locks out alternatives
-- Horror that escalates emotionally, not just mechanically
-- Generator ready to create the full game
+### Documentation Refactor
+- Restructured documentation under `crates/dragons-docs/book/`
+- Created comprehensive design documents
+- Established memory bank system for context preservation
 
-### What's Next
-1. **API Configuration**: Add ANTHROPIC_API_KEY or OPENAI_API_KEY
-2. **First Generation**: Run `python -m generator --stage peace`
-3. **Godot Integration**: Test generated systems in engine
-4. **Fine-tuning**: Adjust mechanical prompts based on output
-5. **Audio Generation**: Create horror-aware soundscapes
-6. **Playtesting**: Experience the dual narratives
+### Core Project Setup
+- Bevy 0.16.1 game engine foundation
+- Rust workspace with multiple crates
+- Asset generation pipeline
+- HBF (Hexroll database) integration
 
-## Key Innovations
+## Next Steps
 
-### Dual-Path Narrative
-- Not just different choices, but fundamentally different games
-- Strength path: Traditional RPG with escalating violence
-- Harmony path: Emotional puzzles and relationship depth
-- Light path: Maintaining humanity despite horror
-- Dark path: Embracing monstrosity to survive
+### Immediate Priority: HBF Preprocessing
+As outlined in memory-bank documentation, need to:
+1. **Fix entity_type extraction** - Currently all entities show as "unknown"
+2. **Implement preprocessing pipeline**:
+   - Extract and normalize entity types
+   - Build relationship graphs
+   - Create location hierarchies
+   - Generate navigation meshes
+   - Process narrative content
+3. **Transform to game-ready format**:
+   - Convert to Rust structs
+   - Generate Bevy components
+   - Create asset manifests
 
-### Three Versions Per Transition
-Each transition exists in three contexts:
-1. **To Labyrinth**: Building dread on the journey
-2. **From Labyrinth**: Returning changed (if you survive)
-3. **Sealing Void**: When reality itself needs healing
+### Integration Tasks
+1. Connect processed HBF data to Bevy systems
+2. Implement world loading from processed data
+3. Create runtime entity spawning system
+4. Set up narrative event triggers
 
-### Mechanical Storytelling
-- No exposition dumps - mechanics reveal truth
-- Player actions shape identity through trait system
-- Companions remember and react to philosophy
-- World physically changes based on choices
+## Known Issues
+- Entity type extraction not working (all show as "unknown")
+- Many JSON parsing warnings (malformed entries in HBF)
+- Need to implement preprocessing steps outlined in memory bank
+- Missing connection between Python preprocessing and Rust game engine
 
-## Technical Evolution
-
-### Generator Improvements
-- Moved from simple templates to narrative-aware generation
-- Integrated horror phases into every system
-- Audio system understands emotional journey
-- Mechanical prompts capture design philosophy
-
-### Architecture Decisions
-- Zero external dependencies in generated code
-- Idempotent generation preserves save games
-- Memory bank provides persistent AI context
-- XDG compliance for cache and logs
-
-## Philosophical Achievement
-
-Dragon's Labyrinth succeeds in creating a game where:
-- The journey truly IS the game
-- Every player's experience is unique and meaningful
-- Horror comes from player complicity, not jump scares
-- Traditional RPG victory is revealed as tragedy
-- Multiple interpretations reward deep engagement
-
-## Status: Ready for Generation
-
-All design work is complete. The next phase is bringing it to life through the generator. The foundation is solid, the philosophy is clear, and the technical architecture is proven.
-
-**The dragon awaits. The question is: who will you become on the journey to face it?**
-
----
-
-## Latest Generator Upgrades (Ready-to-Run)
-- Direct OpenAI integration for code and image prompts (removed LangChain/LangGraph)
-- Modern Images API pipeline (PNG) → Blender (bpy) → GLB, always-on
-- Distributed template discovery across `systems/`, `entities/`, `world/`, `transitions/`, `opening/`, and legacy `prompts/`
-- Files write immediately to disk; `res://` is mapped to project root; relative paths resolve relative to each template directory
-- Image outputs to `{template_dir}/textures` and GLBs to `{template_dir}/models`
-- New parser tags: `MODEL:` and `JSON:` declarations supported
-- Auto-inject `COMPONENT_ID` and `API_VERSION` into `.gd` files when missing
-- CLI helpers: `--list-templates`, `--validate-templates`, `--demo-blender`
-- Python target aligned to 3.11 for bpy compatibility; removed `audioop-lts`
-
-## Next Step to Execute
-- Ensure `OPENAI_API_KEY` is set, then run:
-  - `poetry run python -m generator --validate-templates`
-  - `poetry run python -m generator --stage peace`
+## Technical Debt
+- Need to add proper error handling for malformed JSON
+- Should implement incremental processing for large HBF files
+- Missing unit tests for analysis modules
+- Need documentation for CLI usage

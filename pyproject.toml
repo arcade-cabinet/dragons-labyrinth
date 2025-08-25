@@ -20,7 +20,24 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "pandas>=2.0.0",
+  "pydantic>=2.0.0",
+  "rich>=13.0.0",
+  "plotly>=5.0.0",
+  "networkx>=3.0.0",
+  "beautifulsoup4>=4.12",
+  "lxml>=5.0.0",
+  "tqdm>=4.66",
+  "jinja2>=3.1",
+  "tiktoken>=0.5.0",
+  "typer>=0.9.0",
+  "sqlalchemy>=2.0.0",
+  "pyarrow>=14.0.0",
+]
+
+[project.scripts]
+dl_cli = "dragons_labyrinth.__main__:main"
 
 [project.urls]
 Documentation = "https://github.com/jbcom/dragons-labyrinth#readme"
@@ -29,6 +46,13 @@ Source = "https://github.com/jbcom/dragons-labyrinth"
 
 [tool.hatch.version]
 path = "src/dragons_labyrinth/__about__.py"
+
+[tool.uv]
+required-version = ">=0.5.0"
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
