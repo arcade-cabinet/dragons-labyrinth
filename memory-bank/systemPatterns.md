@@ -1,6 +1,6 @@
 # Dragon's Labyrinth - System Patterns
 
-## REVOLUTIONARY ARCHITECTURE (January 2025)
+## PARADIGM SHIFT ARCHITECTURE (January 2025)
 
 ### The Clean Separation Principle
 **CRITICAL**: Complete separation of build-time AI generation from runtime game systems
@@ -9,10 +9,52 @@
 BUILD-TIME (Python Agentic Workflows)          RUNTIME (Rust Game Engine)
 ├── LangGraph AI Agents                    ←→  ├── Pure Asset Loading
 ├── SQLite Job Queues                     ←→  ├── Bevy ECS Systems  
-├── Database Asset Search                 ←→  ├── Component Processing
-├── Human-in-the-Loop Review              ←→  ├── Event Systems
+├── HBF Features.json Templates           ←→  ├── Component Processing
+├── CC0 Asset Library Search              ←→  ├── Event Systems
+├── Human-in-the-Loop Review              ←→  ├── Game-Database Logic Port
 └── Generated Asset Output                ←→  └── Performance Optimization
 ```
+
+### PARADIGM SHIFT: HBF as Organizational Templates
+**CRITICAL INSIGHT**: Use HBF features.json as organizational wisdom, not content source
+
+**OLD APPROACH (ABANDONED):**
+- Transform 70k HBF entities into our game (complex, forced fit)
+- Parse HTML relationships and force their content into our horror RPG
+
+**NEW APPROACH (IMPLEMENTED):**
+- **Features.json as Templates**: Perfect D&D content organization patterns
+- **AI Content Generation**: Generate our own horror RPG content using organizational wisdom
+- **Game-Database Logic**: Port 2+ years of sophisticated horror RPG systems to pure Bevy ECS
+- **Layer Cake Tiles**: Simplified infinite hex world (Tile → Biome → Path → Feature)
+
+### Game-Database Migration Architecture
+**CRITICAL REALIZATION**: `crates/game-database` contains sophisticated horror RPG logic, NOT simple ORM
+
+**Complete Systems to Port:**
+```rust
+// FROM: crates/game-database/src/
+// TO: crates/game-engine/src/
+
+models/              →  components/
+├── hex_tile.rs      →  ├── hex_tile.rs      // Layer cake tile system
+├── companion.rs     →  ├── companion.rs     // Psychology + trauma processing  
+├── corruption.rs    →  ├── corruption.rs    // Dread progression master
+├── forge.rs         →  ├── forge.rs         // Light/dark paths + sentimental items
+├── weather.rs       →  ├── weather.rs       // Weather + horror integration
+└── 15+ more...      →  └── 15+ more...      // All sophisticated systems
+
+systems/             →  systems/
+├── dread_system.rs  →  ├── dread_system.rs  // Master horror orchestrator
+├── companion_sys.rs →  ├── companion_sys.rs // Trauma + therapy systems
+└── bevy_integration.rs → // ALREADY HAS Bevy ECS integration!
+```
+
+**Migration Strategy:**
+1. **Port SeaORM models** → **Pure Bevy components** (remove database dependencies)
+2. **Preserve sophisticated game logic** (2+ years of horror RPG systems)
+3. **Leverage existing Bevy integration** (bevy_integration.rs already written)
+4. **Add layer cake tile system** (simplify settlement hierarchies to feature overlays)
 
 ### Agentic Workflow Patterns
 
