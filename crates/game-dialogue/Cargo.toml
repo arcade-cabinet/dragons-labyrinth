@@ -27,24 +27,24 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 
 # OpenAI integration
-openai_dive = "1.2"
+openai_dive = { workspace = true }
 
 # UUID generation
-uuid = { version = "1.18", features = ["v4", "serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
 
 # Logging
 tracing = { workspace = true }
 
 # Template engine
-minijinja = "2.12"
+minijinja = { workspace = true }
 
 # Compression for token optimization
-flate2 = "1.1"
-tiktoken-rs = "0.7.0"
+flate2 = { workspace = true }
+tiktoken-rs = { workspace = true }
 regex.workspace = true
-md5 = "0.8.0"
+md5 = { workspace = true }
 chrono.workspace = true
-game-assets = { version = "0.1.0", path = "../game-assets" }
+game-assets = { workspace = true }
 
 [dev-dependencies]
-tokio-test = "0.4"
+tokio-test = { workspace = true }

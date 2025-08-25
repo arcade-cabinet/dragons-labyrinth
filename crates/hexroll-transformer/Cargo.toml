@@ -1,0 +1,27 @@
+[package]
+name = "hexroll-transformer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rayon = { workspace = true }
+regex = { workspace = true }
+lazy_static = { workspace = true }
+html-escape = { workspace = true }
+scraper = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Async + DB stack
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+bevy_yarnspinner = { workspace = true }
+tiktoken-rs = { workspace = true }
+openai_dive = { workspace = true }
+bevy_sqlx = { workspace = true }
+sea-orm = { workspace = true }

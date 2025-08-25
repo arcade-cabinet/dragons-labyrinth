@@ -7,7 +7,7 @@ members = [
     "crates/game-dialogue",
     "crates/game-database",
     "crates/game-engine",
-    "crates/hexroll_exporter",
+    "crates/hexroll-transformer",
 ]
 
 resolver = "2"
@@ -57,6 +57,56 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 # Output utilities - used by build tools and game crates
 colored = "3.0"
 indicatif = "0.18"
+ai-bridge = { path = "crates/ai-bridge" }
+avian3d = "0.3.1"
+bevy-yoleck = "0.28.0"
+bevy_cobweb = "0.17.2"
+bevy_cobweb_ui = "0.21.1"
+bevy_ecs_tilemap = "0.16"
+bevy_hanabi = "0.16"
+bevy_kira_audio = "0.23"
+bevy_sqlx = "0.1.9"
+bevy_yarnspinner = "0.5.0"
+blender-bridge = { path = "crates/blender-bridge" }
+blr = "0.1.0"
+clap = "4"
+config = "0.15"
+criterion = "0.7"
+dashmap = "6.1"
+directories = "6.0"
+fastrand = "2.3"
+flate2 = "1.1"
+futures = "0.3.31"
+game-database = { path = "crates/game-database" }
+glam = "0.30"
+glob = "0.3"
+hexx = "0.21.0"
+html-escape = "0.2"
+html5ever = "0.35"
+lazy_static = "1.5.0"
+mapgen = "0.6"
+markup5ever_rcdom = "0.35"
+md5 = "0.8.0"
+minijinja = "2.12.0"
+noise = "0.9"
+openai_dive = "1.2.4"
+palette = "0.7"
+parking_lot = "0.12"
+pathfinding = "4.14"
+proptest = "1.7"
+pyo3 = "=0.20.0"
+rand = "0.9"
+rayon = "1.11"
+reqwest = "0.12"
+rodio = "0.21"
+sea-orm = "1.1.14"
+sqlx = "0.8"
+tiktoken-rs = "0.7.0"
+tokio-test = "0.4"
+uuid = "1.18.0"
+dirs = "6.0.0"
+xdg = "3.0.0"
+game-assets = { path = "crates/game-assets" }
 
 [profile.dev]
 opt-level = 1

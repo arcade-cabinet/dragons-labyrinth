@@ -13,7 +13,7 @@ path = "src/lib.rs"
 
 [dependencies]
 # Database ORM (now integrated directly)
-sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
+sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 
 # Serialization
 serde = { workspace = true, features = ["derive"] }
@@ -21,8 +21,8 @@ serde_json = { workspace = true }
 toml = { workspace = true }
 
 # Time and UUID for sophisticated tracking
-chrono = { version = "0.4.41", features = ["serde"] }
-uuid = { version = "1.18.0", features = ["v4", "serde"] }
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
 
 # Async runtime for complex operations
 tokio = { workspace = true, features = ["full"] }
@@ -32,11 +32,11 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 
 # Async trait support for database operations
-async-trait = "0.1"
+async-trait = { workspace = true }
 
 # Logging for sophisticated system debugging
 tracing = { workspace = true }
-tracing-subscriber = "0.3"
+tracing-subscriber = { workspace = true }
 
 # Regular expressions for parsing
 regex = { workspace = true }
@@ -45,23 +45,23 @@ regex = { workspace = true }
 scraper = { workspace = true }
 
 # Bevy ECS integration
-bevy = "0.16.1"
-futures = "0.3.31"
-dirs = "6.0.0"
+bevy = { workspace = true }
+futures = { workspace = true }
+dirs = { workspace = true }
 
 [build-dependencies]
 # Build script dependencies - models now integrated directly
-game-assets = { path = "../game-assets" }
-sea-orm = { version = "1.1.14", features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
+game-assets = { workspace = true }
+sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio-rustls"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 walkdir = { workspace = true }
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.18", features = ["v4"] }
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4"] }
 anyhow = { workspace = true }
 
 # MCP server removed - no longer needed with 70k+ entities baked in
 
 [dev-dependencies]
-tokio-test = "0.4"
+tokio-test = { workspace = true }

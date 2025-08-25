@@ -17,12 +17,12 @@ path = "src/lib.rs"
 serde = { workspace = true }
 
 # Math and graphics
-glam = "0.30"
-palette = "0.7"
+glam = { workspace = true }
+palette = { workspace = true }
 
 # Utilities
-fastrand = "2.3"
+fastrand = { workspace = true }
 
 [build-dependencies]
-glob = "0.3"
-blender-bridge = { path = "../blender-bridge" }
+glob = { workspace = true }
+blender-bridge = { workspace = true }
