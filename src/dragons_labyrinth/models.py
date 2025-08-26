@@ -623,3 +623,298 @@ class TOMLAssetBatch(BaseModel):
     # Metadata
     created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
     priority: int = Field(default=5, ge=1, le=10, description="Batch priority")
+
+
+# =============================================================================
+# Variant Asset Generation Models (Revolutionary Architecture)
+# =============================================================================
+
+class VariantDimension(BaseModel):
+    """Single variant dimension with possible values."""
+    model_config = ConfigDict(extra="forbid")
+    
+    dimension_name: str = Field(description="Name of variant dimension (e.g., 'skin_tone', 'corruption')")
+    possible_values: list[str] = Field(description="All possible values for this dimension")
+    default_value: str | None = Field(default=None, description="Default value if not specified")
+    description: str = Field(description="Human-readable description")
+    
+    # Constraints
+    required: bool = Field(default=True, description="Whether this dimension is required")
+    exclude_combinations: list[list[str]] = Field(default_factory=list, description="Value combinations to exclude")
+
+
+class VariantConfiguration(BaseModel):
+    """Configuration for variant generation from universal TOML."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Variant dimensions
+    dimensions: dict[str, VariantDimension] = Field(default_factory=dict, description="All variant dimensions")
+    dimension_descriptors: dict[str, dict[str, str]] = Field(default_factory=dict, description="Value descriptors for substitution")
+    
+    # Generation rules
+    max_variants_per_archetype: int = Field(default=30, description="Limit combinatorial explosion")
+    priority_dimensions: list[str] = Field(default_factory=list, description="Generate these dimensions first")
+    exclude_combinations: list[list[str]] = Field(default_factory=list, description="Global exclusion rules")
+    
+    # Sprite sheet configuration
+    sprite_sheet_grouping: str = Field(description="How to group variants (archetype, category, etc.)")
+    naming_convention: str = Field(description="Template for variant naming")
+    
+    # Resolution optimization
+    resolution_tier: str = Field(description="Resolution tier for this asset type")
+
+
+class ResolutionTier(BaseModel):
+    """Resolution optimization tier configuration."""
+    model_config = ConfigDict(extra="forbid")
+    
+    tier_name: str = Field(description="Name of resolution tier")
+    resolution: str = Field(description="Image resolution (e.g., '512x512')")
+    use_case: str = Field(description="What this resolution is optimized for")
+    
+    # Performance settings
+    batch_size_multiplier: float = Field(default=1.0, description="Batch size adjustment for this resolution")
+    sprite_sheet_compatible: bool = Field(default=True, description="Whether suitable for sprite sheets")
+    
+    # Quality settings
+    quality_override: str | None = Field(default=None, description="Quality override for this tier")
+    style_override: str | None = Field(default=None, description="Style override for this tier")
+
+
+class VariantAssetSpec(BaseModel):
+    """Individual variant asset specification generated from combinations."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Asset identification
+    asset_name: str = Field(description="Generated asset name with variant suffixes")
+    base_archetype: str = Field(description="Base archetype (knight, goblin, plains, etc.)")
+    variant_combination: dict[str, str] = Field(description="Specific variant values used")
+    
+    # Generation details
+    final_prompt: str = Field(description="DALL-E prompt with all substitutions applied")
+    resolution: str = Field(description="Optimized resolution for this asset")
+    quality: str = Field(default="standard", description="Quality setting")
+    style: str = Field(default="natural", description="Style setting")
+    
+    # Asset properties
+    asset_category: str = Field(description="Category (character, biome, monster)")
+    asset_type: str = Field(description="Specific type within category")
+    layer_type: str = Field(description="Layer type (base, overlay, token, effect)")
+    priority: int = Field(description="Layer cake priority")
+    
+    # Sprite sheet metadata
+    sprite_sheet_group: str = Field(description="Which sprite sheet this belongs to")
+    expected_cell_size: tuple[int, int] | None = Field(default=None, description="Expected cell size in sprite sheet")
+    
+    # Metadata
+    generated_at: datetime = Field(default_factory=datetime.now, description="Generation timestamp")
+
+
+class SpriteSheetCell(BaseModel):
+    """Individual cell in a sprite sheet."""
+    model_config = ConfigDict(extra="forbid")
+    
+    asset_name: str = Field(description="Name of asset in this cell")
+    cell_index: int = Field(description="Index in sprite sheet")
+    
+    # Position and size
+    x: int = Field(description="X coordinate in sprite sheet")
+    y: int = Field(description="Y coordinate in sprite sheet")
+    width: int = Field(description="Cell width in pixels")
+    height: int = Field(description="Cell height in pixels")
+    
+    # Variant data
+    variant_combination: dict[str, str] = Field(default_factory=dict, description="Variant values for this cell")
+    base_archetype: str = Field(description="Base archetype")
+    
+    # Validation
+    validated: bool = Field(default=False, description="Whether cell content was validated")
+    validation_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Validation confidence score")
+
+
+class SpriteSheetMetadata(BaseModel):
+    """Complete sprite sheet atlas metadata."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Sheet identification
+    sheet_name: str = Field(description="Sprite sheet filename")
+    sheet_category: str = Field(description="Asset category for this sheet")
+    base_archetype: str = Field(description="Base archetype (if single archetype)")
+    
+    # Dimensions
+    sheet_size: tuple[int, int] = Field(description="Total sprite sheet dimensions (width, height)")
+    cell_size: tuple[int, int] = Field(description="Individual cell dimensions")
+    grid_size: tuple[int, int] = Field(description="Grid dimensions (cols, rows)")
+    
+    # Content
+    cells: list[SpriteSheetCell] = Field(default_factory=list, description="All cells in sprite sheet")
+    total_variants: int = Field(description="Total number of variants in sheet")
+    
+    # Generation metadata
+    variant_dimensions_used: list[str] = Field(default_factory=list, description="Which variant dimensions were used")
+    resolution_tier: str = Field(description="Resolution tier used")
+    
+    # Validation
+    sheet_validated: bool = Field(default=False, description="Whether entire sheet was validated")
+    missing_cells: list[int] = Field(default_factory=list, description="Indices of missing/failed cells")
+    
+    # Metadata
+    generated_at: datetime = Field(default_factory=datetime.now, description="Generation timestamp")
+    file_size_bytes: int | None = Field(default=None, description="Generated file size")
+
+
+class CombinatorialGeneration(BaseModel):
+    """Results of combinatorial variant generation."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Source configuration
+    base_archetype: str = Field(description="Base archetype being expanded")
+    variant_config: VariantConfiguration = Field(description="Variant configuration used")
+    
+    # Generated specifications
+    generated_specs: list[VariantAssetSpec] = Field(default_factory=list, description="All generated variant specs")
+    total_combinations: int = Field(description="Total possible combinations")
+    generated_combinations: int = Field(description="Actually generated combinations")
+    excluded_combinations: int = Field(description="Combinations excluded by rules")
+    
+    # Sprite sheet planning
+    sprite_sheets: list[SpriteSheetMetadata] = Field(default_factory=list, description="Planned sprite sheets")
+    total_sprite_sheets: int = Field(description="Number of sprite sheets needed")
+    
+    # Performance estimates
+    estimated_generation_time: float = Field(description="Estimated time in seconds")
+    estimated_cost_usd: float = Field(description="Estimated generation cost")
+    estimated_file_size_mb: float = Field(description="Estimated total file size")
+    
+    # Metadata
+    generated_at: datetime = Field(default_factory=datetime.now, description="Generation timestamp")
+
+
+class VariantAssetGenerationState(BaseModel):
+    """Enhanced state for variant-based asset generation workflow."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    # Input configuration
+    asset_category: str = Field(description="Category of assets to generate")
+    level_range: str = Field(default="1-180", description="Universal level range")
+    toml_spec_path: Path = Field(description="Path to universal variant TOML")
+    output_dir: Path = Field(description="Output directory")
+    
+    # Variant configuration
+    variant_config: VariantConfiguration | None = Field(default=None, description="Parsed variant configuration")
+    resolution_tiers: dict[str, ResolutionTier] = Field(default_factory=dict, description="Available resolution tiers")
+    
+    # Combinatorial generation
+    combinatorial_results: dict[str, CombinatorialGeneration] = Field(default_factory=dict, description="Results per archetype")
+    total_variants_planned: int = Field(default=0, description="Total variants to generate")
+    
+    # Generation results
+    generated_variants: dict[str, str] = Field(default_factory=dict, description="Generated variant file paths")
+    generation_metadata: dict[str, Any] = Field(default_factory=dict, description="Per-variant metadata")
+    failed_generations: list[str] = Field(default_factory=list, description="Failed variant names")
+    
+    # Sprite sheet processing
+    sprite_sheets_planned: list[SpriteSheetMetadata] = Field(default_factory=list, description="Planned sprite sheets")
+    sprite_sheets_generated: dict[str, str] = Field(default_factory=dict, description="Generated sprite sheet paths")
+    atlas_metadata: dict[str, Any] = Field(default_factory=dict, description="Atlas JSON metadata")
+    
+    # Human review
+    human_approval: ApprovalStatus | None = Field(default=None, description="Human review status")
+    human_feedback: dict[str, str] = Field(default_factory=dict, description="Human feedback")
+    
+    # Workflow metadata
+    workflow_id: WorkflowID = Field(description="Workflow identifier")
+    current_stage: WorkflowStage = Field(default="initialization", description="Current stage")
+    started_at: datetime = Field(default_factory=datetime.now, description="Start time")
+    completed_at: datetime | None = Field(default=None, description="Completion time")
+    step_count: int = Field(default=0, description="Completed steps")
+    
+    # Performance tracking
+    batch_size: int = Field(default=5, description="Variants per batch")
+    autonomous_mode: bool = Field(default=False, description="Skip human review")
+    api_calls_made: int = Field(default=0, description="DALL-E API calls")
+    total_cost_usd: float = Field(default=0.0, description="Total generation cost")
+
+
+class VariantAssetGenerationRequest(BaseModel):
+    """Request for variant-based asset generation."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Basic configuration
+    asset_category: str = Field(description="Asset category to generate")
+    toml_spec_path: Path = Field(description="Path to universal variant TOML")
+    output_dir: Path = Field(description="Output directory")
+    
+    # Variant configuration
+    max_variants_per_archetype: int | None = Field(default=None, description="Override max variants")
+    priority_archetypes: list[str] = Field(default_factory=list, description="Generate these archetypes first")
+    
+    # Generation settings
+    batch_size: int = Field(default=5, description="Variants per batch")
+    quality_level: str = Field(default="standard", description="Quality level")
+    enable_sprite_sheets: bool = Field(default=True, description="Generate sprite sheets")
+    autonomous_mode: bool = Field(default=False, description="Skip human review")
+    
+    # Performance settings
+    parallel_generation: bool = Field(default=False, description="Enable parallel generation")
+    memory_limit_mb: int = Field(default=2048, description="Memory limit for sprite sheet processing")
+    
+    # Workflow configuration
+    workflow_id: WorkflowID | None = Field(default=None, description="Optional workflow ID")
+    checkpoint_interval: int = Field(default=10, description="Steps between checkpoints")
+    
+    # Metadata
+    created_at: datetime = Field(default_factory=datetime.now, description="Request creation time")
+    
+    def model_post_init(self, __context: Any) -> None:
+        """Generate workflow ID if not provided."""
+        if self.workflow_id is None:
+            import uuid
+            self.workflow_id = f"variants_{self.asset_category}_{uuid.uuid4().hex[:8]}"
+
+
+class VariantAssetGenerationResult(BaseModel):
+    """Result from variant-based asset generation."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Basic info
+    workflow_id: WorkflowID = Field(description="Workflow identifier")
+    asset_category: str = Field(description="Generated asset category")
+    status: AnalysisStatus = Field(description="Final status")
+    
+    # Generation results
+    archetypes_processed: int = Field(description="Number of base archetypes processed")
+    variants_requested: int = Field(description="Total variants requested")
+    variants_generated: int = Field(description="Variants successfully generated")
+    variants_failed: int = Field(description="Failed variant generations")
+    
+    # Sprite sheet results
+    sprite_sheets_generated: int = Field(description="Number of sprite sheets created")
+    sprite_sheet_files: list[str] = Field(default_factory=list, description="Generated sprite sheet paths")
+    atlas_files: list[str] = Field(default_factory=list, description="Generated atlas JSON files")
+    
+    # Quality metrics
+    validation_passed: bool = Field(description="Whether validation passed")
+    average_quality_score: float = Field(ge=0.0, le=1.0, description="Average quality score")
+    sprite_sheet_efficiency: float = Field(ge=0.0, le=1.0, description="Sprite sheet space efficiency")
+    
+    # Performance metrics
+    processing_time_seconds: float = Field(description="Total processing time")
+    sprite_sheet_processing_time: float = Field(description="Time spent on sprite sheet generation")
+    peak_memory_usage_mb: float | None = Field(default=None, description="Peak memory usage")
+    total_api_calls: int = Field(description="Total DALL-E API calls")
+    total_cost_usd: float = Field(description="Total generation cost")
+    
+    # File outputs
+    individual_asset_files: dict[str, str] = Field(default_factory=dict, description="Individual variant files")
+    metadata_files: list[str] = Field(default_factory=list, description="Metadata files")
+    integration_files: list[str] = Field(default_factory=list, description="Game engine integration files")
+    
+    # Human review
+    human_reviewed: bool = Field(default=False, description="Whether human reviewed")
+    human_approval: ApprovalStatus | None = Field(default=None, description="Human approval status")
+    
+    # Metadata
+    started_at: datetime = Field(description="Start timestamp")
+    completed_at: datetime = Field(description="Completion timestamp")
+    generator_version: str = Field(default="2.0.0", description="Variant generator version")

@@ -1,0 +1,216 @@
+# Dragon's Labyrinth - Universal Monster Variants System
+# Revolutionary variant-based generation replacing level-banded approach
+# Base creature archetypes with corruption and equipment variants
+
+[batch]
+name = "monsters_universal_variants"  
+description = "Universal monster archetypes with combinatorial variant generation"
+level_range = "1-180"
+category = "monster"
+
+[style_constraints]
+camera_angle = "flat aerial top-down view"
+resolution = "512x512"  # Optimized resolution for monster tokens
+background_type = "transparent PNG overlay"
+tiling = "non-tileable character token"
+framing = "no borders, no frames, no circular crops"
+perspective = "no perspective tilt, no horizon"
+art_style = "medieval fantasy to cosmic horror progression"
+
+[consistency_rules]
+rules = [
+    "Chess-piece character token with clear silhouette",
+    "Flat aerial top-down view",
+    "Square 512x512 transparent PNG, game-ready token",
+    "No borders, no frames, no circles, no symbols",
+    "No horizon, no perspective tilt",
+    "Clear contrast for layer cake priority system",
+    "Corruption progression from natural to void horror"
+]
+
+# Universal Variant Dimensions
+[variants]
+size = ["tiny", "small", "medium", "large", "huge"]
+corruption = ["natural", "dragon_touched", "hellscape", "socially_broken", "void_warped"]
+equipment = ["unarmed", "basic_weapons", "armor", "magic_items"]
+allegiance = ["neutral", "bandit", "cult", "regime", "void_servant"]
+skin_tone = ["natural", "pale", "dark", "scaled", "grey_undead", "void_black", "elemental"]
+
+# Humanoid Base Creatures
+[assets.bandit]
+type = "character_token"
+base_prompt = "Bandit enemy token viewed from above: {size} humanoid with {equipment}, {skin_tone} skin, showing {corruption} corruption effects, serving {allegiance} allegiance, threatening stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "bandit"
+base_category = "humanoid"
+variants = ["size", "corruption", "equipment", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.cultist]
+type = "character_token"
+base_prompt = "Cultist enemy token viewed from above: {size} hooded figure with {equipment}, {skin_tone} skin, showing {corruption} fanaticism, serving {allegiance} cause, ritual pose, chess-piece character token with clear silhouette, flat aerial top-down view, medieval dark fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "cultist"
+base_category = "humanoid"
+variants = ["size", "corruption", "equipment", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.guard]
+type = "character_token"
+base_prompt = "Guard enemy token viewed from above: {size} uniformed figure with {equipment}, {skin_tone} skin, showing {corruption} authoritarianism, serving {allegiance} regime, disciplined stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval dark fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "guard"
+base_category = "humanoid"
+variants = ["size", "corruption", "equipment", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Goblinoid Base Creatures
+[assets.goblin]
+type = "character_token"
+base_prompt = "Goblin enemy token viewed from above: {size} green-skinned goblinoid with {equipment}, showing {corruption} corruption effects, serving {allegiance} tribe, menacing stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "goblin"
+base_category = "goblinoid"
+variants = ["size", "corruption", "equipment", "allegiance"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.hobgoblin]
+type = "character_token"
+base_prompt = "Hobgoblin enemy token viewed from above: {size} disciplined goblinoid with {equipment}, showing {corruption} military corruption, serving {allegiance} army, organized stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "hobgoblin"
+base_category = "goblinoid"
+variants = ["size", "corruption", "equipment", "allegiance"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.kobold]
+type = "character_token"
+base_prompt = "Kobold enemy token viewed from above: {size} reptilian humanoid with {equipment}, scaled skin, showing {corruption} dragonkin corruption, serving {allegiance} master, cunning stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "kobold"
+base_category = "dragonkin"
+variants = ["size", "corruption", "equipment", "allegiance"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Beast Base Creatures
+[assets.wolf]
+type = "character_token"
+base_prompt = "Wolf enemy token viewed from above: {size} predator with {skin_tone} fur, showing {corruption} bestial corruption, serving {allegiance} pack, hunting stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "wolf"
+base_category = "beast"
+variants = ["size", "corruption", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.giant_rat]
+type = "character_token"
+base_prompt = "Giant rat enemy token viewed from above: {size} vermin with {skin_tone} fur, showing {corruption} disease corruption, aggressive pose, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "giant_rat"
+base_category = "vermin"
+variants = ["size", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.giant_bat]
+type = "character_token"
+base_prompt = "Giant bat enemy token viewed from above: {size} flying creature with extended wings, showing {corruption} aerial corruption, flight pose, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "giant_bat"
+base_category = "flying_beast"
+variants = ["size", "corruption"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Undead Base Creatures
+[assets.skeleton]
+type = "character_token"
+base_prompt = "Skeleton enemy token viewed from above: {size} animated bones with {equipment}, showing {corruption} undead corruption, serving {allegiance} necromancer, fighting stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval horror fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "skeleton"
+base_category = "undead"
+variants = ["size", "corruption", "equipment", "allegiance"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.zombie]
+type = "character_token"
+base_prompt = "Zombie enemy token viewed from above: {size} rotting corpse with decaying flesh, showing {corruption} undead corruption, serving {allegiance} master, shambling pose, chess-piece character token with clear silhouette, flat aerial top-down view, medieval horror fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "zombie"
+base_category = "undead"
+variants = ["size", "corruption", "allegiance"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Elemental Base Creatures
+[assets.fire_elemental]
+type = "character_token"
+base_prompt = "Fire elemental enemy token viewed from above: {size} flame being with {skin_tone} fire coloring, showing {corruption} elemental corruption, serving {allegiance} summoner, burning stance, chess-piece character token with clear silhouette, flat aerial top-down view, medieval fantasy style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "fire_elemental"
+base_category = "elemental"
+variants = ["size", "corruption", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Aberration Base Creatures
+[assets.aberration]
+type = "character_token"
+base_prompt = "Aberrant creature token viewed from above: {size} impossible being with {skin_tone} unnatural flesh, showing {corruption} reality corruption, serving {allegiance} void master, reality-warping pose, chess-piece character token with clear silhouette, flat aerial top-down view, cosmic horror style, square 512x512 non-tileable token, transparent PNG background, readable on any biome, no border, no frame, no circles, no horizon, no perspective tilt"
+creature_type = "aberration"
+base_category = "aberration"
+variants = ["size", "corruption", "allegiance", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Corruption Effect Descriptors
+[corruption_descriptors]
+natural = "natural, unmodified state"
+dragon_touched = "dragon corruption with scales, fire damage, draconic features"
+hellscape = "hellish transformation with fire damage, infernal features"
+socially_broken = "psychological corruption, authoritarian indoctrination, political fanaticism"
+void_warped = "reality distortions, impossible geometry, cosmic horror influence"
+
+# Size Descriptors
+[size_descriptors]
+tiny = "very small creature"
+small = "small creature"
+medium = "human-sized creature"
+large = "larger than human"
+huge = "massive creature"
+
+# Equipment Descriptors
+[equipment_descriptors]
+unarmed = "no weapons, natural attacks only"
+basic_weapons = "simple weapons like clubs, daggers, spears"
+armor = "protective gear, shields, enhanced defense"
+magic_items = "enchanted equipment, magical weapons and armor"
+
+# Allegiance Descriptors
+[allegiance_descriptors]
+neutral = "independent, no specific loyalty"
+bandit = "criminal organization, thievery and violence"
+cult = "fanatical religious or ideological group"
+regime = "authoritarian government, military oppression"
+void_servant = "cosmic horror entity servant, reality corruption"
+
+# Automatic Variant Generation Rules
+[generation_rules]
+max_variants_per_creature = 25  # Limit combinatorial explosion
+priority_variants = ["corruption", "size", "allegiance"]  # Generate these first
+sprite_sheet_grouping = "base_category"  # Group by creature category
+naming_convention = "{creature_type}_{size}_{corruption}_{equipment}_{allegiance}"
+exclude_combinations = [
+    "tiny + huge",  # Logical exclusions
+    "natural + void_servant",  # Natural creatures don't serve void
+    "unarmed + magic_items"  # Can't have magic items without weapons
+]

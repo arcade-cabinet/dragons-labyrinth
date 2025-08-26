@@ -469,9 +469,13 @@ def generate_assets(
             raise typer.Exit(code=1)
         
         # Parse basic info from TOML filename
-        import toml
-        with open(toml_spec, 'r') as f:
-            spec_data = toml.load(f)
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+            
+        with open(toml_spec, 'rb') as f:
+            spec_data = tomllib.load(f)
         
         batch_info = spec_data.get('batch', {})
         asset_category = batch_info.get('category', 'unknown')
@@ -535,7 +539,7 @@ def generate_assets(
 @app.command()
 def list_asset_specs(
     specs_dir: Path = typer.Option(
-        Path("memory-bank/game-asset-prompts"),
+        Path("crates/game-engine/prompts"),
         "--specs-dir", "-s",
         help="Directory containing TOML asset specifications"
     )
@@ -548,14 +552,17 @@ def list_asset_specs(
     ))
     
     try:
-        import toml
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
         
         if not specs_dir.exists():
             log.error(f"[red]Specifications directory not found: {specs_dir}[/red]", extra={"markup": True})
             raise typer.Exit(code=1)
         
-        # Find all TOML files
-        toml_files = list(specs_dir.glob("*.toml"))
+        # Find all TOML files recursively
+        toml_files = list(specs_dir.glob("**/*.toml"))
         
         if not toml_files:
             log.warning(f"[yellow]No TOML specifications found in {specs_dir}[/yellow]", extra={"markup": True})
@@ -565,8 +572,8 @@ def list_asset_specs(
         
         for toml_file in sorted(toml_files):
             try:
-                with open(toml_file, 'r') as f:
-                    spec_data = toml.load(f)
+                with open(toml_file, 'rb') as f:
+                    spec_data = tomllib.load(f)
                 
                 batch_info = spec_data.get('batch', {})
                 assets_section = spec_data.get('assets', {})

@@ -1,0 +1,174 @@
+# Dragon's Labyrinth - Universal Biome Variants System
+# Revolutionary variant-based generation replacing level-banded approach
+# Base terrains with corruption and texture variants
+
+[batch]
+name = "biomes_universal_variants"  
+description = "Universal biome base terrains with combinatorial variant generation"
+level_range = "1-180"
+category = "biome"
+
+[style_constraints]
+camera_angle = "flat aerial top-down view"
+resolution = "1024x1024"  # Biomes need tiling, keep high resolution
+background_type = "seamless edge-to-edge terrain texture"
+tiling = "tileable"
+framing = "no borders, no frames, no circular crops"
+perspective = "no perspective tilt, no horizon"
+art_style = "medieval fantasy to cosmic horror progression"
+
+[consistency_rules]
+rules = [
+    "Seamless edge-to-edge terrain texture",
+    "Flat aerial top-down view", 
+    "Square 1024x1024 tileable, game-ready tile",
+    "No borders, no frames, no circles, no symbols, no portals",
+    "No horizon, no perspective tilt",
+    "Corruption progression from clean to void horror",
+    "Texture variants for visual diversity"
+]
+
+# Universal Variant Dimensions
+[variants]
+base_terrain = ["plains", "forest", "mountain", "swamp", "desert", "coast", "snow", "jagged_rock"]
+corruption = ["clean", "blight", "hellscape", "social", "void"]
+texture = ["grass", "stone", "sand", "mud", "ice", "lava", "obsidian", "crystal", "void_matter"]
+density = ["sparse", "normal", "dense"]
+season = ["spring", "summer", "autumn", "winter"]
+
+# Base Terrain Archetypes
+[assets.plains]
+type = "base_terrain"
+base_prompt = "Plains terrain from above: {texture} grassland with {density} vegetation, showing {corruption} corruption effects, {season} seasonal appearance, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "plains"
+variants = ["corruption", "texture", "density", "season"]
+layer_type = "base"
+tileable = true
+priority = 8
+
+[assets.forest]
+type = "base_terrain"
+base_prompt = "Forest canopy from above: {texture} trees with {density} coverage, showing {corruption} corruption effects, {season} seasonal foliage, no trunks visible from above, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "forest"
+variants = ["corruption", "texture", "density", "season"]
+layer_type = "base"
+tileable = true
+priority = 8
+
+[assets.mountain]
+type = "base_terrain"
+base_prompt = "Rocky mountain terrain from above: {texture} stone formations with {density} rock coverage, showing {corruption} corruption effects, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "mountain"
+variants = ["corruption", "texture", "density"]
+layer_type = "base"
+tileable = true
+priority = 8
+
+[assets.swamp]
+type = "base_terrain"
+base_prompt = "Marsh terrain from above: murky water with {density} reeds and vegetation, showing {corruption} corruption effects, {season} seasonal wetland appearance, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "swamp"
+variants = ["corruption", "density", "season"]
+layer_type = "base"
+tileable = true
+priority = 6
+
+[assets.desert]
+type = "base_terrain"
+base_prompt = "Desert terrain from above: {texture} sand with {density} dune patterns, showing {corruption} corruption effects, arid landscape, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "desert"
+variants = ["corruption", "texture", "density"]
+layer_type = "base"
+tileable = true
+priority = 7
+
+[assets.coast]
+type = "base_terrain"
+base_prompt = "Coastal terrain from above: sandy shoreline with gentle waves, showing {corruption} corruption effects, {season} seasonal coastal appearance, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "coast"
+variants = ["corruption", "season"]
+layer_type = "base"
+tileable = true
+priority = 6
+
+[assets.snow]
+type = "base_terrain"
+base_prompt = "Snow-covered terrain from above: white snow surface with {density} coverage, showing {corruption} corruption effects, winter landscape, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "snow"
+variants = ["corruption", "density"]
+layer_type = "base"
+tileable = true
+priority = 7
+
+[assets.jagged_rock]
+type = "base_terrain"
+base_prompt = "Jagged rock terrain from above: sharp dangerous rock formations, {texture} stone with {density} jagged edges, showing {corruption} corruption effects, treacherous terrain, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "jagged_rock"
+variants = ["corruption", "texture", "density"]
+layer_type = "base"
+tileable = true
+priority = 7
+
+# Specialized Corruption Terrains
+[assets.lava]
+type = "base_terrain"
+base_prompt = "Molten lava terrain from above: {texture} lava flows with {density} molten rock, glowing red magma, volcanic hellscape, showing {corruption} corruption enhancement, seamless edge-to-edge terrain texture, flat aerial top-down view, medieval dark fantasy tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "lava"
+variants = ["corruption", "texture", "density"]
+layer_type = "base"
+tileable = true
+priority = 5
+
+[assets.void_terrain]
+type = "base_terrain"
+base_prompt = "Void-corrupted terrain from above: {texture} reality-warped landscape with impossible geometry, {density} void distortions, cosmic horror effects, reality-breaking terrain, seamless edge-to-edge terrain texture, flat aerial top-down view, cosmic horror tile, square 1024x1024 tileable, game-ready, no border, no frame, no circles, no horizon, no perspective tilt"
+terrain_type = "void_terrain"
+variants = ["texture", "density"]
+layer_type = "base"
+tileable = true
+priority = 4
+
+# Corruption Effect Descriptors for Prompt Substitution
+[corruption_descriptors]
+clean = "pristine and natural, welcoming appearance"
+blight = "dragon blight corruption with scorch marks and patches of decay"
+hellscape = "hellish transformation with fire damage, twisted landscape"
+social = "war-torn with military installations, political oppression signs"
+void = "reality distortions, impossible geometry, cosmic horror elements"
+
+# Texture Material Descriptors
+[texture_descriptors]
+grass = "lush green grass"
+stone = "gray stone"
+sand = "golden sand"
+mud = "dark wet mud"
+ice = "crystalline ice"
+lava = "molten lava rock"
+obsidian = "black volcanic glass"
+crystal = "crystalline formations"
+void_matter = "reality-distorting void substance"
+
+# Density Descriptors
+[density_descriptors]
+sparse = "scattered, open areas visible"
+normal = "standard coverage"
+dense = "thick, heavily concentrated"
+
+# Season Descriptors
+[season_descriptors]
+spring = "fresh green growth, new life"
+summer = "full lush vegetation, vibrant colors"
+autumn = "golden and red foliage, harvested fields"
+winter = "bare branches, frost effects"
+
+# Automatic Variant Generation Rules
+[generation_rules]
+max_variants_per_terrain = 20  # Limit combinatorial explosion
+priority_variants = ["corruption", "texture"]  # Generate these first
+sprite_sheet_grouping = "terrain_type"  # Group variants by base terrain
+naming_convention = "{terrain_type}_{corruption}_{texture}_{density}_{season}"
+exclude_combinations = [
+    "snow + summer",  # Logical exclusions
+    "lava + ice",
+    "void_terrain + season"  # Void terrain doesn't have seasons
+]

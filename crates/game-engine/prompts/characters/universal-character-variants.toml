@@ -1,0 +1,199 @@
+# Dragon's Labyrinth - Universal Character Variants System
+# Revolutionary variant-based generation replacing level-banded approach
+# Generic archetypes with combinatorial variant generation
+
+[batch]
+name = "characters_universal_variants"  
+description = "Universal character archetypes with combinatorial variant generation"
+level_range = "1-180"
+category = "character"
+
+[style_constraints]
+camera_angle = "flat aerial top-down view"
+resolution = "512x512"  # Optimized resolution for character tokens
+background_type = "transparent PNG with clear silhouette"
+tiling = "non-tileable character token"
+framing = "no borders, no frames, no circular crops"
+perspective = "no perspective tilt, no horizon"
+art_style = "medieval fantasy chess piece"
+character_style = "clear readable silhouette from above"
+
+[consistency_rules]
+rules = [
+    "Chess-piece style character tokens",
+    "Flat aerial top-down view, clear silhouette",
+    "Square 512x512 transparent PNG, game-ready token", 
+    "No borders, no frames, no circles, no symbols",
+    "No horizon, no perspective tilt",
+    "Medieval fantasy character design",
+    "Readable silhouette on any biome background",
+    "Generic archetype without proper names"
+]
+
+# Universal Variant Dimensions
+[variants]
+gender = ["male", "female", "non_binary"]
+build = ["thin", "average", "stocky", "muscular"]
+age = ["young", "middle_aged", "elder"]
+hair = ["bald", "brown", "black", "blonde", "grey", "red", "white"]
+clothing = ["tunic", "robes", "leather", "chainmail", "plate"]
+corruption = ["clean", "stressed", "traumatized", "broken", "void_touched"]
+skin_tone = ["pale", "fair", "olive", "brown", "dark", "grey_undead", "void_black"]
+
+# Combat Archetypes
+[assets.knight]
+type = "character_token"
+base_prompt = "Knight character token viewed from directly above: armored figure in {clothing}, distinctive helmet shape, sword at side, shield on back, {build} build, {age} appearance, {hair} hair visible, {skin_tone} skin, showing {corruption} psychological state, chess-piece silhouette style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "knight"
+class = "warrior"
+variants = ["gender", "build", "age", "clothing", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.rogue]
+type = "character_token"
+base_prompt = "Rogue character token viewed from directly above: hooded figure with distinctive cloak shape, twin daggers crossed on back, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "rogue"
+class = "stealth"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.mage]
+type = "character_token"
+base_prompt = "Mage character token viewed from directly above: robed figure with wide-brimmed hat, staff held vertically beside body, spell component pouches, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "mage"
+class = "caster"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.archer]
+type = "character_token"
+base_prompt = "Archer character token viewed from directly above: leather-armored figure with distinctive bow shape across torso, quiver of arrows on back, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "archer"
+class = "ranged"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+[assets.cleric]
+type = "character_token"
+base_prompt = "Cleric character token viewed from directly above: robed holy figure with distinctive religious symbols, staff with holy symbol, flowing robes, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "cleric"
+class = "divine"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 10
+
+# Civilian Archetypes
+[assets.merchant]
+type = "character_token"
+base_prompt = "Merchant character token viewed from directly above: {build} figure with distinctive pack and traveling clothes, money pouch at belt, walking stick, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "merchant"
+class = "civilian"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 8
+
+[assets.blacksmith]
+type = "character_token"
+base_prompt = "Blacksmith character token viewed from directly above: muscular figure with leather apron, hammer at belt, distinctive smith silhouette with broad shoulders, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "blacksmith"
+class = "crafter"
+variants = ["gender", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 8
+
+[assets.innkeeper]
+type = "character_token"
+base_prompt = "Innkeeper character token viewed from directly above: welcoming figure with apron, keys at belt, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "innkeeper"
+class = "service"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 8
+
+[assets.guard]
+type = "character_token"
+base_prompt = "Town guard character token viewed from directly above: uniformed figure with spear and shield, distinctive guard helmet, chainmail, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "guard"
+class = "authority"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 8
+
+[assets.priest]
+type = "character_token"
+base_prompt = "Priest character token viewed from directly above: robed holy figure with distinctive religious symbols, staff with holy symbol, flowing robes, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "priest"
+class = "religious"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 8
+
+[assets.farmer]
+type = "character_token"
+base_prompt = "Farmer character token viewed from directly above: simple clothing with work tools, hoe or rake visible, straw hat, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "farmer"
+class = "laborer"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 7
+
+[assets.scholar]
+type = "character_token"
+base_prompt = "Scholar character token viewed from directly above: robed figure with books and scrolls, ink-stained fingers, reading glasses, {build} build, {age} appearance, {hair} hair, {skin_tone} skin, showing {corruption} psychological state, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "scholar"
+class = "intellectual"
+variants = ["gender", "build", "age", "hair", "corruption", "skin_tone"]
+layer_type = "token"
+tileable = false
+priority = 7
+
+# Mounts and Companions
+[assets.horse]
+type = "character_token"
+base_prompt = "Horse mount token viewed from directly above: horse silhouette with saddle and reins, distinctive equine shape, clear four-legged mount, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "horse"
+class = "mount"
+variants = []  # No human variants for mounts
+layer_type = "token"
+tileable = false
+priority = 6
+
+[assets.pack_mule]
+type = "character_token"
+base_prompt = "Pack mule token viewed from directly above: donkey silhouette with cargo packs, smaller than horse, clear beast of burden shape, chess-piece style, flat aerial top-down view, medieval fantasy character token, transparent background, 512x512, no border, no frame, no perspective"
+archetype = "pack_mule"
+class = "mount"
+variants = []
+layer_type = "token"
+tileable = false
+priority = 6
+
+# Corruption State Descriptors for Prompt Substitution
+[corruption_descriptors]
+clean = "healthy and confident demeanor"
+stressed = "tense posture, stress lines visible, tired expression"
+traumatized = "haunted eyes, defensive stance, psychological damage evident"
+broken = "vacant stare, slumped shoulders, broken spirit visible"
+void_touched = "reality distortion effects, impossible angles, cosmic horror influence"
+
+# Automatic Variant Generation Rules
+[generation_rules]
+max_variants_per_archetype = 30  # Limit combinatorial explosion
+priority_variants = ["corruption", "skin_tone", "gender"]  # Generate these first
+sprite_sheet_grouping = "archetype"  # Group variants by archetype for sprite sheets
+naming_convention = "{archetype}_{gender}_{build}_{age}_{hair}_{corruption}_{skin_tone}"
