@@ -38,10 +38,20 @@ Total: 900+ assets from minimal, maintainable prompt definitions.
 """
 
 from .workflow import AssetGenerationWorkflow, create_asset_generation_workflow
+from .toml_parser import VariantTOMLParser
+from .combinatorial_generator import CombinatorialGenerator
+from .dalle_generator import DalleVariantGenerator
+from .sprite_sheet_processor import SpriteSheetProcessor
+from .bevy_integrator import BevyIntegrator
 
 __all__ = [
     "AssetGenerationWorkflow",
-    "create_asset_generation_workflow"
+    "create_asset_generation_workflow",
+    "VariantTOMLParser", 
+    "CombinatorialGenerator",
+    "DalleVariantGenerator",
+    "SpriteSheetProcessor",
+    "BevyIntegrator"
 ]
 
 # Version info for the variant system
