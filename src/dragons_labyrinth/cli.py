@@ -514,25 +514,25 @@ def generate_assets(
         # Display results
         console.rule("[cyan]Generation Complete[/cyan]")
         
-        if result.status == "SUCCESS":
+        # Treat success based on generated variants count to support new workflow state
+        generated_count = len(result.get('generated_variants', {})) if isinstance(result, dict) else getattr(result, 'assets_generated', 0)
+        failed_count = len(result.get('failed_generations', [])) if isinstance(result, dict) else getattr(result, 'assets_failed', 0)
+
+        if generated_count > 0:
             log.info(f"[bold green]✨ Asset generation successful![/bold green]", extra={"markup": True})
-            log.info(f"[green]📊 Generated: {result.assets_generated}/{result.assets_requested} assets[/green]", extra={"markup": True})
-            
-            if result.assets_failed > 0:
-                log.warning(f"[yellow]⚠️  Failed: {result.assets_failed} assets[/yellow]", extra={"markup": True})
-            
-            log.info(f"[green]⏱️  Processing time: {result.processing_time_seconds:.1f}s[/green]", extra={"markup": True})
+            log.info(f"[green]📊 Generated: {generated_count} assets[/green]", extra={"markup": True})
+            if failed_count:
+                log.warning(f"[yellow]⚠️  Failed: {failed_count} assets[/yellow]", extra={"markup": True})
             log.info(f"[green]📁 Output directory: {output_dir}[/green]", extra={"markup": True})
-            
+
             # List generated files
-            if result.asset_files:
+            asset_files = result.get('generated_variants', {}) if isinstance(result, dict) else getattr(result, 'asset_files', {})
+            if asset_files:
                 console.print("\n[bold]Generated Assets:[/bold]")
-                for asset_name, file_path in result.asset_files.items():
+                for asset_name, file_path in asset_files.items():
                     console.print(f"  [cyan]{asset_name}:[/cyan] {file_path}")
-            
         else:
             log.error(f"[bold red]❌ Asset generation failed[/bold red]", extra={"markup": True})
-            log.error(f"[red]Generated: {result.assets_generated}, Failed: {result.assets_failed}[/red]", extra={"markup": True})
             raise typer.Exit(code=1)
         
     except ImportError as e:

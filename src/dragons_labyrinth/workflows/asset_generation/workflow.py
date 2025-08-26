@@ -9,7 +9,6 @@ from datetime import datetime
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt
-import openai
 from openai import OpenAI
 
 from dragons_labyrinth.models import VariantAssetGenerationState
@@ -65,117 +64,112 @@ class AssetGenerationWorkflow:
         return self.combinatorial.generate_combinations(state)
     
     def generate_assets_node(self, state: VariantAssetGenerationState) -> dict:
-        """Node: Generate assets with GPT-5 + GPT Image 1."""
+        """Node: Generate assets with GPT-5 + GPT Image 1 (per-variant images)."""
         print("🎨 Generating assets with GPT-5 + GPT Image 1")
-        
-        generated_variants = {}
-        generation_metadata = {}
+
+        generated_variants = dict(state.generated_variants)
+        generation_metadata = dict(state.generation_metadata)
         failed_generations = []
-        total_cost = 0.0
-        
-        # Group variants by sprite sheet for efficient generation
-        variant_groups = self._group_variants_for_sprite_generation(state)
-        
-        for group_name, group_specs in variant_groups.items():
-            print(f"  📦 Generating sprite sheet: {group_name}")
-            
-            # Generate entire sprite sheet in one call
-            sprite_sheet_data = self._generate_sprite_sheet_with_gpt(
-                group_name,
-                group_specs,
-                state
-            )
-            
-            if sprite_sheet_data:
-                generated_variants.update(sprite_sheet_data['variants'])
-                generation_metadata.update(sprite_sheet_data['metadata'])
-                total_cost += sprite_sheet_data['cost']
-            else:
-                failed_generations.extend([spec.asset_name for spec in group_specs])
-        
-        print(f"  🎯 Generation complete: {len(generated_variants)} variants")
-        print(f"  💰 Total cost: ${total_cost:.2f}")
-        
+        api_calls = 0
+        total_cost = state.total_cost_usd
+
+        # Flatten all variant specs across archetypes
+        all_specs = []
+        for result in state.combinatorial_results.values():
+            all_specs.extend(result.generated_specs)
+
+        # Respect batch size: generate up to N new variants per invocation
+        variants_to_generate = [s for s in all_specs if s.asset_name not in generated_variants]
+        if state.batch_size > 0:
+            variants_to_generate = variants_to_generate[: state.batch_size]
+
+        output_dir = state.output_dir / "variants"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for spec in variants_to_generate:
+            file_path = output_dir / f"{spec.asset_name}.png"
+            if file_path.exists():
+                generated_variants[spec.asset_name] = str(file_path)
+                # Preserve or write metadata
+                generation_metadata.setdefault(spec.asset_name, {
+                    "base_archetype": spec.base_archetype,
+                    "variant_combination": spec.variant_combination,
+                    "resolution": spec.resolution,
+                    "sprite_sheet_group": spec.sprite_sheet_group,
+                    "timestamp": datetime.now().isoformat(),
+                })
+                continue
+
+            try:
+                # Generate image via Images API
+                requested_size = getattr(spec, "resolution", "1024x1024")
+                supported_sizes = {"256x256", "512x512", "1024x1024"}
+                size = requested_size if requested_size in supported_sizes else "1024x1024"
+
+                requested_quality = getattr(spec, "quality", None)
+                supported_qualities = {"low", "medium", "high", "auto"}
+                quality = requested_quality if requested_quality in supported_qualities else "high"
+
+                resp = self.openai.images.generate(
+                    model=self.image_model,
+                    prompt=spec.final_prompt,
+                    size=size,
+                    quality=quality,
+                    background="transparent",
+                    timeout=90,
+                )
+
+                api_calls += 1
+                image_b64 = resp.data[0].b64_json if resp and resp.data else None
+                if not image_b64:
+                    failed_generations.append(spec.asset_name)
+                    continue
+
+                # Decode and write file
+                import base64
+                with open(file_path, "wb") as f:
+                    f.write(base64.b64decode(image_b64))
+
+                generated_variants[spec.asset_name] = str(file_path)
+                generation_metadata[spec.asset_name] = {
+                    "base_archetype": spec.base_archetype,
+                    "variant_combination": spec.variant_combination,
+                    "resolution": spec.resolution,
+                    "sprite_sheet_group": spec.sprite_sheet_group,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+                # Rough cost estimate (standard 1024x1024 ~ $0.04)
+                if spec.resolution in ("1024x1024",):
+                    total_cost += 0.04
+
+            except Exception as e:
+                print(f"  ❌ Failed to generate {spec.asset_name}: {e}")
+                failed_generations.append(spec.asset_name)
+
+        print(f"  🎯 Generation complete: {len(generated_variants)} total, +{len(variants_to_generate) - len(failed_generations)} new")
+        print(f"  💰 Estimated cost: ${total_cost:.2f}")
+
         return {
             "generated_variants": generated_variants,
             "generation_metadata": generation_metadata,
             "failed_generations": failed_generations,
-            "api_calls_made": state.api_calls_made + len(variant_groups),
-            "total_cost_usd": state.total_cost_usd + total_cost,
-            "step_count": state.step_count + 1
+            "api_calls_made": state.api_calls_made + api_calls,
+            "total_cost_usd": total_cost,
+            "step_count": state.step_count + 1,
         }
     
     def _group_variants_for_sprite_generation(self, state: VariantAssetGenerationState) -> dict:
-        """Group variants for efficient sprite sheet generation."""
+        """Group variant specs for planning (used by prompt building helper)."""
         groups = {}
-        
         for result in state.combinatorial_results.values():
             for spec in result.generated_specs:
-                group = spec.sprite_sheet_group
-                if group not in groups:
-                    groups[group] = []
-                groups[group].append(spec)
-        
+                groups.setdefault(spec.sprite_sheet_group, []).append(spec)
         return groups
     
     def _generate_sprite_sheet_with_gpt(self, group_name: str, specs: list, state: VariantAssetGenerationState) -> dict:
-        """Generate complete sprite sheet using GPT-5 + GPT Image 1."""
-        
-        # Build comprehensive prompt with GPT-5
-        enhanced_prompt = self._build_sprite_sheet_prompt(group_name, specs, state)
-        
-        # Generate sprite sheet with GPT Image 1
-        response = self.openai.responses.create(
-            model=self.model,
-            input=enhanced_prompt,
-            tools=[{
-                "type": "image_generation",
-                "background": "transparent",
-                "quality": "high",
-                "size": "1024x1024"
-            }]
-        )
-        
-        # Extract image data
-        image_data = [
-            output.result
-            for output in response.output
-            if output.type == "image_generation_call"
-        ]
-        
-        if not image_data:
-            return None
-        
-        # Save sprite sheet
-        import base64
-        output_dir = state.output_dir / "sprite_sheets"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        sprite_path = output_dir / f"{group_name}.png"
-        with open(sprite_path, 'wb') as f:
-            f.write(base64.b64decode(image_data[0]))
-        
-        # Build return data
-        variants = {spec.asset_name: str(sprite_path) for spec in specs}
-        metadata = {
-            spec.asset_name: {
-                "base_archetype": spec.base_archetype,
-                "variant_combination": spec.variant_combination,
-                "resolution": spec.resolution,
-                "sprite_sheet_group": spec.sprite_sheet_group,
-                "timestamp": datetime.now().isoformat()
-            }
-            for spec in specs
-        }
-        
-        # Calculate cost (high quality 1024x1024)
-        cost = 4160 * 0.00001  # image tokens * price per token
-        
-        return {
-            "variants": variants,
-            "metadata": metadata,
-            "cost": cost
-        }
+        """Deprecated: Previously attempted one-shot sprite sheet generation. Kept for reference."""
+        return {}
     
     def _build_sprite_sheet_prompt(self, group_name: str, specs: list, state: VariantAssetGenerationState) -> str:
         """Build comprehensive sprite sheet prompt."""

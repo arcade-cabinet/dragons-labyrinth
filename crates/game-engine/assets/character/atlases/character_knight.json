@@ -1,0 +1,52 @@
+{
+  "sheet_name": "character_knight.png",
+  "sheet_size": [
+    256,
+    128
+  ],
+  "cell_size": [
+    128,
+    128
+  ],
+  "grid_size": [
+    2,
+    1
+  ],
+  "variant_count": 2,
+  "frames": {
+    "knight_male_thin_young_hair_clean_pale": {
+      "x": 0,
+      "y": 0,
+      "w": 128,
+      "h": 128,
+      "variant_combination": {
+        "gender": "male",
+        "build": "thin",
+        "age": "young",
+        "clothing": "tunic",
+        "corruption": "clean",
+        "skin_tone": "pale"
+      },
+      "base_archetype": "knight",
+      "cell_index": 0
+    },
+    "knight_male_thin_young_hair_clean_fair": {
+      "x": 128,
+      "y": 0,
+      "w": 128,
+      "h": 128,
+      "variant_combination": {
+        "gender": "male",
+        "build": "thin",
+        "age": "young",
+        "clothing": "tunic",
+        "corruption": "clean",
+        "skin_tone": "fair"
+      },
+      "base_archetype": "knight",
+      "cell_index": 1
+    }
+  },
+  "generated_at": "2025-08-26T01:20:46.845316",
+  "successful_placements": 2
+}
