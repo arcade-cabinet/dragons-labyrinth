@@ -49,7 +49,7 @@ class BevyIntegrator:
             "step_count": state.step_count + 1
         }
     
-    def _write_atlas_metadata(self, state: VariantAssetGenerationState, output_dir: Path) -> List[str]:
+    def _write_atlas_metadata(self, state: VariantAssetGenerationState, output_dir: Path) -> list[str]:
         """Write JSON atlas metadata files for sprite sheets."""
         
         atlas_files = []

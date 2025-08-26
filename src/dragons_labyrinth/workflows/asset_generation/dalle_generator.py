@@ -9,7 +9,7 @@ from datetime import datetime
 import requests
 from io import BytesIO
 
-from langchain_community.tools.dalle_image_generator import OpenAIDALLEImageGenerationTool
+from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 
 from dragons_labyrinth.models import VariantAssetGenerationState
 
@@ -21,7 +21,7 @@ class DalleVariantGenerator:
     """
     
     def __init__(self):
-        self.dalle_tool = OpenAIDALLEImageGenerationTool()
+        self.dalle_tool = DallEAPIWrapper()
         self.cost_per_generation = 0.04  # Approximate cost per DALL-E 3 generation
         
     def generate_variants(self, state: VariantAssetGenerationState) -> Dict[str, Any]:
@@ -42,24 +42,34 @@ class DalleVariantGenerator:
         
         print(f"  📦 Using optimized batch size: {optimized_batch_size}")
         
-        # Process in batches with progress tracking
-        for i in range(0, len(all_specs), optimized_batch_size):
-            batch = all_specs[i:i + optimized_batch_size]
-            batch_num = (i // optimized_batch_size) + 1
-            total_batches = (len(all_specs) + optimized_batch_size - 1) // optimized_batch_size
-            
-            print(f"    📦 Batch {batch_num}/{total_batches} ({len(batch)} variants)")
-            
-            # Process each variant in batch
-            for spec in batch:
-                success = self._generate_single_variant(
-                    spec, state.output_dir, tier, generated_variants, generation_metadata, failed_generations
-                )
+        # Process with fail-fast behavior - stop immediately on API issues
+        consecutive_failures = 0
+        max_consecutive_failures = 2  # Stop after just 2 failures
+        
+        print(f"    🔥 FAIL-FAST MODE: Will stop after {max_consecutive_failures} consecutive failures")
+        
+        for i, spec in enumerate(all_specs):
+            if consecutive_failures >= max_consecutive_failures:
+                print(f"    🚨 STOPPING ENTIRE GENERATION: {consecutive_failures} consecutive failures - API issue detected")
+                break
                 
-                if success:
-                    print(f"      ✅ {spec.asset_name}")
-                else:
-                    print(f"      ❌ {spec.asset_name}")
+            batch_num = i + 1
+            print(f"    📦 Variant {batch_num}/{len(all_specs)}: {spec.asset_name}")
+            
+            success = self._generate_single_variant(
+                spec, state.output_dir, tier, generated_variants, generation_metadata, failed_generations
+            )
+            
+            if success:
+                print(f"      ✅ SUCCESS")
+                consecutive_failures = 0  # Reset failure counter
+            else:
+                print(f"      ❌ FAILED")
+                consecutive_failures += 1
+                
+                if consecutive_failures >= max_consecutive_failures:
+                    print(f"      🚨 FAIL-FAST TRIGGERED: {consecutive_failures} consecutive failures")
+                    break
         
         # Calculate final metrics
         success_count = len(generated_variants)
@@ -115,16 +125,14 @@ class DalleVariantGenerator:
         """Generate a single variant asset with error handling."""
         
         try:
-            # Prepare DALL-E parameters
-            dalle_params = {
-                "query": spec.final_prompt,
-                "size": spec.resolution,
-                "quality": tier.quality_override or spec.quality,
-                "style": tier.style_override or spec.style
-            }
+            # Generate image using DALL-E (just pass the prompt string per documentation)
+            result = self.dalle_tool.run(spec.final_prompt)
             
-            # Generate image
-            result = self.dalle_tool.run(dalle_params)
+            # Prepare metadata for download (quality/style not supported by DallEAPIWrapper)
+            dalle_params = {
+                "prompt": spec.final_prompt,
+                "resolution": spec.resolution
+            }
             
             # Handle result and download
             if isinstance(result, str) and result.startswith('http'):

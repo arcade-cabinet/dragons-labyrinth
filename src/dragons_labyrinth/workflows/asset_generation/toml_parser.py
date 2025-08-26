@@ -20,39 +20,7 @@ class VariantTOMLParser:
     """
     
     def __init__(self):
-        # HEX-BASED RESOLUTION STRATEGY (Following game design principles)
-        # Standard hex tile: 128x128 - Large enough for detail, not ridiculous for movement
-        # UI elements follow proper design ratios relative to hex tiles
-        self.resolution_tiers = {
-            "hex_standard": ResolutionTier(
-                tier_name="hex_standard",
-                resolution="128x128",
-                use_case="Standard hex tiles, characters, features - the main game scale",
-                batch_size_multiplier=2.0,
-                sprite_sheet_compatible=True
-            ),
-            "ui_buttons": ResolutionTier(
-                tier_name="ui_buttons", 
-                resolution="64x64",
-                use_case="UI buttons and interface elements (1/2 hex ratio)",
-                batch_size_multiplier=3.0,
-                sprite_sheet_compatible=True
-            ),
-            "ui_icons": ResolutionTier(
-                tier_name="ui_icons",
-                resolution="32x32", 
-                use_case="Small UI icons and indicators (1/4 hex ratio)",
-                batch_size_multiplier=4.0,
-                sprite_sheet_compatible=True
-            ),
-            "multi_hex": ResolutionTier(
-                tier_name="multi_hex",
-                resolution="256x256",
-                use_case="Large features spanning 2x2 hexes (dragon lairs, cities)",
-                batch_size_multiplier=1.0,
-                sprite_sheet_compatible=True
-            )
-        }
+        self.resolution_tiers = self._load_resolution_tiers_from_global_style_guide()
     
     def parse_variant_toml(self, state: VariantAssetGenerationState) -> Dict[str, Any]:
         """Parse universal variant TOML into structured configuration."""
@@ -128,22 +96,71 @@ class VariantTOMLParser:
         return dimension_descriptors
     
     def _determine_resolution_tier(self, raw_toml: Dict[str, Any]) -> str:
-        """Determine the appropriate resolution tier for this asset type."""
+        """Determine resolution tier from GLOBAL_STYLE_GUIDE based on asset category."""
         
-        style_constraints = raw_toml.get('style_constraints', {})
-        resolution_from_toml = style_constraints.get('resolution', '1024x1024')
+        # Get asset category from batch info
+        batch_info = raw_toml.get('batch', {})
+        category = batch_info.get('category', 'unknown')
         
-        # Find matching resolution tier
-        for tier_name, tier in self.resolution_tiers.items():
-            if tier.resolution == resolution_from_toml:
-                return tier_name
+        # Map categories to resolution tiers based on GLOBAL_STYLE_GUIDE
+        category_to_tier = {
+            'biome': 'hex_standard',      # 128x128 hex tiles
+            'character': 'hex_standard',  # 128x128 character tokens 
+            'monster': 'hex_standard',    # 128x128 character tokens
+            'feature': 'hex_standard',    # 128x128 buildings and overlays
+            'path': 'hex_standard',       # 128x128 path overlays
+            'bridge': 'hex_standard',     # 128x128 bridge overlays
+            'effect': 'hex_standard',     # 128x128 effect overlays
+            'ui': 'ui_buttons',           # 64x64 UI buttons
+            'item': 'hex_standard'        # 128x128 item tokens
+        }
         
-        # Default fallback based on common patterns
-        if '256' in resolution_from_toml:
-            return 'ui_elements'
-        elif '512' in resolution_from_toml:
-            return 'character_tokens'
-        elif '768' in resolution_from_toml:
-            return 'feature_overlays'
-        else:
-            return 'biome_tiles'  # Default to biome tiles for 1024x1024+
+        return category_to_tier.get(category, 'hex_standard')
+    
+    def _load_resolution_tiers_from_global_style_guide(self) -> Dict[str, ResolutionTier]:
+        """Load resolution tiers from GLOBAL_STYLE_GUIDE.toml (REQUIRED)."""
+        
+        global_style_path = Path("crates/game-engine/prompts/GLOBAL_STYLE_GUIDE.toml")
+        
+        if not global_style_path.exists():
+            raise FileNotFoundError(f"GLOBAL_STYLE_GUIDE.toml not found at {global_style_path} - this file is REQUIRED")
+        
+        # Load GLOBAL_STYLE_GUIDE
+        with open(global_style_path, 'r') as f:
+            global_style = toml.load(f)
+        
+        # Extract resolution mappings (REQUIRED)
+        resolution_usage = global_style.get('resolution_usage')
+        if not resolution_usage:
+            raise ValueError("resolution_usage section missing from GLOBAL_STYLE_GUIDE.toml")
+        
+        return {
+            "hex_standard": ResolutionTier(
+                tier_name="hex_standard",
+                resolution=resolution_usage['hex_tiles'],
+                use_case="Hex tiles, characters, features",
+                batch_size_multiplier=2.0,
+                sprite_sheet_compatible=True
+            ),
+            "ui_buttons": ResolutionTier(
+                tier_name="ui_buttons", 
+                resolution=resolution_usage['ui_buttons'],
+                use_case="UI buttons and interface elements",
+                batch_size_multiplier=3.0,
+                sprite_sheet_compatible=True
+            ),
+            "ui_icons": ResolutionTier(
+                tier_name="ui_icons",
+                resolution=resolution_usage['ui_icons'],
+                use_case="Small UI icons",
+                batch_size_multiplier=4.0,
+                sprite_sheet_compatible=True
+            ),
+            "multi_hex": ResolutionTier(
+                tier_name="multi_hex",
+                resolution=resolution_usage['large_features'],
+                use_case="Large multi-hex features",
+                batch_size_multiplier=1.0,
+                sprite_sheet_compatible=True
+            )
+        }

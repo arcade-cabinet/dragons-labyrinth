@@ -16,6 +16,7 @@ from dragons_labyrinth.hbf.orchestrator import HBFOrchestrator
 from dragons_labyrinth.hbf.content_processor import HBFContentProcessor
 from dragons_labyrinth.hbf.game_transformer import GameTransformer
 from dragons_labyrinth.hbf.hbf_processor import process_hbf_to_game_world
+from dragons_labyrinth.workflows.asset_generation.workflow import AssetGenerationWorkflow
 
 # Setup logging and console
 console = Console()
@@ -435,10 +436,10 @@ def generate_assets(
         ...,
         help="Path to TOML asset specification file"
     ),
-    output_dir: Path = typer.Option(
-        Path("assets/generated"),
-        "--output", "-o",
-        help="Output directory for generated assets"
+    base_dir: Path = typer.Option(
+        Path("crates/game-engine"),
+        "--base-dir", "-b", 
+        help="Base directory (assets will go in base_dir/assets/)"
     ),
     batch_size: int = typer.Option(
         5,
@@ -449,6 +450,11 @@ def generate_assets(
         False,
         "--autonomous/--interactive",
         help="Skip human review checkpoints"
+    ),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--overwrite",
+        help="Skip assets that already exist"
     )
 ):
     """
@@ -460,8 +466,8 @@ def generate_assets(
     ))
     
     try:
-        # Import workflow
-        from dragons_labyrinth.workflows.asset_generation_workflow import create_asset_generation_workflow
+        # Import modular workflow
+        from dragons_labyrinth.workflows.asset_generation.workflow import AssetGenerationWorkflow
         
         # Validate TOML spec exists
         if not toml_spec.exists():
@@ -483,11 +489,14 @@ def generate_assets(
         
         log.info(f"[cyan]📋 Generating {asset_category} assets for levels {level_range}[/cyan]", extra={"markup": True})
         log.info(f"[cyan]📝 Specification: {toml_spec}[/cyan]", extra={"markup": True})
+        # Calculate output directory from base_dir and category
+        output_dir = base_dir / "assets" / asset_category
+        
         log.info(f"[cyan]📁 Output: {output_dir}[/cyan]", extra={"markup": True})
         log.info(f"[cyan]🤖 Mode: {'Autonomous' if autonomous else 'Interactive'}[/cyan]", extra={"markup": True})
         
         # Create workflow
-        workflow = create_asset_generation_workflow()
+        workflow = AssetGenerationWorkflow()
         
         # Execute asset generation
         console.rule("[cyan]Starting Asset Generation Workflow[/cyan]")
@@ -498,7 +507,8 @@ def generate_assets(
             toml_spec_path=toml_spec,
             output_dir=output_dir,
             batch_size=batch_size,
-            autonomous_mode=autonomous
+            autonomous_mode=autonomous,
+            skip_existing=skip_existing
         )
         
         # Display results
@@ -531,6 +541,218 @@ def generate_assets(
         raise typer.Exit(code=1)
     except Exception as e:
         log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        import traceback
+        traceback.print_exc()
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def generate_all_assets(
+    base_dir: Path = typer.Option(
+        Path("crates/game-engine"),
+        "--base-dir", "-b", 
+        help="Base directory (assets will go in base_dir/assets/)"
+    ),
+    specs_dir: Path = typer.Option(
+        Path("crates/game-engine/prompts"),
+        "--specs-dir", "-s",
+        help="Directory containing TOML asset specifications"
+    ),
+    batch_size: int = typer.Option(
+        10,
+        "--batch-size", 
+        help="Number of assets to generate per batch"
+    ),
+    max_variants: int = typer.Option(
+        50,
+        "--max-variants",
+        help="Maximum variants per archetype (limits combinatorial explosion)"
+    ),
+    skip_existing: bool = typer.Option(
+        True,
+        "--skip-existing/--overwrite",
+        help="Skip assets that already exist"
+    )
+):
+    """
+    Auto-discover and generate ALL assets from prompts directory with idempotency
+    """
+    console.print(Panel.fit(
+        "[bold cyan]🚀 Dragon's Labyrinth Bulk Asset Generator[/bold cyan]",
+        subtitle="Auto-discovery + Idempotent Generation"
+    ))
+    
+    try:
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        
+        if not specs_dir.exists():
+            log.error(f"[red]Specifications directory not found: {specs_dir}[/red]", extra={"markup": True})
+            raise typer.Exit(code=1)
+        
+        # Auto-discover all TOML files recursively
+        toml_files = list(specs_dir.glob("**/*.toml"))
+        
+        # Filter out non-asset TOMLs 
+        asset_specs = []
+        for toml_file in toml_files:
+            try:
+                with open(toml_file, 'rb') as f:
+                    spec_data = tomllib.load(f)
+                
+                batch_info = spec_data.get('batch', {})
+                assets_section = spec_data.get('assets', {})
+                
+                # Skip if no assets or no category
+                if not assets_section or not batch_info.get('category'):
+                    continue
+                    
+                # Skip GLOBAL_STYLE_GUIDE
+                if toml_file.name == 'GLOBAL_STYLE_GUIDE.toml':
+                    continue
+                
+                category = batch_info.get('category', 'unknown')
+                asset_count = len(assets_section)
+                variants_section = spec_data.get('variants', {})
+                
+                # Calculate potential variants
+                total_variants = 0
+                if variants_section:
+                    # This is a universal variant system
+                    for asset_name, asset_data in assets_section.items():
+                        asset_variants = asset_data.get('variants', [])
+                        if asset_variants:
+                            variant_combinations = 1
+                            for variant_dim in asset_variants:
+                                variant_values = variants_section.get(variant_dim, [])
+                                variant_combinations *= len(variant_values)
+                            
+                            # Limit combinatorial explosion
+                            variant_combinations = min(variant_combinations, max_variants)
+                            total_variants += variant_combinations
+                        else:
+                            total_variants += 1
+                else:
+                    # Traditional asset system
+                    total_variants = asset_count
+                
+                asset_specs.append({
+                    'file': toml_file,
+                    'category': category,
+                    'base_assets': asset_count,
+                    'total_variants': total_variants,
+                    'spec_data': spec_data
+                })
+                
+            except Exception as e:
+                log.warning(f"[yellow]Skipping {toml_file.name}: {e}[/yellow]", extra={"markup": True})
+                
+        if not asset_specs:
+            log.warning(f"[yellow]No valid asset specifications found in {specs_dir}[/yellow]", extra={"markup": True})
+            return
+        
+        # Display discovery results
+        console.rule("[cyan]Asset Discovery Results[/cyan]")
+        total_expected_assets = sum(spec['total_variants'] for spec in asset_specs)
+        console.print(f"📋 Found [bold green]{len(asset_specs)}[/bold green] asset specifications")
+        console.print(f"🎨 Expected total assets: [bold magenta]{total_expected_assets:,}[/bold magenta]")
+        console.print()
+        
+        for spec in sorted(asset_specs, key=lambda x: x['category']):
+            console.print(f"[cyan]{spec['category']}[/cyan]: {spec['base_assets']} base → {spec['total_variants']:,} variants")
+        
+        # Idempotency check - scan existing assets
+        console.rule("[cyan]Idempotency Check[/cyan]")
+        existing_assets = {}
+        assets_base = base_dir / "assets"
+        
+        if assets_base.exists():
+            for category_dir in assets_base.iterdir():
+                if category_dir.is_dir():
+                    category = category_dir.name
+                    existing_files = list(category_dir.glob("**/*.png"))
+                    existing_assets[category] = len(existing_files)
+                    if existing_files:
+                        console.print(f"📁 {category}: [green]{len(existing_files)} existing assets[/green]")
+        
+        # Generate missing assets
+        console.rule("[cyan]Starting Bulk Generation[/cyan]")
+        
+        total_generated = 0
+        total_skipped = 0
+        failed_specs = []
+        
+        for spec in asset_specs:
+            category = spec['category']
+            toml_file = spec['file']
+            expected_variants = spec['total_variants']
+            
+            console.print(f"\n[bold]Processing {category} category[/bold]")
+            console.print(f"📝 Spec: {toml_file.relative_to(specs_dir)}")
+            console.print(f"🎯 Expected variants: {expected_variants:,}")
+            
+            # Check existing assets for this category
+            category_output_dir = base_dir / "assets" / category
+            existing_count = 0
+            if category_output_dir.exists():
+                existing_count = len(list(category_output_dir.glob("**/*.png")))
+            
+            if skip_existing and existing_count >= expected_variants:
+                console.print(f"✅ [green]Skipping {category} - {existing_count} assets already exist[/green]")
+                total_skipped += existing_count
+                continue
+            
+            try:
+                # Create workflow using modular system
+                workflow = AssetGenerationWorkflow()
+                
+                # Generate assets for this category using modular workflow
+                result = workflow.generate_assets(
+                    asset_category=category,
+                    toml_spec_path=toml_file,
+                    output_dir=category_output_dir,
+                    batch_size=batch_size,
+                    autonomous_mode=True
+                )
+                
+                variants_generated = len(result.get('generated_variants', {}))
+                if variants_generated > 0:
+                    console.print(f"✅ [green]{category}: Generated {variants_generated} assets[/green]")
+                    total_generated += variants_generated
+                else:
+                    console.print(f"❌ [red]{category}: Generation failed - STOPPING bulk generation[/red]") 
+                    failed_specs.append(category)
+                    # FAIL-FAST: Stop entire bulk generation on API issues
+                    console.print(f"🚨 [red]STOPPING BULK GENERATION: API issues detected in {category}[/red]")
+                    break
+                    
+            except ImportError as e:
+                log.error(f"[red]Missing dependencies for {category}: {e}[/red]", extra={"markup": True})
+                failed_specs.append(category)
+                console.print(f"🚨 [red]STOPPING BULK GENERATION: Dependency issues[/red]")
+                break
+            except Exception as e:
+                log.error(f"[red]Error generating {category}: {e}[/red]", extra={"markup": True})
+                failed_specs.append(category)
+                console.print(f"🚨 [red]STOPPING BULK GENERATION: Critical error in {category}[/red]")
+                break
+        
+        # Final summary
+        console.rule("[cyan]Bulk Generation Complete[/cyan]")
+        console.print(f"✨ [bold green]Generated: {total_generated:,} new assets[/bold green]")
+        if total_skipped > 0:
+            console.print(f"⏭️  [yellow]Skipped: {total_skipped:,} existing assets[/yellow]")
+        if failed_specs:
+            console.print(f"❌ [red]Failed categories: {', '.join(failed_specs)}[/red]")
+        
+        console.print(f"\n🎯 [bold]Asset Directory: {base_dir / 'assets'}[/bold]")
+        console.print(f"📊 [bold]Categories: {len(asset_specs)}[/bold]")
+        console.print(f"🎨 [bold]Total Coverage: {total_generated + total_skipped:,} assets[/bold]")
+        
+    except Exception as e:
+        log.error(f"[bold red]Bulk generation error: {e}[/bold red]", extra={"markup": True})
         import traceback
         traceback.print_exc()
         raise typer.Exit(code=1)
