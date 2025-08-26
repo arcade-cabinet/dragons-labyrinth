@@ -429,6 +429,170 @@ def report(
         raise typer.Exit(code=1)
 
 
+@app.command()
+def generate_assets(
+    toml_spec: Path = typer.Argument(
+        ...,
+        help="Path to TOML asset specification file"
+    ),
+    output_dir: Path = typer.Option(
+        Path("assets/generated"),
+        "--output", "-o",
+        help="Output directory for generated assets"
+    ),
+    batch_size: int = typer.Option(
+        5,
+        "--batch-size", "-b",
+        help="Number of assets to generate per batch"
+    ),
+    autonomous: bool = typer.Option(
+        False,
+        "--autonomous/--interactive",
+        help="Skip human review checkpoints"
+    )
+):
+    """
+    Generate game assets using DALL-E via LangChain workflow
+    """
+    console.print(Panel.fit(
+        "[bold cyan]🎨 Dragon's Labyrinth Asset Generator[/bold cyan]",
+        subtitle="LangGraph + DALL-E workflow"
+    ))
+    
+    try:
+        # Import workflow
+        from dragons_labyrinth.workflows.asset_generation_workflow import create_asset_generation_workflow
+        
+        # Validate TOML spec exists
+        if not toml_spec.exists():
+            log.error(f"[red]TOML specification not found: {toml_spec}[/red]", extra={"markup": True})
+            raise typer.Exit(code=1)
+        
+        # Parse basic info from TOML filename
+        import toml
+        with open(toml_spec, 'r') as f:
+            spec_data = toml.load(f)
+        
+        batch_info = spec_data.get('batch', {})
+        asset_category = batch_info.get('category', 'unknown')
+        level_range = batch_info.get('level_range', 'unknown')
+        
+        log.info(f"[cyan]📋 Generating {asset_category} assets for levels {level_range}[/cyan]", extra={"markup": True})
+        log.info(f"[cyan]📝 Specification: {toml_spec}[/cyan]", extra={"markup": True})
+        log.info(f"[cyan]📁 Output: {output_dir}[/cyan]", extra={"markup": True})
+        log.info(f"[cyan]🤖 Mode: {'Autonomous' if autonomous else 'Interactive'}[/cyan]", extra={"markup": True})
+        
+        # Create workflow
+        workflow = create_asset_generation_workflow()
+        
+        # Execute asset generation
+        console.rule("[cyan]Starting Asset Generation Workflow[/cyan]")
+        
+        result = workflow.generate_assets(
+            asset_category=asset_category,
+            level_range=level_range,
+            toml_spec_path=toml_spec,
+            output_dir=output_dir,
+            batch_size=batch_size,
+            autonomous_mode=autonomous
+        )
+        
+        # Display results
+        console.rule("[cyan]Generation Complete[/cyan]")
+        
+        if result.status == "SUCCESS":
+            log.info(f"[bold green]✨ Asset generation successful![/bold green]", extra={"markup": True})
+            log.info(f"[green]📊 Generated: {result.assets_generated}/{result.assets_requested} assets[/green]", extra={"markup": True})
+            
+            if result.assets_failed > 0:
+                log.warning(f"[yellow]⚠️  Failed: {result.assets_failed} assets[/yellow]", extra={"markup": True})
+            
+            log.info(f"[green]⏱️  Processing time: {result.processing_time_seconds:.1f}s[/green]", extra={"markup": True})
+            log.info(f"[green]📁 Output directory: {output_dir}[/green]", extra={"markup": True})
+            
+            # List generated files
+            if result.asset_files:
+                console.print("\n[bold]Generated Assets:[/bold]")
+                for asset_name, file_path in result.asset_files.items():
+                    console.print(f"  [cyan]{asset_name}:[/cyan] {file_path}")
+            
+        else:
+            log.error(f"[bold red]❌ Asset generation failed[/bold red]", extra={"markup": True})
+            log.error(f"[red]Generated: {result.assets_generated}, Failed: {result.assets_failed}[/red]", extra={"markup": True})
+            raise typer.Exit(code=1)
+        
+    except ImportError as e:
+        log.error(f"[red]Missing dependencies for asset generation: {e}[/red]", extra={"markup": True})
+        log.error("[red]Install with: pip install langchain langchain-community[/red]", extra={"markup": True})
+        raise typer.Exit(code=1)
+    except Exception as e:
+        log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        import traceback
+        traceback.print_exc()
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def list_asset_specs(
+    specs_dir: Path = typer.Option(
+        Path("memory-bank/game-asset-prompts"),
+        "--specs-dir", "-s",
+        help="Directory containing TOML asset specifications"
+    )
+):
+    """
+    List available TOML asset specifications
+    """
+    console.print(Panel.fit(
+        "[bold cyan]📋 Available Asset Specifications[/bold cyan]"
+    ))
+    
+    try:
+        import toml
+        
+        if not specs_dir.exists():
+            log.error(f"[red]Specifications directory not found: {specs_dir}[/red]", extra={"markup": True})
+            raise typer.Exit(code=1)
+        
+        # Find all TOML files
+        toml_files = list(specs_dir.glob("*.toml"))
+        
+        if not toml_files:
+            log.warning(f"[yellow]No TOML specifications found in {specs_dir}[/yellow]", extra={"markup": True})
+            return
+        
+        console.print(f"\n[bold]Found {len(toml_files)} specifications:[/bold]\n")
+        
+        for toml_file in sorted(toml_files):
+            try:
+                with open(toml_file, 'r') as f:
+                    spec_data = toml.load(f)
+                
+                batch_info = spec_data.get('batch', {})
+                assets_section = spec_data.get('assets', {})
+                
+                name = batch_info.get('name', toml_file.stem)
+                description = batch_info.get('description', 'No description')
+                category = batch_info.get('category', 'unknown')
+                level_range = batch_info.get('level_range', 'unknown')
+                asset_count = len(assets_section)
+                
+                console.print(f"[bold cyan]{toml_file.name}[/bold cyan]")
+                console.print(f"  [green]Name:[/green] {name}")
+                console.print(f"  [green]Category:[/green] {category}")
+                console.print(f"  [green]Levels:[/green] {level_range}")
+                console.print(f"  [green]Assets:[/green] {asset_count}")
+                console.print(f"  [green]Description:[/green] {description}")
+                console.print()
+                
+            except Exception as e:
+                console.print(f"[red]❌ Error reading {toml_file.name}: {e}[/red]")
+                
+    except Exception as e:
+        log.error(f"[bold red]Error: {e}[/bold red]", extra={"markup": True})
+        raise typer.Exit(code=1)
+
+
 def main():
     """Main entry point"""
     app()

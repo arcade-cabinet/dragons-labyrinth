@@ -442,3 +442,184 @@ class MemoryBankEntry(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.now, description="Last update timestamp")
     access_count: int = Field(default=0, description="Number of times accessed")
     creator: str = Field(default="system", description="Entry creator")
+
+
+# =============================================================================
+# Asset Generation Models (extending existing architecture)
+# =============================================================================
+
+class AssetGenerationState(BaseModel):
+    """State schema for asset generation workflow following professor-pixels patterns."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    # Input configuration
+    asset_category: str = Field(description="Category of assets to generate (biome, character, etc.)")
+    level_range: str = Field(description="Level range for assets (1-20, 21-40, etc.)")
+    toml_spec_path: Path = Field(description="Path to TOML specification file")
+    output_dir: Path = Field(description="Output directory for generated assets")
+    
+    # Generation configuration
+    batch_size: int = Field(default=5, description="Number of assets to generate per batch")
+    quality_level: str = Field(default="standard", description="Quality level (draft, standard, hd)")
+    style_consistency: bool = Field(default=True, description="Enforce style consistency")
+    autonomous_mode: bool = Field(default=False, description="Skip human review")
+    
+    # TOML processing
+    raw_toml_data: dict[str, Any] = Field(default_factory=dict, description="Raw TOML specification data")
+    parsed_asset_specs: list[dict[str, Any]] = Field(default_factory=list, description="Parsed asset specifications")
+    prompt_templates: dict[str, str] = Field(default_factory=dict, description="DALL-E prompt templates")
+    
+    # Generation results
+    generated_assets: dict[str, str] = Field(default_factory=dict, description="Generated asset file paths")
+    generation_metadata: dict[str, Any] = Field(default_factory=dict, description="Generation metadata")
+    failed_generations: list[str] = Field(default_factory=list, description="Failed asset names")
+    
+    # Human review
+    human_approval: ApprovalStatus | None = Field(default=None, description="Human review status")
+    human_feedback: dict[str, str] = Field(default_factory=dict, description="Human feedback")
+    review_data: ReviewData = Field(default_factory=dict, description="Data for human review")
+    
+    # Quality validation
+    validation_results: list[ValidationResult] = Field(default_factory=list, description="Asset validation results")
+    consistency_scores: dict[str, float] = Field(default_factory=dict, description="Style consistency scores")
+    
+    # Integration with game engine
+    asset_registry_updates: dict[str, Any] = Field(default_factory=dict, description="Updates to asset registry")
+    bevy_integration_code: str | None = Field(default=None, description="Generated Bevy integration code")
+    
+    # Workflow metadata
+    workflow_id: WorkflowID = Field(description="Workflow identifier")
+    current_stage: WorkflowStage = Field(default="initialization", description="Current workflow stage")
+    started_at: datetime = Field(default_factory=datetime.now, description="Start time")
+    completed_at: datetime | None = Field(default=None, description="Completion time")
+    step_count: int = Field(default=0, description="Number of completed steps")
+    status: AnalysisStatus = Field(default=AnalysisStatus.NOT_STARTED, description="Current generation status")
+
+
+class AssetSpecification(BaseModel):
+    """Specification for a single asset following TOML structure."""
+    model_config = ConfigDict(extra="forbid")
+    
+    # Basic asset info
+    asset_name: str = Field(description="Asset filename (without extension)")
+    asset_category: str = Field(description="Category (biome, character, monster, etc.)")
+    asset_type: str = Field(description="Specific type within category")
+    level_range: str = Field(description="Level range this asset applies to")
+    
+    # DALL-E generation
+    prompt: str = Field(description="DALL-E prompt with consistency constraints")
+    size: str = Field(default="1024x1024", description="Image dimensions")
+    quality: str = Field(default="standard", description="Image quality")
+    style: str = Field(default="natural", description="Style parameter")
+    
+    # Layer cake system
+    layer_type: str = Field(description="Layer in compositing system (base, overlay, effect)")
+    transparency: bool = Field(default=False, description="Requires transparent background")
+    tileable: bool = Field(default=False, description="Must be seamlessly tileable")
+    
+    # Horror progression
+    dread_level: int = Field(ge=0, le=4, default=0, description="Associated dread level")
+    corruption_variant: str | None = Field(default=None, description="Corruption variant (cursed, nightmare, void)")
+    philosophy_alignment: list[str] = Field(default_factory=list, description="Philosophy path alignment")
+    
+    # Technical constraints
+    consistency_constraints: list[str] = Field(default_factory=list, description="Style consistency requirements")
+    negative_prompts: list[str] = Field(default_factory=list, description="Elements to avoid")
+    
+    # Metadata
+    created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
+    priority: int = Field(default=5, ge=1, le=10, description="Generation priority")
+
+
+class AssetGenerationRequest(BaseModel):
+    """Request for asset generation workflow."""
+    model_config = ConfigDict(extra="forbid")
+    
+    asset_category: str = Field(description="Category of assets to generate")
+    level_range: str = Field(description="Level range (1-20, 21-40, etc.)")
+    toml_spec_path: Path = Field(description="Path to TOML specification")
+    output_dir: Path = Field(description="Output directory")
+    
+    # Generation configuration
+    batch_size: int = Field(default=5, description="Assets per batch")
+    quality_level: str = Field(default="standard", description="Quality level")
+    autonomous_mode: bool = Field(default=False, description="Skip human review")
+    
+    # Workflow configuration
+    workflow_id: WorkflowID | None = Field(default=None, description="Optional workflow ID")
+    checkpoint_interval: int = Field(default=3, description="Steps between checkpoints")
+    max_retries: int = Field(default=2, description="Maximum retry attempts")
+    
+    # Generated fields
+    created_at: datetime = Field(default_factory=datetime.now, description="Request creation time")
+    
+    def model_post_init(self, __context: Any) -> None:
+        """Generate workflow ID if not provided."""
+        if self.workflow_id is None:
+            import uuid
+            self.workflow_id = f"assets_{self.asset_category}_{uuid.uuid4().hex[:8]}"
+
+
+class AssetGenerationResult(BaseModel):
+    """Result from asset generation workflow."""
+    model_config = ConfigDict(extra="forbid")
+    
+    workflow_id: WorkflowID = Field(description="Workflow identifier")
+    asset_category: str = Field(description="Category of assets generated")
+    level_range: str = Field(description="Level range processed")
+    status: AnalysisStatus = Field(description="Final generation status")
+    
+    # Generation results
+    assets_requested: int = Field(description="Number of assets requested")
+    assets_generated: int = Field(description="Number of assets successfully generated")
+    assets_failed: int = Field(description="Number of failed generations")
+    
+    # Generated outputs
+    asset_files: dict[str, str] = Field(default_factory=dict, description="Generated asset file paths")
+    metadata_files: list[str] = Field(default_factory=list, description="Generation metadata files")
+    integration_files: list[str] = Field(default_factory=list, description="Game engine integration files")
+    
+    # Quality metrics
+    validation_passed: bool = Field(description="Whether validation passed")
+    consistency_scores: dict[str, float] = Field(default_factory=dict, description="Style consistency scores")
+    average_quality_score: float = Field(ge=0.0, le=1.0, default=0.0, description="Average quality score")
+    
+    # Human review
+    human_reviewed: bool = Field(default=False, description="Whether human reviewed")
+    human_approval: ApprovalStatus | None = Field(default=None, description="Human approval status")
+    review_comments: list[str] = Field(default_factory=list, description="Human review comments")
+    
+    # Performance metrics
+    processing_time_seconds: float = Field(description="Total processing time")
+    api_calls_made: int = Field(default=0, description="Number of DALL-E API calls")
+    total_cost_usd: float = Field(default=0.0, description="Total generation cost")
+    
+    # Metadata
+    started_at: datetime = Field(description="Start timestamp")
+    completed_at: datetime = Field(description="Completion timestamp")
+    generator_version: str = Field(default="1.0.0", description="Generator version")
+
+
+class TOMLAssetBatch(BaseModel):
+    """Batch configuration for asset generation from TOML."""
+    model_config = ConfigDict(extra="forbid")
+    
+    batch_name: str = Field(description="Batch identifier")
+    level_range: str = Field(description="Level range for this batch")
+    asset_category: str = Field(description="Primary asset category")
+    
+    # Asset specifications
+    asset_specs: list[AssetSpecification] = Field(default_factory=list, description="Asset specifications")
+    total_assets: int = Field(default=0, description="Total number of assets in batch")
+    
+    # Generation settings
+    style_constraints: dict[str, Any] = Field(default_factory=dict, description="Global style constraints")
+    consistency_rules: list[str] = Field(default_factory=list, description="Consistency rules")
+    
+    # Horror integration
+    dread_progression: dict[str, Any] = Field(default_factory=dict, description="Dread level progression")
+    corruption_mapping: dict[str, str] = Field(default_factory=dict, description="Corruption variant mapping")
+    
+    # Metadata
+    created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
+    priority: int = Field(default=5, ge=1, le=10, description="Batch priority")
