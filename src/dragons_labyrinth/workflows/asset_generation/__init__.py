@@ -1,20 +1,19 @@
 """
-Asset Generation Package - Revolutionary Variant-Based Asset Generation
+Asset Generation Package - GPT-5 + GPT Image 1 Native Integration
 
-This package implements the new variant system architecture:
+Direct OpenAI integration for sprite sheet and variant generation:
 - Universal TOML specifications with combinatorial generation
-- Resolution optimization (256x256 UI, 512x512 tokens, 1024x1024 tiles) 
-- Automatic sprite sheet generation with Pillow
-- Generic archetypes without proper names
-- Exponential asset coverage from minimal prompt definitions
+- GPT-5 enhanced prompts with GPT Image 1 generation
+- Native sprite sheet generation in single API calls
+- Transparent backgrounds for game assets
+- Multi-turn iterative refinement capabilities
 
 Architecture:
-- workflow.py: Main coordinator with clean LangGraph
+- workflow.py: Main coordinator with LangGraph + native OpenAI
 - toml_parser.py: Focused TOML parsing
 - combinatorial_generator.py: Variant combination logic
-- dalle_generator.py: DALL-E integration (to be created)
-- sprite_sheet_processor.py: Pillow sprite sheet processing (to be created)
-- bevy_integrator.py: Rust/Bevy integration (to be created)
+- sprite_sheet_processor.py: Pillow sprite sheet processing
+- bevy_integrator.py: Rust/Bevy integration
 
 Usage:
 ```python
@@ -29,18 +28,17 @@ result = workflow.generate_assets(
 )
 ```
 
-This system replaces 12+ level-banded TOML files with 3 universal variant systems:
+This system generates complete sprite sheets in single API calls:
 - Characters: 12 archetypes × 30 variants = 360+ assets
 - Biomes: 10 terrains × 20 variants = 200+ assets  
 - Monsters: 13 creatures × 25 variants = 325+ assets
 
-Total: 900+ assets from minimal, maintainable prompt definitions.
+Total: 900+ assets from minimal prompt definitions using GPT-5 + GPT Image 1.
 """
 
 from .workflow import AssetGenerationWorkflow, create_asset_generation_workflow
 from .toml_parser import VariantTOMLParser
 from .combinatorial_generator import CombinatorialGenerator
-from .dalle_generator import DalleVariantGenerator
 from .sprite_sheet_processor import SpriteSheetProcessor
 from .bevy_integrator import BevyIntegrator
 
@@ -49,12 +47,11 @@ __all__ = [
     "create_asset_generation_workflow",
     "VariantTOMLParser", 
     "CombinatorialGenerator",
-    "DalleVariantGenerator",
     "SpriteSheetProcessor",
     "BevyIntegrator"
 ]
 
-# Version info for the variant system
-__version__ = "2.0.0"
-__variant_system__ = True
-__architecture__ = "universal_variants_with_sprite_sheets"
+# Version info for GPT-5 + GPT Image 1 system
+__version__ = "3.0.0"
+__generator__ = "gpt-5 + gpt-image-1"
+__architecture__ = "native_openai_sprite_sheets"
