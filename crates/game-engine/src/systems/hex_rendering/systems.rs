@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 use super::components::*;
 use super::resources::*;
+use super::biome_rules::{load_biome_rules, BiomeRules};
 use crate::bevy_integration::DatabaseQuery;
 
 /// System to load hex tiles from database into ECS
@@ -22,6 +23,15 @@ pub fn load_hex_tiles_system(
     // 2. Spawn ECS entities for each tile with all components
     // 3. Set up bevy_ecs_tilemap integration
     // 4. Apply corruption visuals and effects
+}
+
+#[derive(Resource, Default, Debug, Clone)]
+pub struct ActiveBiomeRules(pub Option<BiomeRules>);
+
+pub fn apply_biome_rules_system(mut commands: Commands) {
+    let rules = load_biome_rules();
+    commands.insert_resource(ActiveBiomeRules(Some(rules)));
+    info!("Applied biome rules for hex rendering/path costs");
 }
 
 /// System to update tile visuals based on corruption changes

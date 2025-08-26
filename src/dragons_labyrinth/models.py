@@ -706,6 +706,11 @@ class VariantAssetSpec(BaseModel):
     sprite_sheet_group: str = Field(description="Which sprite sheet this belongs to")
     expected_cell_size: tuple[int, int] | None = Field(default=None, description="Expected cell size in sprite sheet")
     
+    # Optional advanced generation inputs
+    base_image_path: str | None = Field(default=None, description="Optional reference/base image path for edits")
+    mask_image_path: str | None = Field(default=None, description="Optional mask image path for edits (white=edit)")
+    reference_image_urls: list[str] = Field(default_factory=list, description="Optional list of reference image URLs")
+
     # Metadata
     generated_at: datetime = Field(default_factory=datetime.now, description="Generation timestamp")
 
@@ -799,6 +804,7 @@ class VariantAssetGenerationState(BaseModel):
     level_range: str = Field(default="1-180", description="Universal level range")
     toml_spec_path: Path = Field(description="Path to universal variant TOML")
     output_dir: Path = Field(description="Output directory")
+    prompt_category: str | None = Field(default=None, description="Prompt category (e.g., biomes, items)")
     
     # Variant configuration
     variant_config: VariantConfiguration | None = Field(default=None, description="Parsed variant configuration")
@@ -817,6 +823,7 @@ class VariantAssetGenerationState(BaseModel):
     sprite_sheets_planned: list[SpriteSheetMetadata] = Field(default_factory=list, description="Planned sprite sheets")
     sprite_sheets_generated: dict[str, str] = Field(default_factory=dict, description="Generated sprite sheet paths")
     atlas_metadata: dict[str, Any] = Field(default_factory=dict, description="Atlas JSON metadata")
+    codegen_extras: dict[str, Any] = Field(default_factory=dict, description="Additional code generation spec from prompts")
     
     # Human review
     human_approval: ApprovalStatus | None = Field(default=None, description="Human review status")

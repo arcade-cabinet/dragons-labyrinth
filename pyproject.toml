@@ -21,35 +21,23 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "pandas>=2.2.0",
-  "pydantic>=2.8.0",
-  "pydantic-settings>=2.6.1",
-  "rich>=13.9.0",
-  "plotly>=5.24.0",
-  "networkx>=3.3",
-  "beautifulsoup4>=4.12.3",
-  "lxml>=5.2.0",
-  "tqdm>=4.66.0",
-  "jinja2>=3.1.4",
-  "tiktoken>=0.7.0",
-  "typer>=0.12.0",
-  "sqlalchemy>=2.0.30",
-  "pyarrow>=17.0.0",
-  # Langchain/LangGraph dependencies for agentic workflows
-  "langgraph>=0.2.0",
-  "langchain>=0.3.0",
-  "langchain-openai>=0.2.0",
-  "langchain-core>=0.3.0",
-  "langchain-community>=0.3.0",
-  "libcst>=1.0.0",
-  "openai>=1.50.0",
-  "fastmcp>=2.0.0",
-  "faiss-cpu>=1.8.0",
-  # Sprite sheet processing dependencies
-  "pillow>=10.4.0",
-  "psutil>=5.9.8",
-  "requests>=2.32.0",
-  "toml>=0.10.0",
+  "pydantic>=2.11.7",
+  "pydantic-settings>=2.10.1",
+  "rich>=14.1.0,
+  "jinja2>=3.1.6",
+  "tiktoken>=0.11.0",
+  "typer>=0.16.0",
+  "openai>=1.101.0",
+  "pillow>=11.3.0",
+  "psutil>=7.0.0",
+  "xdg-base-dirs>=6.0.2",
+]
+
+[tool.hatch.build]
+include = [
+  "src/dragons_labyrinth/workflows/asset_generation/prompts/**",
+  "src/dragons_labyrinth/workflows/asset_generation/templates/**",
+  "src/dragons_labyrinth/workflows/code_generation/specs/**",
 ]
 
 [project.scripts]
@@ -61,7 +49,7 @@ Issues = "https://github.com/jbcom/dragons-labyrinth/issues"
 Source = "https://github.com/jbcom/dragons-labyrinth"
 
 [tool.hatch.version]
-path = "src/dragons_labyrinth/__about__.py"
+path = "src/dragons_labyrinth/__init__.py"
 
 [tool.uv]
 required-version = ">=0.5.0"
@@ -82,7 +70,7 @@ source_pkgs = ["dragons_labyrinth", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/dragons_labyrinth/__about__.py",
+  "src/dragons_labyrinth/__init__.py",
 ]
 
 [tool.coverage.paths]

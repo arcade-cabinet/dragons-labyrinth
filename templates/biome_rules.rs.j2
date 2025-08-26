@@ -1,0 +1,70 @@
+// Auto-generated biome rules
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+pub struct BiomeRules {
+    pub adjacency: HashMap<String, Vec<String>>,    // which biomes prefer neighbors
+    pub clustering: HashMap<String, ClusterRule>,    // optional cluster limits
+    pub movement: HashMap<String, MovementRule>,    // movement multipliers
+    pub hazards: HashMap<String, HazardRule>,       // hazard DPS etc.
+    pub passability: HashMap<String, PassRule>,     // passability per movement mode
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ClusterRule { pub max_cluster: Option<u32> }
+
+#[derive(Debug, Clone, Default)]
+pub struct MovementRule { pub walk: f32, pub ground_mount: f32, pub flying: f32 }
+
+#[derive(Debug, Clone, Default)]
+pub struct HazardRule { pub dps: f32 }
+
+#[derive(Debug, Clone, Default)]
+pub struct PassRule { pub walk: bool, pub ground_mount: bool, pub flying: bool }
+
+pub fn load_biome_rules() -> BiomeRules {
+    let mut adjacency: HashMap<String, Vec<String>> = HashMap::new();
+    let mut clustering: HashMap<String, ClusterRule> = HashMap::new();
+    let mut movement: HashMap<String, MovementRule> = HashMap::new();
+    let mut hazards: HashMap<String, HazardRule> = HashMap::new();
+    let mut passability: HashMap<String, PassRule> = HashMap::new();
+
+    // Adjacency
+    {% for biome, neighbors in rules.get('adjacency', {}).items() %}
+    adjacency.insert("{{ biome }}".to_string(), vec![
+        {% for n in neighbors %}"{{ n }}".to_string(),{% endfor %}
+    ]);
+    {% endfor %}
+
+    // Clustering
+    {% for biome, rule in rules.get('clustering', {}).items() %}
+    clustering.insert("{{ biome }}".to_string(), ClusterRule{ max_cluster: {{ rule.get('max_cluster', None) }} });
+    {% endfor %}
+
+    // Movement
+    {% for biome, rule in rules.get('movement', {}).items() %}
+    movement.insert("{{ biome }}".to_string(), MovementRule{ 
+        walk: {{ rule.get('walk', 1.0) }}, 
+        ground_mount: {{ rule.get('ground_mount', 1.0) }}, 
+        flying: {{ rule.get('flying', 1.0) }} 
+    });
+    {% endfor %}
+
+    // Hazards
+    {% for biome, rule in rules.get('hazards', {}).items() %}
+    hazards.insert("{{ biome }}".to_string(), HazardRule{ dps: {{ rule.get('dps', 0.0) }} });
+    {% endfor %}
+
+    // Passability
+    {% for biome, rule in rules.get('passability', {}).items() %}
+    passability.insert("{{ biome }}".to_string(), PassRule{ 
+        walk: {{ rule.get('walk', True) | lower }}, 
+        ground_mount: {{ rule.get('ground_mount', True) | lower }}, 
+        flying: {{ rule.get('flying', True) | lower }} 
+    });
+    {% endfor %}
+
+    BiomeRules { adjacency, clustering, movement, hazards, passability }
+}
+
+

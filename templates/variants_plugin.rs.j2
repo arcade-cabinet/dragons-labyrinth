@@ -1,0 +1,86 @@
+// Auto-generated Bevy integration for {{ asset_category }} variants
+// Generated: {{ timestamp }}
+
+use bevy::prelude::*;
+use serde::{Serialize, Deserialize};
+use std::collections::HashMap;
+
+#[derive(Resource, Debug, Clone, Serialize, Deserialize, Default)]
+pub struct {{ asset_category | title }}VariantAtlas {
+    pub individual_variants: HashMap<String, Handle<Image>>,
+    pub variant_metadata: HashMap<String, VariantMetadata>,
+    pub archetype_lookup: HashMap<String, Vec<String>>, // base_archetype -> variant names
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VariantMetadata {
+    pub base_archetype: String,
+    pub variant_combination: HashMap<String, String>,
+    pub resolution: String,
+    pub layer_type: String,
+    pub priority: u8,
+}
+
+pub struct {{ asset_category | title }}VariantPlugin;
+
+impl Plugin for {{ asset_category | title }}VariantPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_resource:: < {{ asset_category | title }}VariantAtlas >()
+            .add_systems(Startup, load_{{ asset_category }}_variants);
+    }
+}
+
+fn load_{{ asset_category }}_variants(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let mut atlas = {{ asset_category | title }}VariantAtlas::default();
+
+    // Load individual variants
+    {% for name in generated_variants %}
+    {
+        // Use asset_server_path if present for precise directory mapping
+        {% set meta = generation_metadata[name] %}
+        let rel_path = {
+            {% if meta.get('asset_server_path') %}
+            "{{ meta.get('asset_server_path') }}".to_string()
+            {% else %}
+            format!("variants/{}.png", "{{ name }}")
+            {% endif %}
+        };
+        let path = rel_path;
+        let handle: Handle<Image> = asset_server.load(path);
+        atlas.individual_variants.insert("{{ name }}".to_string(), handle);
+        let vm = VariantMetadata {
+            base_archetype: "{{ meta.get('base_archetype', '') }}".to_string(),
+            variant_combination: {
+                let mut m = HashMap::new();
+                {% for k, v in meta.get('variant_combination', {}).items() %}
+                m.insert("{{ k }}".to_string(), "{{ v }}".to_string());
+                {% endfor %}
+                m
+            },
+            resolution: "{{ meta.get('resolution', '') }}".to_string(),
+            layer_type: "{{ meta.get('layer_type', 'item') }}".to_string(),
+            priority: {{ meta.get('priority', 8) }},
+        };
+        atlas.variant_metadata.insert("{{ name }}".to_string(), vm);
+        atlas.archetype_lookup.entry("{{ meta.get('base_archetype', '') }}".to_string()).or_default().push("{{ name }}".to_string());
+    }
+    {% endfor %}
+
+    commands.insert_resource(atlas);
+}
+
+impl {{ asset_category | title }}VariantAtlas {
+    pub fn get_variant(&self, name: &str) -> Option<Handle<Image>> {
+        self.individual_variants.get(name).cloned()
+    }
+
+    pub fn get_variants_by_archetype(&self, base: &str) -> Vec<String> {
+        self.archetype_lookup.get(base).cloned().unwrap_or_default()
+    }
+}
+
+

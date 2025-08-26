@@ -31,10 +31,27 @@ use combat::CombatPlugin;
 use resources::*;
 use components::*;
 
+fn asset_root() -> String {
+    use std::{env, path::PathBuf};
+    if let Ok(custom) = env::var("DL_ASSETS_DIR") {
+        let p = PathBuf::from(custom);
+        if p.exists() { return p.to_string_lossy().into_owned(); }
+    }
+    let dev = PathBuf::from("crates/game-engine/assets");
+    if dev.exists() { return dev.to_string_lossy().into_owned(); }
+    "assets".to_string()
+}
+
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(WindowPlugin {
+            DefaultPlugins
+                .set(bevy::asset::AssetPlugin {
+                    file_path: asset_root(),
+                    watch_for_changes: cfg!(debug_assertions),
+                    ..default()
+                })
+                .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Dragon's Labyrinth - Horror RPG".to_string(),
                     resolution: (1280.0, 720.0).into(),

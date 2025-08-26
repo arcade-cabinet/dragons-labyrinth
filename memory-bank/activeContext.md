@@ -9,18 +9,12 @@
 - **Initial Test Run**: Organization verification required (FIXED)
 - **Performance Issue**: System hangs when generating first character sprite sheet
 
-### CRITICAL ISSUE: Performance Hang
-When running generation, the system appears to hang at:
-```
-🎨 Generating assets with GPT-5 + GPT Image 1
-  📦 Generating sprite sheet: character_knight
-```
-
-Potential culprits in `workflow.py`:
-1. **API Call Structure**: The `openai.responses.create()` might be using wrong parameters
-2. **Blocking on Response**: No timeout or async handling
-3. **Large Batch Size**: Trying to generate too many variants at once (30 per archetype)
-4. **Model Names**: GPT-5 and gpt-image-1 might need exact model identifiers
+### CRITICAL ISSUE: Performance Hang (Addressed)
+We reworked generation:
+- Added timeouts, retries, and concurrent requests
+- Sanitized prompts and enforced transparent backgrounds
+- Downsampled assets to target resolution immediately
+- Added alpha anomaly detection and targeted regen
 
 ### Architecture Changes
 ```
@@ -36,6 +30,8 @@ GPT-5 prompt enhancement → GPT Image 1 sprite sheets → Native 4x4 grids
 - **Sprite Sheets**: Generate complete 4x4 grids in single API calls
 - **Transparency**: Native transparent backgrounds for game assets
 - **Cost**: ~$0.04 per 1024x1024 high-quality sprite sheet
+- **XDG**: Interim artifacts to `~/.local/share` (data) and `~/.local/state` (state); final assets to game-engine assets tree
+- **Bevy**: AssetServer configured; integration code references `asset_server_path`
 
 ### Files Modified Today
 - `workflow.py`: Complete rewrite with native OpenAI client

@@ -1,0 +1,24 @@
+# Biome code generation spec (separate from asset prompts)
+biome_rules:
+  adjacency:
+    plains: [plains, forest, coast]
+    forest: [forest, plains, mountain]
+    mountain: [mountain, forest, snow]
+    swamp: [swamp, forest, coast]
+    desert: [desert, plains]
+  clustering:
+    lava:
+      max_cluster: 6
+  movement:
+    plains: { walk: 1.0, ground_mount: 1.0, flying: 1.0 }
+    forest: { walk: 1.2, ground_mount: 1.1, flying: 1.0 }
+    swamp: { walk: 1.5, ground_mount: 1.3, flying: 1.0 }
+    mountain: { walk: 1.8, ground_mount: 1.6, flying: 1.0 }
+    desert: { walk: 1.2, ground_mount: 1.1, flying: 1.0 }
+  hazards:
+    lava: { dps: 8.0 }
+    swamp: { dps: 1.0 }
+  passability:
+    mountain: { walk: false, ground_mount: false, flying: true }
+    plains: { walk: true, ground_mount: true, flying: true }
+

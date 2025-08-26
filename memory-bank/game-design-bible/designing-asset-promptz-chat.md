@@ -1,1 +1,0 @@
-/Users/jbogaty/src/dragons-labyrinth/crates/game-engine/assets
