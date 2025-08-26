@@ -1,42 +1,30 @@
-//! Encounter models for sophisticated narrative interactions
+//! Encounter components for sophisticated narrative interactions
 
-use sea_orm::entity::prelude::*;
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 
 /// Encounters with NPCs, environments, and narrative situations
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[sea_orm(table_name = "encounters")]
-pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct Encounter {
     pub id: Uuid,
-    
-    pub hex_tile_id: Option<Uuid>, // Where this encounter occurs
-    pub player_id: Option<Uuid>, // Which player this encounter is for (instance data)
+    pub hex_tile_entity: Option<Entity>, // Where this encounter occurs
+    pub player_entity: Option<Entity>, // Which player this encounter is for (instance data)
     
     // Encounter metadata
-    #[sea_orm(column_type = "Text")]
-    pub encounter_type: String, // "npc_dialogue", "environmental", "combat", "discovery", "horror_event"
-    
-    #[sea_orm(column_type = "Text")]
+    pub encounter_type: EncounterType,
     pub encounter_name: String,
-    
-    #[sea_orm(column_type = "Text")]
     pub description: String,
     
     // Narrative requirements
     pub required_dread_level_min: Option<i32>, // Min dread level to trigger
     pub required_dread_level_max: Option<i32>, // Max dread level to trigger
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub required_items: Option<serde_json::Value>, // JSON array of required item IDs
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub required_companion_states: Option<serde_json::Value>, // JSON object of companion requirements
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub required_story_flags: Option<serde_json::Value>, // JSON array of required story progression flags
+    pub required_items: Vec<Entity>, // Required item entities
+    pub required_companion_states: Vec<CompanionRequirement>,
+    pub required_story_flags: Vec<String>,
     
     // Encounter state and availability
     pub is_available: bool, // Can this encounter be triggered?
@@ -51,43 +39,23 @@ pub struct Model {
     pub companion_trauma_impact: f32, // Impact on companion psychological states
     
     // Dialogue and narrative content
-    #[sea_orm(column_type = "Text", nullable)]
     pub dialogue_tree_id: Option<String>, // Reference to dialogue system
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub dialogue_options: Option<serde_json::Value>, // JSON array of dialogue choices
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub narrative_outcomes: Option<serde_json::Value>, // JSON object of possible outcomes
+    pub dialogue_options: Vec<EncounterDialogueOption>,
+    pub narrative_outcomes: Vec<NarrativeOutcome>,
     
     // Rewards and consequences
-    #[sea_orm(column_type = "Json", nullable)]
-    pub item_rewards: Option<serde_json::Value>, // JSON array of items that can be gained
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub story_flag_changes: Option<serde_json::Value>, // JSON object of story flags that change
-    
-    #[sea_orm(column_type = "Json", nullable)]
-    pub companion_relationship_changes: Option<serde_json::Value>, // Impact on companion bonds
+    pub item_rewards: Vec<ItemReward>,
+    pub story_flag_changes: HashMap<String, bool>,
+    pub companion_relationship_changes: HashMap<Entity, f32>,
     
     // Environmental storytelling
-    #[sea_orm(column_type = "Text", nullable)]
     pub atmospheric_description: Option<String>, // Rich environmental description
-    
-    #[sea_orm(column_type = "Text", nullable)]
     pub horror_description: Option<String>, // Description when horror-influenced
     
     // Asset references for rich presentation
-    #[sea_orm(column_type = "Text", nullable)]
     pub background_image_id: Option<String>, // Visual background for encounter
-    
-    #[sea_orm(column_type = "Text", nullable)]
     pub character_portrait_id: Option<String>, // NPC portrait if applicable
-    
-    #[sea_orm(column_type = "Text", nullable)]
     pub ambient_audio_id: Option<String>, // Background audio
-    
-    #[sea_orm(column_type = "Text", nullable)]
     pub music_track_id: Option<String>, // Music for this encounter
     
     // Forge system integration
@@ -100,42 +68,144 @@ pub struct Model {
     pub last_modified: DateTime<Utc>,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-    #[sea_orm(
-        belongs_to = "super::hex_tiles::Entity",
-        from = "Column::HexTileId", 
-        to = "super::hex_tiles::Column::Id"
-    )]
-    HexTile,
-    
-    #[sea_orm(
-        belongs_to = "super::players::Entity",
-        from = "Column::PlayerId",
-        to = "super::players::Column::Id" 
-    )]
-    Player,
-    
-    #[sea_orm(has_many = "super::dialogues::Entity")]
-    Dialogues,
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub enum EncounterType {
+    NPCDialogue,
+    Environmental,
+    Combat,
+    Discovery,
+    HorrorEvent,
+    SentimentalMoment,
+    ForgeOpportunity,
+    TherapyMoment,
 }
 
-impl Related<super::hex_tiles::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::HexTile.def()
-    }
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct CompanionRequirement {
+    pub companion_entity: Entity,
+    pub required_state: CompanionStateRequirement,
+    pub required_relationship_level: Option<f32>,
+    pub required_therapy_progress: Option<f32>,
 }
 
-impl Related<super::players::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Player.def()
-    }
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub enum CompanionStateRequirement {
+    Present,
+    Absent,
+    Healthy,
+    Traumatized,
+    Recovering,
+    Healed,
+    Specific(String),
 }
 
-impl Related<super::dialogues::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Dialogues.def()
-    }
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct EncounterDialogueOption {
+    pub option_text: String,
+    pub required_reputation: Option<i32>,
+    pub required_items: Vec<Entity>,
+    pub leads_to_outcome: String,
+    pub companion_reactions: HashMap<Entity, String>,
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct NarrativeOutcome {
+    pub outcome_id: String,
+    pub outcome_description: String,
+    pub probability: f32,     // 0.0-1.0 chance of this outcome
+    pub requirements_met: bool,
+    pub consequences: Vec<EncounterConsequence>,
+}
+
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct EncounterConsequence {
+    pub consequence_type: ConsequenceType,
+    pub description: String,
+    pub immediate_effect: bool,
+    pub delayed_effect_turns: Option<u32>,
+    pub affects_world_state: bool,
+}
+
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub enum ConsequenceType {
+    DreadLevelChange,
+    CorruptionChange,
+    CompanionTrauma,
+    CompanionHealing,
+    ItemGained,
+    ItemLost,
+    StoryProgression,
+    SentimentalItemCreated,
+    RelationshipChange,
+}
+
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct ItemReward {
+    pub item_entity: Entity,
+    pub quantity: u32,
+    pub condition: ItemCondition,
+    pub special_properties: Vec<String>,
+}
+
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub enum ItemCondition {
+    Perfect,
+    Good,
+    Worn,
+    Damaged,
+    Magical,
+    Cursed,
+    Blessed,
+}
+
+/// Event fired when encounter is triggered
+#[derive(Event, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Event)]
+pub struct EncounterTriggerEvent {
+    pub encounter_entity: Entity,
+    pub player_entity: Entity,
+    pub trigger_reason: EncounterTriggerReason,
+    pub participating_companions: Vec<Entity>,
+}
+
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub enum EncounterTriggerReason {
+    PlayerMovement,
+    TimeProgression,
+    StoryProgression,
+    DreadLevelChange,
+    CompanionAction,
+    EnvironmentalEvent,
+    RandomChance,
+}
+
+/// Event fired when encounter concludes
+#[derive(Event, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Event)]
+pub struct EncounterCompleteEvent {
+    pub encounter_entity: Entity,
+    pub player_entity: Entity,
+    pub chosen_outcome: String,
+    pub consequences: Vec<EncounterConsequence>,
+    pub sentimental_items_created: Vec<Entity>,
+}
+
+/// Component marking entities as encounter locations
+#[derive(Component, Reflect, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[reflect(Component)]
+pub struct EncounterLocation {
+    pub available_encounters: Vec<Entity>,
+    pub encounter_frequency: f32,     // 0.0-1.0 how often encounters happen here
+    pub last_encounter_time: Option<DateTime<Utc>>,
+    pub cooldown_period: Option<u32>, // Turns before new encounter possible
+}

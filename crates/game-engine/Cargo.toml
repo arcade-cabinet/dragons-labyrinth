@@ -17,8 +17,7 @@ name = "dragons-labyrinth"
 path = "src/main.rs"
 
 [dependencies]
-# Internal crates
-game-database = { workspace = true }
+# Internal crates (removed game-database - migrated to pure ECS)
 game-assets = { workspace = true }
 
 # Game engine core
@@ -27,6 +26,10 @@ bevy = { workspace = true, features = ["default"] }
 # Serialization (common utilities)
 serde = { workspace = true }
 serde_json = { workspace = true }
+
+# Time handling
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
 
 # Hex grid system (game-specific)
 hexx = { workspace = true, features = ["algorithms", "serde"] }
@@ -37,9 +40,9 @@ mapgen = { workspace = true }
 # ECS Tilemap (game-specific)
 bevy_ecs_tilemap = { workspace = true }
 
-# Database (shared with game-database)
-sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
-sqlx = { workspace = true, features = ["sqlite", "runtime-tokio-rustls"] }
+# Database removed - now using pure Bevy ECS
+# sea-orm = { workspace = true, features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+# sqlx = { workspace = true, features = ["sqlite", "runtime-tokio-rustls"] }
 
 # Async runtime (common utility)
 tokio = { workspace = true }

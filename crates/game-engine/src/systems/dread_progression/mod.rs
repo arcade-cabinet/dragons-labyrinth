@@ -5,7 +5,7 @@
 //! creating the core horror experience that makes Dragon's Labyrinth unique.
 
 use bevy::prelude::*;
-use sea_orm::DatabaseConnection;
+use std::collections::HashMap;
 
 pub mod components;
 pub mod systems;
@@ -164,13 +164,11 @@ pub enum DreadSystemPhase {
 /// Setup dread progression system on startup
 fn setup_dread_progression_system(
     mut commands: Commands,
-    db: Res<DatabaseConnection>,
 ) {
     info!("Initializing Dragon's Labyrinth Dread Progression System");
     
     // Initialize the master dread progression state
     let dread_state = DreadProgressionState {
-        db: db.clone(),
         global_dread_level: 0,
         regional_dread_levels: HashMap::new(),
         active_dread_sources: HashMap::new(),
@@ -220,10 +218,9 @@ fn setup_reality_distortion_manager(
     info!("Reality distortion manager initialized");
 }
 
-/// Initialize baseline dread levels from database
+/// Initialize baseline dread levels
 fn initialize_baseline_dread_levels(
     mut commands: Commands,
-    db: Res<DatabaseConnection>,
 ) {
     // Create initial dread level entity
     commands.spawn(DreadLevel {
@@ -300,11 +297,25 @@ fn dread_level_stability_monitoring(
 
 fn regional_dread_calculation(
     mut dread_state: ResMut<DreadProgressionState>,
-    db: Res<DatabaseConnection>,
+    hex_tiles_query: Query<(Entity, &crate::components::hex_tiles::HexTile, &crate::components::hex_tiles::Biome)>,
+    dread_sources_query: Query<(Entity, &DreadSource)>,
 ) {
-    // Calculate regional dread levels
-    // This would use the DreadProgressionQueries in actual implementation
-    debug!("Calculating regional dread levels");
+    // Calculate regional dread levels using ECS queries
+    let mut regional_levels = HashMap::new();
+    
+    for (source_entity, dread_source) in dread_sources_query.iter() {
+        for (tile_entity, hex_tile, biome) in hex_tiles_query.iter() {
+            let distance = hex_tile.coordinates.distance_to(dread_source.location);
+            if distance <= dread_source.influence_radius {
+                let influence = dread_source.calculate_influence_at_distance(distance);
+                let current_level = regional_levels.get(&tile_entity).unwrap_or(&0.0);
+                regional_levels.insert(tile_entity, current_level + influence);
+            }
+        }
+    }
+    
+    dread_state.regional_dread_levels = regional_levels;
+    debug!("Updated regional dread levels for {} tiles", dread_state.regional_dread_levels.len());
 }
 
 fn player_adaptation_tracking(

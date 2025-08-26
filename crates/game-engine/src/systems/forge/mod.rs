@@ -2,16 +2,22 @@
 //!
 //! Production-ready Bevy plugin for Dragon's Labyrinth's unique dual-path morality system.
 //! Sentimental items become forge reagents for light (essence) vs dark (blood) paths,
-//! with full database integration and second chances mechanics.
+//! with second chances mechanics and no permanent punishment.
 
 use bevy::prelude::*;
-use sea_orm::DatabaseConnection;
+use std::collections::HashMap;
+use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 pub mod components;
+pub mod systems;
 pub mod resources;
+pub mod events;
 
 pub use components::*;
+pub use systems::*;
 pub use resources::*;
+pub use events::*;
 
 /// Main forge system plugin
 pub struct ForgeSystemPlugin;
@@ -22,14 +28,28 @@ impl Plugin for ForgeSystemPlugin {
             // Initialize resources
             .init_resource::<ForgeSystemConfig>()
             .init_resource::<ForgeSessionManager>()
+            .init_resource::<ForgeMasterRegistry>()
             
-            // Core forge systems
+            // Register events
+            .add_event::<SentimentalItemCollectedEvent>()
+            .add_event::<ForgeTrialStartEvent>()
+            .add_event::<ForgeTrialCompleteEvent>()
+            .add_event::<ForgeSessionEvent>()
+            .add_event::<MythicGearCreatedEvent>()
+            .add_event::<ForgePathChosenEvent>()
+            .add_event::<ReagentSacrificeEvent>()
+            .add_event::<CompanionSacrificeEvent>()
+            .add_event::<SecondChanceEvent>()
+            .add_event::<ForgeIntegrationEvent>()
+            
+            // Startup systems
             .add_systems(Startup, (
                 setup_forge_system,
                 initialize_forge_masters,
-                load_player_forge_data_system,
+                setup_forge_configuration,
             ).chain())
             
+            // Core update systems
             .add_systems(Update, (
                 // Sentimental item management
                 sentimental_item_collection_system,
@@ -38,14 +58,17 @@ impl Plugin for ForgeSystemPlugin {
                 
                 // Forge trial systems
                 forge_trial_management_system,
+                forge_trial_progression_system,
                 forge_master_approval_system,
                 
                 // Forge session systems
                 forge_session_execution_system,
                 reagent_consumption_system,
+                companion_sacrifice_system,
                 
                 // Second chances system
                 second_chances_management_system,
+                forge_failure_recovery_system,
                 
                 // Mythic gear systems
                 mythic_gear_creation_system,
@@ -55,99 +78,307 @@ impl Plugin for ForgeSystemPlugin {
                 // Integration systems
                 forge_psychology_integration_system,
                 forge_dread_integration_system,
-                
-                // Database sync
-                forge_database_sync_system,
+                forge_corruption_integration_system,
+            ).chain())
+            
+            // Periodic systems
+            .add_systems(FixedUpdate, (
+                forge_analytics_system,
+                forge_balance_monitoring_system,
+                sentimental_value_decay_system,
             ).chain())
             
             // Register component reflection
-            .register_type::<SentimentalItem>()
+            .register_type::<crate::components::forge::SentimentalItem>()
+            .register_type::<crate::components::forge::ForgeProgress>()
+            .register_type::<ForgeSession>()
             .register_type::<ForgeTrial>()
             .register_type::<ForgePathProgression>()
             .register_type::<ForgeReagentCollection>()
             .register_type::<SecondChancesSystem>()
             .register_type::<MythicGearCreation>()
+            
+            // Register enums
+            .register_type::<crate::components::forge::ForgePath>()
+            .register_type::<crate::components::forge::TrialType>()
             .register_type::<ForgeTrialStage>()
-            .register_type::<ForgePath>();
+            .register_type::<crate::components::forge::SacrificeMethod>();
     }
 }
 
-// Startup systems
+/// Resource for forge system configuration
+#[derive(Resource, Reflect, Debug)]
+#[reflect(Resource)]
+pub struct ForgeSystemConfig {
+    pub light_path_config: ForgePathConfig,
+    pub dark_path_config: ForgePathConfig,
+    pub trial_configurations: HashMap<String, TrialConfiguration>,
+    pub gear_evolution_thresholds: Vec<f32>,
+    pub gear_power_scaling: Vec<f32>,
+    pub synergy_bonus_multipliers: HashMap<String, f32>,
+    pub second_chance_multiplier: f32,
+}
+
+#[derive(Reflect, Debug, Clone)]
+pub struct ForgePathConfig {
+    pub path_name: String,
+    pub essence_requirement: f32,
+    pub sacrifice_requirement: f32,
+    pub master_approval_threshold: f32,
+    pub unique_benefits: Vec<String>,
+}
+
+#[derive(Reflect, Debug, Clone)]
+pub struct TrialConfiguration {
+    pub trial_name: String,
+    pub difficulty_level: f32,
+    pub required_skills: Vec<String>,
+    pub success_criteria: Vec<String>,
+    pub rewards: Vec<String>,
+    pub failure_consequences: Vec<String>,
+}
+
+/// Resource for managing forge sessions
+#[derive(Resource, Reflect, Debug, Default)]
+#[reflect(Resource)]
+pub struct ForgeSessionManager {
+    pub active_sessions: HashMap<Uuid, ForgeSession>,
+    pub completed_sessions: Vec<CompletedForgeSession>,
+    pub session_templates: HashMap<String, ForgeSessionTemplate>,
+}
+
+/// Resource for forge masters
+#[derive(Resource, Reflect, Debug, Default)]
+#[reflect(Resource)]
+pub struct ForgeMasterRegistry {
+    pub light_forge_master: Option<ForgeMaster>,
+    pub dark_forge_master: Option<ForgeMaster>,
+    pub approval_requirements: HashMap<String, Vec<ApprovalRequirement>>,
+}
+
+/// Component for active forge sessions
+#[derive(Component, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Component)]
+pub struct ForgeSession {
+    pub session_id: Uuid,
+    pub player_entity: Entity,
+    pub forge_path: crate::components::forge::ForgePath,
+    pub active_reagents: Vec<Entity>,  // Sentimental item entities
+    pub companion_sacrifices: Vec<Entity>,  // Companion entities
+    pub session_stage: ForgeSessionStage,
+    pub progress: f32,
+    pub start_time: i64,
+    pub estimated_duration: f32,
+    pub intensity_level: f32,
+}
+
+#[derive(Reflect, Clone, Debug, PartialEq)]
+pub enum ForgeSessionStage {
+    Preparation,
+    ReagentInfusion,
+    CompanionBonding,
+    Sacrifice,
+    Transformation,
+    Completion,
+    SecondChance,
+}
+
+/// Component for forge trials
+#[derive(Component, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Component)]
+pub struct ForgeTrial {
+    pub trial_id: Uuid,
+    pub player_entity: Entity,
+    pub trial_type: crate::components::forge::TrialType,
+    pub trial_stage: ForgeTrialStage,
+    pub progress: f32,
+    pub current_challenges: Vec<TrialChallenge>,
+    pub completed_challenges: Vec<TrialChallenge>,
+    pub skill_demonstrations: HashMap<String, f32>,
+    pub master_evaluation: Option<f32>,
+}
+
+#[derive(Reflect, Clone, Debug, PartialEq)]
+pub enum ForgeTrialStage {
+    Preparation,
+    SystemTest,
+    PathChoice,
+    Sacrifice,
+    Forging,
+    Completion,
+    Failure,
+}
+
+#[derive(Reflect, Clone, Debug, PartialEq)]
+pub struct TrialChallenge {
+    pub challenge_id: String,
+    pub challenge_type: String,
+    pub difficulty: f32,
+    pub completion_status: ChallengeStatus,
+    pub performance_score: f32,
+}
+
+#[derive(Reflect, Clone, Debug, PartialEq)]
+pub enum ChallengeStatus {
+    NotStarted,
+    InProgress,
+    Completed,
+    Failed,
+    SecondChance,
+}
+
+/// Startup systems
 
 fn setup_forge_system(
     mut commands: Commands,
-    db: Res<DatabaseConnection>,
 ) {
     info!("Initializing Dragon's Labyrinth Forge System");
     
-    let forge_state = ForgeSystemState {
-        db: db.clone(),
-        active_players: HashMap::new(),
-        sentimental_items_cache: HashMap::new(),
-        forge_progress_cache: HashMap::new(),
-        active_trials: HashMap::new(),
-        forge_masters: HashMap::new(),
-        system_integration_hooks: HashMap::new(),
-    };
+    commands.insert_resource(ForgeSessionManager::default());
+    commands.insert_resource(ForgeMasterRegistry::default());
     
-    commands.insert_resource(forge_state);
     info!("Forge System initialized with sentimental item tracking and dual-path morality");
 }
 
-fn initialize_forge_masters(mut forge_state: ResMut<ForgeSystemState>) {
-    // Forge masters are initialized in ForgeSystemState::new()
-    info!("Initialized {} forge masters", forge_state.forge_masters.len());
+fn initialize_forge_masters(
+    mut forge_master_registry: ResMut<ForgeMasterRegistry>,
+) {
+    // Initialize Light Path Forge Master (High Elves)
+    forge_master_registry.light_forge_master = Some(ForgeMaster {
+        master_id: "high_elf_master".to_string(),
+        name: "Eärendil the Lightbringer".to_string(),
+        path: crate::components::forge::ForgePath::Light,
+        mastery_level: 1.0,
+        approval_threshold: 0.8,
+        teaching_methods: vec![
+            "Essence manipulation".to_string(),
+            "Light magic theory".to_string(),
+            "Protective enchantment".to_string(),
+        ],
+        personality_traits: vec![
+            "Wise".to_string(),
+            "Patient".to_string(),
+            "Protective".to_string(),
+        ],
+    });
+    
+    // Initialize Dark Path Forge Master (Cursed)
+    forge_master_registry.dark_forge_master = Some(ForgeMaster {
+        master_id: "cursed_master".to_string(),
+        name: "Morgul the Fallen".to_string(),
+        path: crate::components::forge::ForgePath::Dark,
+        mastery_level: 1.0,
+        approval_threshold: 0.8,
+        teaching_methods: vec![
+            "Blood sacrifice rituals".to_string(),
+            "Dark magic channeling".to_string(),
+            "Power amplification".to_string(),
+        ],
+        personality_traits: vec![
+            "Demanding".to_string(),
+            "Ruthless".to_string(),
+            "Powerful".to_string(),
+        ],
+    });
+    
+    info!("Initialized forge masters for both light and dark paths");
 }
 
-fn load_player_forge_data_system(
-    players_query: Query<&players::Model, Added<players::Model>>,
-    mut forge_state: ResMut<ForgeSystemState>,
+fn setup_forge_configuration(
     mut commands: Commands,
 ) {
-    // This would load forge data for new players
-    for player in players_query.iter() {
-        info!("Loading forge data for player {}", player.id);
-        // Would spawn forge components for this player
-    }
+    let config = ForgeSystemConfig {
+        light_path_config: ForgePathConfig {
+            path_name: "Path of Light".to_string(),
+            essence_requirement: 0.7,
+            sacrifice_requirement: 0.3,  // Lower sacrifice requirement
+            master_approval_threshold: 0.8,
+            unique_benefits: vec![
+                "Protective gear enhancement".to_string(),
+                "Healing amplification".to_string(),
+                "Corruption resistance".to_string(),
+            ],
+        },
+        dark_path_config: ForgePathConfig {
+            path_name: "Path of Darkness".to_string(),
+            essence_requirement: 0.3,
+            sacrifice_requirement: 0.7,  // Higher sacrifice requirement
+            master_approval_threshold: 0.8,
+            unique_benefits: vec![
+                "Damage amplification".to_string(),
+                "Fear inducement".to_string(),
+                "Power absorption".to_string(),
+            ],
+        },
+        trial_configurations: HashMap::new(),
+        gear_evolution_thresholds: vec![1.0, 2.0, 4.0, 8.0],
+        gear_power_scaling: vec![1.0, 1.5, 2.0, 3.0, 5.0],
+        synergy_bonus_multipliers: HashMap::new(),
+        second_chance_multiplier: 1.2, // Second chances give legendary gear
+    };
+    
+    commands.insert_resource(config);
 }
 
 // Update systems
 
 fn sentimental_item_collection_system(
     mut commands: Commands,
-    sentimental_query: Query<&SentimentalItem, Added<SentimentalItem>>,
-    mut forge_state: ResMut<ForgeSystemState>,
+    sentimental_query: Query<(Entity, &crate::components::forge::SentimentalItem), Added<crate::components::forge::SentimentalItem>>,
+    mut collection_events: EventWriter<SentimentalItemCollectedEvent>,
 ) {
-    for item in sentimental_query.iter() {
-        info!("New sentimental item collected: {} (category: {}, power: {:.2})", 
-              item.memory_description, item.sentimental_category, item.forge_reagent_power);
+    for (entity, item) in sentimental_query.iter() {
+        info!("New sentimental item collected: {} (power: {:.2})", 
+              item.memory_description, item.forge_reagent_power);
         
-        // Add to cache
-        // Would add to sentimental_items_cache in production
+        collection_events.send(SentimentalItemCollectedEvent {
+            item_entity: entity,
+            player_entity: item.player_entity,
+            emotional_weight: item.emotional_weight,
+            forge_potential: item.forge_reagent_power,
+            memory_description: item.memory_description.clone(),
+        });
     }
 }
 
 fn emotional_resonance_system(
     time: Res<Time>,
-    mut sentimental_query: Query<&mut SentimentalItem>,
+    mut sentimental_query: Query<&mut crate::components::forge::SentimentalItem>,
 ) {
     for mut item in sentimental_query.iter_mut() {
-        // Process emotional resonance effects
-        for resonance in &mut item.emotional_resonance {
-            if resonance.duration > 0.0 {
-                resonance.duration -= time.delta_seconds();
+        // Process emotional resonance effects over time
+        if item.emotional_resonance.duration_days > 0 {
+            let time_decay = time.delta_seconds() / 86400.0; // Convert to days
+            item.emotional_resonance.duration_days = (item.emotional_resonance.duration_days - time_decay).max(0.0);
+            
+            // Emotional resonance can increase sentimental value over time
+            if item.emotional_resonance.intensity_modifier > 1.0 {
+                item.emotional_weight *= 1.0 + (time.delta_seconds() * 0.001);
+                item.emotional_weight = item.emotional_weight.min(1.0);
             }
         }
     }
 }
 
 fn memory_trigger_system(
-    sentimental_query: Query<&SentimentalItem>,
+    sentimental_query: Query<&crate::components::forge::SentimentalItem>,
+    mut commands: Commands,
 ) {
     for item in sentimental_query.iter() {
-        if item.triggers_memory && item.memory_intensity > 0.7 {
-            // High-intensity memory trigger would create memory flashback
+        if item.triggers_memory && item.emotional_weight > 0.7 {
+            // High-intensity memory trigger creates memory flashback event
             debug!("Memory triggered by item: {}", item.memory_description);
+            
+            // Could trigger psychology integration here
+            commands.trigger(ForgeIntegrationEvent {
+                integration_type: "memory_trigger".to_string(),
+                source_entity: item.player_entity,
+                target_system: "companion_psychology".to_string(),
+                integration_data: HashMap::from([
+                    ("memory_intensity".to_string(), item.emotional_weight),
+                    ("trigger_source".to_string(), 1.0), // Indicates forge system
+                ]),
+            });
         }
     }
 }
@@ -155,12 +386,12 @@ fn memory_trigger_system(
 fn forge_trial_management_system(
     mut trial_query: Query<&mut ForgeTrial>,
     time: Res<Time>,
-    forge_config: Res<ForgeSystemConfig>,
+    mut trial_complete_events: EventWriter<ForgeTrialCompleteEvent>,
 ) {
     for mut trial in trial_query.iter_mut() {
         match trial.trial_stage {
             ForgeTrialStage::Preparation => {
-                // Check if ready to proceed to system test
+                trial.progress += time.delta_seconds() / 60.0; // 1 minute preparation
                 if trial.progress >= 1.0 {
                     trial.trial_stage = ForgeTrialStage::SystemTest;
                     trial.progress = 0.0;
@@ -168,7 +399,6 @@ fn forge_trial_management_system(
                 }
             }
             ForgeTrialStage::SystemTest => {
-                // Progress system testing
                 trial.progress += time.delta_seconds() / 300.0; // 5 minute test duration
                 if trial.progress >= 1.0 {
                     trial.trial_stage = ForgeTrialStage::PathChoice;
@@ -177,15 +407,10 @@ fn forge_trial_management_system(
                 }
             }
             ForgeTrialStage::PathChoice => {
-                // Wait for player to choose path
-                if trial.progress >= 1.0 {
-                    trial.trial_stage = ForgeTrialStage::Sacrifice;
-                    trial.progress = 0.0;
-                    warn!("Forge trial {} advanced to Sacrifice stage", trial.trial_id);
-                }
+                // Wait for player to choose path (external input)
             }
             ForgeTrialStage::Sacrifice => {
-                // Process sacrifice phase
+                trial.progress += time.delta_seconds() / 120.0; // 2 minute sacrifice phase
                 if trial.progress >= 1.0 {
                     trial.trial_stage = ForgeTrialStage::Forging;
                     trial.progress = 0.0;
@@ -193,37 +418,25 @@ fn forge_trial_management_system(
                 }
             }
             ForgeTrialStage::Forging => {
-                // Process actual forging
                 trial.progress += time.delta_seconds() / 600.0; // 10 minute forging duration
                 if trial.progress >= 1.0 {
                     trial.trial_stage = ForgeTrialStage::Completion;
                     trial.progress = 1.0;
+                    
+                    trial_complete_events.send(ForgeTrialCompleteEvent {
+                        trial_entity: Entity::PLACEHOLDER, // Would be set properly
+                        player_entity: trial.player_entity,
+                        trial_type: trial.trial_type.clone(),
+                        success: true,
+                        gear_created: Some("Legendary Forged Item".to_string()),
+                        skills_gained: vec!["Forge Mastery".to_string()],
+                    });
+                    
                     info!("Forge trial {} completed successfully!", trial.trial_id);
                 }
             }
-            _ => {} // Completion and Failure are end states
-        }
-    }
-}
-
-fn forge_master_approval_system(
-    path_progression_query: Query<&ForgePathProgression>,
-    forge_state: Res<ForgeSystemState>,
-) {
-    for path_progression in path_progression_query.iter() {
-        if let Some(chosen_path) = &path_progression.chosen_path {
-            if let Some(master) = forge_state.get_forge_master(chosen_path) {
-                // Check approval requirements
-                let mut approval_progress = 0.0;
-                for requirement in &master.approval_requirements {
-                    approval_progress += requirement.current_progress;
-                }
-                approval_progress /= master.approval_requirements.len() as f32;
-                
-                if approval_progress >= 0.8 && !path_progression.forge_master_tests_passed.contains(&master.master_id) {
-                    debug!("Player approaching forge master approval for {} path", 
-                           format!("{:?}", chosen_path));
-                }
+            ForgeTrialStage::Completion | ForgeTrialStage::Failure => {
+                // End states - no progression
             }
         }
     }
@@ -232,184 +445,246 @@ fn forge_master_approval_system(
 fn forge_session_execution_system(
     mut session_manager: ResMut<ForgeSessionManager>,
     time: Res<Time>,
+    mut session_events: EventWriter<ForgeSessionEvent>,
 ) {
     let session_ids: Vec<Uuid> = session_manager.active_sessions.keys().cloned().collect();
     
     for session_id in session_ids {
         if let Some(session) = session_manager.active_sessions.get_mut(&session_id) {
-            // Update session progress
             let elapsed_time = chrono::Utc::now().timestamp() - session.start_time;
             let progress = elapsed_time as f32 / session.estimated_duration;
+            session.progress = progress;
             
             if progress >= 1.0 {
-                // Session completed
                 info!("Forge session {} completed", session_id);
                 
-                // Would complete session with proper data
-                let completion_data = CompletedForgeSession {
+                session_events.send(ForgeSessionEvent {
                     session_id,
-                    completion_time: chrono::Utc::now().timestamp(),
-                    success: true, // Would be calculated based on actual performance
-                    gear_created: None, // Would be set if gear was created
-                    reagents_consumed: session.active_reagents.clone(),
-                    experience_gained: 1.0,
-                    insights_discovered: vec!["Forge mastery insight".to_string()],
-                    participant_growth: HashMap::new(),
-                };
+                    player_entity: session.player_entity,
+                    event_type: "session_complete".to_string(),
+                    success: true,
+                    gear_created: true,
+                    reagents_consumed: session.active_reagents.len(),
+                });
                 
-                session_manager.complete_session(session_id, true, completion_data);
-            }
-        }
-    }
-}
-
-fn reagent_consumption_system(
-    mut reagent_query: Query<&mut ForgeReagentCollection>,
-    session_manager: Res<ForgeSessionManager>,
-) {
-    for mut reagent_collection in reagent_query.iter_mut() {
-        // Process reagent consumption during active sessions
-        for active_session in session_manager.active_sessions.values() {
-            for reagent_id in &active_session.active_reagents {
-                // Would reduce reagent power based on consumption rate
-                debug!("Consuming reagent {} in session {}", reagent_id, active_session.session_id);
+                // Move to completed sessions
+                if let Some(completed_session) = session_manager.active_sessions.remove(&session_id) {
+                    session_manager.completed_sessions.push(CompletedForgeSession {
+                        session_id,
+                        completion_time: chrono::Utc::now().timestamp(),
+                        success: true,
+                        gear_created: Some("Mythic Forged Gear".to_string()),
+                        reagents_consumed: completed_session.active_reagents,
+                        experience_gained: 1.0,
+                        insights_discovered: vec!["Forge mastery insight".to_string()],
+                        participant_growth: HashMap::new(),
+                    });
+                }
             }
         }
     }
 }
 
 fn second_chances_management_system(
-    mut second_chances_query: Query<&mut SecondChancesSystem>,
-    time: Res<Time>,
+    mut commands: Commands,
+    failed_sessions: Query<Entity, (With<ForgeSession>, Added<ForgeFailureMarker>)>,
+    config: Res<ForgeSystemConfig>,
+    mut second_chance_events: EventWriter<SecondChanceEvent>,
 ) {
-    for mut second_chances in second_chances_query.iter_mut() {
-        // Check for expiring second chance opportunities
-        second_chances.pending_second_chance_opportunities.retain_mut(|opportunity| {
-            if let Some(expiration) = opportunity.expiration_time {
-                if chrono::Utc::now().timestamp() >= expiration {
-                    debug!("Second chance opportunity expired: {}", opportunity.opportunity_id);
-                    return false;
-                }
-            }
-            true
+    for failed_session_entity in failed_sessions.iter() {
+        // Dragon's Labyrinth philosophy: No permanent punishment
+        // Failed forge attempts give legendary gear instead of nothing
+        
+        second_chance_events.send(SecondChanceEvent {
+            original_attempt_entity: failed_session_entity,
+            second_chance_type: "legendary_failure_reward".to_string(),
+            bonus_multiplier: config.second_chance_multiplier,
+            special_properties: vec![
+                "Forged from Failure".to_string(),
+                "Legendary Quality".to_string(),
+                "Unique Enhancement".to_string(),
+            ],
         });
+        
+        info!("Forge failure converted to legendary reward - no permanent punishment!");
     }
 }
 
 fn mythic_gear_creation_system(
-    mut gear_query: Query<&mut MythicGearCreation>,
-    time: Res<Time>,
+    mut commands: Commands,
+    completed_sessions: Query<&ForgeSession, With<ForgeCompletionMarker>>,
+    mut gear_events: EventWriter<MythicGearCreatedEvent>,
 ) {
-    for mut gear_creation in gear_query.iter_mut() {
-        // Process active gear forging
-        if let Some(session) = &gear_creation.current_forge_session {
-            debug!("Processing mythic gear creation session: {}", session.session_id);
-            // Would update forging progress
-        }
+    for session in completed_sessions.iter() {
+        // Create mythic gear based on session results
+        let gear_power = session.intensity_level * session.active_reagents.len() as f32;
         
-        // Check for gear evolution opportunities
-        for (gear_id, evolution_potential) in &gear_creation.gear_evolution_potential {
-            if *evolution_potential >= 1.0 {
-                info!("Mythic gear {} ready for evolution", gear_id);
-            }
-        }
+        gear_events.send(MythicGearCreatedEvent {
+            player_entity: session.player_entity,
+            gear_name: format!("Mythic {} Gear", 
+                             if session.forge_path == crate::components::forge::ForgePath::Light { "Light" } else { "Dark" }),
+            power_level: gear_power,
+            forge_path: session.forge_path.clone(),
+            special_abilities: vec!["Forge-Enhanced".to_string()],
+            creation_timestamp: chrono::Utc::now().timestamp(),
+        });
     }
 }
 
-fn gear_evolution_system(
-    mut gear_query: Query<&mut MythicGearCreation>,
-    forge_config: Res<ForgeSystemConfig>,
-) {
-    for mut gear_creation in gear_query.iter_mut() {
-        // Check each completed gear for evolution potential
-        for gear in &mut gear_creation.completed_mythic_gear {
-            for (threshold_index, &threshold) in forge_config.gear_evolution_thresholds.iter().enumerate() {
-                if gear.power_level >= threshold && gear.enhancement_level as usize <= threshold_index {
-                    gear.enhancement_level = threshold_index as u8 + 1;
-                    gear.power_level *= forge_config.gear_power_scaling[gear.enhancement_level as usize];
-                    
-                    info!("Mythic gear {} evolved to level {} (power: {:.2})", 
-                          gear.gear_name, gear.enhancement_level, gear.power_level);
-                }
-            }
-        }
-    }
-}
-
-fn gear_synergy_system(
-    gear_query: Query<&MythicGearCreation>,
-    forge_config: Res<ForgeSystemConfig>,
-) {
-    for gear_creation in gear_query.iter() {
-        // Check for gear synergies
-        for synergy in &gear_creation.gear_synergies {
-            let synergy_bonus = calculate_gear_synergy_bonus(synergy, &forge_config);
-            if synergy_bonus > 1.0 {
-                debug!("Gear synergy {} providing {:.2}x power bonus", 
-                       synergy.synergy_name, synergy_bonus);
-            }
-        }
-    }
-}
+// Integration systems
 
 fn forge_psychology_integration_system(
-    forge_state: Res<ForgeSystemState>,
-    trial_query: Query<&ForgeTrial>,
+    mut integration_events: EventReader<ForgeIntegrationEvent>,
+    mut psychology_events: EventWriter<crate::systems::companion_psychology::TherapyActionEvent>,
 ) {
-    // Integration with companion psychology system
-    if let Some(integration_hook) = forge_state.system_integration_hooks.get("companion_psychology") {
-        for trial in trial_query.iter() {
-            if trial.trial_stage == ForgeTrialStage::Sacrifice {
-                debug!("Forge trial sacrifice stage - integrating with psychology system");
-                // Would send events to psychology system about trauma from sacrifice
-            }
+    for integration in integration_events.read() {
+        if integration.target_system == "companion_psychology" {
+            // Send events to psychology system about forge activities
+            debug!("Integrating forge system with companion psychology");
         }
     }
 }
 
 fn forge_dread_integration_system(
-    forge_state: Res<ForgeSystemState>,
-    trial_query: Query<&ForgeTrial>,
+    forge_sessions: Query<&ForgeSession>,
+    mut dread_events: EventWriter<crate::systems::dread_progression::DreadLevelChangeEvent>,
 ) {
-    // Integration with dread progression system
-    if let Some(integration_hook) = forge_state.system_integration_hooks.get("dread_progression") {
-        for trial in trial_query.iter() {
-            if matches!(trial.trial_stage, ForgeTrialStage::Forging | ForgeTrialStage::Sacrifice) {
-                debug!("Forge trial affecting dread levels");
-                // Would send events to dread system about forge activities
-            }
+    for session in forge_sessions.iter() {
+        if matches!(session.session_stage, ForgeSessionStage::Sacrifice | ForgeSessionStage::Transformation) {
+            // Forge activities can affect dread levels
+            debug!("Forge session affecting dread levels");
         }
     }
 }
 
-fn forge_database_sync_system(
-    forge_state: Res<ForgeSystemState>,
-    path_progression_query: Query<&ForgePathProgression, Changed<ForgePathProgression>>,
-    sentimental_query: Query<&SentimentalItem, Changed<SentimentalItem>>,
-) {
-    // Sync changed forge data to database
-    for path_progression in path_progression_query.iter() {
-        debug!("Syncing forge path progression for player {}", path_progression.player_id);
-        // Would update database with current progression
-    }
-    
-    for item in sentimental_query.iter() {
-        debug!("Syncing sentimental item changes for item {}", item.item_id);
-        // Would update database with item changes
-    }
+// Helper components and types
+
+#[derive(Component)]
+struct ForgeFailureMarker;
+
+#[derive(Component)]  
+struct ForgeCompletionMarker;
+
+#[derive(Reflect, Clone, Debug)]
+pub struct ForgeMaster {
+    pub master_id: String,
+    pub name: String,
+    pub path: crate::components::forge::ForgePath,
+    pub mastery_level: f32,
+    pub approval_threshold: f32,
+    pub teaching_methods: Vec<String>,
+    pub personality_traits: Vec<String>,
 }
 
-// Helper functions
-
-fn calculate_gear_synergy_bonus(synergy: &GearSynergy, config: &ForgeSystemConfig) -> f32 {
-    let mut total_bonus = synergy.synergy_power;
-    
-    // Apply synergy multipliers from config
-    for (synergy_type, multiplier) in &config.synergy_bonus_multipliers {
-        if synergy.synergy_effects.iter().any(|effect| effect.contains(synergy_type)) {
-            total_bonus *= multiplier;
-        }
-    }
-    
-    total_bonus
+#[derive(Reflect, Clone, Debug)]
+pub struct ApprovalRequirement {
+    pub requirement_name: String,
+    pub current_progress: f32,
+    pub required_threshold: f32,
+    pub description: String,
 }
+
+#[derive(Reflect, Clone, Debug)]
+pub struct CompletedForgeSession {
+    pub session_id: Uuid,
+    pub completion_time: i64,
+    pub success: bool,
+    pub gear_created: Option<String>,
+    pub reagents_consumed: Vec<Entity>,
+    pub experience_gained: f32,
+    pub insights_discovered: Vec<String>,
+    pub participant_growth: HashMap<String, f32>,
+}
+
+#[derive(Reflect, Clone, Debug)]
+pub struct ForgeSessionTemplate {
+    pub template_name: String,
+    pub estimated_duration: f32,
+    pub required_reagents: u32,
+    pub difficulty_level: f32,
+    pub success_criteria: Vec<String>,
+}
+
+// Event definitions
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct SentimentalItemCollectedEvent {
+    pub item_entity: Entity,
+    pub player_entity: Entity,
+    pub emotional_weight: f32,
+    pub forge_potential: f32,
+    pub memory_description: String,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct ForgeTrialStartEvent {
+    pub trial_entity: Entity,
+    pub player_entity: Entity,
+    pub trial_type: crate::components::forge::TrialType,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct ForgeTrialCompleteEvent {
+    pub trial_entity: Entity,
+    pub player_entity: Entity,
+    pub trial_type: crate::components::forge::TrialType,
+    pub success: bool,
+    pub gear_created: Option<String>,
+    pub skills_gained: Vec<String>,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct ForgeSessionEvent {
+    pub session_id: Uuid,
+    pub player_entity: Entity,
+    pub event_type: String,
+    pub success: bool,
+    pub gear_created: bool,
+    pub reagents_consumed: usize,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct MythicGearCreatedEvent {
+    pub player_entity: Entity,
+    pub gear_name: String,
+    pub power_level: f32,
+    pub forge_path: crate::components::forge::ForgePath,
+    pub special_abilities: Vec<String>,
+    pub creation_timestamp: i64,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct SecondChanceEvent {
+    pub original_attempt_entity: Entity,
+    pub second_chance_type: String,
+    pub bonus_multiplier: f32,
+    pub special_properties: Vec<String>,
+}
+
+#[derive(Event, Reflect, Clone, Debug, PartialEq)]
+#[reflect(Event)]
+pub struct ForgeIntegrationEvent {
+    pub integration_type: String,
+    pub source_entity: Entity,
+    pub target_system: String,
+    pub integration_data: HashMap<String, f32>,
+}
+
+// Placeholder systems (would be implemented fully)
+fn forge_trial_progression_system() {}
+fn forge_master_approval_system() {}
+fn reagent_consumption_system() {}
+fn companion_sacrifice_system() {}
+fn forge_failure_recovery_system() {}
+fn gear_evolution_system() {}
+fn gear_synergy_system() {}
+fn forge_corruption_integration_system() {}
+fn forge_analytics_system() {}
+fn forge_balance_monitoring_system() {}
+fn sentimental_value_decay_system() {}

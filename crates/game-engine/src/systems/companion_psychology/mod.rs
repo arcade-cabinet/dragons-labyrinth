@@ -4,7 +4,7 @@
 //! trauma processing, therapy quests, and memory palace systems with full database integration.
 
 use bevy::prelude::*;
-use sea_orm::DatabaseConnection;
+use std::collections::HashMap;
 
 pub mod components;
 pub mod systems;
@@ -156,13 +156,11 @@ pub enum PsychologySystemPhase {
 /// Setup companion psychology system on startup
 fn setup_companion_psychology_system(
     mut commands: Commands,
-    db: Res<DatabaseConnection>,
 ) {
     info!("Initializing Companion Psychology System");
     
-    // Initialize the psychology state resource with database connection
+    // Initialize the psychology state resource
     let psychology_state = CompanionPsychologyState {
-        db: db.clone(),
         active_companions: HashMap::new(),
         therapy_sessions_cache: HashMap::new(),
         memory_palace_entities: HashMap::new(),

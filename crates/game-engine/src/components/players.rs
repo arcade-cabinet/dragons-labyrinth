@@ -218,7 +218,7 @@ impl PlayerEquipment {
 
 // Supporting types and systems
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Reflect, Serialize, Deserialize)]
 pub enum Season {
     Spring,
     Summer,
@@ -226,7 +226,7 @@ pub enum Season {
     Winter,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Reflect, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Serialize, Deserialize)]
 pub enum MovementType {
     Walk, // 1 space
     Run,  // 2-3 spaces with decreased encounter chance
