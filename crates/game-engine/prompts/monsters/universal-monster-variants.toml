@@ -1,6 +1,5 @@
 # Dragon's Labyrinth - Universal Monster Variants System
-# Revolutionary variant-based generation replacing level-banded approach
-# Base creature archetypes with corruption and equipment variants
+# See GLOBAL_STYLE_GUIDE.toml for format specifications
 
 [batch]
 name = "monsters_universal_variants"  
@@ -8,25 +7,8 @@ description = "Universal monster archetypes with combinatorial variant generatio
 level_range = "1-180"
 category = "monster"
 
-[style_constraints]
-camera_angle = "flat aerial top-down view"
-resolution = "512x512"  # Optimized resolution for monster tokens
-background_type = "transparent PNG overlay"
-tiling = "non-tileable character token"
-framing = "no borders, no frames, no circular crops"
-perspective = "no perspective tilt, no horizon"
-art_style = "medieval fantasy to cosmic horror progression"
-
-[consistency_rules]
-rules = [
-    "Chess-piece character token with clear silhouette",
-    "Flat aerial top-down view",
-    "Square 512x512 transparent PNG, game-ready token",
-    "No borders, no frames, no circles, no symbols",
-    "No horizon, no perspective tilt",
-    "Clear contrast for layer cake priority system",
-    "Corruption progression from natural to void horror"
-]
+# All format constraints inherited from GLOBAL_STYLE_GUIDE.toml
+# Standard 128x128 hex tile resolution, chess-piece style tokens
 
 # Universal Variant Dimensions
 [variants]

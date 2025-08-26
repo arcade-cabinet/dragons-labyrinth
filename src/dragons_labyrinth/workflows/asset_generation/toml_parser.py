@@ -20,41 +20,36 @@ class VariantTOMLParser:
     """
     
     def __init__(self):
-        # Resolution optimization tiers
+        # HEX-BASED RESOLUTION STRATEGY (Following game design principles)
+        # Standard hex tile: 128x128 - Large enough for detail, not ridiculous for movement
+        # UI elements follow proper design ratios relative to hex tiles
         self.resolution_tiers = {
-            "ui_elements": ResolutionTier(
-                tier_name="ui_elements",
-                resolution="256x256",
-                use_case="Small UI components and icons",
+            "hex_standard": ResolutionTier(
+                tier_name="hex_standard",
+                resolution="128x128",
+                use_case="Standard hex tiles, characters, features - the main game scale",
                 batch_size_multiplier=2.0,
                 sprite_sheet_compatible=True
             ),
-            "character_tokens": ResolutionTier(
-                tier_name="character_tokens", 
-                resolution="512x512",
-                use_case="Character and monster tokens",
-                batch_size_multiplier=1.5,
+            "ui_buttons": ResolutionTier(
+                tier_name="ui_buttons", 
+                resolution="64x64",
+                use_case="UI buttons and interface elements (1/2 hex ratio)",
+                batch_size_multiplier=3.0,
                 sprite_sheet_compatible=True
             ),
-            "biome_tiles": ResolutionTier(
-                tier_name="biome_tiles",
-                resolution="1024x1024", 
-                use_case="Biome tiles that need seamless tiling",
-                batch_size_multiplier=0.5,
-                sprite_sheet_compatible=False
+            "ui_icons": ResolutionTier(
+                tier_name="ui_icons",
+                resolution="32x32", 
+                use_case="Small UI icons and indicators (1/4 hex ratio)",
+                batch_size_multiplier=4.0,
+                sprite_sheet_compatible=True
             ),
-            "feature_overlays": ResolutionTier(
-                tier_name="feature_overlays",
-                resolution="768x768",
-                use_case="Buildings and dungeon features",
+            "multi_hex": ResolutionTier(
+                tier_name="multi_hex",
+                resolution="256x256",
+                use_case="Large features spanning 2x2 hexes (dragon lairs, cities)",
                 batch_size_multiplier=1.0,
-                sprite_sheet_compatible=True
-            ),
-            "effect_overlays": ResolutionTier(
-                tier_name="effect_overlays",
-                resolution="512x512",
-                use_case="Particle effects and atmospheric overlays",
-                batch_size_multiplier=1.5,
                 sprite_sheet_compatible=True
             )
         }

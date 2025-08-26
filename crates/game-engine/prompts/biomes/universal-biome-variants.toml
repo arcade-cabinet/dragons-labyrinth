@@ -1,6 +1,5 @@
-# Dragon's Labyrinth - Universal Biome Variants System
-# Revolutionary variant-based generation replacing level-banded approach
-# Base terrains with corruption and texture variants
+# Dragon's Labyrinth - Universal Biome Variants System  
+# See GLOBAL_STYLE_GUIDE.toml for format specifications
 
 [batch]
 name = "biomes_universal_variants"  
@@ -8,25 +7,8 @@ description = "Universal biome base terrains with combinatorial variant generati
 level_range = "1-180"
 category = "biome"
 
-[style_constraints]
-camera_angle = "flat aerial top-down view"
-resolution = "1024x1024"  # Biomes need tiling, keep high resolution
-background_type = "seamless edge-to-edge terrain texture"
-tiling = "tileable"
-framing = "no borders, no frames, no circular crops"
-perspective = "no perspective tilt, no horizon"
-art_style = "medieval fantasy to cosmic horror progression"
-
-[consistency_rules]
-rules = [
-    "Seamless edge-to-edge terrain texture",
-    "Flat aerial top-down view", 
-    "Square 1024x1024 tileable, game-ready tile",
-    "No borders, no frames, no circles, no symbols, no portals",
-    "No horizon, no perspective tilt",
-    "Corruption progression from clean to void horror",
-    "Texture variants for visual diversity"
-]
+# All format constraints inherited from GLOBAL_STYLE_GUIDE.toml
+# Standard 128x128 hex tile resolution, seamless tileable terrain
 
 # Universal Variant Dimensions
 [variants]
