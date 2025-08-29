@@ -1,0 +1,290 @@
+# Optimized Dragon's Labyrinth Hex System Metaprompts
+
+## Core Philosophy: Direct Model Integration + Modular Generation
+
+Instead of asset libraries, each template directly generates the specific 3D models it needs using our biome generator metaprompt, then creates optimized Godot code around those models.
+
+## 1. FOCUSED HEX COORDINATE SYSTEM
+
+### Template: `hex_math_core.jinja2`
+**Purpose**: Pure mathematical hex operations (idempotent, no dependencies)
+
+```markdown
+Generate a production-ready hex coordinate system for Godot 4.x with the following specifications:
+
+CORE REQUIREMENTS:
+- Pure GDScript mathematical operations (no external dependencies)
+- Cube coordinates (q, r, s) with q + r + s = 0 constraint
+- Flat-top orientation, 2.0 unit diameter
+- All coordinate conversions (cube ↔ offset ↔ pixel)
+- Pathfinding with A* integration
+- Distance, neighbors, line drawing, ranges
+- Ring and spiral generation for area operations
+
+PERFORMANCE OPTIMIZATION:
+- Static functions where possible (no instantiation overhead)
+- Precomputed neighbor offsets
+- Efficient hash functions for Dictionary keys
+- Memory-pooled temporary coordinate objects
+
+GODOT INTEGRATION:
+- Vector2i for grid coordinates, Vector3 for world positions
+- Compatible with Godot's built-in pathfinding
+- Thread-safe operations for procedural generation
+- Resource-friendly for mobile deployment
+
+FILES TO GENERATE:
+- `scripts/core/HexMath.gd` - Static coordinate utilities
+- `scripts/core/HexCoord.gd` - Coordinate value class  
+- `scripts/core/HexPathfinding.gd` - A* pathfinding
+```
+
+## 2. OPTIMIZED TILE RENDERING SYSTEM
+
+### Template: `hex_tile_renderer.jinja2` 
+**Purpose**: Efficient tile rendering using MultiMesh + direct model generation
+
+```markdown
+Generate a high-performance hex tile rendering system that directly creates and manages 3D tile models.
+
+MODEL GENERATION INTEGRATION:
+For each biome type needed, use this model generation call:
+```
+BIOME: {BiomeName} + INTENSITY: Standard + GODOT_OPTIMIZED: true
+```
+
+Generate tiles for: grassland, desert, forest, mountain, water, swampland, tundra
+
+RENDERING ARCHITECTURE:
+- MultiMeshInstance3D for identical tiles (performance)
+- Individual MeshInstance3D for unique/special tiles
+- Automatic LOD system with 3 detail levels
+- Frustum culling for large maps
+- Texture atlas for minimal draw calls
+
+GODOT OPTIMIZATION:
+- Use Godot's built-in chunk/streaming system
+- Resource.take_over_path() for dynamic loading
+- Proper memory management with queue_free()
+- Shader-based height blending between biomes
+
+PERFORMANCE TARGETS:
+- 10,000+ tiles at 60fps
+- <200MB memory usage for full map
+- <2ms update time per frame
+- Mobile-friendly (OpenGL ES 3.0)
+
+FILES TO GENERATE:
+- `scripts/rendering/HexTileRenderer.gd` - Core rendering system
+- `scripts/rendering/TileMultiMesh.gd` - MultiMesh management
+- `scripts/rendering/ChunkLoader.gd` - Dynamic loading
+- `shaders/HexTileTransitions.gdshader` - Biome blending
+- `scripts/data/TileDefinitions.gd` - Generated tile data
+```
+
+## 3. MODULAR WORLD GENERATOR
+
+### Template: `world_generator_core.jinja2`
+**Purpose**: Pure world generation logic (separate from rendering)
+
+```markdown
+Generate a modular world generation system that creates detailed hex-based worlds.
+
+GENERATION STRATEGY:
+1. Use FastNoiseLite for base terrain (elevation, temperature, moisture)
+2. Apply biome classification rules
+3. Generate river systems using flow simulation
+4. Place roads/paths using pathfinding between settlements
+5. Create settlement hierarchies (villages → towns → cities)
+
+BIOME INTEGRATION:
+For each generated biome region, store metadata for tile renderer:
+- Primary biome type
+- Transition zones with neighboring biomes  
+- Elevation variance
+- Special features (rivers, roads, settlements)
+
+PROCEDURAL SYSTEMS:
+- Deterministic generation (same seed = same world)
+- Incremental generation (generate chunks on demand)
+- Validation systems (ensure playable layouts)
+- Export to standard formats for editor tools
+
+GODOT NATIVE FEATURES:
+- Use Godot's noise classes efficiently
+- Resource streaming for large worlds
+- Background thread generation
+- Progressive mesh updates
+
+FILES TO GENERATE:
+- `scripts/generation/WorldGenerator.gd` - Main generation controller
+- `scripts/generation/BiomeClassifier.gd` - Terrain type logic
+- `scripts/generation/RiverGenerator.gd` - Water flow simulation
+- `scripts/generation/SettlementPlacer.gd` - Town/city placement
+- `scripts/generation/WorldValidator.gd` - Playability checks
+```
+
+## 4. PERFORMANCE-FOCUSED EXPLORATION SYSTEM
+
+### Template: `exploration_visibility.jinja2`
+**Purpose**: Efficient fog of war and area discovery
+
+```markdown
+Generate a high-performance exploration system using Godot's native rendering features.
+
+VISIBILITY ARCHITECTURE:
+- Shader-based fog of war (GPU accelerated)
+- Bitfield storage for explored tiles (memory efficient)
+- Spatial partitioning for fast visibility queries
+- Event-driven updates (no per-frame polling)
+
+FOG OF WAR IMPLEMENTATION:
+- Custom shader using texture masks
+- Real-time shadow rendering for dynamic fog
+- Smooth fog transitions with vertex interpolation
+- Multiple visibility states (unexplored, explored, visible)
+
+DISCOVERY SYSTEM:
+- Signal-based architecture for discoveries
+- Spatial hashing for proximity detection
+- Configurable discovery ranges per unit type
+- Achievement integration for exploration milestones
+
+GODOT OPTIMIZATION:
+- Use ViewportTexture for fog rendering
+- RenderingServer calls for maximum performance
+- Minimal scene tree modifications
+- Resource pooling for temporary objects
+
+FILES TO GENERATE:
+- `scripts/exploration/FogOfWar.gd` - Main fog controller
+- `scripts/exploration/VisibilityManager.gd` - Exploration state
+- `scripts/exploration/DiscoverySystem.gd` - Point of interest detection
+- `shaders/FogOfWar.gdshader` - GPU fog rendering
+- `scripts/ui/ExplorationHUD.gd` - Discovery notifications
+```
+
+## 5. INTEGRATED SETTLEMENT SYSTEM
+
+### Template: `settlement_generator.jinja2`
+**Purpose**: Generate complete towns with direct model integration
+
+```markdown
+Generate a comprehensive settlement system that creates towns using AI-generated building models.
+
+BUILDING MODEL INTEGRATION:
+Generate building models on-demand using these calls:
+```
+BIOME: {Settlement Type} + BUILDING_TYPE: {house|shop|temple|etc} + INTENSITY: Rich + GODOT_OPTIMIZED: true
+```
+
+Settlement types: medieval_village, desert_trading_post, mountain_fortress, coastal_town
+
+TOWN GENERATION ALGORITHM:
+1. Analyze terrain suitability
+2. Generate road network first (determines layout)
+3. Zone areas (residential, commercial, religious, defensive)
+4. Place anchor buildings (town hall, market, temple)  
+5. Fill zones with appropriate building types
+6. Add connecting infrastructure (walls, bridges, fountains)
+
+NPC INTEGRATION:
+- Generate NPCs with models matching settlement theme
+- Create daily routines based on building functions
+- Economic simulation (supply/demand, trade routes)
+- Dynamic events and seasonal changes
+
+GODOT OPTIMIZATION:
+- Instanced scenes for repeated building types
+- Occlusion culling for indoor/outdoor transitions
+- Dynamic NPC loading/unloading
+- Efficient pathfinding with Navigation3D
+
+FILES TO GENERATE:
+- `scripts/settlements/SettlementGenerator.gd` - Town creation
+- `scripts/settlements/BuildingPlacer.gd` - Structure placement
+- `scripts/settlements/NPCPopulator.gd` - Character management
+- `scripts/settlements/EconomySimulator.gd` - Trade simulation
+- `scripts/ui/SettlementUI.gd` - Town interaction interface
+```
+
+## 6. UNIFIED RENDERING COORDINATOR
+
+### Template: `scene_coordinator.jinja2`
+**Purpose**: Orchestrates all systems efficiently
+
+```markdown
+Generate a master coordinator that manages all hex-based rendering systems for optimal performance.
+
+SYSTEM INTEGRATION:
+- Coordinates between world generator, tile renderer, and settlement system
+- Manages loading priorities and memory budgets
+- Handles level-of-detail transitions seamlessly
+- Synchronizes updates across all systems
+
+PERFORMANCE MANAGEMENT:
+- Frame-rate adaptive loading (reduce quality if FPS drops)
+- Memory pressure monitoring and cleanup
+- Background streaming of distant areas
+- Predictive loading based on player movement
+
+GODOT NATIVE INTEGRATION:
+- Uses Godot's built-in profiling systems
+- Leverages SceneTree for optimal updates
+- Resource preloading and management
+- Multi-threaded operations where safe
+
+ERROR HANDLING:
+- Graceful degradation for low-end hardware
+- Recovery from generation failures
+- Validation of all generated content
+- User-facing error messages and solutions
+
+FILES TO GENERATE:
+- `scripts/core/SceneCoordinator.gd` - Master system controller
+- `scripts/core/PerformanceManager.gd` - Frame rate/memory management
+- `scripts/core/ContentValidator.gd` - Quality assurance
+- `scripts/debug/SystemProfiler.gd` - Development tools
+```
+
+## Key Improvements Over Original Templates
+
+### 1. **Direct Model Integration**
+- No asset library dependencies
+- Models generated on-demand with exact specifications  
+- Better memory management and loading performance
+
+### 2. **Idempotent Generation**
+- Each template generates complete, self-contained functionality
+- No cross-template dependencies
+- Can regenerate individual systems without breaking others
+
+### 3. **Godot-Native Optimization**
+- Proper use of MultiMesh for performance
+- Shader-based effects instead of script-heavy solutions
+- Leverages Godot's streaming and LOD systems
+- Mobile-friendly from the start
+
+### 4. **Modular Architecture**
+- Clear separation of concerns
+- Easy to modify or replace individual components
+- Better testing and debugging
+- Supports incremental development
+
+### 5. **Performance-First Design**
+- Target frame rates and memory usage specified
+- GPU-accelerated where possible
+- Efficient algorithms and data structures
+- Scalable for both mobile and desktop
+
+## Integration Workflow
+
+1. **Generate Core Math** → `hex_math_core.jinja2`
+2. **Generate Models** → Use biome metaprompt for all needed tile/building models  
+3. **Generate Rendering** → `hex_tile_renderer.jinja2` (references generated models)
+4. **Generate World Logic** → `world_generator_core.jinja2`
+5. **Generate Exploration** → `exploration_visibility.jinja2`
+6. **Generate Settlements** → `settlement_generator.jinja2` (includes NPC models)
+7. **Generate Coordinator** → `scene_coordinator.jinja2` (orchestrates everything)
+
+This approach eliminates the asset library bottleneck while creating more maintainable, performant code that's properly optimized for Godot's architecture.

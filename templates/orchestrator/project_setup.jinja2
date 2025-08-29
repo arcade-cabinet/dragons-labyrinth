@@ -1,0 +1,133 @@
+# Dragon's Labyrinth - Godot Project Setup
+
+Create a new Godot 4 project with the following structure for a 2.5D top-down hex-based RPG.
+
+## Project Configuration
+
+```
+project.godot:
+- Rendering: Forward+ (for better 2.5D performance)
+- Default texture filter: Linear with Mipmaps
+- Window size: 1920x1080
+- Stretch mode: viewport
+- Stretch aspect: expand
+```
+
+## Core Architecture
+
+The game uses a hexagonal grid system with 2.5D graphics (3D models rendered from top-down perspective).
+
+### Directory Structure
+```
+res://
+├── scenes/
+│   ├── game/
+│   │   ├── Game.tscn          # Main game controller
+│   │   ├── HexGrid.tscn       # Hex grid system
+│   │   └── Camera2D.tscn      # Top-down camera
+│   ├── entities/
+│   │   ├── Character.tscn     # Base character scene
+│   │   ├── Player.tscn        # Player character
+│   │   └── Monster.tscn       # Base monster
+│   ├── ui/
+│   │   ├── MainMenu.tscn
+│   │   ├── HUD.tscn
+│   │   └── Inventory.tscn
+│   └── tiles/
+│       └── HexTile.tscn       # Base hex tile
+├── scripts/
+│   ├── core/
+│   │   ├── HexGrid.gd
+│   │   ├── HexCoord.gd
+│   │   └── GameState.gd
+│   ├── entities/
+│   │   ├── Character.gd
+│   │   ├── Player.gd
+│   │   └── Monster.gd
+│   └── systems/
+│       ├── CombatSystem.gd
+│       ├── InventorySystem.gd
+│       └── SkillSystem.gd
+├── assets/
+│   ├── models/           # 3D models from Blender
+│   ├── textures/
+│   └── audio/
+└── data/
+    ├── characters/      # Character definitions
+    ├── monsters/        # Monster definitions
+    └── items/          # Item definitions
+```
+
+## Core Systems
+
+### 1. Hex Grid System (HexGrid.gd)
+```gdscript
+extends Node2D
+class_name HexGrid
+
+const HEX_SIZE = 64  # Size of hex tiles
+const GRID_WIDTH = 30
+const GRID_HEIGHT = 20
+
+var tiles = {}  # Dictionary of HexCoord -> Tile
+var entities = {}  # Dictionary of HexCoord -> Entity
+
+func _ready():
+    generate_grid()
+    
+func pixel_to_hex(position: Vector2) -> HexCoord:
+    # Convert pixel coordinates to hex coordinates
+    pass
+    
+func hex_to_pixel(coord: HexCoord) -> Vector2:
+    # Convert hex coordinates to pixel position
+    pass
+```
+
+### 2. Character System
+All characters (player and enemies) inherit from a base Character class that handles:
+- Stats (Health, Mana, Strength, Defense, Speed)
+- Movement on hex grid
+- Basic animations
+- Inventory
+- Skills
+
+### 3. Asset Integration
+Discovered assets are automatically integrated:
+- Character models → Player classes
+- Monster models → Enemy types
+- Tile models → Hex tile variants
+- Item models → Collectibles/Equipment
+
+## Key Features
+
+1. **Hex-based Movement**: Characters move on hexagonal grid
+2. **Turn-based Combat**: Classic RPG combat on hex grid
+3. **Dynamic Classes**: Player classes based on discovered character assets
+4. **Procedural Dungeons**: Hex-based dungeon generation
+5. **2.5D Rendering**: 3D models viewed from fixed top-down angle
+
+## Discovered Assets Integration
+
+{% for character in discovered_characters %}
+### {{ character.name }} Class
+- Model: `res://assets/models/characters/{{ character.filename }}`
+- Base Stats: {{ character.stats }}
+- Unique Abilities: {{ character.abilities }}
+{% endfor %}
+
+{% for monster in discovered_monsters %}
+### {{ monster.name }} Enemy
+- Model: `res://assets/models/monsters/{{ monster.filename }}`
+- Difficulty: {{ monster.difficulty }}
+- Behaviors: {{ monster.behaviors }}
+{% endfor %}
+
+## Next Steps
+
+1. Create the base Godot project
+2. Implement hex grid system
+3. Create character controller for hex movement
+4. Import discovered 3D models
+5. Set up 2.5D camera system
+6. Implement turn-based combat

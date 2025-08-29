@@ -1,0 +1,203 @@
+# Generate Quest and Story System
+
+## Context
+Create an engaging quest system that drives the narrative forward while providing meaningful player choices. Quests should utilize the hex-based world and discovered assets to create varied objectives.
+
+## Quest Categories
+
+### 1. Main Story Quests
+The core narrative leading to the dragon:
+
+#### Act 1: The Awakening (Levels 1-15)
+- **The Hero's Call**: Character creation and tutorial
+- **First Steps**: Learn combat, explore starting town
+- **The Dragon's Shadow**: First evidence of dragon threat
+- **Gathering Allies**: Recruit first companion
+- **The Broken Seal**: Discover why dragon awakened
+
+#### Act 2: The Journey (Levels 15-35)
+- **Six Trials**: One major quest per biome type
+- **The Ancient Weapons**: Collect legendary dragon-slaying gear
+- **The Lost Kingdom**: Uncover civilization destroyed by dragons
+- **Alliance Building**: Unite various factions
+- **The Dragon Cult**: Infiltrate dragon worshippers
+
+#### Act 3: The Confrontation (Levels 35-50)
+- **The Final Preparations**: Craft ultimate equipment
+- **Siege of Dragon's Spire**: Assault the dragon's domain
+- **The Three Guardians**: Defeat dragon's champions
+- **Heart of the Labyrinth**: Navigate final dungeon
+- **Destiny's End**: Face the dragon
+
+### 2. Side Quest Types
+
+#### Character Quests
+Based on discovered character classes:
+{% for character in discovered_characters %}
+- **{{ character.name }}'s Legacy**:
+  - Unlock {{ character.name }} class features
+  - Personal story about {{ character.background }}
+  - Reward: Unique {{ character.name }} ability
+{% endfor %}
+
+#### Collection Quests
+- **The Herbalist's Garden**: Gather rare plants from each biome
+- **Ancient Artifacts**: Find 20 relics hidden in dungeons
+- **Monster Encyclopedia**: Scan/defeat every enemy type
+- **Hex Explorer**: Visit percentage of world hexes
+
+#### Escort Missions (Hex-Based)
+- **Safe Passage**: Guide NPC through dangerous hexes
+- **Moving Day**: Help merchant relocate (protect cargo)
+- **The Pilgrim**: Escort to sacred sites
+- **Diplomatic Mission**: Ensure ambassador reaches destination
+
+#### Puzzle Quests
+- **Hex Patterns**: Activate monuments in specific order
+- **The Wandering Stones**: Move pillars to form shapes
+- **Elemental Balance**: Place items on hexes to solve
+- **The Prophet's Path**: Follow cryptic hex directions
+
+### 3. Dynamic Quest Generation
+
+#### Procedural Quest Templates
+
+##### Investigation Quests
+- **Mystery of the Hexes**: Search area for clues in specific pattern
+- **The Missing Scholar**: Interview NPCs, follow leads
+- **Ancient Conspiracy**: Piece together lore from ruins
+- **Murder in the Village**: Use class skills to solve
+- Multiple solutions based on class abilities
+
+##### Hex Puzzle Quests
+- **Ley Line Activation**: Connect power nodes in order
+- **Elemental Balance**: Place items to stabilize magic
+- **The Wandering Stones**: Rotate hex sections to align
+- **Temporal Echoes**: Repeat patterns from past
+- Time pressure adds urgency
+
+##### Survival Challenges
+- **Last Stand**: Defend position for X turns
+- **The Gauntlet**: Navigate dangerous hex maze
+- **Arena Champion**: Defeat waves with limited resources
+- **Escort Under Fire**: Protect NPC through ambushes
+- Rewards scale with performance
+
+##### Diplomacy Missions
+- **Faction Mediator**: Balance competing interests
+- **Trade Negotiations**: Secure best deal for town
+- **War and Peace**: Choose sides or broker truce
+- **Cultural Exchange**: Learn customs, avoid offense
+- Choices have lasting consequences
+
+##### Class-Specific Variants
+Transform base quests by class:
+```
+Base Quest: "Deal with bandit camp"
+
+Fighter: "Challenge leader to single combat"
+Archer: "Eliminate sentries without alarm"
+Mage: "Dispel their magical defenses"
+Rogue: "Steal plans without violence"
+Paladin: "Convert them to lawful path"
+```
+
+#### Time-Limited Events
+- **The Wandering Merchant**: Appears for 3 days only
+- **Meteor Shower**: Collect space rocks before they vanish
+- **Festival Preparations**: Gather items before celebration
+- **The Hunt**: Track legendary beast before it moves
+- **Seasonal Events**: Special quests for holidays/seasons
+
+### 4. Quest Mechanics
+
+#### Objective Types
+- **Kill**: Defeat specific enemies or bosses
+- **Collect**: Gather items from environment/enemies
+- **Explore**: Reach specific hexes or discover areas
+- **Interact**: Talk to NPCs, activate objects
+- **Survive**: Last X turns or reach extraction
+- **Puzzle**: Solve environmental challenges
+- **Choice**: Make decisions affecting outcomes
+
+#### Quest Tracking
+- Active quest marker on hex map
+- Objective compass on UI
+- Progress bars for collection quests
+- Journal with detailed descriptions
+- Hint system for stuck players
+
+### 5. Branching Narratives
+
+#### Choice Consequences
+- **Faction Allegiance**: Side with knights or rogues
+- **Moral Dilemmas**: Save village or chase villain
+- **Resource Allocation**: Which town gets supplies
+- **Combat vs Diplomacy**: Fight or negotiate
+
+#### Multiple Endings
+Based on quest choices:
+1. **Hero's Victory**: Traditional good ending
+2. **Pyrrhic Victory**: Win but at great cost
+3. **The New Order**: Become dragon's successor
+4. **True Peace**: Diplomatic resolution
+5. **Secret Ending**: Complete all optional content
+
+### 6. Quest Rewards
+
+#### Standard Rewards
+- Experience points (level-scaled)
+- Gold/currency
+- Equipment (quality based on difficulty)
+- Crafting materials
+- Skill points
+- Reputation with factions
+
+#### Unique Rewards
+- **Class Unlocks**: New playable classes
+- **Map Reveals**: Hidden area locations
+- **Lore Books**: Backstory and world building
+- **Cosmetics**: Armor skins, weapon effects
+- **Abilities**: Quest-exclusive skills
+- **Companions**: Recruit special NPCs
+
+### 7. Quest Design Patterns
+
+#### The Three-Part Quest
+1. **Discovery**: Find the problem/opportunity
+2. **Investigation**: Gather information/resources
+3. **Resolution**: Solve through combat/puzzle/choice
+
+#### Hub Quests
+- Central location with multiple objectives
+- Player chooses order of completion
+- Each completed part affects others
+- Final challenge unlocked after all parts
+
+#### Chain Quests
+- Quest A leads to Quest B naturally
+- Each reveals more of the story
+- Can branch based on choices
+- Ultimate reward at chain's end
+
+### 8. Quest Difficulty Scaling
+
+#### Adaptive Challenges
+- Enemy levels scale to player (within limits)
+- Puzzle complexity based on player performance
+- Optional hard modes for better rewards
+- Failure doesn't block progress, reduces rewards
+
+#### Accessibility Options
+- Quest markers can be toggled
+- Objective hints available
+- Skip combat options for story mode
+- Auto-solve puzzles after X attempts
+
+Generate complete quest system with:
+- Quest data structures
+- Dialogue system integration
+- Save state for all quest progress
+- Dynamic objective generation
+- Branching dialogue trees
+- Reward distribution algorithms

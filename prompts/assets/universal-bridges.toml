@@ -1,0 +1,145 @@
+# Dragon's Labyrinth - Universal Bridge Assets (All Levels)
+# Following consistency-locked prompt patterns from ChatGPT refinement work
+
+[batch]
+name = "bridges_universal"
+description = "Bridge overlays for crossing water, chasms, and obstacles (transparent overlays)"
+level_range = "1-180"
+category = "bridge"
+
+[style_constraints]
+camera_angle = "flat aerial top-down view"
+resolution = "1024x1024"
+background_type = "transparent PNG overlay"
+tiling = "seamless edge-to-edge overlay"
+framing = "no borders, no frames, no circular crops"
+perspective = "no perspective tilt, no horizon"
+art_style = "medieval dark fantasy"
+width = "~25% of canvas width, constant across all bridges"
+edges = "soft feathered edges that fade to transparency"
+
+[consistency_rules]
+rules = [
+    "Flat aerial top-down view, no perspective, no tilt, no horizon",
+    "1024×1024 transparent PNG, seamless edge-to-edge overlay",
+    "Width ~25% of canvas, consistent across all bridges",
+    "Soft feathered edges that fade to transparency (blend with biome tiles)",
+    "No side walls, no shadows, no rails, no hardware",
+    "Medieval fantasy / dark fantasy as dread increases"
+]
+
+# Stone Bridges
+[assets.stone_bridge]
+type = "bridge_overlay"
+prompt = "Stone arch bridge top-down overlay: flat cobblestone strip, ~25% canvas width, seamless edge-to-edge, soft transparency blend, medieval fantasy, transparent background, no shadows, no side walls"
+layer_type = "overlay"
+tileable = true
+dread_level = 0
+priority = 9
+
+[assets.stone_bridge_degraded]
+type = "bridge_overlay"
+prompt = "Stone arch bridge top-down overlay: flat cobblestone strip, weathered and cracked stones, missing pieces, ~25% canvas width, seamless edge-to-edge, soft transparency blend, medieval fantasy, transparent background, no shadows, no side walls"
+layer_type = "overlay"
+tileable = true
+dread_level = 1
+priority = 9
+
+[assets.stone_bridge_cursed]
+type = "bridge_overlay"
+prompt = "Stone arch bridge top-down overlay: flat cobblestone strip, blackened corrupted stones, unnatural dark glow, ~25% canvas width, seamless edge-to-edge, soft transparency blend, corrupted medieval dark fantasy, transparent background, no shadows, no side walls"
+layer_type = "overlay"
+tileable = true
+dread_level = 2
+priority = 9
+
+# Wooden Bridges
+[assets.wooden_bridge]
+type = "bridge_overlay"
+prompt = "Wooden plank bridge top-down overlay: straight planks with rope lash hints, ~25% width, seamless edge-to-edge, soft transparency blend, medieval fantasy, transparent background, no shadows, no perspective"
+layer_type = "overlay"
+tileable = true
+dread_level = 0
+priority = 8
+
+[assets.wooden_bridge_degraded]
+type = "bridge_overlay"
+prompt = "Wooden plank bridge top-down overlay: weathered planks with loose boards, frayed ropes, gaps and rot damage, ~25% width, seamless edge-to-edge, soft transparency blend, medieval fantasy, transparent background, no shadows, no perspective"
+layer_type = "overlay"
+tileable = true
+dread_level = 1
+priority = 8
+
+[assets.wooden_bridge_nightmare]
+type = "bridge_overlay"
+prompt = "Wooden plank bridge top-down overlay: rotting skeletal planks with bone fragments, twisted horror construction, ~25% width, seamless edge-to-edge, soft transparency blend, horror fantasy, transparent background, no shadows, no perspective"
+layer_type = "overlay"
+tileable = true
+dread_level = 4
+priority = 8
+
+# Natural Bridges
+[assets.coral_bridge]
+type = "bridge_overlay"
+prompt = "Coral-encrusted natural bridge strip, pale reef textures with sand and shell flecks, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, medieval fantasy, transparent background, no shadows"
+layer_type = "overlay"
+tileable = true
+dread_level = 0
+priority = 6
+
+[assets.ice_bridge]
+type = "bridge_overlay"
+prompt = "Frozen ice bridge strip, frosted blue-white cracked ice, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, medieval fantasy, transparent background"
+layer_type = "overlay"
+tileable = true
+dread_level = 0
+priority = 6
+
+[assets.ice_bridge_cursed]
+type = "bridge_overlay"
+prompt = "Frozen ice bridge strip, dark corrupted ice with unnatural purple veins, nightmare frost patterns, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, corrupted medieval dark fantasy, transparent background"
+layer_type = "overlay"
+tileable = true
+dread_level = 3
+priority = 6
+
+[assets.rock_bridge]
+type = "bridge_overlay"
+prompt = "Rugged natural rock bridge strip, uneven stone slabs and lichen patches, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, medieval fantasy, transparent background"
+layer_type = "overlay"
+tileable = true
+dread_level = 0
+priority = 7
+
+[assets.rock_bridge_cursed]
+type = "bridge_overlay"
+prompt = "Rugged natural rock bridge strip, blackened stone slabs with corrupted veins, twisted unnatural formations, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, corrupted medieval dark fantasy, transparent background"
+layer_type = "overlay"
+tileable = true
+dread_level = 2
+priority = 7
+
+# Horror Bridges (Act 3)
+[assets.bone_bridge]
+type = "bridge_overlay"
+prompt = "Nightmare bone bridge strip made of fused skeletal remains, ribcages and femurs forming walkway, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, horror fantasy, transparent background, no shadows"
+layer_type = "overlay"
+tileable = true
+dread_level = 4
+priority = 5
+
+[assets.void_bridge]
+type = "bridge_overlay"
+prompt = "Impossible void bridge strip, reality-warping crystalline structure, eldritch geometry that shouldn't exist, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, cosmic horror fantasy, transparent background, no shadows"
+layer_type = "overlay"
+tileable = true
+dread_level = 4
+priority = 4
+
+[assets.lava_bridge]
+type = "bridge_overlay"
+prompt = "Molten lava bridge strip, obsidian and basalt formation over magma, glowing cracks with ember effects, ~25% width, seamless edge-to-edge, soft transparency blend, flat aerial top-down, hellscape fantasy, transparent background, no shadows"
+layer_type = "overlay"
+tileable = true
+dread_level = 3
+priority = 6

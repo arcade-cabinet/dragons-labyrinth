@@ -1,0 +1,788 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the emergent traits system for Dragon's Labyrinth at the {{ emotional_stage }} stage.
+
+NARRATIVE CONTEXT:
+- Previous state: {{ previous_state | default('none') }}
+- Current state: {{ current_state | default('peace') }}
+- Next state: {{ next_state | default('unease') }}
+- Dread level: {{ dread_level | default(0) }}
+
+CRITICAL PHILOSOPHY:
+1. **You Are What You Do** - Traits emerge from actions, not character creation
+2. **The World Names You** - Others decide what to call you based on your deeds
+3. **Morality + Practice = Identity** - Your ethics combined with skills define you
+4. **Tropes Guide Generation** - Use familiar archetypes as AI anchor points
+5. **Everything Connects Here** - Traits influence all other systems
+
+TRAIT CATEGORIES:
+
+1. **PRACTICED TRAITS** (What you've done repeatedly):
+   - Weapon Preferences: "Favors Axes", "Dual Wielder", "Unarmed Fighter"
+   - Combat Styles: "Defensive Fighter", "Berserker", "Precise Striker"
+   - Survival Skills: "Tracker", "Forager", "Fire Keeper"
+   - Social Actions: "Negotiator", "Intimidator", "Comforter"
+   - Magical Practices: "Hedge Magic User", "Ritual Performer", "Potion Brewer"
+
+2. **MORAL TRAITS** (How you've chosen):
+   - Compassion Spectrum: "Merciful" ← → "Ruthless"
+   - Honor Spectrum: "Oath Keeper" ← → "Oath Breaker"
+   - Altruism Spectrum: "Selfless" ← → "Self-Serving"
+   - Violence Spectrum: "Pacifist" ← → "Bloodthirsty"
+   - Truth Spectrum: "Honest" ← → "Deceptive"
+
+3. **REPUTATION TRAITS** (What others call you):
+   - Local Names: "Village Protector", "Child Savior", "Monster"
+   - Faction Titles: "Friend of Merchants", "Enemy of Nobles", "Neutral Wanderer"
+   - Deed-Based: "Dragon Toucher", "Mercy Killer", "Last Hope"
+   - Fear-Based: "The Mad One", "Death Walker", "Cursed"
+
+4. **PERCEPTION TRAITS** (How you see the world):
+   - Awareness: "Notices Patterns", "Sees Omens", "Detail Oriented"
+   - Understanding: "Questions Everything", "Accepts Fate", "Seeks Truth"
+   - Madness: "Hears Whispers", "Sees Through Veils", "Knows Too Much"
+
+EMERGENCE MECHANICS:
+
+1. **Trait Development**:
+   ```
+   Action → Repetition → Recognition → Identity
+   
+   Example Flow:
+   - Pick up sword once: No trait
+   - Use sword 10 times: "Has Used Swords" (hidden)
+   - Win 5 sword fights: "Sword Fighter" (emerging)
+   - Become known for swordplay: "The Swordsman" (recognized)
+   - Master unique style: "Whirlwind Blade" (legendary)
+   ```
+
+2. **Trait Combinations Create Archetypes**:
+   - "Unarmed Fighter" + "Ruthless" + "Arena Champion" = What others call a "Gladiator"
+   - "Bow User" + "Merciful" + "Forest Walker" = What others call a "Ranger"
+   - "Staff Wielder" + "Knowledge Seeker" + "Mad Prophet" = What others call a "Wizard"
+   
+   But these are DESCRIPTIONS, not classes. A "wizard" who picks up an axe and starts chopping becomes something else.
+
+3. **Trait Conflicts**:
+   - Some traits oppose each other: Can't be both "Merciful" and "Ruthless"
+   - Conflicting actions create internal struggle
+   - NPCs comment on contradictions
+   - May lead to "Unpredictable" or "Torn" traits
+
+4. **Trait Evolution by Stage**:
+   {% if emotional_stage == "peace" %}
+   - Traits emerge slowly from repeated actions
+   - Mostly positive or neutral recognitions
+   - "Helpful Stranger", "Strong Worker", "Quick Learner"
+   {% elif emotional_stage == "unease" %}
+   - Traits reflect growing tensions
+   - "Questioner", "Prepared One", "Still Hopeful"
+   - Some see you as "Troublemaker" for noticing problems
+   {% elif emotional_stage == "dread" %}
+   - Dark traits emerge from dark choices
+   - "Mercy Killer", "Abandoner", "Survivor"
+   - Reputation splits: hero to some, monster to others
+   {% elif emotional_stage == "terror" %}
+   - Extreme traits from extreme actions
+   - "Death Seeker", "Mad Prophet", "Last Standing"
+   - Few remain to name you anything
+   {% elif emotional_stage == "horror" %}
+   - Traits transcend normal understanding
+   - "The One Who Walked Back", "Dragon Touched", "Still Human"
+   - The labyrinth knows all your traits
+   {% endif %}
+
+SYSTEM INTEGRATION:
+
+1. **Companion Reactions**:
+   - Companions attracted to certain trait combinations
+   - Some traits repel certain companions
+   - Shared traits create stronger bonds
+   - Opposing traits create conflict
+
+2. **Quest Availability**:
+   - Some quests only appear for certain traits
+   - "Merciful" opens different quests than "Ruthless"
+   - Reputation traits affect who trusts you
+   - Skill traits determine what help you can offer
+
+3. **Equipment Generation**:
+   - AI uses trait combinations to generate appropriate gear
+   - "Berserker" + "Dual Wielder" = Generate paired brutal axes
+   - "Defensive" + "Shield User" = Generate reinforced tower shield
+   - "Hedge Mage" + "Potion Brewer" = Generate alchemical staff
+
+4. **NPC Interactions**:
+   - NPCs address you by your strongest reputation trait
+   - Dialogue changes based on visible traits
+   - Some NPCs fear certain trait combinations
+   - Others seek out specific traits
+
+5. **Combat Behavior**:
+   - Traits influence available combat options
+   - "Precise Striker" enables targeted attacks
+   - "Berserker" enables rage but reduces defense
+   - "Pacifist" provides defensive bonuses but attack penalties
+
+TRAIT VISIBILITY:
+
+1. **Hidden Traits**: Early development, only you know
+2. **Emerging Traits**: Close observers notice
+3. **Known Traits**: Reputation spreads locally
+4. **Famous/Infamous Traits**: Everyone knows
+
+TECHNICAL REQUIREMENTS:
+- Dynamic trait calculation from action history
+- Reputation system tracking per-NPC and per-faction
+- Trait combination analyzer for archetype emergence
+- AI hooks for equipment/ability generation
+- Dialogue system integration for trait-based responses
+
+Generate a trait system where identity emerges from action, reputation comes from deeds, and what you become is shaped by what you do - not what you choose at character creation.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: trait.gd -->
+extends Resource
+class_name Trait
+
+# An aspect of identity earned through action
+
+signal level_changed(new_level: int)
+signal visibility_changed(new_visibility: String)
+signal combined_with(other_trait: Trait, result: String)
+
+@export var trait_id: String = ""
+@export var display_name: String = ""
+@export var category: String = ""  # practiced, moral, reputation, perception
+@export var description: String = ""
+
+# Development tracking
+var actions_taken: int = 0
+var level: int = 0  # 0-5, where 5 is legendary
+var visibility: String = "hidden"  # hidden, emerging, known, famous
+var discovered_by: Array[String] = []  # Who has noticed this trait
+
+# Trait relationships
+var strengthens: Array[String] = []  # Trait IDs this enhances
+var weakens: Array[String] = []  # Trait IDs this opposes
+var combines_with: Dictionary = {}  # trait_id: resulting_archetype
+
+# Mechanical effects
+var modifiers: Dictionary = {}  # stat_name: modifier_value
+var enables_actions: Array[String] = []  # Action IDs unlocked
+var restricts_actions: Array[String] = []  # Actions blocked
+
+# Reputation impact
+var faction_opinions: Dictionary = {}  # faction_id: opinion_modifier
+var npc_reactions: Dictionary = {}  # reaction_type: probability
+
+func add_action(action_type: String, context: Dictionary = {}) -> void:
+    # Every relevant action develops the trait
+    actions_taken += 1
+    
+    # Check for level up
+    var old_level = level
+    level = _calculate_level()
+    
+    if level > old_level:
+        level_changed.emit(level)
+        _update_visibility()
+        _unlock_new_abilities()
+
+func _calculate_level() -> int:
+    # Logarithmic growth - easy to start, hard to master
+    if actions_taken < 5:
+        return 0  # Still learning
+    elif actions_taken < 20:
+        return 1  # Novice
+    elif actions_taken < 50:
+        return 2  # Practiced
+    elif actions_taken < 100:
+        return 3  # Skilled
+    elif actions_taken < 200:
+        return 4  # Master
+    else:
+        return 5  # Legendary
+
+func _update_visibility() -> void:
+    var old_visibility = visibility
+    
+    # Visibility based on level and category
+    match category:
+        "practiced":
+            # Skills become visible through use
+            if level >= 2:
+                visibility = "emerging"
+            if level >= 3:
+                visibility = "known"
+            if level >= 5:
+                visibility = "famous"
+        
+        "moral":
+            # Moral traits known through choices
+            if actions_taken >= 3:
+                visibility = "emerging"
+            if actions_taken >= 10:
+                visibility = "known"
+        
+        "reputation":
+            # Reputation spreads quickly
+            visibility = "known"  # Always visible once earned
+        
+        "perception":
+            # Internal traits stay hidden longer
+            if level >= 3:
+                visibility = "emerging"
+            if level >= 4:
+                visibility = "known"
+    
+    if visibility != old_visibility:
+        visibility_changed.emit(visibility)
+
+func combine_with_trait(other: Trait) -> String:
+    # Check if these traits form an archetype
+    if combines_with.has(other.trait_id):
+        return combines_with[other.trait_id]
+    elif other.combines_with.has(trait_id):
+        return other.combines_with[trait_id]
+    
+    # Generate dynamic combination
+    return _generate_combination(other)
+
+func _generate_combination(other: Trait) -> String:
+    # Dynamic archetype generation
+    var archetypes = {
+        ["weapon_sword", "defensive", "protector"]: "Guardian",
+        ["weapon_bow", "precise", "hunter"]: "Ranger",
+        ["unarmed", "aggressive", "arena"]: "Gladiator",
+        ["magic_hedge", "helpful", "healer"]: "Village Healer",
+        ["weapon_axe", "ruthless", "feared"]: "Executioner",
+        ["nimble", "deceptive", "thief"]: "Rogue"
+    }
+    
+    # Check trait combination patterns
+    for pattern in archetypes:
+        var matches = 0
+        for required_trait in pattern:
+            if trait_id.contains(required_trait) or other.trait_id.contains(required_trait):
+                matches += 1
+        
+        if matches >= 2:
+            combined_with.emit(other, archetypes[pattern])
+            return archetypes[pattern]
+    
+    return ""
+
+func get_dialogue_modifier() -> String:
+    # How this trait affects speech
+    match trait_id:
+        "merciful":
+            return "speaks gently"
+        "ruthless":
+            return "speaks harshly"
+        "mad_prophet":
+            return "speaks in riddles"
+        "berserker":
+            return "speaks simply"
+        _:
+            return ""
+
+func influences_action(action: String) -> Dictionary:
+    # How this trait affects actions
+    var influence = {
+        "allowed": true,
+        "modified": false,
+        "bonus": 0.0,
+        "special_option": ""
+    }
+    
+    # Check restrictions
+    if action in restricts_actions:
+        influence.allowed = false
+        return influence
+    
+    # Check enhancements
+    if action in enables_actions:
+        influence.modified = true
+        influence.bonus = 0.2 * level
+    
+    # Special options for high-level traits
+    if level >= 4:
+        match trait_id:
+            "weapon_master_sword":
+                if action == "attack":
+                    influence.special_option = "whirlwind_strike"
+            "pacifist_master":
+                if action == "defend":
+                    influence.special_option = "perfect_guard"
+    
+    return influence
+<!-- /FILE -->
+
+<!-- FILE: trait_manager.gd -->
+extends Node
+class_name TraitManager
+
+# The forge of identity through action
+
+signal trait_emerged(trait: Trait)
+signal trait_evolved(trait: Trait, new_level: int)
+signal archetype_recognized(archetype: String, traits: Array)
+signal reputation_changed(faction: String, change: float)
+
+@export var emotional_stage: String = "peace"
+
+# Active identity
+var active_traits: Dictionary = {}  # trait_id: Trait
+var emerging_traits: Dictionary = {}  # trait_id: development_progress
+var available_archetypes: Array[String] = []
+var reputation_names: Dictionary = {}  # source: given_name
+
+# Action tracking
+var action_history: Array[Dictionary] = []
+var choice_history: Array[Dictionary] = []
+var combat_history: Dictionary = {}
+var social_history: Dictionary = {}
+
+# Thresholds
+const ACTIONS_TO_EMERGE = 5
+const ACTIONS_TO_ESTABLISH = 20
+const CONTRADICTORY_THRESHOLD = 10
+
+func _ready() -> void:
+    # Track everything that shapes identity
+    Events.action_performed.connect(_on_action_performed)
+    Events.choice_made.connect(_on_choice_made)
+    Events.combat_ended.connect(_on_combat_result)
+    Events.dialogue_completed.connect(_on_social_interaction)
+    Events.quest_completed.connect(_on_quest_completed)
+
+func _on_action_performed(action: String, context: Dictionary) -> void:
+    # Every action shapes you
+    action_history.append({
+        "action": action,
+        "context": context,
+        "timestamp": Time.get_ticks_msec(),
+        "emotional_stage": emotional_stage
+    })
+    
+    # Check what traits this develops
+    _develop_traits_from_action(action, context)
+    
+    # NPCs might notice
+    if context.has("witnessed_by"):
+        _update_reputation(action, context.witnessed_by)
+
+func _develop_traits_from_action(action: String, context: Dictionary) -> void:
+    # Map actions to trait development
+    match action:
+        "attack_with_sword":
+            _develop_trait("weapon_sword", "practiced")
+            if context.get("style") == "aggressive":
+                _develop_trait("aggressive_fighter", "practiced")
+        
+        "cast_spell":
+            _develop_trait("magic_user", "practiced")
+            var spell_type = context.get("spell_type", "")
+            if spell_type == "healing":
+                _develop_trait("healer", "practiced")
+                _develop_trait("compassionate", "moral")
+        
+        "flee_combat":
+            _develop_trait("survivor", "practiced")
+            if context.get("abandoned_allies", false):
+                _develop_trait("coward", "reputation")
+        
+        "share_resources":
+            _develop_trait("generous", "moral")
+            _develop_trait("trustworthy", "reputation")
+        
+        "steal":
+            _develop_trait("thief", "practiced")
+            _develop_trait("deceptive", "moral")
+
+func _develop_trait(trait_id: String, category: String) -> void:
+    # Check if trait already active
+    if active_traits.has(trait_id):
+        active_traits[trait_id].add_action(trait_id)
+        return
+    
+    # Track emerging trait
+    if not emerging_traits.has(trait_id):
+        emerging_traits[trait_id] = {
+            "progress": 0,
+            "category": category,
+            "first_action": Time.get_ticks_msec()
+        }
+    
+    emerging_traits[trait_id].progress += 1
+    
+    # Check if trait should emerge
+    if emerging_traits[trait_id].progress >= ACTIONS_TO_EMERGE:
+        _emerge_trait(trait_id, category)
+
+func _emerge_trait(trait_id: String, category: String) -> void:
+    # Create the new trait
+    var trait = _create_trait(trait_id, category)
+    
+    # Add to active traits
+    active_traits[trait_id] = trait
+    emerging_traits.erase(trait_id)
+    
+    # Notify systems
+    trait_emerged.emit(trait)
+    
+    # Check for contradictions
+    _check_trait_conflicts(trait)
+    
+    # Check for archetypes
+    _check_archetype_formation()
+
+func _create_trait(trait_id: String, category: String) -> Trait:
+    # Generate trait from ID and category
+    var trait = Trait.new()
+    trait.trait_id = trait_id
+    trait.category = category
+    
+    # Set trait properties based on ID
+    match trait_id:
+        "weapon_sword":
+            trait.display_name = "Sword User"
+            trait.description = "Favors blade combat"
+            trait.enables_actions = ["precise_strike", "parry"]
+            
+        "aggressive_fighter":
+            trait.display_name = "Aggressive"
+            trait.description = "Fights with fury"
+            trait.modifiers = {"attack": 1.2, "defense": 0.8}
+            
+        "compassionate":
+            trait.display_name = "Compassionate"
+            trait.description = "Shows mercy to others"
+            trait.strengthens = ["healer", "protector"]
+            trait.weakens = ["ruthless", "cold"]
+            
+        "mad_prophet":
+            trait.display_name = "Mad Prophet"
+            trait.description = "Sees what others cannot"
+            trait.modifiers = {"perception": 2.0, "sanity": -0.5}
+    
+    return trait
+
+func _check_trait_conflicts(new_trait: Trait) -> void:
+    # Some traits oppose each other
+    for trait_id in active_traits:
+        var existing = active_traits[trait_id]
+        
+        if new_trait.trait_id in existing.weakens:
+            # Conflicting traits create tension
+            _create_internal_conflict(existing, new_trait)
+
+func _create_internal_conflict(trait1: Trait, trait2: Trait) -> void:
+    # Track contradictory behavior
+    var conflict_id = "torn_between_%s_and_%s" % [trait1.trait_id, trait2.trait_id]
+    
+    # This might create a new trait
+    if action_history.size() > CONTRADICTORY_THRESHOLD:
+        _develop_trait("unpredictable", "reputation")
+        _develop_trait("conflicted", "perception")
+
+func _check_archetype_formation() -> void:
+    # See if current traits form recognized patterns
+    var trait_combinations = []
+    
+    # Check practiced + moral combinations
+    for practiced_id in active_traits:
+        if active_traits[practiced_id].category != "practiced":
+            continue
+            
+        for moral_id in active_traits:
+            if active_traits[moral_id].category != "moral":
+                continue
+            
+            var archetype = active_traits[practiced_id].combine_with_trait(active_traits[moral_id])
+            if archetype != "":
+                _recognize_archetype(archetype, [practiced_id, moral_id])
+
+func _recognize_archetype(archetype: String, trait_ids: Array) -> void:
+    if archetype in available_archetypes:
+        return
+    
+    available_archetypes.append(archetype)
+    archetype_recognized.emit(archetype, trait_ids)
+    
+    # This affects how others see you
+    reputation_names["archetype"] = archetype
+    
+    # Generate specialized equipment for this archetype
+    Events.emit_signal("generate_archetype_equipment", archetype, emotional_stage)
+
+func _on_choice_made(choice_type: String, context: Dictionary) -> void:
+    # Moral choices heavily influence traits
+    choice_history.append({
+        "choice": choice_type,
+        "context": context,
+        "stage": emotional_stage
+    })
+    
+    match choice_type:
+        "save_infected_child":
+            _develop_trait("compassionate", "moral")
+            _develop_trait("hopeful", "perception")
+            _develop_trait("fool", "reputation")  # Some think this
+            
+        "mercy_kill":
+            _develop_trait("pragmatic", "moral")
+            _develop_trait("mercy_giver", "reputation")
+            _develop_trait("haunted", "perception")
+            
+        "abandon_to_die":
+            _develop_trait("survivor", "moral")
+            _develop_trait("cold", "moral")
+            _develop_trait("monster", "reputation")  # To some
+
+func get_primary_archetype() -> String:
+    # What the world calls you
+    if reputation_names.has("archetype"):
+        return reputation_names.archetype
+    
+    # Or your most visible trait
+    var most_visible = ""
+    var highest_level = 0
+    
+    for trait_id in active_traits:
+        var trait = active_traits[trait_id]
+        if trait.visibility == "famous" and trait.level > highest_level:
+            most_visible = trait.display_name
+            highest_level = trait.level
+    
+    return most_visible if most_visible != "" else "Wanderer"
+
+func get_trait_influence_on_action(action: String) -> Dictionary:
+    # How all traits affect an action
+    var total_influence = {
+        "allowed": true,
+        "total_bonus": 1.0,
+        "special_options": [],
+        "restrictions": []
+    }
+    
+    for trait_id in active_traits:
+        var trait = active_traits[trait_id]
+        var influence = trait.influences_action(action)
+        
+        if not influence.allowed:
+            total_influence.allowed = false
+            total_influence.restrictions.append(trait.display_name)
+        
+        total_influence.total_bonus *= (1.0 + influence.bonus)
+        
+        if influence.special_option != "":
+            total_influence.special_options.append(influence.special_option)
+    
+    return total_influence
+
+# You are not born a hero or villain
+# You become what your actions make you
+# And the world decides what to call it
+<!-- /FILE -->
+
+<!-- FILE: archetype_generator.gd -->
+extends Node
+class_name ArchetypeGenerator
+
+# Turning emergent behaviors into recognized patterns
+
+signal equipment_generated(archetype: String, items: Array)
+signal abilities_unlocked(archetype: String, abilities: Array)
+signal title_granted(archetype: String, title: String)
+
+# Archetype definitions emerge from trait combinations
+var archetype_patterns = {
+    # Practice + Morality + Reputation = Archetype
+    "Guardian": {
+        "required_traits": ["weapon_sword", "defensive", "protector"],
+        "equipment_theme": "blessed_defensive",
+        "ability_theme": "protection",
+        "titles": ["Village Guardian", "Shield Bearer", "Defender of the Weak"]
+    },
+    
+    "Berserker": {
+        "required_traits": ["aggressive_fighter", "bloodthirsty", "feared"],
+        "equipment_theme": "brutal_offensive", 
+        "ability_theme": "rage",
+        "titles": ["The Red Handed", "Fury Incarnate", "Blood Dancer"]
+    },
+    
+    "Ranger": {
+        "required_traits": ["weapon_bow", "tracker", "lone_wolf"],
+        "equipment_theme": "wilderness_survival",
+        "ability_theme": "hunting",
+        "titles": ["Forest Walker", "Beast Tracker", "The Silent Arrow"]
+    },
+    
+    "Hedge Wizard": {
+        "required_traits": ["magic_user", "self_taught", "careful"],
+        "equipment_theme": "makeshift_magical",
+        "ability_theme": "practical_magic",
+        "titles": ["Cantrip Keeper", "Village Mage", "The Careful Caster"]
+    },
+    
+    "Warlock": {
+        "required_traits": ["magic_user", "power_hungry", "feared"],
+        "equipment_theme": "corrupted_magical",
+        "ability_theme": "dark_magic",
+        "titles": ["Shadow Binder", "The Accursed", "Power's Thrall"]
+    },
+    
+    "Monk": {
+        "required_traits": ["unarmed", "disciplined", "spiritual"],
+        "equipment_theme": "simple_focused",
+        "ability_theme": "inner_strength",
+        "titles": ["Empty Hand", "The Centered", "Peace Walker"]
+    },
+    
+    "Dread Knight": {
+        "required_traits": ["weapon_sword", "ruthless", "death_touched"],
+        "equipment_theme": "cursed_knightly",
+        "ability_theme": "fear",
+        "titles": ["Death's Herald", "The Merciless", "Sorrow Bringer"]
+    }
+}
+
+func generate_for_archetype(archetype: String, emotional_stage: String) -> void:
+    if not archetype_patterns.has(archetype):
+        _generate_unique_archetype(archetype, emotional_stage)
+        return
+    
+    var pattern = archetype_patterns[archetype]
+    
+    # Generate equipment based on theme and stage
+    var equipment = _generate_themed_equipment(pattern.equipment_theme, emotional_stage)
+    equipment_generated.emit(archetype, equipment)
+    
+    # Unlock abilities
+    var abilities = _generate_themed_abilities(pattern.ability_theme, emotional_stage)
+    abilities_unlocked.emit(archetype, abilities)
+    
+    # Grant appropriate title
+    var title = _select_title(pattern.titles, emotional_stage)
+    title_granted.emit(archetype, title)
+
+func _generate_themed_equipment(theme: String, stage: String) -> Array:
+    var equipment = []
+    
+    # Base equipment for theme
+    match theme:
+        "blessed_defensive":
+            equipment.append(_create_item("Warden's Blade", "sword", ["defensive", "holy"]))
+            equipment.append(_create_item("Sanctuary Shield", "shield", ["protective", "blessed"]))
+            
+        "brutal_offensive":
+            equipment.append(_create_item("Flesh Render", "greataxe", ["vicious", "bloodthirsty"]))
+            equipment.append(_create_item("Berserker's Chains", "armor", ["light", "rage_inducing"]))
+            
+        "wilderness_survival":
+            equipment.append(_create_item("Hunter's Longbow", "bow", ["accurate", "silent"]))
+            equipment.append(_create_item("Tracker's Cloak", "cloak", ["camouflage", "weather_resistant"]))
+            
+        "makeshift_magical":
+            equipment.append(_create_item("Carved Branch Staff", "staff", ["channeling", "unstable"]))
+            equipment.append(_create_item("Herb Pouch", "accessory", ["component_storage", "aromatic"]))
+    
+    # Modify based on emotional stage
+    _apply_stage_modifications(equipment, stage)
+    
+    return equipment
+
+func _create_item(name: String, type: String, properties: Array) -> Dictionary:
+    return {
+        "name": name,
+        "type": type,
+        "properties": properties,
+        "model_hints": _generate_model_hints(type, properties),
+        "description": _generate_item_description(name, properties)
+    }
+
+func _generate_model_hints(type: String, properties: Array) -> Dictionary:
+    # Give AI clear visual direction
+    var hints = {
+        "base_form": type,
+        "material_suggestions": [],
+        "detail_elements": [],
+        "wear_patterns": []
+    }
+    
+    # Build from properties
+    for prop in properties:
+        match prop:
+            "defensive":
+                hints.material_suggestions.append("reinforced metal")
+                hints.detail_elements.append("protective runes")
+            "holy":
+                hints.material_suggestions.append("blessed silver")
+                hints.detail_elements.append("religious symbols")
+            "vicious":
+                hints.detail_elements.append("serrated edges")
+                hints.detail_elements.append("blood grooves")
+            "bloodthirsty":
+                hints.wear_patterns.append("blood stains")
+                hints.detail_elements.append("skull motifs")
+    
+    return hints
+
+func _apply_stage_modifications(equipment: Array, stage: String) -> void:
+    # Equipment reflects the world's state
+    for item in equipment:
+        match stage:
+            "peace":
+                item.properties.append("well_maintained")
+                item.name = "New " + item.name
+            "unease":
+                item.properties.append("showing_wear")
+                item.description += " Shows signs of recent use."
+            "dread":
+                item.properties.append("battle_scarred")
+                item.name = "Worn " + item.name
+                item.description += " Bears the marks of desperate battles."
+            "terror":
+                item.properties.append("corrupted")
+                item.name = "Twisted " + item.name
+                item.description += " Something is wrong with this."
+            "horror":
+                item.properties.append("nightmare_touched")
+                item.name = "??? " + item.name
+                item.description = "You're not sure this exists."
+
+func _generate_themed_abilities(theme: String, stage: String) -> Array:
+    var abilities = []
+    
+    match theme:
+        "protection":
+            abilities = [
+                _create_ability("Stand Ground", "Become immovable for allies"),
+                _create_ability("Guardian's Vigor", "Share your health with companions"),
+                _create_ability("Sanctuary", "Create a safe zone")
+            ]
+        
+        "rage":
+            abilities = [
+                _create_ability("Blood Fury", "Damage increases with wounds"),
+                _create_ability("Terrifying Charge", "Scatter enemies with fear"),
+                _create_ability("Rage Beyond Death", "Keep fighting when you shouldn't")
+            ]
+        
+        "practical_magic":
+            abilities = [
+                _create_ability("Mend", "Fix broken things, sometimes people"),
+                _create_ability("Illuminate Truth", "Reveal hidden things"),
+                _create_ability("Hedge Ward", "Simple but effective protection")
+            ]
+    
+    # Abilities corrupt with the world
+    if stage in ["terror", "horror"]:
+        for ability in abilities:
+            ability.name = "Twisted " + ability.name
+            ability.cost = ability.get("cost", "sanity")
+            ability.side_effects.append("corrupting")
+    
+    return abilities

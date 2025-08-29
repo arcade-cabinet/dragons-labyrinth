@@ -1,0 +1,789 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the Fighting Pit Transition for Dragon's Labyrinth - the alternative transition from UNEASE to DREAD for mercenary/party-focused players.
+
+NARRATIVE CONTEXT:
+- Current emotional stage: {{ emotional_stage }}
+- This triggers if player has NO companions OR has more party members than companions
+- Player has shown preference for transactional relationships and strength
+- The world demands you prove your ability to command, not connect
+- This is where leadership through power becomes defining
+
+CORE CONCEPT - THE WEIGHT OF COMMAND:
+In a forgotten colosseum emerging from the mists, you must prove you can lead through strength and tactical brilliance. This isn't about feelings - it's about whether you can forge a fighting force before the world gets too dark. The transition tests party command and tactical dominance.
+
+THE EXPERIENCE:
+
+1. **The Summons** (Mercenary's calling):
+   - A blood-stained invitation arrives
+   - "The Pit calls for a new Champion"
+   - Promise of gold, glory, and loyal fighters
+   - Warning: "Come alone or bring your hired swords"
+
+2. **The Pit Emerges** (Environmental transformation):
+   - Ancient colosseum rises from the earth
+   - Fog forms natural arena boundaries
+   - Crowd of shadowy spectators materializes
+   - Your party members get excited - this is what they signed up for
+
+3. **The Pit Master** (Pure pragmatism):
+   - Massive scarred veteran of thousand battles
+   - Speaks only of strength, strategy, victory
+   - "Feelings make you weak. Gold makes you strong."
+   - Offers to sell you additional fighters
+
+4. **The Trials of Command** (Core challenges):
+
+   **If Solo:**
+   - Forced to hire at least one fighter
+   - Must prove you can command effectively
+   - Series of escalating tactical challenges
+   - Failure: Marked as "Unfit to Lead"
+   
+   **If Party Only:**
+   - Test coordination of mercenary units
+   - Loyalty tested by counter-bribes
+   - Must maintain morale through victories
+   - Balance payment vs performance
+   
+   **If Mixed (Companions + Party):**
+   - Companions disturbed by brutality
+   - Party members mock emotional attachments
+   - Must balance both or lose one side
+   - Hidden option: Unite them through shared victory
+
+5. **The Gladiatorial Gauntlet** (Unique mechanics):
+   - Five rounds of increasingly complex battles
+   - Each round adds new tactical elements:
+     * Round 1: Basic formation combat
+     * Round 2: Environmental hazards
+     * Round 3: Multi-front assault
+     * Round 4: Betrayal mechanics (fighters can be bribed)
+     * Round 5: Champion duel OR mass battle (your choice)
+
+6. **The Blood Price** (Culmination):
+   - Final challenge based on your approach:
+   - **Brutal Path**: Execute defeated opponents for crowd favor
+   - **Tactical Path**: Outmaneuver without killing
+   - **Profitable Path**: Turn enemies into allies with gold
+   - Each path locks in your leadership style
+
+UNIQUE MECHANICS:
+
+**Command & Control System:**
+- Issue complex orders to multiple units
+- Party members have morale meters
+- Pay bonuses for exceptional performance  
+- Punish failures to maintain discipline
+
+**Crowd Favor Mechanics:**
+- Spectators vote on your performance
+- Brutal acts gain immediate favor
+- Clever tactics gain respect
+- Mercy costs favor but may gain unexpected allies
+
+**Economic Warfare:**
+- Bid on new fighters between rounds
+- Enemies try to buy your fighters
+- Set bounties on specific targets
+- Victory prizes fund future battles
+
+FAILURE STATES:
+- Party abandons you for better pay
+- Crowd demands your execution
+- Run out of gold to maintain force
+- Lose control and fighters turn on you
+
+PERFORMANCE TRACKING:
+- Command efficiency rating
+- Tactical creativity score
+- Economic management
+- Brutality vs mercy ratio
+- Party loyalty maintained
+
+PERMANENT CONSEQUENCES:
+
+**Trait Impacts:**
+- Won through brutality → "Tyrant" trait
+- Won through tactics → "Strategist" trait
+- Won through economics → "Merchant Prince" trait
+- United party/companions → "War Leader" trait
+- Lost control → "Failed Commander" trait
+
+**Party Changes:**
+- Fighters respect/fear you based on methods
+- New elite mercenaries available
+- Companions may leave if too brutal
+- Unlock "War Band" mechanics
+
+**World Changes:**
+- Reputation as Pit Champion spreads
+- Towns hire you for defense
+- Bandits flee or join you
+- Merchant prices vary based on fear/respect
+
+ENVIRONMENTAL DETAILS:
+- Arena floor stained with old blood
+- Spectators fade in/out of existence
+- Your shadow sometimes shows multiple fighters
+- Weapons of defeated champions line walls
+- The crowd's roar affects reality
+
+AUDIO DESIGN:
+- Crowd chants in unknown language
+- Heartbeat drum intensifies each round
+- Clashing steel echoes unnaturally
+- Victory horns sound hollow
+- Death rattles linger too long
+
+THE PIT MASTER'S NATURE:
+- Claims to have "served the dragon once"
+- Missing eye sees "true strength"
+- Offers cryptic warnings between rounds
+- Knows your future somehow
+- May be testing you for something greater
+
+ROUND-SPECIFIC EVENTS:
+
+**Round 1 - Proving Ground:**
+- Basic 3v3 combat
+- Introduces formation commands
+- Crowd judges your leadership style
+
+**Round 2 - The Burning Sands:**
+- Floor sections ignite randomly
+- Must coordinate movement
+- Environmental advantage crucial
+
+**Round 3 - Surrounded:**
+- Enemies from all sides
+- Test multi-unit management
+- Companions can scout if present
+
+**Round 4 - The Bidding War:**
+- Mid-battle, enemies offer gold for betrayal
+- Must counter-bid or ensure loyalty
+- Some fighters WILL turn
+
+**Round 5 - Champion's Choice:**
+- Face the Pit Master alone OR
+- Lead massive battle against veteran army
+- Choice affects final traits
+
+ENDING VARIATIONS:
+
+**Tyrant's Victory:**
+- Rule through fear established
+- Pit Master kneels, offers service
+- Crowd bays for more blood
+- Dark path bonuses unlocked
+- Achievement: "Iron Fist"
+
+**Strategist's Victory:**
+- Tactical genius recognized
+- Pit Master nods respect
+- Elite tacticians seek you
+- War college unlocked
+- Achievement: "Mind Over Muscle"
+
+**Merchant's Victory:**
+- Economic dominance proven
+- Pit Master becomes business partner
+- Trading empire seeds planted
+- Unique merchant options
+- Achievement: "Gold Conquers All"
+
+**Unity Victory (Secret):**
+- Companions and party fight as one
+- Pit Master reveals this was the true test
+- Grants blessing of "Unified Command"
+- Both systems fully unlocked
+- Achievement: "Strength Through Unity"
+
+THE THREE VERSIONS:
+
+**Journey TO Labyrinth:**
+- Tests raw command ability
+- Establishes leadership style
+- Builds your war band
+
+**Journey HOME:**
+- Your fighters question continuing
+- Must maintain discipline as world ends
+- Betrayals more common
+
+**Return to VOID:**
+- Ultimate test of loyalty
+- Who follows you into certain death?
+- Command structure vs voluntary sacrifice
+
+Generate complete implementation focusing on tactical command, economic management, and leadership through strength.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: fighting_pit_transition.gd -->
+extends Node3D
+
+class_name FightingPitTransition
+
+signal transition_complete(performance: Dictionary)
+signal transition_failed(reason: String)
+signal trait_gained(trait: String, amount: int)
+signal fighter_recruited(fighter: FighterData)
+
+@onready var arena_environment = $ArenaEnvironment
+@onready var pit_master = $PitMaster
+@onready var crowd_system = $CrowdSystem
+@onready var combat_orchestrator = $CombatOrchestrator
+@onready var economy_manager = $EconomyManager
+
+var performance_tracker = {
+    "command_efficiency": 0.0,
+    "tactical_creativity": 0.0,
+    "economic_management": 0.0,
+    "brutality_ratio": 0.5,  # 0 = merciful, 1 = brutal
+    "party_loyalty": 1.0,
+    "rounds_won": 0,
+    "fighters_lost": 0,
+    "gold_spent": 0,
+    "crowd_favor": 0.5,
+    "leadership_style": ""  # tyrant, strategist, merchant, unified
+}
+
+var current_party: Array[Fighter] = []
+var current_companions: Array[Companion] = []
+var available_fighters: Array[FighterData] = []
+var current_round: int = 0
+var betrayal_risk: Dictionary = {}  # fighter_id -> risk_level
+
+const ROUND_CONFIGS = [
+    {"name": "Proving Ground", "enemies": 3, "hazards": false, "betrayal": false},
+    {"name": "Burning Sands", "enemies": 4, "hazards": true, "betrayal": false},
+    {"name": "Surrounded", "enemies": 8, "hazards": true, "betrayal": false},
+    {"name": "Bidding War", "enemies": 5, "hazards": true, "betrayal": true},
+    {"name": "Champion's Choice", "enemies": 0, "hazards": true, "betrayal": true}
+]
+
+func _ready():
+    # Gather current forces
+    current_party = GlobalState.get_active_party_members()
+    current_companions = GlobalState.get_active_companions()
+    
+    # Initialize based on composition
+    _evaluate_force_composition()
+    
+    # Set up the arena
+    _initialize_arena()
+
+func _evaluate_force_composition():
+    if current_party.is_empty() and current_companions.is_empty():
+        # Lone wolf must hire
+        performance_tracker.leadership_style = "untested"
+        _force_first_recruitment()
+    elif current_companions.is_empty():
+        # Pure mercenary leader
+        performance_tracker.leadership_style = "mercenary"
+    elif current_party.is_empty():
+        # Has companions but no mercs - interesting
+        performance_tracker.leadership_style = "reluctant"
+    else:
+        # Mixed force - most complex
+        performance_tracker.leadership_style = "balanced"
+
+func _initialize_arena():
+    # Arena emerges from the mists
+    arena_environment.rise_from_earth()
+    
+    # Crowd materializes
+    crowd_system.materialize_spectators()
+    crowd_system.favor_changed.connect(_on_crowd_favor_changed)
+    
+    # Atmospheric audio
+    AudioManager.play_arena_ambience()
+    AudioManager.play_crowd_murmur(crowd_system.get_crowd_size())
+    
+    # Pit Master entrance
+    _spawn_pit_master()
+
+func _spawn_pit_master():
+    pit_master.dramatic_entrance()
+    await pit_master.entrance_complete
+    
+    # Different dialogue based on force composition
+    var dialogue = DialogueSystem.start_dialogue("pit_master_intro")
+    
+    match performance_tracker.leadership_style:
+        "untested":
+            dialogue.add_line("Fresh meat for the pit. You'll need fighters if you want to survive.")
+        "mercenary":
+            dialogue.add_line("I see you understand the truth. Gold buys loyalty, loyalty buys victory.")
+        "reluctant":
+            dialogue.add_line("Your 'friends' won't save you here. This is about strength.")
+        "balanced":
+            dialogue.add_line("Trying to play both sides? We'll see how long that lasts.")
+    
+    await dialogue.finished
+    _begin_trials()
+
+func _force_first_recruitment():
+    UI.show_narrative("You cannot face the pit alone...")
+    
+    # Offer three fighter types
+    var recruitment_ui = preload("res://ui/fighter_recruitment.tscn").instantiate()
+    add_child(recruitment_ui)
+    
+    recruitment_ui.setup_forced_recruitment([
+        {"name": "Brutus", "type": "warrior", "cost": 50, "trait": "bloodthirsty"},
+        {"name": "Silvia", "type": "rogue", "cost": 40, "trait": "opportunist"},
+        {"name": "Marcus", "type": "tactician", "cost": 60, "trait": "calculating"}
+    ])
+    
+    var chosen = await recruitment_ui.fighter_selected
+    _recruit_fighter(chosen)
+
+func _recruit_fighter(fighter_data: Dictionary):
+    var fighter = Fighter.new()
+    fighter.initialize(fighter_data)
+    
+    current_party.append(fighter)
+    GlobalState.player_gold -= fighter_data.cost
+    performance_tracker.gold_spent += fighter_data.cost
+    
+    fighter_recruited.emit(fighter)
+    
+    # Companions may react
+    for companion in current_companions:
+        companion.react_to_mercenary_hiring()
+
+func _begin_trials():
+    current_round = 0
+    _start_next_round()
+
+func _start_next_round():
+    if current_round >= ROUND_CONFIGS.size():
+        _complete_trials()
+        return
+    
+    var round_config = ROUND_CONFIGS[current_round]
+    
+    # Announce round
+    pit_master.announce_round(round_config.name)
+    crowd_system.build_anticipation()
+    
+    # Set up arena for round
+    arena_environment.configure_for_round(current_round)
+    
+    # Offer between-round options
+    if current_round > 0:
+        await _between_round_management()
+    
+    # Special handling for final round
+    if current_round == 4:
+        _present_final_choice()
+    else:
+        _start_combat_round(round_config)
+
+func _between_round_management():
+    # Heal/resurrect options
+    economy_manager.offer_medical_services(current_party)
+    
+    # Recruitment opportunities
+    if performance_tracker.crowd_favor > 0.6:
+        economy_manager.offer_elite_fighters()
+    
+    # Betrayal prevention
+    _check_loyalty_management()
+    
+    # Companion concerns
+    if not current_companions.is_empty():
+        _handle_companion_concerns()
+
+func _check_loyalty_management():
+    for fighter in current_party:
+        var loyalty = fighter.get_loyalty()
+        if loyalty < 0.5:
+            betrayal_risk[fighter.id] = 1.0 - loyalty
+            
+            # Offer options to maintain loyalty
+            var choice_ui = preload("res://ui/loyalty_choice.tscn").instantiate()
+            add_child(choice_ui)
+            
+            choice_ui.setup_fighter_loyalty(fighter, {
+                "pay_bonus": fighter.daily_rate * 5,
+                "intimidate": "requires_tyrant_trait",
+                "inspire": "requires_strategist_trait"
+            })
+            
+            var choice = await choice_ui.choice_made
+            _handle_loyalty_choice(fighter, choice)
+
+func _start_combat_round(config: Dictionary):
+    # Transition to tactical view
+    combat_orchestrator.setup_arena_combat()
+    
+    # Spawn enemies based on config
+    var enemies = combat_orchestrator.spawn_enemies(config.enemies, current_round)
+    
+    # Enable hazards if configured
+    if config.hazards:
+        arena_environment.activate_round_hazards(current_round)
+    
+    # Set up betrayal mechanics
+    if config.betrayal:
+        _enable_betrayal_mechanics()
+    
+    # Start tactical combat
+    combat_orchestrator.combat_finished.connect(_on_round_finished, CONNECT_ONE_SHOT)
+    combat_orchestrator.start_combat()
+
+func _enable_betrayal_mechanics():
+    # Enemies can make offers during combat
+    economy_manager.enable_combat_bribes()
+    
+    for fighter in current_party:
+        if fighter.id in betrayal_risk:
+            fighter.set_betrayal_chance(betrayal_risk[fighter.id])
+            fighter.betrayal_triggered.connect(_on_fighter_betrayal)
+
+func _on_fighter_betrayal(fighter: Fighter, bribe_amount: int):
+    # Player gets chance to counter
+    var counter_ui = preload("res://ui/counter_betrayal.tscn").instantiate()
+    get_tree().root.add_child(counter_ui)
+    
+    counter_ui.setup_betrayal_situation(fighter, bribe_amount)
+    
+    var choice = await counter_ui.choice_made
+    
+    match choice.action:
+        "outbid":
+            if GlobalState.player_gold >= choice.amount:
+                GlobalState.player_gold -= choice.amount
+                performance_tracker.gold_spent += choice.amount
+                fighter.cancel_betrayal()
+                fighter.increase_loyalty(0.2)
+            else:
+                _execute_betrayal(fighter)
+        
+        "threaten":
+            if performance_tracker.brutality_ratio > 0.7:
+                fighter.cancel_betrayal()
+                fighter.increase_fear(0.3)
+                trait_gained.emit("tyrant", 5)
+            else:
+                _execute_betrayal(fighter)
+        
+        "let_go":
+            _execute_betrayal(fighter)
+            trait_gained.emit("pragmatic", 5)
+
+func _execute_betrayal(fighter: Fighter):
+    # Fighter switches sides
+    combat_orchestrator.switch_fighter_allegiance(fighter)
+    current_party.erase(fighter)
+    performance_tracker.fighters_lost += 1
+    
+    # Party morale impact
+    for other_fighter in current_party:
+        other_fighter.decrease_morale(0.2)
+    
+    # Companion reactions
+    for companion in current_companions:
+        companion.react_to_betrayal("You couldn't even keep your hired swords loyal...")
+
+func _on_round_finished(victory: bool, stats: Dictionary):
+    if not victory:
+        _handle_round_failure()
+        return
+    
+    performance_tracker.rounds_won += 1
+    
+    # Update metrics
+    performance_tracker.command_efficiency += stats.command_rating
+    performance_tracker.tactical_creativity += stats.creativity_bonus
+    
+    # Crowd reaction
+    var crowd_change = _calculate_crowd_reaction(stats)
+    crowd_system.adjust_favor(crowd_change)
+    
+    # Post-round options
+    _present_post_round_choices(stats)
+
+func _present_post_round_choices(combat_stats: Dictionary):
+    # What to do with defeated enemies
+    var defeated_count = combat_stats.enemies_defeated
+    
+    var choice_ui = preload("res://ui/victory_choice.tscn").instantiate()
+    add_child(choice_ui)
+    
+    choice_ui.add_option("Execute them all", "brutal", {"crowd_favor": 0.3, "companion_disapproval": 0.5})
+    choice_ui.add_option("Spare the surrendered", "merciful", {"crowd_favor": -0.2, "recruit_chance": 0.3})
+    choice_ui.add_option("Recruit the strongest", "pragmatic", {"cost": defeated_count * 30})
+    
+    var choice = await choice_ui.choice_made
+    _handle_victory_choice(choice, defeated_count)
+
+func _present_final_choice():
+    # Round 5: Champion's Choice
+    UI.show_narrative("The crowd falls silent...")
+    UI.show_narrative("The Pit Master steps forward...")
+    
+    var dialogue = DialogueSystem.start_dialogue("final_challenge")
+    dialogue.add_line("You've proven yourself capable. Now choose your final test.")
+    dialogue.add_line("Face me in single combat, or lead your forces against my veterans.")
+    
+    await dialogue.finished
+    
+    var choice_ui = preload("res://ui/final_choice.tscn").instantiate()
+    add_child(choice_ui)
+    
+    choice_ui.setup_options({
+        "single_combat": {
+            "text": "I'll face you alone",
+            "description": "Single combat. No tricks. Pure skill.",
+            "trait": "confident"
+        },
+        "mass_battle": {
+            "text": "My forces will crush yours",
+            "description": "Large scale tactical battle. Command vs command.",
+            "trait": "commander"
+        },
+        "unified_challenge": {
+            "text": "We fight as one",
+            "description": "You and all allies vs Pit Master and veterans.",
+            "trait": "unity",
+            "requires": current_companions.size() > 0 and performance_tracker.party_loyalty > 0.7
+        }
+    })
+    
+    var final_choice = await choice_ui.choice_selected
+    _execute_final_challenge(final_choice)
+
+func _execute_final_challenge(choice: String):
+    match choice:
+        "single_combat":
+            _start_champion_duel()
+        "mass_battle":
+            _start_mass_battle()
+        "unified_challenge":
+            _start_unity_challenge()
+
+func _start_champion_duel():
+    # One on one with Pit Master
+    combat_orchestrator.setup_duel(GlobalState.player, pit_master)
+    
+    # Party/companions watch and may intervene
+    for fighter in current_party:
+        if fighter.loyalty > 0.8:
+            fighter.set_intervention_chance(0.3)
+    
+    for companion in current_companions:
+        companion.set_worried_state(true)
+    
+    combat_orchestrator.duel_finished.connect(_on_duel_finished)
+
+func _complete_trials():
+    # Calculate final performance
+    _calculate_final_scores()
+    
+    # Pit Master's judgment
+    pit_master.deliver_verdict(performance_tracker)
+    
+    # Establish reputation
+    match performance_tracker.leadership_style:
+        "tyrant":
+            GlobalState.reputation.add_aspect("feared_commander")
+            trait_gained.emit("tyrant", 30)
+        "strategist":
+            GlobalState.reputation.add_aspect("tactical_genius")
+            trait_gained.emit("strategist", 30)
+        "merchant":
+            GlobalState.reputation.add_aspect("merchant_prince")
+            trait_gained.emit("merchant_prince", 30)
+        "unified":
+            GlobalState.reputation.add_aspect("true_leader")
+            trait_gained.emit("war_leader", 40)
+    
+    # Complete transition
+    transition_complete.emit(performance_tracker)
+
+<!-- FILE: pit_master.gd -->
+extends Node3D
+
+signal entrance_complete
+signal verdict_delivered
+
+@onready var model = $PitMasterModel
+@onready var weapons = $Weapons
+@onready var aura_effects = $AuraEffects
+@onready var voice = $VoicePlayer
+
+var combat_stats = {
+    "health": 500,
+    "damage": 50,
+    "armor": 30,
+    "special_abilities": ["whirlwind", "intimidating_roar", "veteran_reflexes", "dragon_touched"]
+}
+
+var dialogue_variants = {
+    "respect": [
+        "You fight with honor. The dragon would approve.",
+        "I see why you survived this long.",
+        "Perhaps you are worthy of the truth..."
+    ],
+    "disappointment": [
+        "The dragon will feast on your weakness.",
+        "Another pretender. The pit remains hungry.",
+        "You command through fear alone. It will fail you."
+    ],
+    "surprise": [
+        "Impossible... you unified them...",
+        "The dragon spoke of one like you...",
+        "This is not strength OR weakness. This is... different."
+    ]
+}
+
+func dramatic_entrance():
+    # Emerge from arena shadows
+    model.visible = false
+    aura_effects.charge_dramatic_entrance()
+    
+    await get_tree().create_timer(1.0).timeout
+    
+    # Sudden appearance
+    model.visible = true
+    AudioManager.play_3d("thunderous_impact", global_position)
+    aura_effects.explode_dust()
+    
+    # Intimidating pose
+    model.play_animation("intimidating_entrance")
+    voice.play_layered("I am the Pit Master. I have served dragons and slain heroes.")
+    
+    await model.animation_finished
+    entrance_complete.emit()
+
+func announce_round(round_name: String):
+    # Voice booms across arena
+    voice.set_arena_reverb(true)
+    
+    match round_name:
+        "Proving Ground":
+            voice.play_layered("Show me you can command!")
+        "Burning Sands":
+            voice.play_layered("The arena itself fights you now!")
+        "Surrounded":
+            voice.play_layered("Death from all sides! Command or die!")
+        "Bidding War":
+            voice.play_layered("Let's see if gold truly buys loyalty!")
+        "Champion's Choice":
+            voice.play_layered("Choose... your... destiny!")
+
+func deliver_verdict(performance: Dictionary):
+    # Evaluate performance
+    var verdict_type = _evaluate_performance(performance)
+    
+    # Physical reaction
+    match verdict_type:
+        "respect":
+            model.play_animation("respectful_nod")
+            weapons.sheathe_all()
+        "disappointment":
+            model.play_animation("dismissive_gesture")
+            weapons.ready_position()
+        "surprise":
+            model.play_animation("step_back_shocked")
+            aura_effects.flicker_uncertainty()
+    
+    # Deliver dialogue
+    var chosen_line = dialogue_variants[verdict_type][randi() % dialogue_variants[verdict_type].size()]
+    voice.play_layered(chosen_line)
+    
+    # Grant rewards/consequences
+    _apply_verdict_effects(verdict_type, performance)
+    
+    verdict_delivered.emit()
+
+func _evaluate_performance(performance: Dictionary) -> String:
+    if performance.leadership_style == "unified" and performance.rounds_won == 5:
+        return "surprise"
+    elif performance.command_efficiency > 0.7 and performance.brutality_ratio < 0.3:
+        return "respect"
+    else:
+        return "disappointment"
+
+func _apply_verdict_effects(verdict_type: String, performance: Dictionary):
+    match verdict_type:
+        "respect":
+            # Offers to join as elite fighter
+            GlobalState.unlock_fighter("pit_master_veteran")
+            # Reveals dragon lore
+            GlobalState.add_lore("dragon_servant_testimony")
+            
+        "surprise":
+            # Grants unique blessing
+            GlobalState.player.add_blessing("unified_command")
+            # Opens secret path
+            GlobalState.unlock_secret_path("pit_master_passage")
+            
+        "disappointment":
+            # Marks you as unworthy
+            GlobalState.reputation.add_aspect("pit_failure")
+
+func setup_dragon_revelation():
+    # In final moment, reveals connection to dragon
+    voice.shift_to_whisper()
+    voice.play_layered("The dragon... it's not what you think...")
+    voice.play_layered("I was its first champion. I failed.")
+    voice.play_layered("Now I test others. You... might succeed where I could not.")
+    
+    # Visual transformation hint
+    aura_effects.reveal_dragon_corruption()
+    model.show_hidden_scales()
+
+<!-- JSON: manifests/fighting_pit_content.json -->
+{
+  "transition": {
+    "name": "Fighting Pit",
+    "type": "unease_to_dread",
+    "description": "Test of command and tactical leadership",
+    "triggers_when": "player_favors_mercenary_path",
+    "key_mechanics": [
+      "Multi-unit tactical combat",
+      "Economic management",
+      "Loyalty/betrayal system",
+      "Crowd favor",
+      "Command decisions"
+    ],
+    "unique_features": {
+      "five_rounds": "Escalating combat challenges",
+      "betrayal_mechanics": "Fighters can be bribed to switch sides",
+      "economic_warfare": "Gold management crucial",
+      "brutality_choices": "Execute or recruit defeated foes",
+      "final_choice": "Duel or mass battle"
+    },
+    "performance_metrics": {
+      "command_efficiency": "How well you lead in battle",
+      "tactical_creativity": "Innovative solutions",
+      "economic_management": "Gold spent vs earned",
+      "brutality_ratio": "Mercy vs ruthlessness",
+      "party_loyalty": "Maintaining mercenary loyalty"
+    },
+    "permanent_effects": {
+      "traits_gained": ["tyrant/strategist/merchant_prince", "commander", "pragmatic"],
+      "reputation": ["feared", "respected", "wealthy"],
+      "unlocks": ["elite_mercenaries", "war_band_mechanics", "command_abilities"],
+      "world_changes": ["dread_phase_begins", "mercenary_prices_change"]
+    },
+    "three_versions": {
+      "to_labyrinth": "Establish command style",
+      "journey_home": "Maintain discipline as world ends",
+      "void_return": "Who follows you to certain death?"
+    }
+  }
+}
+
+<!-- PHILOSOPHY -->
+The Fighting Pit is the dark mirror to the Crossroads Meeting. Where one tests emotional bonds, the other tests command through strength. Neither is "wrong" - they represent different philosophies of leadership in a darkening world.
+
+The Pit Master serves as a dark reflection of what the player might become - someone who served the dragon and failed, now reduced to testing others. His revelation that he was the dragon's "first champion" plants seeds for the larger narrative.
+
+The betrayal mechanics reinforce that mercenary loyalty is always conditional. The crowd favor system shows how brutality gains quick approval but may cost you later. The final choice between single combat and mass battle tests whether you trust your leadership or your personal prowess.
+
+Most importantly, the "unified" path remains possible but difficult - proving you can blend both companions and mercenaries into a cohesive force. This is the hardest path but offers the greatest rewards.

@@ -1,0 +1,70 @@
+# Generate Character System from Discovered Assets
+
+## Context
+You are implementing a character system for a hex-based 2.5D RPG in Godot 4. The game uses discovered 3D model assets to dynamically create character classes and enemy types.
+
+## Discovered Character Assets
+{% for character in discovered_characters %}
+### {{ character.name }}
+- File: {{ character.filename }}
+- Theme: {{ character.theme }}
+- Suggested Role: {{ character.role }}
+{% endfor %}
+
+## Requirements
+
+### 1. Base Character Class (Character.gd)
+Create a base character class that all entities inherit from:
+- Health/Mana/Stamina system with regeneration
+- Stats: Strength, Defense, Speed, Intelligence
+- Movement on hex grid with animation
+- Inventory system for equipment
+- Skill/ability system
+- Status effects (poison, stun, etc.)
+- Line of sight calculation on hex grid
+
+### 2. Dynamic Character Classes
+For each discovered character asset, generate a unique class:
+- Analyze the asset name/theme to determine appropriate abilities
+- Create 2-3 unique skills per character type
+- Balance stats based on apparent role (tank, DPS, support)
+- Include special passive abilities that fit the theme
+
+Example interpretations:
+- "Knight" → High defense, shield abilities, protection skills
+- "Alien" → Psychic powers, technology-based abilities
+- "Pirate" → Mobility skills, treasure-finding bonuses
+- "Robot" → Repair abilities, energy-based attacks
+
+### 3. Character Controller
+Implement smooth hex-based movement:
+- Click/tap to move pathfinding
+- Arrow keys (↑↓←→) for direct hex navigation
+- WASD keys as alternative to arrow keys
+- Numpad support for 6-directional hex movement
+- Smooth interpolation between hexes
+- Turn-based or real-time movement modes
+- Animation state machine integration
+- Visual feedback showing available movement directions
+
+### 4. Character Factory
+Create a factory system that:
+- Loads character definitions from JSON/resource files
+- Instantiates characters based on discovered assets
+- Applies appropriate materials/textures
+- Scales models to fit hex grid appropriately
+
+## Visual Integration
+- Model height: Approximately 1.5x hex width
+- Camera angle: 45-degree top-down
+- Shadows: Dynamic for depth perception
+- Selection indicator: Glowing hex beneath character
+
+## Stats Scaling
+Generate balanced stats using these guidelines:
+- Base health: 80-120 based on role
+- Mana: 50-100 based on magic affinity
+- Speed: 3-7 hexes per turn
+- Ensure no character is overpowered
+
+Generate complete GDScript implementations with extensive comments.

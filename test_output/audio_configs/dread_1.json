@@ -1,0 +1,195 @@
+{
+  "dread_level": 1,
+  "ambient_sounds": [
+    {
+      "name": "Creepy Ambient Horror Soundscape",
+      "freesound_id": 793483,
+      "tags": [
+        "ambience",
+        "ambient",
+        "atmosphere",
+        "background",
+        "chilling",
+        "cinematic",
+        "creepy",
+        "dark",
+        "disturbing",
+        "drones",
+        "eerie",
+        "fear-inducing",
+        "ghostly",
+        "haunted",
+        "horror",
+        "music",
+        "ominous",
+        "psychological",
+        "soundscape",
+        "spooky",
+        "supernatural",
+        "tension",
+        "textures",
+        "thriller",
+        "tones",
+        "unsettling",
+        "voices"
+      ],
+      "duration": 134.317,
+      "horror_intensity": 0.25
+    },
+    {
+      "name": "Whispering Shadows Atmosphere",
+      "freesound_id": 796514,
+      "tags": [
+        "ambient",
+        "atmosphere",
+        "background",
+        "chilling",
+        "cinematic",
+        "creepy",
+        "dark",
+        "disturbing",
+        "eerie",
+        "fear",
+        "ghostly",
+        "haunted",
+        "horror",
+        "mysterious",
+        "ominous",
+        "paranormal",
+        "shadows",
+        "sound",
+        "spooky",
+        "supernatural",
+        "suspense",
+        "thriller",
+        "tones",
+        "unsettling",
+        "vibes",
+        "whispering"
+      ],
+      "duration": 217.285,
+      "horror_intensity": 0.25
+    },
+    {
+      "name": "Thunder Claps, Distant, Boomy, Cracking Strikes, Storm",
+      "freesound_id": 681517,
+      "tags": [
+        "boomy",
+        "claps",
+        "crack",
+        "distant",
+        "nature",
+        "storm",
+        "strikes",
+        "thunder",
+        "weather"
+      ],
+      "duration": 232.086,
+      "horror_intensity": 0.25
+    },
+    {
+      "name": "Thunder Claps, Constant, Strikes, Storm, Birds, Rumble Distant",
+      "freesound_id": 681516,
+      "tags": [
+        "birds",
+        "claps",
+        "constant",
+        "distant",
+        "nature",
+        "rumble",
+        "storm",
+        "strikes",
+        "thunder",
+        "weather"
+      ],
+      "duration": 413.846,
+      "horror_intensity": 0.25
+    },
+    {
+      "name": "Creaking Wood 10.wav",
+      "freesound_id": 590149,
+      "tags": [
+        "boards",
+        "chair",
+        "creak",
+        "creaking",
+        "creaky",
+        "door",
+        "floor",
+        "floorboards",
+        "house",
+        "rocking",
+        "rocking-chair",
+        "settling",
+        "squeak",
+        "wood",
+        "wooden"
+      ],
+      "duration": 5.26569,
+      "horror_intensity": 0.25
+    },
+    {
+      "name": "Creaking Wood 7.wav",
+      "freesound_id": 590159,
+      "tags": [
+        "boards",
+        "chair",
+        "creak",
+        "creaking",
+        "creaky",
+        "door",
+        "floor",
+        "floorboards",
+        "house",
+        "rocking",
+        "rocking-chair",
+        "settling",
+        "squeak",
+        "wood",
+        "wooden"
+      ],
+      "duration": 3.14762,
+      "horror_intensity": 0.25
+    }
+  ],
+  "horror_stingers": [],
+  "companion_trauma_sounds": [
+    {
+      "name": "kitten meowing indoor various worried excited",
+      "freesound_id": 768911,
+      "tags": [
+        "animal",
+        "cat",
+        "excited",
+        "indoor",
+        "kitten",
+        "meow",
+        "meowing",
+        "various",
+        "worried"
+      ],
+      "duration": 55.3751,
+      "horror_intensity": 0.25
+    }
+  ],
+  "environmental_audio": [
+    {
+      "name": "plastic bottle rolls street 008 241126_0951",
+      "freesound_id": 772032,
+      "tags": [
+        "bottle",
+        "dropping",
+        "empty",
+        "junk",
+        "plastic",
+        "rubbish",
+        "street",
+        "trash",
+        "wast",
+        "zwerfafval"
+      ],
+      "duration": 1.39974,
+      "horror_intensity": 0.25
+    }
+  ]
+}

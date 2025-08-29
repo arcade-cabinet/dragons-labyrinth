@@ -1,0 +1,738 @@
+# Forge of High Elves Transition - Dragon's Labyrinth
+# Light Path: Madness → Void
+# Theme: Ultimate test of mastery and sacrifice for mythic power
+
+extends Node
+class_name ForgeOfHighElvesTransition
+
+## Core Design: Sentimental items collected throughout journey become reagents
+## Revelation: The dragon's own equipment was forged here with similar sacrifices
+
+signal transition_complete(outcome: Dictionary)
+signal trial_completed(trial: String, success: bool, cost: Dictionary)
+signal reagent_revealed(item: Dictionary, true_purpose: String)
+signal companion_sacrificed(companion: Node, essence_type: String)
+signal mythic_item_forged(item: Dictionary, abilities: Array)
+signal forge_master_judged(judgment: String, worthiness: float)
+
+@export_group("Transition Settings")
+@export var forge_name: String = "Aethermere Forge"
+@export var required_reagents: int = 7
+@export var forge_trials_count: int = 5
+@export var companion_essence_required: bool = true
+@export var time_limit_hours: int = 72
+
+@export_group("Trial Requirements")
+@export var hex_navigation_mastery: float = 0.8
+@export var combat_system_mastery: float = 0.8
+@export var mount_control_mastery: float = 0.7
+@export var puzzle_solving_mastery: float = 0.9
+@export var party_coordination_mastery: float = 0.8
+
+@export_group("Scaling Settings")
+@export var companion_bonus: float = 0.2  # Per companion helping
+@export var solo_difficulty_multiplier: float = 3.0  # Near impossible alone
+@export var love_sacrifice_power: float = 2.0  # When companion willingly sacrifices
+
+var _world_state: Node
+var _party_manager: Node
+var _trait_system: Node
+var _achievement_system: Node
+var _companion_system: Node
+var _inventory_system: Node
+
+var _sentimental_items: Array[Dictionary] = []
+var _forge_reagents: Array[Dictionary] = []
+var _completed_trials: Array[String] = []
+var _failed_trials: Array[String] = []
+var _companion_essences: Array[Dictionary] = []
+var _forged_items: Array[Dictionary] = []
+var _forge_master_approval: float = 0.0
+var _time_elapsed: int = 0
+var _revelation_stages: Array[bool] = [false, false, false]
+
+## Three Versions of the Transition
+enum TransitionVersion {
+	TO_LABYRINTH,    # Forging dragonslayer gear (first attempt)
+	FROM_LABYRINTH,  # Return journey - Second chance at mythic
+	SEALING_VOID     # Final forge - Void defense gear
+}
+
+@export var current_version: TransitionVersion = TransitionVersion.TO_LABYRINTH
+
+func _ready() -> void:
+	_world_state = get_node("/root/WorldState")
+	_party_manager = get_node("/root/PartyManager")
+	_trait_system = get_node("/root/TraitSystem")
+	_achievement_system = get_node("/root/AchievementSystem")
+	_companion_system = get_node("/root/CompanionSystem")
+	_inventory_system = get_node("/root/InventorySystem")
+	
+	_initialize_forge_state()
+
+func _initialize_forge_state() -> void:
+	# Gather all sentimental items from journey
+	_collect_sentimental_items()
+	
+	# Initialize forge master
+	_summon_forge_master()
+	
+	# Prepare trial chambers
+	_prepare_trial_chambers()
+
+## The Great Revelation: Your Collected Trinkets Were Reagents
+func _collect_sentimental_items() -> void:
+	# Check inventory for items collected throughout journey
+	var all_items = _inventory_system.get_all_items()
+	
+	for item in all_items:
+		if item.has_tag("sentimental") or item.has_tag("unique"):
+			_sentimental_items.append(item)
+			
+			# Reveal true purpose
+			var true_purpose = _determine_item_purpose(item)
+			item["forge_purpose"] = true_purpose
+			item["reagent_quality"] = _calculate_reagent_quality(item)
+			
+			reagent_revealed.emit(item, true_purpose)
+
+func _determine_item_purpose(item: Dictionary) -> String:
+	# Map sentimental items to forge purposes
+	match item.id:
+		"eagle_feather":
+			return "blessed_flight_essence"
+		"golden_scale":
+			return "dragon_sympathy_catalyst"
+		"child_drawing":
+			return "innocence_preservative"
+		"wedding_ring":
+			return "love_eternal_binding"
+		"soldier_medal":
+			return "courage_crystallized"
+		"prayer_beads":
+			return "faith_made_manifest"
+		"dried_flower":
+			return "memory_anchor"
+		_:
+			return "essence_catalyst"
+
+func start_transition() -> void:
+	_present_forge_entrance()
+	
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_begin_forging_trials()
+		TransitionVersion.FROM_LABYRINTH:
+			_begin_forge_cleansing()
+		TransitionVersion.SEALING_VOID:
+			_begin_final_forging()
+
+## Journey TO Labyrinth - The Ultimate Test
+func _begin_forging_trials() -> void:
+	# Forge master explains the requirements
+	var requirements = {
+		"reagents_needed": required_reagents,
+		"trials_to_pass": forge_trials_count,
+		"essence_sacrifice": "One who loves you must give their essence freely",
+		"time_limit": time_limit_hours,
+		"reward": "Mythic dragonslayer equipment",
+		"special_reward": "Sanctuary Presence - Divine ability to still madness"
+	}
+	
+	# Warn about consequences
+	if _party_manager.get_player().has_trait("rushed_journey"):
+		requirements["warning"] = "You seem hasty. Failure grants legendary gear, but you forfeit the divine gift until your return."
+	
+	_world_state.present_forge_requirements(requirements, self, "_on_requirements_accepted")
+
+## Return Journey - Second Chance
+func _begin_return_forge() -> void:
+	var has_mythic_ability = _world_state.has_mythic_ability()
+	
+	if has_mythic_ability:
+		# Already have ability - offer different reward
+		_offer_eternal_companion()
+	else:
+		# Second chance at mythic ability
+		var second_chance = {
+			"message": "The forge recognizes you. Your deeds against the dragon have proven your worth.",
+			"trials_required": forge_trials_count / 2,  # Easier this time
+			"essence_required": false,  # Already paid the price
+			"reward": "Complete your mythic transformation"
+		}
+		_world_state.present_forge_requirements(second_chance, self, "_on_second_chance_accepted")
+
+func _offer_eternal_companion() -> void:
+	# Special reward for those who already achieved mythic status
+	var eternal_companion = {
+		"name": "Aethon, Last of the Forge Guards",
+		"type": "eternal_companion",
+		"traits": ["undying", "light_sworn", "forge_blessed"],
+		"abilities": [
+			"shared_mythic_power",
+			"sanity_anchor",
+			"void_resistant"
+		],
+		"backstory": "The final guardian of the forge, waiting eons for one worthy of their service."
+	}
+	
+	_world_state.present_companion_offer(eternal_companion, self, "_on_eternal_companion_accepted")
+
+func _on_eternal_companion_accepted(accepted: bool) -> void:
+	if accepted:
+		var companion = _companion_system.create_special_companion("eternal_guardian")
+		companion.setup(eternal_companion)
+		companion.bond_level = 100  # Instant maximum bond
+		companion.add_trait("shares_mythic_ability")
+		_achievement_system.trigger_achievement("gained_eternal_ally")
+
+## Core Mechanic: Every System Mastered Matters
+func attempt_trial(trial_name: String) -> Dictionary:
+	var result = {
+		"success": false,
+		"mastery_demonstrated": 0.0,
+		"cost_paid": {},
+		"lesson_learned": "",
+		"forge_reaction": ""
+	}
+	
+	# Each trial tests specific mastery
+	match trial_name:
+		"trial_of_paths":
+			result = _test_hex_navigation()
+		"trial_of_steel":
+			result = _test_combat_mastery()
+		"trial_of_bonds":
+			result = _test_mount_mastery()
+		"trial_of_mind":
+			result = _test_puzzle_mastery()
+		"trial_of_unity":
+			result = _test_party_coordination()
+	
+	# Apply results
+	if result.success:
+		_completed_trials.append(trial_name)
+		_forge_master_approval += 0.2
+		forge_master_judged.emit("approved", _forge_master_approval)
+	else:
+		_failed_trials.append(trial_name)
+		_forge_master_approval -= 0.1
+		forge_master_judged.emit("disappointed", _forge_master_approval)
+	
+	trial_completed.emit(trial_name, result.success, result.cost_paid)
+	
+	# Check for revelations
+	_check_forge_revelations()
+	
+	return result
+
+func _test_hex_navigation() -> Dictionary:
+	# Navigate impossible maze while time dilates
+	var player_mastery = _calculate_hex_mastery()
+	var required = hex_navigation_mastery
+	
+	if _party_manager.get_party_size() == 1:
+		required *= solo_difficulty_multiplier
+	
+	return {
+		"success": player_mastery >= required,
+		"mastery_demonstrated": player_mastery,
+		"cost_paid": {"sanity": 0.1, "time": 6},
+		"lesson_learned": "Every path you took prepared you for this",
+		"forge_reaction": "The forge recognizes a true pathfinder"
+	}
+
+func _test_combat_mastery() -> Dictionary:
+	# Fight mythic guardian using everything learned
+	var combat_score = _calculate_combat_mastery()
+	var required = combat_system_mastery
+	
+	# Must use trait-based combat verbs
+	var traits_used = _demonstrate_trait_combat()
+	combat_score += traits_used * 0.1
+	
+	return {
+		"success": combat_score >= required,
+		"mastery_demonstrated": combat_score,
+		"cost_paid": {"health": 0.3, "stamina": 0.5},
+		"lesson_learned": "Your identity shapes your fighting style",
+		"forge_reaction": "The forge sees your true nature in battle"
+	}
+
+func _test_mount_mastery() -> Dictionary:
+	# Ride mythic mounts through elemental gauntlet
+	var mount_score = _calculate_mount_mastery()
+	var required = mount_control_mastery
+	
+	# Each mount type mastered adds bonus
+	var mount_variety = _count_mastered_mount_types()
+	mount_score += mount_variety * 0.15
+	
+	return {
+		"success": mount_score >= required,
+		"mastery_demonstrated": mount_score,
+		"cost_paid": {"mount_trust": 0.2},
+		"lesson_learned": "Trust between rider and mount transcends form",
+		"forge_reaction": "The forge acknowledges your bonds"
+	}
+
+func _test_puzzle_mastery() -> Dictionary:
+	# Solve meta-puzzle using knowledge from entire journey
+	var puzzle_score = _calculate_puzzle_mastery()
+	var required = puzzle_solving_mastery
+	
+	# References to past puzzles boost score
+	var past_solutions = _recall_previous_puzzles()
+	puzzle_score += past_solutions * 0.05
+	
+	return {
+		"success": puzzle_score >= required,
+		"mastery_demonstrated": puzzle_score,
+		"cost_paid": {"mental_fatigue": 0.4},
+		"lesson_learned": "Every puzzle was preparing you for this moment",
+		"forge_reaction": "The forge respects your wisdom"
+	}
+
+func _test_party_coordination() -> Dictionary:
+	# Coordinate companions and mercenaries in complex trial
+	var coordination_score = _calculate_party_coordination()
+	var required = party_coordination_mastery
+	
+	# More party members = harder but higher potential
+	var party_size = _party_manager.get_party_size()
+	required *= (1.0 + party_size * 0.1)
+	coordination_score *= (1.0 + party_size * 0.2)
+	
+	return {
+		"success": coordination_score >= required,
+		"mastery_demonstrated": coordination_score,
+		"cost_paid": {"party_stress": 0.3},
+		"lesson_learned": "Leadership is knowing when to trust others",
+		"forge_reaction": "The forge sees how others follow you"
+	}
+
+## The Ultimate Sacrifice: Companion Essence
+func perform_essence_sacrifice() -> Dictionary:
+	var result = {
+		"sacrifice_made": false,
+		"essence_quality": 0.0,
+		"companion_fate": "",
+		"emotional_impact": {},
+		"forge_response": ""
+	}
+	
+	# Present the choice to companions
+	var willing_companions = []
+	for companion in _companion_system.get_active_companions():
+		var willingness = _calculate_sacrifice_willingness(companion)
+		if willingness > 0.5:
+			willing_companions.append({
+				"companion": companion,
+				"willingness": willingness,
+				"essence_type": _determine_essence_type(companion)
+			})
+	
+	if willing_companions.is_empty() and companion_essence_required:
+		# No one willing - forge may reject you
+		result.forge_response = "The forge finds you unworthy of loyalty"
+		return result
+	
+	# Present choice
+	_world_state.present_sacrifice_choice(willing_companions, self, "_on_sacrifice_chosen")
+	
+	return result
+
+func _on_sacrifice_chosen(choice: Dictionary) -> void:
+	if choice.id == "refuse_sacrifice":
+		# Noble but may fail forge
+		_forge_master_approval -= 0.3
+		_trait_system.add_trait(_party_manager.get_player(), "refused_ultimate_sacrifice")
+		return
+	
+	var companion = choice.companion
+	var essence_quality = choice.willingness * love_sacrifice_power
+	
+	# The sacrifice
+	var essence = {
+		"source": companion.name,
+		"type": choice.essence_type,
+		"quality": essence_quality,
+		"memory": companion.get_best_memory(),
+		"final_words": _generate_final_words(companion)
+	}
+	
+	_companion_essences.append(essence)
+	companion_sacrificed.emit(companion, choice.essence_type)
+	
+	# Companion's fate (Light path = not death)
+	companion.transform_to_essence()
+	companion.add_state("eternal_guardian")
+	companion.bind_to_forge()
+	
+	# Emotional impact
+	for other_companion in _companion_system.get_active_companions():
+		if other_companion != companion:
+			other_companion.add_memory("witnessed_noble_sacrifice", {
+				"who": companion.name,
+				"why": "for_greater_good"
+			})
+
+## Forging the Mythic Gear
+func forge_mythic_equipment() -> void:
+	# Combine reagents, trial completions, and essence
+	var forge_power = _calculate_total_forge_power()
+	
+	if forge_power < 1.0:
+		# Failure still grants legendary gear - not mythic
+		_forge_legendary_fallback()
+		return
+	
+	# Create mythic items based on journey
+	var items_to_forge = _determine_mythic_items()
+	
+	for item_template in items_to_forge:
+		var mythic_item = _forge_single_item(item_template, forge_power)
+		_forged_items.append(mythic_item)
+		mythic_item_forged.emit(mythic_item, mythic_item.abilities)
+	
+	# Grant special ability only if all trials passed
+	if _completed_trials.size() >= forge_trials_count:
+		_grant_mythic_ability()
+
+func _forge_legendary_fallback() -> void:
+	# Failed forge still grants powerful gear, just not mythic
+	_trait_system.add_trait(_party_manager.get_player(), "failed_mythic_forge")
+	
+	var legendary_items = _determine_legendary_items()
+	for item_template in legendary_items:
+		var legendary_item = _forge_single_item(item_template, 0.7)  # 70% power
+		legendary_item.tier = "legendary"
+		legendary_item.dragon_bane = false  # Missing key property
+		_forged_items.append(legendary_item)
+	
+	forge_master_judged.emit("disappointed_but_merciful", _forge_master_approval)
+
+func _grant_mythic_ability() -> void:
+	# Only granted on first successful completion
+	if _world_state.has_mythic_ability():
+		return
+		
+	# Light path: Sanctuary Presence
+	var ability = {
+		"name": "Sanctuary Presence",
+		"type": "mythic_ability",
+		"passive": "Reality stabilizes in 50m radius around you",
+		"active": "Divine Clarity - Restore 100 sanity to all allies in 100m",
+		"dragon_fight_bonus": "Dragon's madness effects reduced by 75%",
+		"cooldown": 300.0
+	}
+	
+	_party_manager.get_player().grant_mythic_ability(ability)
+	_achievement_system.trigger_achievement("light_mythic_achieved")
+
+func _forge_single_item(template: Dictionary, power: float) -> Dictionary:
+	var item = {
+		"name": template.base_name + " of the Last Light",
+		"type": template.type,
+		"tier": "mythic",
+		"base_stats": template.stats * power,
+		"abilities": [],
+		"blessed": true,
+		"dragon_bane": true
+	}
+	
+	# Add abilities based on trials completed
+	for trial in _completed_trials:
+		item.abilities.append(_get_trial_blessing(trial))
+	
+	# Add essence abilities
+	for essence in _companion_essences:
+		item.abilities.append(_get_essence_blessing(essence))
+	
+	# Add unique ability based on path
+	item.abilities.append("light_of_hope")
+	
+	return item
+
+## The Horror: Understanding the Dragon's Burden
+func _check_forge_revelations() -> void:
+	# First revelation: Dragon's gear was forged here
+	if not _revelation_stages[0] and _completed_trials.size() >= 2:
+		_reveal_forge_truth(0, "These pedestals... ancient armor fragments... the dragon's own equipment was forged here, with similar sacrifices.")
+	
+	# Second revelation: The cycle of guardians
+	if not _revelation_stages[1] and _companion_essences.size() > 0:
+		_reveal_forge_truth(1, "The forge whispers: 'Each guardian sacrifices what they love to gain power to protect. The dragon gave up its hoard, its kin, its freedom.'")
+	
+	# Third revelation: You're forging your prison
+	if not _revelation_stages[2] and _forged_items.size() >= 3:
+		_reveal_forge_truth(2, "The gear bonds to your soul. You understand: This power comes with eternal duty. You're forging the chains of guardianship.")
+
+func _reveal_forge_truth(stage: int, truth: String) -> void:
+	_world_state.add_forge_revelation("forge_of_high_elves", stage, truth)
+	_revelation_stages[stage] = true
+	_achievement_system.trigger_achievement("forge_understanding_" + str(stage))
+
+## Solo Attempt - The Ascended Path
+func attempt_solo_forge() -> void:
+	# Nearly impossible but grants unique rewards
+	var solo_score = 0.0
+	
+	# Must complete all trials alone
+	for trial in ["paths", "steel", "bonds", "mind", "unity"]:
+		var trial_name = "trial_of_" + trial
+		var result = attempt_trial(trial_name)
+		if result.success:
+			solo_score += 0.2
+		else:
+			# Single failure ends solo attempt
+			_trait_system.add_trait(_party_manager.get_player(), "failed_ascension")
+			return
+	
+	# The impossible sacrifice - part of yourself
+	if _perform_self_essence_sacrifice():
+		solo_score += 0.3
+		
+		# Ascension possible
+		if solo_score >= 1.0:
+			_begin_ascension()
+			_trait_system.add_trait(_party_manager.get_player(), "ascended")
+
+func _begin_ascension() -> void:
+	# Transform into higher being
+	_world_state.trigger_ascension_sequence()
+	
+	# Forge responds to ascended being
+	_forge_master_approval = 2.0  # Beyond normal scale
+	
+	# Create ascended-tier equipment
+	var ascended_gear = _forge_ascended_equipment()
+	
+	# New ending unlocked
+	_world_state.unlock_ending("ascended_guardian")
+
+## Light Path Consequences
+func _apply_permanent_forge_consequences() -> void:
+	# Mythic gear permanently bound
+	for item in _forged_items:
+		_inventory_system.bind_item_to_soul(item)
+		item.cursed = false  # Light path blessing
+		item.grows_with_wielder = true
+	
+	# Sacrificed companions become eternal guardians
+	for essence in _companion_essences:
+		_world_state.add_eternal_guardian(essence.source, {
+			"location": forge_name,
+			"purpose": "guide_future_heroes",
+			"memory_preserved": true
+		})
+	
+	# Forge remembers you
+	_world_state.add_forge_champion(_party_manager.get_player().name, {
+		"trials_completed": _completed_trials,
+		"approval_earned": _forge_master_approval,
+		"path": "light",
+		"worthiness": "proven"
+	})
+
+func _complete_transition(outcome: String) -> void:
+	var result = {
+		"transition": "forge_of_high_elves",
+		"path": "light",
+		"outcome": outcome,
+		"trials_completed": _completed_trials,
+		"trials_failed": _failed_trials,
+		"items_forged": _forged_items,
+		"companion_sacrifices": _companion_essences,
+		"forge_approval": _forge_master_approval,
+		"time_taken": _time_elapsed,
+		"revelations": _revelation_stages,
+		"solo_attempted": _party_manager.get_party_size() == 1,
+		"gear_tier": _determine_final_gear_tier(),
+		"ability_earned": _check_ability_earned()
+	}
+	
+	# Apply permanent changes
+	_apply_permanent_forge_consequences()
+	
+	# Update world state
+	_world_state.set_forge_state(forge_name, "light_blessed")
+	_world_state.set_forge_completion(current_version, result)
+	
+	transition_complete.emit(result)
+
+func _determine_final_gear_tier() -> String:
+	if _forged_items.is_empty():
+		return "none"
+	elif _forged_items[0].tier == "mythic":
+		return "mythic"
+	else:
+		return "legendary"
+
+func _check_ability_earned() -> bool:
+	return _completed_trials.size() >= forge_trials_count and _forge_power >= 1.0
+
+## Helper Functions
+func _calculate_reagent_quality(item: Dictionary) -> float:
+	var quality = 0.5
+	
+	# Story significance increases quality
+	if item.has("story_moments"):
+		quality += item.story_moments.size() * 0.1
+	
+	# Emotional weight matters
+	if item.has("emotional_value"):
+		quality += item.emotional_value * 0.2
+	
+	# Items from key moments are more powerful
+	if item.has("obtained_during"):
+		match item.obtained_during:
+			"companion_bonding":
+				quality += 0.3
+			"moral_choice":
+				quality += 0.2
+			"revelation":
+				quality += 0.4
+	
+	return min(quality, 1.0)
+
+func _summon_forge_master() -> void:
+	# Ancient elven smith spirit
+	var forge_master = {
+		"name": "Aethermere the Eternal Smith",
+		"nature": "strict_but_fair",
+		"tests_worthiness": true,
+		"remembers_dragon": true,
+		"speaks_in": "cryptic_wisdom"
+	}
+	
+	_world_state.summon_npc(forge_master, forge_name)
+
+func _calculate_sacrifice_willingness(companion: Node) -> float:
+	var base_willingness = 0.3
+	
+	# Bond level crucial
+	base_willingness += companion.bond_level * 0.005
+	
+	# Shared experiences
+	var shared_trials = companion.get_shared_memories().size()
+	base_willingness += shared_trials * 0.05
+	
+	# Personality traits
+	if companion.has_tag("self_sacrificing"):
+		base_willingness += 0.3
+	if companion.has_tag("devoted"):
+		base_willingness += 0.2
+	if companion.has_tag("selfish"):
+		base_willingness -= 0.4
+	
+	# Witnessed your journey
+	if companion.memories.has("saw_you_save_others"):
+		base_willingness += 0.2
+	
+	return clamp(base_willingness, 0.0, 1.0)
+
+func _determine_essence_type(companion: Node) -> String:
+	# Each companion provides different essence
+	if companion.has_tag("warrior"):
+		return "courage_essence"
+	elif companion.has_tag("mage"):
+		return "wisdom_essence"
+	elif companion.has_tag("healer"):
+		return "compassion_essence"
+	elif companion.has_tag("rogue"):
+		return "cunning_essence"
+	else:
+		return "loyalty_essence"
+
+func _generate_final_words(companion: Node) -> String:
+	var words = [
+		"This is my choice. Forge something beautiful.",
+		"I've seen who you are. You're worthy of this.",
+		"Remember me in the light of your victories.",
+		"My essence will guard you always.",
+		"This isn't goodbye. I'll be with you."
+	]
+	
+	# Personalized based on relationship
+	if companion.bond_level > 80:
+		words.append("I love you. Use my strength well.")
+	
+	return words[randi() % words.size()]
+
+func _calculate_total_forge_power() -> float:
+	var power = 0.0
+	
+	# Trials contribution
+	power += _completed_trials.size() * 0.15
+	
+	# Reagents contribution
+	for item in _sentimental_items:
+		if item.has("reagent_quality"):
+			power += item.reagent_quality * 0.1
+	
+	# Essence contribution (most important)
+	for essence in _companion_essences:
+		power += essence.quality * 0.3
+	
+	# Forge master approval
+	power *= (1.0 + _forge_master_approval)
+	
+	return power
+
+func _determine_mythic_items() -> Array:
+	var items = []
+	
+	# Core dragonslayer set
+	items.append({
+		"base_name": "Lightbringer",
+		"type": "sword",
+		"stats": {"damage": 100, "holy": 50}
+	})
+	
+	items.append({
+		"base_name": "Aegis of Hope",
+		"type": "shield", 
+		"stats": {"defense": 80, "magic_resist": 60}
+	})
+	
+	items.append({
+		"base_name": "Crown of the Last Guardian",
+		"type": "helm",
+		"stats": {"wisdom": 40, "void_resistance": 90}
+	})
+	
+	# Additional items based on trials
+	if "trial_of_unity" in _completed_trials:
+		items.append({
+			"base_name": "Bonds of Fellowship",
+			"type": "accessory",
+			"stats": {"party_synergy": 50}
+		})
+	
+	return items
+
+## Save/Load Support
+func save_transition_state() -> Dictionary:
+	return {
+		"version": current_version,
+		"sentimental_items": _sentimental_items,
+		"completed_trials": _completed_trials,
+		"failed_trials": _failed_trials,
+		"companion_essences": _companion_essences,
+		"forged_items": _forged_items,
+		"forge_approval": _forge_master_approval,
+		"time_elapsed": _time_elapsed,
+		"revelations": _revelation_stages
+	}
+
+func load_transition_state(data: Dictionary) -> void:
+	current_version = data.get("version", TransitionVersion.TO_LABYRINTH)
+	_sentimental_items = data.get("sentimental_items", [])
+	_completed_trials = data.get("completed_trials", [])
+	_failed_trials = data.get("failed_trials", [])
+	_companion_essences = data.get("companion_essences", [])
+	_forged_items = data.get("forged_items", [])
+	_forge_master_approval = data.get("forge_approval", 0.0)
+	_time_elapsed = data.get("time_elapsed", 0)
+	_revelation_stages = data.get("revelations", [false, false, false])

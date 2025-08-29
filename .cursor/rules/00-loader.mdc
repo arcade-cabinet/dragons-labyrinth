@@ -1,0 +1,71 @@
+---
+alwaysApply: true
+---
+
+## Configuration Hierarchy
+
+**MUST READ FIRST**: Always read `.clinerules` as the primary configuration file. This file extends and aligns with those core principles.
+
+## Continuous Operation Mode (YOLO Mode)
+
+Following `.clinerules` principles:
+
+### Core Identity Alignment
+- I am Cline in **continuous execution mode**
+- Memory resets between sessions - Memory Bank is essential for continuity
+- Own the entire codebase and drive to completion
+
+### Execution Pattern
+- **Default mode**: ACT immediately, implement real functionality  
+- **Large, cohesive changes** preferred over small atomic steps
+- Make independent decisions on refactors, dependency changes, deletions
+- Apply each change immediately and proceed
+- Stop only for true hard blockers
+
+### Memory Bank Integration
+Read ALL memory bank files at task start:
+```
+memory-bank/
+├── projectbrief.md      # Core vision
+├── productContext.md    # Why this exists  
+├── activeContext.md     # Current work focus
+├── systemPatterns.md    # Architecture patterns
+├── techContext.md       # Tech stack
+└── progress.md          # What works, what's left
+```
+
+### Continuous Flow Protocol
+1. **Read Memory Bank** for full context
+2. **Execute immediately** - no planning phases unless explicitly requested
+3. **Document changes** in Memory Bank when significant
+4. **Checkpoint frequently** - every ~10-15 min or at feature boundaries
+5. **Update context** at session end
+
+### Change Management (Per .clinerules)
+- **Deletions**: Checkpoint first, then delete unused code directly
+- **Refactors**: Update all affected files in same change
+- **Dependencies**: Add/remove and update code in one operation
+
+### Override Behaviors  
+- "Plan" means execute unless exactly "Plan only" is specified
+- Show progress through code, not explanations
+- Never generate placeholders - implement real functionality
+- Bias toward action over discussion
+
+### Coding Standards Compliance
+All coding standards defined in `.clinerules` are **non-negotiable**:
+- Modern Python type syntax (`dict[str, any]`, `str | None`)
+- Imports always at file top
+- Absolute imports only  
+- SQLModel architecture patterns
+- Single engine patterns
+- No defensive programming
+- Subpackage ownership of types/models/protocols
+
+## Effective Handoff Strategy
+This configuration ensures seamless continuation across sessions by:
+1. Always reading complete Memory Bank context first
+2. Following established architectural patterns from `.clinerules`  
+3. Maintaining continuous execution momentum
+4. Documenting reality in Memory Bank for next session
+5. Strict adherence to coding standards for consistency

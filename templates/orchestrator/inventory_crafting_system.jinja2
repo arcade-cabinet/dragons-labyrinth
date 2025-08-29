@@ -1,0 +1,272 @@
+# Generate Inventory and Crafting System
+
+## Context
+Create a comprehensive inventory and crafting system that integrates with the hex-based gameplay and discovered item assets. The system should encourage exploration and resource management while providing meaningful progression through crafted items.
+
+## Inventory System
+
+### 1. Inventory Layout
+- **Grid Size**: 10x5 hexagonal slots (50 total)
+- **Equipment Slots**: 
+  - Head, Chest, Legs, Feet (Armor)
+  - Main Hand, Off Hand (Weapons/Shield)
+  - 2 Ring slots, 1 Amulet slot
+  - 4 Quick-use slots (potions/consumables)
+- **Weight System**: Optional encumbrance
+- **Sorting Options**: By type, value, weight, name
+
+### 2. Item Categories
+
+Based on discovered item assets:
+{% for item_type in discovered_items %}
+- **{{ item_type.category }}**:
+  - Examples: {{ item_type.items }}
+  - Stack size: {{ item_type.stackable }}
+  - Special properties: {{ item_type.properties }}
+{% endfor %}
+
+### 3. Item Rarity Tiers
+- **Common** (Gray): Basic items, vendor trash
+- **Uncommon** (Green): Slight stat improvements
+- **Rare** (Blue): Notable upgrades, minor effects
+- **Epic** (Purple): Significant bonuses, unique effects
+- **Legendary** (Orange): Best-in-slot, game-changing
+- **Mythic** (Red): Ultra-rare, requires special quests
+- **Dragon-Forged** (Rainbow): Crafted from dragon parts
+
+### 4. Class-Aware Loot System
+
+#### Drop Rate Modifiers
+```
+Base Drop Rate × Class Affinity Modifier:
+
+For player class items:
+- Primary weapon type: 1.5x drop rate
+- Primary armor type: 1.4x drop rate  
+- Class-specific accessories: 1.3x drop rate
+
+For other items:
+- Universal items: 1.0x drop rate
+- Crafting materials: 1.0x drop rate
+- Opposite class items: 0.7x drop rate (for trading/selling)
+
+Example for Archer:
+- Bows/Crossbows: 45% drop chance (base 30% × 1.5)
+- Light armor: 42% drop chance (base 30% × 1.4)
+- Heavy armor: 21% drop chance (base 30% × 0.7)
+```
+
+#### Smart Loot Distribution
+- First item drop prioritizes upgrades for equipped slots
+- Subsequent drops vary to encourage diverse builds
+- Boss drops guarantee at least one class-appropriate item
+- Crafting materials drop regardless of class
+
+### 4. Item Properties
+
+#### Base Stats
+- Damage/Defense values
+- Stat bonuses (+STR, +INT, etc.)
+- Elemental resistances
+- Special effects (lifesteal, mana regen)
+
+#### Modifiers
+- Prefix: "Flaming", "Frozen", "Swift"
+- Suffix: "of the Bear", "of Wisdom"
+- Set bonuses: Collect full sets for extras
+- Enchantment slots: Add custom effects
+
+## Crafting System
+
+### 1. Crafting Stations
+
+#### Portable Crafting
+- **Campfire**: Basic cooking, simple repairs
+- **Workbench**: Field repairs, basic crafting
+- **Alchemy Kit**: Potions on the go
+
+#### Town Stations (Superior Results)
+- **Forge**: Weapons and heavy armor
+- **Loom**: Cloth and leather armor
+- **Enchanting Table**: Add magical properties
+- **Alchemy Lab**: Advanced potions
+- **Jeweler**: Rings, amulets, gem cutting
+- **Dragon Forge**: Ultimate crafting (late game)
+
+### 2. Crafting Mechanics
+
+#### Progressive Tutorial System
+Level-based introduction to crafting:
+```
+Level 1-3: Material Introduction
+- Hovering over materials shows tooltips
+- "Iron Ore - Used for crafting weapons at a blacksmith"
+- UI notification when inventory has crafting materials
+- "Visit a blacksmith to learn about crafting!"
+
+Level 3-5: First Crafting Experience
+- Mandatory quest: "The Apprentice Blacksmith"
+- NPC guides through crafting basic item
+- Shows recipe preview interface
+- Explains success rates and material requirements
+- Rewards: Basic crafted item + recipe book
+
+Level 5+: Advanced Features
+- Unlock experimentation system
+- Access to recipe planning/tracking
+- Material conversion unlocked
+- Special crafting quests available
+```
+
+#### Recipe Preview & Planning
+```
+Recipe Browser Interface:
+- ALL recipes visible (grayed if locked/missing materials)
+- Filter by: Available to craft, Class-specific, Item type
+- For each recipe shows:
+  * Required materials (owned/needed)
+  * Success rate with current skill
+  * Preview of item stats/appearance
+  * Where to find missing materials
+- "Track Recipe" feature:
+  * Pins material requirements to HUD
+  * Shows closest locations for materials
+  * Updates as materials are gathered
+```
+
+#### Recipe Discovery
+- **Tutorial Quests**: First recipes taught by NPCs
+- **Learn by Doing**: Craft once to permanently learn
+- **Recipe Books**: Found in dungeons, purchased, quest rewards
+- **NPC Teachers**: Learn from masters (class-specific)
+- **Experimentation**: Combine items to discover new recipes
+- **Achievement Unlocks**: Special recipes for milestones
+
+#### Crafting Process
+```
+1. Gather Materials (with tracking assistance)
+2. Meet Level/Skill Requirements
+3. Use Appropriate Station
+4. Success Chance = Base + Skill + Station Quality
+5. Critical Success = Better stats
+6. Failure = Lose some materials (protection scrolls prevent total loss)
+```
+
+### 3. Material Tiers
+
+#### Metals (Weapons/Armor)
+1. **Iron**: Basic tier, common
+2. **Steel**: Improved stats
+3. **Mithril**: Lightweight, magical
+4. **Adamantine**: Heavy, durable
+5. **Dragon Scale**: Ultimate protection
+6. **Void Metal**: Exotic properties
+
+#### Organic Materials
+- **Leather**: From various creatures
+- **Cloth**: Silk, cotton, enchanted fabric
+- **Wood**: For staves, bows, handles
+- **Bones**: Necromantic items
+- **Monster Parts**: Special properties
+
+#### Magical Components
+- **Gems**: Elemental focusing
+- **Crystals**: Mana storage
+- **Essences**: Extracted from enemies
+- **Runes**: Ancient power symbols
+- **Dragon Blood**: Ultimate reagent
+
+### 4. Crafting Specializations
+
+#### Weapon Crafting
+- **Balanced**: Standard stats
+- **Heavy**: +Damage, -Speed
+- **Light**: +Speed, -Damage
+- **Masterwork**: All stats improved
+- **Runic**: Added spell effects
+
+#### Armor Crafting
+- **Reinforced**: +Defense, +Weight
+- **Mobile**: +Dodge, -Defense
+- **Enchanted**: Magic resistance
+- **Set Pieces**: Bonus when worn together
+
+#### Consumable Crafting
+- **Potions**: Healing, mana, buffs
+- **Food**: Long-term buffs, stamina
+- **Scrolls**: One-use spells
+- **Bombs**: Area damage items
+- **Traps**: Deployable on hexes
+
+### 5. Upgrade System
+
+#### Enhancement Levels
+- Items can be upgraded +1 to +10
+- Each level requires more materials
+- Failure chance increases with level
+- Protection scrolls prevent destruction
+
+#### Socketing System
+- Items have 1-3 gem sockets
+- Gems provide various bonuses
+- Can be removed/replaced
+- Matching colors provide bonuses
+
+#### Reforging
+- Change item properties
+- Reroll random stats
+- Transform item type
+- Requires rare materials
+
+### 6. Special Crafting
+
+#### Legendary Crafting Quests
+Each legendary item requires:
+1. Ancient recipe discovery
+2. Rare material gathering
+3. Special boss defeats
+4. Crafting ritual/minigame
+
+#### Dragon Equipment
+After defeating the dragon:
+- **Dragon Scale Armor**: Ultimate defense
+- **Dragon Fang Weapons**: Highest damage
+- **Dragon Eye Amulet**: All-seeing
+- **Dragon Heart Elixir**: Permanent stats
+
+### 7. Resource Management
+
+#### Storage Solutions
+- **Bank Vaults**: Town storage
+- **Portable Bags**: Increase capacity
+- **Resource Deposits**: Crafting material storage
+- **Shared Stash**: Between characters
+
+#### Material Conversion
+- Break down items for materials
+- Combine lesser materials
+- Transmute between types
+- Recycling for partial returns
+
+### 8. Economic Integration
+
+#### Crafted Item Value
+```
+Value = Material Cost + Skill Level + Rarity + Enchantments
+Market Demand affects selling price
+Reputation affects buying prices
+```
+
+#### Trade Skills
+- **Haggling**: Better prices
+- **Appraisal**: See true value
+- **Prospecting**: Find rare materials
+- **Salvaging**: Better breakdown returns
+
+Generate complete inventory/crafting system with:
+- Item database structure
+- Crafting recipe trees
+- Material drop tables
+- UI/UX for crafting interface
+- Save system for inventory
+- Balanced progression curve

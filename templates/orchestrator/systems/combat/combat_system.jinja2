@@ -1,0 +1,619 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the combat system for Dragon's Labyrinth, where traits fundamentally change HOW you fight, not just stats. This is not about "+5 to damage" - it's about completely different combat experiences based on emergent identity.
+
+Key Philosophy:
+- Traits create combat VERBS, not modifiers
+- A Guardian PROTECTS differently than they attack
+- A Berserker sees different UI, different options
+- Combat degrades with dread - enemies become horror
+
+The game uses proximity-based turn combat with emotional weight. As dread increases, combat shifts from tactical to desperate survival.
+
+Generate ALL combat variations for different trait archetypes, showing how each identity fights uniquely.
+
+<!-- FILE: res://systems/combat/combat_manager.gd -->
+extends Node
+class_name CombatManager
+
+signal combat_started(enemies: Array[Enemy])
+signal combat_ended(victory: bool, consequences: Dictionary)
+signal action_performed(action: CombatAction)
+signal trait_verb_unlocked(verb: String)
+
+const DREAD_COMBAT_CHANGES = {
+	DreadLevel.PEACE: {
+		"ui_clarity": 1.0,
+		"action_time": 5.0,
+		"enemy_behavior": "predictable",
+		"death_is": "knockout"
+	},
+	DreadLevel.UNEASE: {
+		"ui_clarity": 0.9,
+		"action_time": 4.0,
+		"enemy_behavior": "aggressive",
+		"death_is": "wounded"
+	},
+	DreadLevel.DREAD: {
+		"ui_clarity": 0.7,
+		"action_time": 3.0,
+		"enemy_behavior": "erratic",
+		"death_is": "dying"
+	},
+	DreadLevel.TERROR: {
+		"ui_clarity": 0.4,
+		"action_time": 2.0,
+		"enemy_behavior": "horrific",
+		"death_is": "death"
+	}
+}
+
+var trait_manager: TraitManager
+var current_combat: Combat
+var available_verbs: Dictionary = {}  # trait -> [verbs]
+
+func _ready() -> void:
+	trait_manager = get_node("/root/TraitManager")
+	trait_manager.trait_gained.connect(_on_trait_gained)
+	trait_manager.trait_milestone.connect(_on_trait_milestone)
+
+func start_combat(enemies: Array[Enemy], context: Dictionary = {}) -> void:
+	current_combat = Combat.new()
+	current_combat.enemies = enemies
+	current_combat.context = context
+	current_combat.dread_level = WorldState.current_dread_level
+	
+	_apply_dread_modifications()
+	_generate_combat_verbs()
+	combat_started.emit(enemies)
+
+func _generate_combat_verbs() -> void:
+	available_verbs.clear()
+	
+	# Basic verbs everyone has
+	available_verbs["basic"] = ["strike", "defend", "flee"]
+	
+	# Trait-specific verbs
+	for trait in trait_manager.get_active_traits():
+		available_verbs[trait.id] = _get_verbs_for_trait(trait)
+
+func _get_verbs_for_trait(trait: Trait) -> Array[String]:
+	# This is where traits fundamentally change combat
+	match trait.archetype:
+		"guardian":
+			return ["shield_other", "stand_ground", "inspire_courage", "sacrifice_self"]
+		"berserker":
+			return ["blood_rage", "ignore_pain", "intimidate", "rampage"]
+		"shadow":
+			return ["vanish", "backstab", "poison_blade", "smoke_bomb"]
+		"sage":
+			return ["analyze_weakness", "mystical_barrier", "confuse", "drain_essence"]
+		"ranger":
+			return ["track_movement", "pin_down", "call_nature", "survival_instinct"]
+		"healer":
+			return ["mend_wounds", "share_pain", "purify", "last_stand"]
+		_:
+			return ["improvise"]  # Emergent gameplay for undefined archetypes
+
+func perform_action(verb: String, target: Node = null) -> void:
+	var action = CombatAction.new()
+	action.verb = verb
+	action.actor = get_node("/root/Player")
+	action.target = target
+	action.trait_modifiers = _get_trait_modifiers_for_verb(verb)
+	
+	# Execute based on verb type
+	match verb:
+		# Guardian verbs
+		"shield_other":
+			_execute_shield_other(action)
+		"stand_ground":
+			_execute_stand_ground(action)
+		"sacrifice_self":
+			_execute_sacrifice_self(action)
+			
+		# Berserker verbs
+		"blood_rage":
+			_execute_blood_rage(action)
+		"rampage":
+			_execute_rampage(action)
+			
+		# Shadow verbs
+		"vanish":
+			_execute_vanish(action)
+		"backstab":
+			_execute_backstab(action)
+			
+		# Universal verbs
+		"strike":
+			_execute_basic_strike(action)
+		"defend":
+			_execute_basic_defend(action)
+		"flee":
+			_execute_flee(action)
+	
+	action_performed.emit(action)
+	_check_combat_end()
+
+func _execute_shield_other(action: CombatAction) -> void:
+	# Guardian protects chosen ally
+	if action.target and action.target.has_method("add_shield"):
+		action.target.add_shield(action.actor.trait_power("guardian"))
+		action.actor.add_trait_experience("guardian", 10)
+		
+		# Narrative moment
+		if randf() < 0.3:
+			_trigger_narrative_moment("guardian_protection", action)
+
+func _execute_blood_rage(action: CombatAction) -> void:
+	# Berserker enters fury state
+	action.actor.enter_rage_state()
+	
+	# Hit ALL nearby enemies
+	for enemy in current_combat.get_enemies_in_range(action.actor.position, 2.0):
+		enemy.take_damage(action.actor.trait_power("berserker") * 0.7)
+	
+	# But also hurt self
+	action.actor.take_damage(action.actor.max_health * 0.1)
+	action.actor.add_trait_experience("berserker", 15)
+
+func _execute_vanish(action: CombatAction) -> void:
+	# Shadow disappears from combat temporarily
+	action.actor.become_invisible(3.0)
+	current_combat.remove_from_turn_order(action.actor)
+	
+	# Set up backstab opportunity
+	action.actor.next_attack_backstab = true
+	action.actor.add_trait_experience("shadow", 8)
+
+func _apply_dread_modifications() -> void:
+	var mods = DREAD_COMBAT_CHANGES[current_combat.dread_level]
+	
+	# UI becomes less clear
+	if has_node("/root/CombatUI"):
+		get_node("/root/CombatUI").set_clarity(mods.ui_clarity)
+	
+	# Time pressure increases
+	current_combat.turn_timer = mods.action_time
+	
+	# Enemy behavior changes
+	for enemy in current_combat.enemies:
+		enemy.behavior_mode = mods.enemy_behavior
+		
+		# At high dread, enemies become horror creatures
+		if current_combat.dread_level >= DreadLevel.DREAD:
+			enemy.enable_horror_mode()
+
+func _trigger_narrative_moment(moment_type: String, action: CombatAction) -> void:
+	# Combat pauses for emotional moments
+	match moment_type:
+		"guardian_protection":
+			DialogueManager.show_combat_dialogue([
+				"You step between them and danger.",
+				"Your body remembers this dance.",
+				"This is who you've become."
+			])
+		"berserker_last_stand":
+			DialogueManager.show_combat_dialogue([
+				"Blood in your eyes.",
+				"But you're still standing.",
+				"They should run."
+			])
+
+# Combat degrades with the world
+func _on_world_dread_increased(new_level: int) -> void:
+	# Existing combats become more horrific
+	if current_combat:
+		current_combat.dread_level = new_level
+		_apply_dread_modifications()
+
+class Combat:
+	var enemies: Array[Enemy] = []
+	var allies: Array[Node] = []
+	var turn_order: Array[Node] = []
+	var context: Dictionary = {}
+	var dread_level: int = DreadLevel.PEACE
+	var turn_timer: float = 5.0
+	
+	func get_enemies_in_range(pos: Vector3, range: float) -> Array[Enemy]:
+		return enemies.filter(func(e): return e.position.distance_to(pos) <= range)
+
+class CombatAction:
+	var verb: String
+	var actor: Node
+	var target: Node
+	var trait_modifiers: Dictionary = {}
+	var consequences: Dictionary = {}
+
+<!-- FILE: res://systems/combat/trait_combat_modifiers.gd -->
+extends Node
+class_name TraitCombatModifiers
+
+# How traits fundamentally change combat mechanics
+const TRAIT_COMBAT_RULES = {
+	"guardian": {
+		"new_mechanics": [
+			"damage_redirection",  # Take hits for others
+			"unbreakable_defense",  # Can't be flanked while defending
+			"rally_on_protect"      # Heal when successfully protecting
+		],
+		"disabled_options": [
+			"flee_while_ally_critical",  # Can't abandon others
+			"stealth_attacks"            # Too honorable
+		],
+		"ui_changes": {
+			"highlight_vulnerable_allies": true,
+			"show_protection_ranges": true,
+			"defense_stance_indicator": true
+		}
+	},
+	"berserker": {
+		"new_mechanics": [
+			"damage_acceleration",   # Each hit makes next hit stronger
+			"ignore_death",         # Can act below 0 HP briefly
+			"fear_aura"            # Enemies may flee
+		],
+		"disabled_options": [
+			"precise_targeting",    # Too angry for precision
+			"defensive_stance"      # Only knows offense
+		],
+		"ui_changes": {
+			"screen_blood_overlay": true,
+			"shaking_interface": true,
+			"rage_meter": true
+		}
+	},
+	"shadow": {
+		"new_mechanics": [
+			"positional_damage",    # Backstab criticals
+			"vanish_counter",      # Disappear when missed
+			"poison_applications"   # Damage over time
+		],
+		"disabled_options": [
+			"direct_confrontation", # Prefers ambush
+			"heavy_armor"          # Restricts movement
+		],
+		"ui_changes": {
+			"enemy_vision_cones": true,
+			"shadow_step_preview": true,
+			"poison_timers": true
+		}
+	},
+	"sage": {
+		"new_mechanics": [
+			"spell_combinations",   # Mix effects
+			"mana_drain",          # Steal enemy resources  
+			"reality_manipulation" # Change battlefield
+		],
+		"disabled_options": [
+			"physical_attacks",    # Weak physically
+			"armor_use"           # Interferes with magic
+		],
+		"ui_changes": {
+			"enemy_weakness_display": true,
+			"spell_combination_hints": true,
+			"mana_flow_visualization": true
+		}
+	}
+}
+
+static func get_combat_modifications(traits: Array[Trait]) -> Dictionary:
+	var modifications = {
+		"new_verbs": [],
+		"disabled_verbs": [],
+		"ui_modifications": {},
+		"special_rules": []
+	}
+	
+	for trait in traits:
+		if trait.archetype in TRAIT_COMBAT_RULES:
+			var rules = TRAIT_COMBAT_RULES[trait.archetype]
+			modifications.new_verbs.append_array(rules.new_mechanics)
+			modifications.disabled_verbs.append_array(rules.disabled_options)
+			modifications.ui_modifications.merge(rules.ui_changes)
+	
+	return modifications
+
+<!-- FILE: res://systems/combat/emotional_combat_state.gd -->
+extends Node
+class_name EmotionalCombatState
+
+# Combat changes based on emotional context
+signal combat_emotion_shifted(new_emotion: String)
+signal desperation_triggered()
+signal companion_traumatized(companion: Companion)
+
+const EMOTIONAL_STATES = {
+	"confident": {
+		"description": "You know you can win this.",
+		"accuracy_mod": 1.1,
+		"damage_mod": 1.0,
+		"defense_mod": 1.0
+	},
+	"desperate": {
+		"description": "This might be your last fight.",
+		"accuracy_mod": 0.8,
+		"damage_mod": 1.3,  # Wild swings
+		"defense_mod": 0.7
+	},
+	"protective": {
+		"description": "Not while you still draw breath.",
+		"accuracy_mod": 1.0,
+		"damage_mod": 0.9,
+		"defense_mod": 1.5
+	},
+	"horrified": {
+		"description": "What have they become?",
+		"accuracy_mod": 0.6,
+		"damage_mod": 0.8,
+		"defense_mod": 0.9
+	},
+	"resigned": {
+		"description": "So this is how it ends.",
+		"accuracy_mod": 1.0,
+		"damage_mod": 1.0,
+		"defense_mod": 0.5  # Given up on defense
+	}
+}
+
+var current_emotion: String = "confident"
+var emotion_stability: float = 1.0  # How quickly emotions change
+
+func update_combat_emotion(combat_context: Dictionary) -> void:
+	var new_emotion = _determine_emotion(combat_context)
+	
+	if new_emotion != current_emotion:
+		current_emotion = new_emotion
+		combat_emotion_shifted.emit(new_emotion)
+		_apply_emotion_effects()
+
+func _determine_emotion(context: Dictionary) -> String:
+	# Companion in danger?
+	if context.has("companion_critical") and context.companion_critical:
+		return "protective"
+	
+	# Outnumbered badly?
+	if context.get("enemy_count", 0) > context.get("ally_count", 1) * 3:
+		return "desperate"
+	
+	# Fighting former friends?
+	if context.has("enemy_was_friend") and context.enemy_was_friend:
+		return "horrified"
+	
+	# Low health, no healing?
+	if context.get("player_health_percent", 1.0) < 0.2:
+		if context.get("healing_available", true):
+			return "desperate"
+		else:
+			return "resigned"
+	
+	return "confident"
+
+func _apply_emotion_effects() -> void:
+	var state = EMOTIONAL_STATES[current_emotion]
+	
+	# Modify combat calculations
+	CombatManager.set_emotion_modifiers(state)
+	
+	# Show emotional state in UI
+	if has_node("/root/CombatUI"):
+		get_node("/root/CombatUI").show_emotional_state(current_emotion, state.description)
+	
+	# Special triggers
+	if current_emotion == "desperate" and randf() < 0.3:
+		desperation_triggered.emit()
+
+# Companions react to your combat emotions
+func check_companion_trauma(companion: Companion, combat_result: Dictionary) -> void:
+	if current_emotion in ["horrified", "resigned"]:
+		companion.add_trauma("saw_you_give_up", 15)
+		companion_traumatized.emit(companion)
+	
+	if combat_result.get("you_killed_innocent", false):
+		companion.add_trauma("watched_you_murder", 50)
+		companion_traumatized.emit(companion)
+
+<!-- FILE: res://systems/combat/combat_dread_progression.gd -->
+extends Node
+class_name CombatDreadProgression
+
+# How combat horrifically transforms as you approach the dragon
+
+const COMBAT_DREAD_STAGES = {
+	DreadLevel.PEACE: {
+		"enemy_types": ["bandit", "wolf", "goblin"],
+		"death_description": "falls unconscious",
+		"combat_music": "adventurous_battle",
+		"post_combat": "victory_fanfare",
+		"loot_system": true
+	},
+	DreadLevel.UNEASE: {
+		"enemy_types": ["desperate_bandit", "rabid_wolf", "crazed_goblin"],
+		"death_description": "stops moving",
+		"combat_music": "tense_battle", 
+		"post_combat": "uncomfortable_silence",
+		"loot_system": true
+	},
+	DreadLevel.DREAD: {
+		"enemy_types": ["pleading_bandit", "wrong_wolf", "sobbing_goblin"],
+		"death_description": "begs for mercy, then dies",
+		"combat_music": "sorrowful_battle",
+		"post_combat": "guilt_theme",
+		"loot_system": false  # You don't want to touch them
+	},
+	DreadLevel.TERROR: {
+		"enemy_types": ["was_human", "shaped_like_wolf", "remembered_name"],
+		"death_description": "thanks you as they die",
+		"combat_music": "distorted_echoes",
+		"post_combat": "absolute_silence",
+		"loot_system": false
+	},
+	DreadLevel.HORROR: {
+		"enemy_types": ["your_reflection", "childhood_friend", "what_you_could_have_been"],
+		"death_description": "you're not sure they died",
+		"combat_music": "your_heartbeat",
+		"post_combat": "labyrinth_breathing",
+		"loot_system": false
+	}
+}
+
+signal combat_became_horror(enemy_type: String)
+signal player_killed_innocent()
+signal combat_mercy_possible(enemy: Enemy)
+
+func transform_enemy_for_dread(enemy: Enemy, dread_level: int) -> void:
+	var stage = COMBAT_DREAD_STAGES[dread_level]
+	
+	if dread_level >= DreadLevel.DREAD:
+		# Enemies start pleading
+		enemy.enable_dialogue_during_combat()
+		enemy.combat_lines = _get_pleading_lines(enemy.base_type)
+		
+		# They might have been human once
+		if randf() < 0.3:
+			enemy.reveal_human_origin()
+			combat_became_horror.emit(enemy.base_type)
+	
+	if dread_level >= DreadLevel.TERROR:
+		# Combat becomes genuinely uncomfortable
+		enemy.death_animation = "grateful_death"
+		enemy.pre_death_dialogue = ["Finally...", "Thank you...", "I remember... sunshine..."]
+
+func _get_pleading_lines(enemy_type: String) -> Array[String]:
+	match enemy_type:
+		"bandit":
+			return [
+				"I have children!",
+				"I just wanted food!",
+				"Please, I'll leave these lands!"
+			]
+		"wolf":
+			return [
+				"*whimpers*",
+				"*shows belly submissively*",
+				"*eyes too human*"
+			]
+		"goblin":
+			return [
+				"Not want fight!",
+				"Me sorry! Me sorry!",
+				"Have family in cave!"
+			]
+		_:
+			return ["Please...", "No more...", "Why...?"]
+
+func check_mercy_options(enemy: Enemy) -> bool:
+	# At high dread, mercy might be possible but has consequences
+	if WorldState.current_dread_level >= DreadLevel.DREAD:
+		if enemy.health_percent < 0.3 and not enemy.has_attacked_this_turn:
+			combat_mercy_possible.emit(enemy)
+			return true
+	return false
+
+func apply_combat_consequences(combat_result: Dictionary) -> void:
+	# Killing at high dread has permanent effects
+	if WorldState.current_dread_level >= DreadLevel.DREAD:
+		for death in combat_result.deaths:
+			if death.was_pleading or death.was_human_once:
+				player_killed_innocent.emit()
+				PlayerStats.add_permanent_guilt(10)
+				
+				# Companions judge you
+				for companion in PartyManager.get_companions():
+					companion.witness_unnecessary_death()
+
+<!-- FILE: res://systems/combat/combat_manifest.json -->
+{
+  "system": "combat",
+  "version": "1.0.0",
+  "description": "Trait-based combat where identity determines fighting style",
+  "philosophy": "Combat is not about numbers but about who you've become",
+  
+  "combat_verbs": {
+    "universal": ["strike", "defend", "flee", "wait", "use_item"],
+    "guardian": ["shield_other", "stand_ground", "inspire_courage", "sacrifice_self", "defensive_formation"],
+    "berserker": ["blood_rage", "ignore_pain", "intimidate", "rampage", "berserk_charge"],
+    "shadow": ["vanish", "backstab", "poison_blade", "smoke_bomb", "shadow_step"],
+    "sage": ["analyze_weakness", "mystical_barrier", "confuse", "drain_essence", "reality_tear"],
+    "ranger": ["track_movement", "pin_down", "call_nature", "survival_instinct", "hunter_mark"],
+    "healer": ["mend_wounds", "share_pain", "purify", "last_stand", "life_link"]
+  },
+  
+  "dread_progression": {
+    "peace": {
+      "combat_feel": "heroic adventure",
+      "enemy_behavior": "video game enemies",
+      "death_impact": "minimal",
+      "ui_style": "clear and gamey"
+    },
+    "unease": {
+      "combat_feel": "desperate struggle", 
+      "enemy_behavior": "erratic and aggressive",
+      "death_impact": "uncomfortable",
+      "ui_style": "slightly unclear"
+    },
+    "dread": {
+      "combat_feel": "tragic necessity",
+      "enemy_behavior": "pleading and human",
+      "death_impact": "haunting",
+      "ui_style": "obscured by emotion"
+    },
+    "terror": {
+      "combat_feel": "nightmare logic",
+      "enemy_behavior": "wrong and familiar",
+      "death_impact": "psychological scar", 
+      "ui_style": "breaking apart"
+    },
+    "horror": {
+      "combat_feel": "fighting yourself",
+      "enemy_behavior": "mirrors and memories",
+      "death_impact": "identity damage",
+      "ui_style": "first-person panic"
+    }
+  },
+  
+  "trait_integration": {
+    "description": "Traits don't add bonuses - they change the fundamental nature of combat",
+    "examples": {
+      "guardian_combat": "See ally health bars larger than your own, damage redirection options",
+      "berserker_combat": "UI shakes with rage, can't see exact HP numbers, only 'HURT THEM'",
+      "shadow_combat": "See enemy vision cones, backstab indicators, stealth timers",
+      "sage_combat": "See magical weaknesses, spell combination hints, reality break points"
+    }
+  },
+  
+  "audio_integration": {
+    "combat_music": {
+      "peace": ["heroic_battle_theme.ogg", "adventure_combat.ogg"],
+      "unease": ["tense_strings.ogg", "uncomfortable_rhythm.ogg"],
+      "dread": ["mournful_combat.ogg", "tragedy_theme.ogg"],
+      "terror": ["distorted_battle.ogg", "breaking_reality.ogg"],
+      "horror": ["heartbeat_only.ogg", "labyrinth_breathing.ogg"]
+    },
+    "combat_sounds": {
+      "sword_hit": ["freesound:sword_clash", "freesound:metal_impact"],
+      "guardian_block": ["freesound:shield_bash", "freesound:metal_ring"],
+      "berserker_rage": ["freesound:primal_scream", "freesound:beast_roar"],
+      "shadow_vanish": ["freesound:smoke_puff", "freesound:cloth_swoosh"],
+      "spell_cast": ["freesound:magic_chime", "freesound:energy_charge"]
+    }
+  }
+}
+
+<!-- PHILOSOPHY -->
+Dragon's Labyrinth combat is not about optimization or builds. It's about how your emergent identity - your traits - fundamentally changes the way you interact with violence.
+
+A Guardian doesn't just have "higher defense" - they see the battlefield differently, with ally health bars prominently displayed and damage redirection options. Their UI literally prevents them from fleeing while allies are critical.
+
+A Berserker doesn't get "+10% damage" - their screen shakes with rage, exact numbers become obscured, and they can only see "HURT THEM" over enemy heads. They can't even access defensive options.
+
+As dread increases, combat stops being about winning and becomes about what you're willing to do to survive. Enemies transform from "video game obstacles" to pleading beings who might have been human once.
+
+By the time you reach the dragon, combat has become a horror where you might be fighting your own memories, using verbs that damage your very identity. The question isn't "Can you win?" but "What will be left of you if you do?"
+
+<!-- INTEGRATION POINTS -->
+- Trait System: Every combat verb comes from traits
+- Dread System: Combat degrades with world emotional state  
+- Companion System: Companions react to your combat choices
+- Quest System: How you fight affects quest outcomes
+- NPC System: Your combat reputation precedes you
+- Inventory System: What you craft reflects how you fight

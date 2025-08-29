@@ -1,0 +1,209 @@
+# Generate PvP Arena System
+
+## Context
+Create a balanced PvP arena system that allows players to test their builds against each other in tactical hex-based combat. The system should support both real-time and asynchronous multiplayer modes.
+
+## Arena Modes
+
+### 1. Duel Mode (1v1)
+- **Ranked Matches**: ELO-based matchmaking
+- **Casual Matches**: Open challenges
+- **Private Matches**: Challenge friends
+- **Practice Mode**: Against AI mimicking player behavior
+- **Tournament Mode**: Scheduled competitions
+
+### 2. Team Battle (3v3)
+- Each player controls one character
+- Companion AI disabled
+- Coordinated tactics required
+- Voice chat integration
+- Spectator mode for learning
+
+### 3. Tactical Chess (Asynchronous)
+- Turn-based with 24-hour timer
+- Play multiple matches simultaneously
+- Review match history
+- Send preset emotes
+- Perfect for different time zones
+
+## Arena Mechanics
+
+### 1. Hex Arena Designs
+Rotating selection of arenas:
+- **Classic Hexagon**: 19 hexes, no obstacles
+- **Pillar Fort**: Cover positions, elevation
+- **Lava Bridges**: Environmental hazards
+- **Ice Rink**: Movement mechanics altered
+- **Maze Runner**: Limited visibility
+- **King of the Hill**: Central objective
+- **Random Generated**: New layout each match
+
+### 2. Balance Systems
+
+#### Gear Normalization
+```
+PvP Stat Scaling:
+- All gear scaled to same item level
+- Legendary effects disabled or balanced
+- Set bonuses capped at 2-piece
+- Consumables limited or banned
+- Mount abilities disabled
+
+OR
+
+Templates Mode:
+- Choose from preset gear sets
+- Equal stats for all players
+- Focus on skill not gear
+```
+
+#### Class Balance
+- Separate PvP balance from PvE
+- Weekly balance patches
+- Community feedback integration
+- Win rate tracking per class
+- Nerf/buff carefully with data
+
+### 3. Matchmaking System
+- **Placement Matches**: 10 matches to determine initial rank
+- **Rank Tiers**:
+  - Bronze (0-1000)
+  - Silver (1000-1500)
+  - Gold (1500-2000)
+  - Platinum (2000-2500)
+  - Diamond (2500-3000)
+  - Dragon (3000+)
+- **Seasonal Resets**: Every 3 months
+- **Region-Based**: Low latency priority
+
+## PvP Progression
+
+### 1. Honor System
+Earn honor points for:
+- Match victories: 100 honor
+- Match participation: 25 honor
+- Daily first win: 200 honor bonus
+- Weekly challenges: 500 honor each
+- Season placement: 1000-5000 honor
+
+### 2. PvP Rewards
+
+#### Honor Shop
+- **PvP-Exclusive Gear**: Cosmetic variations
+- **Arena Mounts**: Show off ranking
+- **Titles**: "Gladiator", "Arena Master"
+- **Emotes**: Victory celebrations
+- **Portrait Frames**: Seasonal rewards
+- **Weapon Effects**: Glowing enchantments
+
+#### Seasonal Rewards
+Based on final rank:
+- Unique armor sets
+- Exclusive mounts
+- Loading screen art
+- Character voice lines
+- Special spell effects
+
+### 3. Leaderboards
+- Global rankings
+- Class-specific boards
+- Regional boards
+- Guild rankings
+- Friend comparisons
+
+## Combat Adaptations
+
+### 1. PvP-Specific Abilities
+Some abilities work differently:
+```
+PvE: Stun lasts 3 turns
+PvP: Stun lasts 1 turn
+
+PvE: Heal restores 50% HP
+PvP: Heal restores 25% HP
+
+PvE: Ultimate has 5 turn cooldown
+PvP: Ultimate has 8 turn cooldown
+```
+
+### 2. Crowd Control Diminishing Returns
+- First stun: 100% duration
+- Second stun: 50% duration
+- Third stun: 25% duration
+- Immunity for 2 turns after
+
+### 3. Turn Timers
+- 60 seconds per turn
+- 15 second warning
+- Auto-play basic action if timeout
+- Forfeit after 3 timeouts
+
+## Social Features
+
+### 1. Spectator Mode
+- Watch live matches
+- Free camera control
+- See both players' cards/cooldowns
+- Chat with other spectators
+- Learn from top players
+
+### 2. Replay System
+- Save last 20 matches
+- Share replay codes
+- Download pro replays
+- Slow motion analysis
+- Commentary tracks
+
+### 3. Arena Guilds
+- PvP-focused guild features
+- Guild wars (20v20 battles)
+- Guild rankings
+- Exclusive guild rewards
+- Training rooms
+
+## Anti-Cheat & Fair Play
+
+### 1. Server Authority
+- All calculations server-side
+- Client only sends inputs
+- Regular state validation
+- Automatic rollback on desync
+
+### 2. Report System
+- Report suspicious behavior
+- Review panel of veteran players
+- Penalties for false reports
+- Rewards for accurate reports
+
+### 3. Penalties
+- Warning → 1 day ban → 1 week ban → Season ban → Permanent
+- Separate PvE access maintained
+- Appeal process available
+
+## Integration with PvE
+
+### 1. Practice Arena
+- Test PvE builds in PvP setting
+- AI opponents use player builds
+- No rewards but good practice
+- Experiment freely
+
+### 2. PvP Quests
+- "Win 3 arena matches"
+- "Deal 1000 damage in PvP"
+- "Play each arena map"
+- Rewards useful in both modes
+
+### 3. Hybrid Events
+- PvPvE battles
+- Defend against waves while fighting
+- Environmental objectives
+- Mixed rewards
+
+Generate complete PvP system with:
+- Netcode architecture
+- Matchmaking algorithms
+- Balance framework
+- Progression tracking
+- Anti-cheat systems
+- Spectator infrastructure

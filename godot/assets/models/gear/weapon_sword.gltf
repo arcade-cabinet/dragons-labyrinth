@@ -1,0 +1,185 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "dragons-labyrinth/blender-bridge"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sword",
+      "nodes": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "blade",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "rotation": null,
+      "scale": [
+        0.02,
+        0.08,
+        0.4
+      ]
+    },
+    {
+      "name": "crossguard",
+      "mesh": 1,
+      "translation": [
+        0.0,
+        0.0,
+        0.1
+      ],
+      "rotation": null,
+      "scale": [
+        0.02,
+        0.2,
+        0.02
+      ]
+    },
+    {
+      "name": "handle",
+      "mesh": 2,
+      "translation": [
+        0.0,
+        0.0,
+        -0.05
+      ],
+      "rotation": null,
+      "scale": [
+        0.02,
+        0.02,
+        0.1
+      ]
+    },
+    {
+      "name": "pommel",
+      "mesh": 3,
+      "translation": [
+        0.0,
+        0.0,
+        -0.15
+      ],
+      "rotation": null,
+      "scale": [
+        0.03,
+        0.03,
+        0.03
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "blade",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "crossguard",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "handle",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "pommel",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Blade",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.7,
+          0.7,
+          0.75,
+          1.0
+        ],
+        "metallicFactor": 0.9,
+        "roughnessFactor": 0.2
+      },
+      "doubleSided": false
+    },
+    {
+      "name": "Hilt",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.2,
+          0.15,
+          0.1,
+          1.0
+        ],
+        "metallicFactor": 0.3,
+        "roughnessFactor": 0.6
+      },
+      "doubleSided": false
+    },
+    {
+      "name": "Pommel",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.5,
+          0.4,
+          0.2,
+          1.0
+        ],
+        "metallicFactor": 0.7,
+        "roughnessFactor": 0.3
+      },
+      "doubleSided": false
+    }
+  ],
+  "buffers": [],
+  "bufferViews": [],
+  "accessors": []
+}

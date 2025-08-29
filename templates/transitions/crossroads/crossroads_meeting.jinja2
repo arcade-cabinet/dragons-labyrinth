@@ -1,0 +1,682 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the Crossroads Meeting Transition for Dragon's Labyrinth - the transition from UNEASE to DREAD.
+
+NARRATIVE CONTEXT:
+- Current emotional stage: {{ emotional_stage }}
+- The world has shifted to UNEASE - fog is common, people are nervous
+- The player has proven themselves in the Bandit Cave
+- Now they must face a choice about companionship as darkness grows
+- This is where isolation or connection becomes defining
+
+CORE CONCEPT - THE WEIGHT OF CONNECTION:
+At the crossroads where three paths meet at dusk, the player faces a test of relationships and trust. This isn't combat - it's about whether you can form meaningful bonds before the world gets too dark. The transition tests companion synergy and emotional intelligence.
+
+THE EXPERIENCE:
+
+1. **Approaching the Crossroads** (Hex view with growing tension):
+   - Three roads converge in perpetual twilight
+   - Fog thicker here, visibility reduced
+   - Strange monument at center - ancient, pre-dragon
+   - NPCs warn: "Don't go there alone. People... change at the crossroads."
+
+2. **The Gathering Dusk** (Atmospheric buildup):
+   - Sun sets but never fully - stuck at dusk
+   - Shadows from three directions don't align properly
+   - If alone: Crushing sense of isolation grows
+   - If with companion: They grow nervous, need reassurance
+
+3. **The Crossroads Entity** (Not quite human):
+   - Emerges from monument's shadow
+   - Appears as idealized version of what you most need:
+     * If alone: Potential companion perfectly suited to you
+     * If you have one companion: Another that complements
+     * If you rejected first companion: Same one, changed
+   - Speaks in riddles about "the weight of solitude"
+
+4. **The Test of Bonds** (Core challenge):
+   
+   **If Alone:**
+   - Entity offers companionship but tests your capacity for trust
+   - Series of trust exercises that get increasingly intimate
+   - Must prove you can be vulnerable
+   - Failure: Remain alone, gain "Confirmed Loner" trait
+   
+   **If One Companion:**
+   - Entity offers to join, creating dynamic trio
+   - Tests how well you know your current companion
+   - Companion may object - jealousy mechanics
+   - Must balance relationships or lose both
+   
+   **If Previously Rejected:**
+   - Original companion returns, transformed by their own journey
+   - They've grown stronger alone
+   - Harder to convince but more valuable if successful
+   - This is your LAST CHANCE for first companion
+
+5. **The Emotional Labyrinth** (Unique mechanics):
+   - Not physical combat but emotional navigation
+   - Dialogue choices have weight - literally
+   - Wrong choices make fog thicker, right ones clear paths
+   - Companion abilities affect available options:
+     * Cheerful companion: Can dispel growing dread
+     * Serious companion: Sees through illusions
+     * Mysterious companion: Understands the entity
+
+6. **The Three Paths Trial** (Culmination):
+   - Must choose which path to take - but catch:
+   - If alone: All paths lead to suffering
+   - With companion(s): They can scout other paths
+   - Perfect coordination: Can influence all three paths
+   - Each path represents different future:
+     * Left: Path of Power (combat challenges ahead)
+     * Right: Path of Knowledge (puzzle challenges ahead)
+     * Center: Path of Sacrifice (moral challenges ahead)
+
+UNIQUE MECHANICS:
+
+**Relationship Resonance System:**
+- Companions have emotional states that fluctuate
+- Your responses affect their stability
+- Unstable companions might flee or betray
+- Stable companions unlock combination abilities
+
+**Trust Building Minigames:**
+- "Share a Fear": Reveal vulnerabilities for bond points
+- "Back-to-Back": Navigate blind while companion guides
+- "Shared Dream": Enter companion's nightmare, help them
+
+**The Entity's Tests:**
+- Changes based on your traits
+- If warrior: Tests emotional intelligence
+- If scholar: Tests intuition and faith
+- If loner: Tests ability to open up
+
+FAILURE STATES:
+- Companion leaves due to neglect
+- Entity deems you "unworthy of connection"
+- Succumb to isolation madness
+- Choose wrong path and get locked into harder route
+
+PERFORMANCE TRACKING:
+- Relationship depth achieved
+- Trust exercises completed
+- Emotional intelligence shown
+- Path chosen and reasoning
+- Companion synergy rating
+
+PERMANENT CONSEQUENCES:
+
+**Trait Impacts:**
+- Accepted second companion → "Leader" trait
+- Rejected all companionship → "Lone Wolf" trait  
+- Deepened existing bond → "True Friend" trait
+- Managed jealousy well → "Diplomat" trait
+- Failed emotional tests → "Emotionally Stunted" trait
+
+**Companion Changes:**
+- First companion may evolve based on experience
+- New companion starts with unique abilities
+- Rejection creates recurring "What If" encounters
+- Success unlocks combination attacks/abilities
+
+**World Changes:**
+- Path chosen affects next zones
+- Fog patterns change based on relationship status
+- NPCs comment on your growing party or isolation
+- Merchant prices affected by "loner tax" or "group discount"
+
+ENVIRONMENTAL DETAILS:
+- Crossroads exists outside normal time
+- Three moons visible simultaneously  
+- Monument has names of previous travelers
+- Your shadow(s) sometimes move independently
+- Ground is soft, footprints disappear quickly
+
+AUDIO DESIGN:
+- Three different musical themes from each road
+- They clash, creating dissonance
+- Harmonize only with proper companion synergy
+- Entity speaks in layered voices
+- Emotional moments have heartbeat audio
+
+THE ENTITY'S NATURE:
+- Never fully explained
+- Might be:
+  * Ancient pre-dragon guardian
+  * Manifestation of crossroads magic
+  * The player's own need given form
+  * First sign of reality breaking down
+- Remembers previous players' choices
+
+ENDING VARIATIONS:
+
+**Solo Path:**
+- Entity vanishes, disappointed
+- Crossroads crumble slightly
+- Gain powerful solo abilities but...
+- Dread accumulates faster when alone
+- Achievement: "The Weight of Solitude"
+
+**New Companion Path:**
+- Entity nods approvingly, fades
+- New companion's backstory revealed
+- Gain synergy abilities
+- Dread shared between party
+- Achievement: "Strength in Numbers"
+
+**Deepened Bond Path:**
+- Entity transforms into blessing
+- Existing companion gains new form/abilities
+- Unlock "Soul Bond" mechanics
+- Shared health/mana pools
+- Achievement: "Unbreakable Connection"
+
+**Perfect Harmony Path (Secret):**
+- Achieve perfect synergy with 2 companions
+- Entity reveals true form briefly
+- Grants party-wide blessing
+- All three paths partially accessible
+- Achievement: "Trinity of Trust"
+
+Generate complete implementation focusing on emotional mechanics, relationship systems, and non-combat challenge resolution.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: crossroads_meeting.gd -->
+extends Node3D
+
+class_name CrossroadsMeeting
+
+signal transition_complete(performance: Dictionary)
+signal transition_failed(reason: String)
+signal companion_joined(companion: CompanionData)
+signal relationship_changed(companion_id: String, new_value: float)
+
+@onready var environment = $CrossroadsEnvironment
+@onready var entity = $CrossroadsEntity
+@onready var dialogue_system = $DialogueSystem
+@onready var emotional_maze = $EmotionalMaze
+@onready var monument = $Monument
+@onready var fog_system = $FogSystem
+
+var performance_tracker = {
+    "relationship_depth": 0.0,
+    "trust_exercises_completed": [],
+    "emotional_intelligence": 0.0,
+    "path_chosen": "",
+    "companion_synergy": 0.0,
+    "entity_approval": 0.0,
+    "perfect_harmony": false
+}
+
+var current_companions: Array[Companion] = []
+var relationship_states: Dictionary = {}  # companion_id -> float (0-1)
+var emotional_stability: float = 1.0
+var crossroads_time_elapsed: float = 0.0
+var available_paths = ["power", "knowledge", "sacrifice"]
+
+# Trust exercise definitions
+const TRUST_EXERCISES = {
+    "share_fear": {
+        "name": "Share a Fear",
+        "description": "Reveal vulnerabilities for deeper connection",
+        "solo_penalty": 0.3
+    },
+    "back_to_back": {
+        "name": "Back-to-Back Navigation", 
+        "description": "Navigate blind while companion guides",
+        "requires_companion": true
+    },
+    "shared_dream": {
+        "name": "Enter Shared Nightmare",
+        "description": "Experience companion's deepest fear together",
+        "requires_deep_bond": true
+    }
+}
+
+func _ready():
+    # Gather current companion data
+    current_companions = GlobalState.get_active_companions()
+    
+    # Initialize relationship states
+    for companion in current_companions:
+        relationship_states[companion.id] = companion.bond_level
+    
+    # Set up crossroads environment
+    _initialize_crossroads()
+
+func _initialize_crossroads():
+    # Stuck at eternal dusk
+    environment.set_time_of_day("eternal_dusk")
+    environment.enable_three_moons()
+    
+    # Fog based on isolation
+    var isolation_level = 1.0 if current_companions.is_empty() else 0.5
+    fog_system.set_density(isolation_level)
+    
+    # Monument reveals history
+    monument.set_inscriptions(_generate_previous_travelers())
+    
+    # Start atmospheric audio
+    AudioManager.play_crossroads_theme(current_companions.size())
+    
+    # Begin encounter
+    _spawn_entity()
+
+func _spawn_entity():
+    # Entity appears based on player need
+    var entity_form = _determine_entity_form()
+    entity.manifest(entity_form)
+    
+    # Different dialogue based on situation
+    entity.dialogue_ready.connect(_begin_entity_dialogue)
+    
+    # Entity evaluates you constantly
+    entity.evaluation_changed.connect(_on_entity_evaluation)
+
+func _determine_entity_form() -> String:
+    if current_companions.is_empty():
+        # Appears as ideal companion
+        return _calculate_ideal_companion_type()
+    elif current_companions.size() == 1:
+        # Appears as complementary companion
+        return _calculate_complementary_type(current_companions[0])
+    else:
+        # Appears as abstract guardian
+        return "guardian_of_bonds"
+
+func _begin_entity_dialogue():
+    dialogue_system.start_conversation("crossroads_entity")
+    
+    if current_companions.is_empty():
+        _handle_solo_dialogue()
+    elif current_companions.size() == 1:
+        _handle_duo_dialogue()
+    else:
+        _handle_group_dialogue()
+
+func _handle_solo_dialogue():
+    # Entity tests your capacity for connection
+    dialogue_system.add_branch({
+        "entity": "You walk alone. Is this strength or fear?",
+        "choices": [
+            {"text": "I need no one.", "trait": "loner", "approval": -0.2},
+            {"text": "I... I'm afraid to trust.", "trait": "honest", "approval": 0.3},
+            {"text": "I haven't found the right companion.", "trait": "selective", "approval": 0.1}
+        ]
+    })
+    
+    var choice = await dialogue_system.choice_made
+    _process_solo_choice(choice)
+
+func _handle_duo_dialogue():
+    # Entity tests your existing bond
+    var companion = current_companions[0]
+    
+    dialogue_system.add_branch({
+        "entity": "You travel with %s. But do you truly know them?" % companion.name,
+        "choices": [
+            {"text": "We're partners, nothing more.", "approval": -0.1},
+            {"text": "They're... important to me.", "approval": 0.2},
+            {"text": "I would die for them.", "approval": 0.3, "requires_bond": 0.7}
+        ]
+    })
+    
+    # Companion reacts
+    companion.react_to_statement(await dialogue_system.choice_made)
+
+func _initiate_trust_exercise(exercise_id: String):
+    var exercise = TRUST_EXERCISES[exercise_id]
+    
+    if exercise.get("requires_companion", false) and current_companions.is_empty():
+        UI.show_notification("This exercise requires a companion...")
+        performance_tracker.emotional_intelligence -= 0.1
+        return
+    
+    # Create exercise UI
+    var exercise_ui = preload("res://ui/trust_exercise.tscn").instantiate()
+    add_child(exercise_ui)
+    
+    match exercise_id:
+        "share_fear":
+            _run_share_fear_exercise(exercise_ui)
+        "back_to_back":
+            _run_back_to_back_exercise(exercise_ui)
+        "shared_dream":
+            _run_shared_dream_exercise(exercise_ui)
+
+func _run_share_fear_exercise(ui):
+    # Player must reveal genuine vulnerability
+    ui.setup_fear_sharing()
+    
+    var fears_to_share = [
+        "I'm afraid I'll fail everyone counting on me",
+        "I fear the dragon is already inside my mind",
+        "I'm terrified of dying alone",
+        "I fear I'm becoming something monstrous"
+    ]
+    
+    ui.set_fear_options(fears_to_share)
+    var chosen_fear = await ui.fear_selected
+    
+    # Companion/Entity responds with empathy
+    if not current_companions.is_empty():
+        var companion = current_companions[0]
+        companion.share_reciprocal_fear()
+        relationship_states[companion.id] += 0.2
+        performance_tracker.relationship_depth += 0.3
+    else:
+        entity.respond_to_vulnerability(chosen_fear)
+        performance_tracker.entity_approval += 0.2
+
+func _run_emotional_maze():
+    # Not a physical maze but dialogue choices with weight
+    emotional_maze.initialize(current_companions)
+    
+    # Each choice literally affects the fog
+    emotional_maze.choice_made.connect(_on_emotional_choice)
+    
+    # Companion abilities affect options
+    for companion in current_companions:
+        var special_options = companion.get_emotional_insights()
+        emotional_maze.add_companion_options(special_options)
+    
+    # Navigate through emotional challenges
+    var challenges = [
+        "Your companion doubts your leadership",
+        "The entity questions your motives",  
+        "Your shadow whispers your failures",
+        "The fog shows visions of loneliness"
+    ]
+    
+    for challenge in challenges:
+        await emotional_maze.present_challenge(challenge)
+
+func _on_emotional_choice(choice: String, weight: float):
+    # Right choices clear fog, wrong ones thicken it
+    if weight > 0:
+        fog_system.reduce_density(weight * 0.1)
+        performance_tracker.emotional_intelligence += weight
+    else:
+        fog_system.increase_density(abs(weight) * 0.1)
+        emotional_stability -= abs(weight) * 0.1
+    
+    # Companions react to your emotional intelligence
+    for companion in current_companions:
+        companion.adjust_stability(emotional_stability)
+
+func _present_three_paths():
+    # The crucial choice
+    environment.reveal_three_paths()
+    
+    # Each path whispers its nature
+    AudioManager.play_3d("power_whispers", environment.get_left_path_position())
+    AudioManager.play_3d("knowledge_whispers", environment.get_right_path_position())
+    AudioManager.play_3d("sacrifice_whispers", environment.get_center_path_position())
+    
+    # Solo vs group mechanics
+    if current_companions.is_empty():
+        _present_solo_path_choice()
+    else:
+        _present_group_path_choice()
+
+func _present_solo_path_choice():
+    # All paths lead to suffering when alone
+    UI.show_narrative("The three paths stretch before you...")
+    UI.show_narrative("Each whispers of trials ahead...")
+    UI.show_narrative("Alone, you can only guess at their nature.")
+    
+    var choice_ui = preload("res://ui/path_choice.tscn").instantiate()
+    add_child(choice_ui)
+    
+    choice_ui.setup_paths({
+        "power": "Path of Power - Combat trials await",
+        "knowledge": "Path of Knowledge - Mental challenges ahead",
+        "sacrifice": "Path of Sacrifice - Moral dilemmas to come"
+    })
+    
+    choice_ui.add_warning("Without companions to scout, you choose blind...")
+    
+    performance_tracker.path_chosen = await choice_ui.path_selected
+
+func _present_group_path_choice():
+    # Companions can scout other paths
+    UI.show_narrative("Your companions offer to scout the paths...")
+    
+    # Each companion can investigate one path
+    var scouting_results = {}
+    for i in min(current_companions.size(), available_paths.size()):
+        var companion = current_companions[i]
+        var path = available_paths[i]
+        
+        UI.show_narrative("%s investigates the %s path..." % [companion.name, path])
+        await get_tree().create_timer(2.0).timeout
+        
+        scouting_results[path] = companion.scout_path(path)
+    
+    # Present findings
+    _show_scouting_results(scouting_results)
+    
+    # Make informed choice
+    var choice_ui = preload("res://ui/path_choice.tscn").instantiate()
+    add_child(choice_ui)
+    choice_ui.setup_paths_with_info(scouting_results)
+    
+    performance_tracker.path_chosen = await choice_ui.path_selected
+    
+    # Perfect harmony check
+    if current_companions.size() >= 2 and performance_tracker.companion_synergy > 0.8:
+        _attempt_perfect_harmony()
+
+func _attempt_perfect_harmony():
+    # Secret ending - access all paths partially
+    entity.reveal_true_form()
+    
+    UI.show_narrative("Your perfect unity impresses the entity...")
+    UI.show_narrative("'You have achieved what few can - true harmony.'")
+    UI.show_narrative("'I grant you glimpses of all paths.'")
+    
+    performance_tracker.perfect_harmony = true
+    
+    # Grant blessings
+    for companion in current_companions:
+        companion.receive_harmony_blessing()
+    
+    GlobalState.player.receive_harmony_blessing()
+
+func _complete_transition():
+    # Calculate results
+    _finalize_performance()
+    
+    # Entity's final words based on outcome
+    if performance_tracker.entity_approval > 0.7:
+        entity.give_blessing()
+    elif performance_tracker.entity_approval < 0.3:
+        entity.give_warning()
+    else:
+        entity.give_neutral_farewell()
+    
+    # Update world state
+    GlobalState.current_phase = "dread"
+    GlobalState.chosen_path = performance_tracker.path_chosen
+    
+    # Companion finalization
+    _finalize_companion_states()
+    
+    # Complete
+    transition_complete.emit(performance_tracker)
+
+func _finalize_performance():
+    # Weight different aspects
+    var relationship = performance_tracker.relationship_depth * 0.3
+    var trust = performance_tracker.trust_exercises_completed.size() * 0.1
+    var emotional = performance_tracker.emotional_intelligence * 0.2
+    var synergy = performance_tracker.companion_synergy * 0.2
+    var approval = performance_tracker.entity_approval * 0.2
+    
+    performance_tracker["final_score"] = relationship + trust + emotional + synergy + approval
+    
+    # Special bonuses
+    if performance_tracker.perfect_harmony:
+        performance_tracker["final_score"] = 1.0  # Perfect score
+
+func _finalize_companion_states():
+    # Save relationship changes
+    for companion_id in relationship_states:
+        var companion = GlobalState.get_companion(companion_id)
+        if companion:
+            companion.bond_level = relationship_states[companion_id]
+            companion.crossroads_experience = true
+    
+    # Handle new companions
+    if entity.offered_companion and performance_tracker.entity_approval > 0.5:
+        var new_companion = entity.get_offered_companion()
+        GlobalState.add_companion(new_companion)
+        companion_joined.emit(new_companion)
+
+<!-- FILE: crossroads_entity.gd -->
+extends Node3D
+
+signal dialogue_ready
+signal evaluation_changed(approval: float)
+signal true_form_revealed
+
+@onready var visual_form = $VisualForm
+@onready var particle_effects = $ParticleEffects
+@onready var voice_layers = $VoiceLayers
+
+var current_form: String = ""
+var approval_rating: float = 0.5
+var offered_companion: CompanionData = null
+var true_form_revealed: bool = false
+
+func manifest(form_type: String):
+    current_form = form_type
+    
+    # Visual manifestation
+    match form_type:
+        "ideal_companion":
+            _manifest_as_ideal_companion()
+        "complementary_companion":
+            _manifest_as_complement()
+        "guardian_of_bonds":
+            _manifest_as_guardian()
+    
+    # Always slightly otherworldly
+    particle_effects.create_ethereal_aura()
+    voice_layers.enable_multiplicity()
+    
+    dialogue_ready.emit()
+
+func _manifest_as_ideal_companion():
+    # Analyze player traits to create perfect match
+    var player_traits = GlobalState.player.get_dominant_traits()
+    
+    # Create appearance
+    visual_form.generate_humanoid({
+        "archetype": _calculate_ideal_archetype(player_traits),
+        "features": "attractive_but_uncanny",
+        "clothing": "traveler_gear",
+        "weapon": _suggest_complementary_weapon(player_traits)
+    })
+    
+    # Prepare companion offer
+    offered_companion = CompanionData.new()
+    offered_companion.generate_ideal(player_traits)
+
+func respond_to_vulnerability(fear: String):
+    # Entity responds with surprising empathy
+    var response = _generate_empathetic_response(fear)
+    
+    voice_layers.speak(response, "soothing")
+    particle_effects.pulse_warmly()
+    
+    # Approval increases for honesty
+    _adjust_approval(0.3)
+
+func give_blessing():
+    visual_form.begin_transformation("true_form")
+    particle_effects.explode_into_light()
+    
+    voice_layers.speak_all_layers([
+        "You understand the weight of connection.",
+        "Your bonds will be tested, but they will hold.",
+        "The dragon cannot break what is truly united.",
+        "Remember: in the darkest hour, reach for each other."
+    ])
+    
+    # Grant mechanical blessing
+    GlobalState.party_blessing = "crossroads_harmony"
+
+func reveal_true_form():
+    if true_form_revealed:
+        return
+        
+    true_form_revealed = true
+    
+    # Dramatic transformation
+    visual_form.shatter_current_form()
+    await get_tree().create_timer(1.0).timeout
+    
+    # True form is incomprehensible beauty
+    visual_form.manifest_abstract_geometry({
+        "type": "impossible_mandala",
+        "colors": "all_visible_spectrum",
+        "movement": "hypnotic_rotation"
+    })
+    
+    particle_effects.create_reality_ripples()
+    voice_layers.harmonize_all()
+    
+    true_form_revealed.emit()
+
+func _adjust_approval(amount: float):
+    approval_rating = clamp(approval_rating + amount, 0.0, 1.0)
+    evaluation_changed.emit(approval_rating)
+    
+    # Visual feedback
+    particle_effects.set_color_warmth(approval_rating)
+
+<!-- JSON: manifests/crossroads_content.json -->
+{
+  "transition": {
+    "name": "Crossroads Meeting",
+    "type": "unease_to_dread",
+    "description": "Test of companionship and emotional bonds",
+    "key_mechanics": [
+      "Relationship management",
+      "Trust exercises",
+      "Emotional navigation",
+      "Companion synergy",
+      "Path selection"
+    ],
+    "unique_features": {
+      "time_stuck": "Eternal dusk at crossroads",
+      "entity_nature": "Mysterious, possibly helpful",
+      "no_combat": "Entirely social/emotional challenges",
+      "companion_evolution": "Relationships permanently changed",
+      "three_paths": "Major route selection for next phase"
+    },
+    "performance_metrics": {
+      "relationship_depth": "How deep bonds have grown",
+      "trust_completed": "Number of vulnerability exercises",
+      "emotional_intelligence": "Correct emotional choices made",
+      "companion_synergy": "How well party works together",
+      "entity_approval": "Mysterious being's judgment"
+    },
+    "permanent_effects": {
+      "traits_gained": ["leader/loner", "trusting/paranoid", "empathetic/cold"],
+      "companion_changes": ["New companion", "Evolved bonds", "Lost companion"],
+      "path_locked": ["Power path", "Knowledge path", "Sacrifice path"],
+      "world_changes": ["Dread phase begins", "Fog thickens globally"]
+    }
+  }
+}
+
+<!-- PHILOSOPHY -->
+The Crossroads Meeting is the antithesis of traditional game bosses. There's no health bars, no combat, no clear win condition. Instead, it's about the invisible bonds between people and whether you can forge them before the world becomes too dark.
+
+The entity remains mysterious because it represents the question: in a world sliding toward horror, is connection strength or vulnerability? Players who embrace companionship gain mechanical advantages but also emotional stakes. Those who remain alone gain freedom but face mounting dread alone.
+
+The three paths aren't just level selection - they're a commitment to how you'll face the horror ahead. Will you rely on Power (combat), Knowledge (puzzles), or Sacrifice (moral choices)? Your companions can help you choose wisely, but only if you've built trust.
+
+This transition cements Dragon's Labyrinth's core theme: you are not just what you do, but who you do it with.

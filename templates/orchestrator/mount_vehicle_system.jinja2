@@ -1,0 +1,199 @@
+# Generate Mount and Vehicle System
+
+## Context
+Create a mount system that enhances exploration and combat while integrating with the hex-based movement. Mounts should feel like meaningful companions with unique abilities and progression.
+
+## Mount Types
+
+### 1. Ground Mounts
+Based on discovered animal/vehicle assets:
+{% for mount in discovered_mounts %}
+- **{{ mount.name }}**:
+  - Type: {{ mount.category }}
+  - Speed: {{ mount.hex_movement_bonus }} extra hexes
+  - Special: {{ mount.ability }}
+  - Terrain: {{ mount.preferred_terrain }}
+{% endfor %}
+
+### 2. Mount Categories
+
+#### Basic Mounts (Levels 10+)
+- **Horse**: +2 hex movement, standard mount
+- **Wolf**: +1 hex movement, combat assist
+- **Bear**: +1 hex movement, extra cargo capacity
+- **Raptor**: +2 hex movement, can leap gaps
+
+#### Advanced Mounts (Levels 25+)
+- **Griffon**: +3 hex movement, limited flight
+- **Dire Wolf**: +2 hex movement, pack bonus
+- **War Elephant**: +1 hex movement, mobile platform
+- **Mechanical Strider**: +2 hex movement, no fatigue
+
+#### Legendary Mounts (Levels 40+)
+- **Dragon Whelp**: +3 hex movement, fire breath
+- **Phoenix**: +3 hex movement, resurrection ability
+- **Void Stalker**: +2 hex movement, phase through enemies
+- **Ancient Treant**: +1 hex movement, nature powers
+
+### 3. Flying Mounts
+Special mechanics for aerial movement:
+- Requires "Flight License" quest completion
+- Can cross impassable terrain
+- Limited flight duration (stamina system)
+- Combat dismounts rider
+- Weather affects flight capability
+
+## Mount Mechanics
+
+### 1. Movement on Hex Grid
+```
+Base Movement + Mount Bonus = Total Hexes
+- Player: 3 hexes/turn
+- With Horse: 5 hexes/turn
+- With Griffon: 6 hexes/turn (can fly over)
+
+Special Rules:
+- Difficult terrain reduces mount bonus by 1
+- Roads increase mount bonus by 1
+- Combat stance reduces to normal movement
+- Sprint mode: 2x movement for 3 turns (cooldown)
+```
+
+### 2. Mount Combat
+- **Mounted Combat**: Stay mounted with restrictions
+  - Melee attacks from adjacent hexes only
+  - Ranged attacks with accuracy penalty
+  - Magic casting limited to simple spells
+  - Mount can be targeted separately
+
+- **Combat Abilities**:
+  - Charge: Move 3+ hexes for damage bonus
+  - Trample: Pass through enemy hex
+  - Mounted Advantage: +1 damage vs unmounted
+  - Emergency Dismount: Free action, defensive bonus
+
+### 3. Mount Health & Care
+- Mounts have separate HP
+- If mount reaches 0 HP, it's injured (not dead)
+- Healing items work on mounts
+- Rest at stables for full recovery
+- Feed regularly for happiness bonus
+
+## Mount Progression
+
+### 1. Mount Bonding
+Build relationship with mount:
+- **Trust Level 1**: Basic riding
+- **Trust Level 2**: Combat training complete
+- **Trust Level 3**: Special ability unlocked
+- **Trust Level 4**: Stat bonuses for rider
+- **Trust Level 5**: Unique appearance/armor
+
+### 2. Mount Equipment
+- **Saddles**: Comfort, storage, combat bonuses
+- **Armor**: Protection in combat
+- **Horseshoes**: Terrain adaptability
+- **Decorations**: Cosmetic options
+- **Saddlebags**: Extra inventory space
+
+### 3. Mount Skills
+Each mount can learn abilities:
+- **Speed Training**: +1 hex movement
+- **Combat Veteran**: No morale loss
+- **Sure-Footed**: Ignore difficult terrain
+- **Bonded**: Share HP regeneration
+- **Rally**: Inspire nearby allies
+
+## Mount Acquisition
+
+### 1. Obtaining Mounts
+- **Purchase**: Buy from stables
+- **Taming**: Wild animals with skill
+- **Quest Rewards**: Special mounts
+- **Breeding**: Combine mount traits
+- **Events**: Limited-time mounts
+
+### 2. Stable System
+Towns have stables for:
+- Mount storage (up to 10)
+- Mount healing and care
+- Mount equipment shop
+- Mount trainer for skills
+- Breeding services
+
+### 3. Mount Costs
+- Purchase: 500-10,000 gold
+- Upkeep: 10 gold/day or free with care
+- Training: 100 gold per skill
+- Equipment: 200-2000 gold
+- Breeding: 1000 gold + time
+
+## Special Mount Features
+
+### 1. Unique Mount Abilities
+- **Horses**: "Gallop" - Double movement for 1 turn
+- **Wolves**: "Pack Hunt" - Summon wolf allies
+- **Griffons**: "Aerial Strike" - Dive bomb attack
+- **Dragons**: "Dragon Fear" - AoE intimidation
+- **Mechanical**: "Overdrive" - No AP cost movement
+
+### 2. Mount Customization
+- Name your mount
+- Choose color variations
+- Unlock armor styles
+- Add decorative elements
+- Mount emotes/animations
+
+### 3. Mount Collections
+- Achievement for collecting mount types
+- Mount museum in major city
+- Rare mount tracking journal
+- Breeding genealogy system
+- Mount racing competitions
+
+## Integration with Other Systems
+
+### 1. Combat Integration
+- Formation includes mount positions
+- Mounted units take 2 hexes
+- Special mounted-only abilities
+- Dismount as free action when needed
+- Mount AI when rider dismounted
+
+### 2. Exploration Benefits
+- Access mount-only areas
+- Faster world traversal
+- Mount-specific shortcuts
+- Resource gathering while mounted
+- Mount senses detect secrets
+
+### 3. Quest Integration
+- Mount races as quests
+- Rescue stolen mounts
+- Legendary mount hunts
+- Mount breeding quests
+- Mount trial challenges
+
+## Mount AI Behavior
+
+### 1. When Dismounted
+- Flee: Runs to safe distance
+- Defend: Fights alongside player
+- Wait: Stays in place
+- Follow: Trails behind player
+
+### 2. Mount Personality
+Based on type and training:
+- Brave: Won't flee easily
+- Skittish: Flees from loud noises
+- Loyal: Always returns
+- Wild: Occasional disobedience
+- Trained: Follows commands perfectly
+
+Generate complete mount system with:
+- Mount AI and pathfinding
+- Integration with hex movement
+- Mount progression tracking
+- Stable management system
+- Mount equipment database
+- Balanced speed/combat trade-offs

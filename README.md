@@ -1,44 +1,53 @@
-# Godot 4 Open RPG
+<h1 align="center">
+  Godot OpenRPG</br>
+  <small>Learn to create turn-based games</small>
+</h1>
 
-![Godot Open RPG banner](media/Open-RPG.png)
+<p align='center'>
+  <img src="https://i.imgur.com/lhi0U9v.png" alt="Godot Open RPG banner" />
+</p>
 
-OpenRPG is a a demo showing how to create a classical turn-based RPG in Godot 4. It's currently a work-in-progress.
+OpenRPG is a tool and a demo to create Role Playing Games with turn-based combat. It's made with Godot 3.1 (alpha 2).
 
-**You need to use Godot 4.4.1 to open the project!** You can find Godot 4.4.1 on the [Godot website](https://godotengine.org/).
+*Looking for a Zelda-like game? Check out our [Open Source A-RPG demo](https://github.com/GDquest/make-pro-2d-games-with-godot/).*
 
-➡ Follow us on [Twitter](https://twitter.com/NathanGDQuest) and [YouTube](https://www.youtube.com/c/gdquest/) for Godot tips and tutorials! Get one of our [Godot game creation courses](https://www.gdquest.com/product/) to support our work on Free Software.
+![Combat system screenshot](https://i.imgur.com/RvrBrvR.jpg)
 
-## Project Goal
 
-The goal of this project is to provide the gamedev community with a demo that shows one solid way to create and structure the code for a 2D RPG in Godot 4. You can reuse the code in your own projects, and also learn from the project's codebase.
+## Our mission
 
-As we're teachers, our focus is on providing a learning resource that is both practical and educational. We're not trying to build a framework.
+Together, we're creating a codebase and tools to show you some of the best practices to create:
 
-We're putting heavy emphasis on code that:
-
-- Is updated to take advantage of what GDScript 4 has to offer.
-- Is accessible to users with solid code foundations. It should be a good starting point and reference for those diving into an RPG project.
-- Follows our [GDScript guidelines](https://gdquest.gitbook.io/gdquests-guidelines/godot-gdscript-guidelines).
-
-## Our Mission
-
-Together, we're creating a codebase and tools to show you some good Godot practices to create:
-
-- Turn-based games.
-- A combat system.
-- An inventory system.
-- Character progression.
-- Maps with transitions, dialogues, grid-based movement, and more.
-- User interface with multiple menus.
+- Turn-based games
+- A combat system
+- An inventory system
+- Character progression
+- User interface with multiple menus
 
 And more! Do you want to contribute and improve your programming skills with Godot? Check out the open issues, suggest improvements and report bugs by opening new ones, and be sure to check the contributing guidelines below.
 
-## Credits
+### The current project's scope
 
-The project uses the asset pack [Tiny Town by Kenney](https://kenney.nl/assets/tiny-town).
+Our initial goal is to create a mini-demo with the full combat loop, character experience, skills, some pretty art, and basic map navigaton and conversation with NPCs.
+
+We are building a demo that the community can learn from and reuse as a template to build complete games.
+
+## Support GDquest
+
+At GDquest, our mission is to bring game creators together to become better developers. We released [hundreds of free tutorials](http://youtube.com/c/gdquest) and build [open source game demos](https://github.com/GDquest/) like this project. But we need your support to keep going!
+
+To support our Free projects, you can:
+
+- [Get our Godot course](https://gumroad.com/gdquest)
+- [Become our patron](https://www.patreon.com/gdquest) on Patreon
 
 ## Contributing Guidelines
 
-All contributors are welcome 🙂. To ensure a smooth and a productive experience for everyone working together, we came up with some guidelines we all follow here.
+All contributors are welcome 🙂. To ensure a smooth and a productive experience for everyone working together, we came up with some guidelines we all follow here. In summary:
 
-Check our [Contributors Guide](https://gdquest.gitbook.io/gdquests-guidelines/contributing-to-gdquest-projects/) for more information 😄
+- Get in touch and communicate! Let us know what you are working on or report bugs using the issues tab. Join the [GDquest Discord server](https://discord.gg/87NNb3Z) to discuss the project live or to get in touch with the community
+- Be respectful to everyone around. Please review the [GDQuest Code of Conduct](code-of-conduct.md).
+- For code, we follow the [GDScript styleguide](http://docs.godotengine.org/en/latest/getting_started/scripting/gdscript/gdscript_styleguide.html). We try to write clean and self-documenting GDScript as it helps us build upon each other's work. We use static typing to write more robust code and get full autocompletion in Godot 3.1. Also, we're here to review and to help you improve your code.
+- The maintainers may refactor or tweak your code to make it fit the project's style, and for educational purposes. But we'll give you the opportunity to refine the style by yourself
+
+Check our full [Contributors Guide](http://gdquest.com/open-source/contributing-guidelines/) for more information 😄

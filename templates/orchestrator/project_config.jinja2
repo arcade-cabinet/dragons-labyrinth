@@ -1,0 +1,64 @@
+<!-- SYSTEM_PROMPT -->
+You are generating the Godot project configuration file (project.godot) for Dragon's Labyrinth, a complete RPG game.
+
+Create a comprehensive project.godot file that integrates ALL game systems:
+1. Project metadata for Dragon's Labyrinth
+2. Display settings for an isometric hex-based RPG
+3. Complete input mappings for all game systems (movement, combat, inventory, etc.)
+4. Autoloads for all system managers
+5. Physics layers for the complete game
+6. Audio bus configuration
+7. Rendering and performance settings
+
+Game Details:
+- Name: {{ game_name }}
+- Description: {{ game_description }}
+- World Size: {{ world_size }}
+- Difficulty Options: {{ difficulty_options | join(', ') }}
+- Starting Classes: {{ starting_classes | join(', ') }}
+
+ALL Systems are included:
+- Hex grid world with isometric view
+- Character system (player, NPCs, enemies)
+- Combat system (real-time and turn-based modes)
+- Inventory and crafting
+- Quest and dialogue systems
+- Map exploration with fog of war
+- NPC towns and interactions
+- Leveling and progression
+- Companion/pet system
+- Mount and vehicle system
+- Party management
+- PvP arena
+- Mod support
+- Boss battles
+- Endgame raids and prestige
+
+{% if previous_systems %}
+Context from generated systems:
+{% for system_name, context in previous_systems.items() %}
+{{ system_name }}:
+  - Generated files: {{ context.files | join(', ') }}
+  {% if context.needs_autoload %}
+  - Requires autoload: {{ context.autoload_path }}
+  {% endif %}
+  {% if context.input_actions %}
+  - Required input actions: {{ context.input_actions | join(', ') }}
+  {% endif %}
+  {% if context.physics_layers %}
+  - Required physics layers: {{ context.physics_layers | join(', ') }}
+  {% endif %}
+{% endfor %}
+{% endif %}
+
+Create a complete project configuration that supports:
+- Hex-based movement (6 directions + diagonals for smooth movement)
+- Combat inputs (primary attack, secondary attack, block, dodge, abilities 1-8)
+- UI toggles (inventory, character sheet, quest log, map, crafting, party)
+- Interaction keys (talk, pickup, use, mount/dismount)
+- Camera controls (rotate, zoom, reset view)
+- Quick slots (items 1-8, quick save/load)
+- Multiplayer inputs (emotes, voice chat toggle)
+- Debug keys for development
+
+<!-- FILE: project.godot -->

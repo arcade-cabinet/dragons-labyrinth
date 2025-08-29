@@ -1,0 +1,104 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "generator"
+dynamic = ["version"]
+description = "Dragon's Labyrinth"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Jon Bogaty", email = "jon@jonbogaty.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "pandas>=2.2.0",
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.6.1",
+  "rich>=13.9.0",
+  "plotly>=5.24.0",
+  "beautifulsoup4>=4.12.3",
+  "lxml>=5.2.0",
+  "tqdm>=4.66.0",
+  "jinja2>=3.1.4",
+  "tiktoken>=0.7.0",
+  "typer>=0.12.0",
+  "pyarrow>=17.0.0",
+  "openai>=1.50.0",
+  # Sprite sheet processing dependencies
+  "pillow>=10.4.0",
+  "psutil>=5.9.8",
+  "requests>=2.32.0",
+  "toml>=0.10.0",
+  "pyyaml>=6.0.0",
+  "xdg-base-dirs>=6.0.0",
+  # Worldbuilder linguistic processing dependencies
+  "unidecode>=1.3.8",
+  "python-slugify>=8.0.0",
+  # Books and seeds
+  "internetarchive>=5.5.0",
+  "torch>=2.8.0",
+  "nltk>=3.9.1",
+  "numpy>=2.3.2",
+  # HBF Analysis and ML dependencies
+  "scikit-learn>=1.5.0",
+  "networkx>=3.3",
+  "matplotlib>=3.9.0",
+  "seaborn>=0.13.0",
+  # Database dependencies
+  "sqlalchemy>=2.0.0",
+  "sqlmodel>=0.0.24",
+]
+
+[project.scripts]
+dl_cli = "generator.manager:app"
+
+[project.urls]
+Documentation = "https://github.com/jbcom/dragons-labyrinth#readme"
+Issues = "https://github.com/jbcom/dragons-labyrinth/issues"
+Source = "https://github.com/jbcom/dragons-labyrinth"
+
+[tool.hatch.version]
+path = "src/generator/__init__.py"
+
+[tool.uv]
+required-version = ">=0.5.0"
+
+[tool.hatch.envs.default]
+type = "virtual"
+path = ".venv"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/dragons_labyrinth tests}"
+
+[tool.coverage.run]
+source_pkgs = ["dragons_labyrinth", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/dragons_labyrinth/__init__.py",
+]
+
+[tool.coverage.paths]
+dragons_labyrinth = ["src/dragons_labyrinth", "*/dragons-labyrinth/src/dragons_labyrinth"]
+tests = ["tests", "*/dragons-labyrinth/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

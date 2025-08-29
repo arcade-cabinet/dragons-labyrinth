@@ -1,0 +1,404 @@
+{
+  "regions": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:52",
+      "preview": "FstfgXXx Fearless Wilds > > The Lands of Vo'il Once a prison of the demon-queen,  these wilds now have a settlement, are frequently travelled, and a safe place to stay the night, but adventurers must ..."
+    },
+    {
+      "id": "Entities:79",
+      "preview": "LKr88oqA Vicious Crags > > The Lands of Vo'il Once the birthplace of the dark lord,  these crags are barren and mysterious. Regional Weather 2d6 All Seasons 2 Snowstorm 3-4 Heavy Snow 5-9 Snowy 10-11 ..."
+    }
+  ],
+  "biomes": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:98",
+      "preview": "awJ8h6Ky Occult in Dorith Reinwar's Ritual Goods ( Occult ) > > Vo'il > Village of dorith > Curator: Reinwar Samanilde .  He has glowing green eyes, a frowny expression and big round spectacles ( Mell..."
+    }
+  ],
+  "dungeons": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    }
+  ],
+  "cities": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:87",
+      "preview": "eW2X5rhF_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    }
+  ],
+  "towns": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    }
+  ],
+  "villages": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    },
+    {
+      "id": "Entities:10",
+      "preview": "jlEKEgZn Hatter in Harad Grimhar's Top Hat ( Hatter ) > > Vo'il > Village of harad > Hatter: Grimhar of Dorith .  He has piercing blue eyes, thin red hair and a missing tooth ( Hurt ). In the pocket: ..."
+    }
+  ],
+  "inns": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    }
+  ],
+  "factions": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    }
+  ],
+  "monsters": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:23",
+      "preview": "6qaawkOA Tanner in Harad Electo's Beast Skins ( Tanner ) > > Vo'il > Village of harad > Tanner: Electo of Headbone .  He has short blonde hair, piercing dark eyes and a double chin ( Outraged ). In th..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "combat": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    }
+  ],
+  "druids": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:22",
+      "preview": "tTe6ZzVO Bookstore in Harad Arathis's Pages ( Bookstore ) > > Vo'il > Village of harad > Curator: Arathis of Ashamar .  He has glowing black eyes, short almond hair and freckles ( Energetic ). In the ..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "economics": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:10",
+      "preview": "jlEKEgZn Hatter in Harad Grimhar's Top Hat ( Hatter ) > > Vo'il > Village of harad > Hatter: Grimhar of Dorith .  He has piercing blue eyes, thin red hair and a missing tooth ( Hurt ). In the pocket: ..."
+    },
+    {
+      "id": "Entities:11",
+      "preview": "bZ2hFD19 Veterinarian in Harad Serveta's Sheep Whisperer ( Veterinarian ) > > Vo'il > Village of harad > Veterinarian: Serveta of Kothian .  She has haunted dark eyes, full lips and big round spectacl..."
+    }
+  ],
+  "treasure": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    }
+  ],
+  "armor": [
+    {
+      "id": "Entities:0",
+      "preview": "map {\n  \"map\": [\n    {\n      \"x\": 0,\n      \"y\": 0,\n      \"type\": \"JungleHex\",\n      \"uuid\": \"gDhlZths\",\n      \"feature\": \"Other\",\n      \"feature_uuid\": \"NYwhgJ5l\",\n      \"rivers\": [\n        2,\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "shops": [
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:13",
+      "preview": "QNnHo0l2 Liquor in Harad Norwin's Mixtures ( Liquor ) > > Vo'il > Village of harad > Merchant: Norwin Webber .  He has piercing blue eyes, thick sideburns and stained clothes ( Confident ). In the poc..."
+    },
+    {
+      "id": "Entities:14",
+      "preview": "MAsn5B5z Liquor in Harad Tyriantheus's Mixtures ( Liquor ) > > Vo'il > Village of harad > Merchant: Tyriantheus of Balaal .  He has sleepy brown eyes, thin blonde hair and a face tattoo ( Delighted )...."
+    }
+  ],
+  "taverns": [
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    },
+    {
+      "id": "Entities:13",
+      "preview": "QNnHo0l2 Liquor in Harad Norwin's Mixtures ( Liquor ) > > Vo'il > Village of harad > Merchant: Norwin Webber .  He has piercing blue eyes, thick sideburns and stained clothes ( Confident ). In the poc..."
+    }
+  ],
+  "weapons": [
+    {
+      "id": "Entities:8",
+      "preview": "Cyw6XrnL_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    },
+    {
+      "id": "Entities:16",
+      "preview": "ir9qkPUJ Animal Supplies in Harad Alamanda's Barn & Yarn ( Animal Supplies ) > > Vo'il > Village of harad > Merchant: Alamanda of Dokar .  She has flowing white hair, enchanting green eyes and stained..."
+    }
+  ],
+  "tombs": [
+    {
+      "id": "Entities:9",
+      "preview": "v1DUw1ad Tanner in Harad Materia's Hides and Leathers ( Tanner ) > > Vo'il > Village of harad > Tanner: Materia of Dorith .  She has haunted dark eyes, soft gentle features and a smelly breath ( Offen..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    }
+  ],
+  "militias": [
+    {
+      "id": "Entities:10",
+      "preview": "jlEKEgZn Hatter in Harad Grimhar's Top Hat ( Hatter ) > > Vo'il > Village of harad > Hatter: Grimhar of Dorith .  He has piercing blue eyes, thin red hair and a missing tooth ( Hurt ). In the pocket: ..."
+    },
+    {
+      "id": "Entities:11",
+      "preview": "bZ2hFD19 Veterinarian in Harad Serveta's Sheep Whisperer ( Veterinarian ) > > Vo'il > Village of harad > Veterinarian: Serveta of Kothian .  She has haunted dark eyes, full lips and big round spectacl..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "fighters": [
+    {
+      "id": "Entities:10",
+      "preview": "jlEKEgZn Hatter in Harad Grimhar's Top Hat ( Hatter ) > > Vo'il > Village of harad > Hatter: Grimhar of Dorith .  He has piercing blue eyes, thin red hair and a missing tooth ( Hurt ). In the pocket: ..."
+    },
+    {
+      "id": "Entities:11",
+      "preview": "bZ2hFD19 Veterinarian in Harad Serveta's Sheep Whisperer ( Veterinarian ) > > Vo'il > Village of harad > Veterinarian: Serveta of Kothian .  She has haunted dark eyes, full lips and big round spectacl..."
+    },
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "scrolls": [
+    {
+      "id": "Entities:22",
+      "preview": "tTe6ZzVO Bookstore in Harad Arathis's Pages ( Bookstore ) > > Vo'il > Village of harad > Curator: Arathis of Ashamar .  He has glowing black eyes, short almond hair and freckles ( Energetic ). In the ..."
+    },
+    {
+      "id": "Entities:91",
+      "preview": "dZ2FWBvZ General Goods in Dorith Grimhar's Reserves ( General Goods ) > > Vo'il > Village of dorith > Merchant: Grimhar Calomaria .  He has a frowny expression, sleepy red-looking eyes and a nose ring..."
+    },
+    {
+      "id": "Entities:95",
+      "preview": "XLhFOgOx Bookstore in Dorith Agia's Pages ( Bookstore ) > > Vo'il > Village of dorith > Curator: Agia Frodegard .  She has delicate makeup, glowing dark eyes and a face tattoo ( Repentant ). In the po..."
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "Entities:22",
+      "preview": "tTe6ZzVO Bookstore in Harad Arathis's Pages ( Bookstore ) > > Vo'il > Village of harad > Curator: Arathis of Ashamar .  He has glowing black eyes, short almond hair and freckles ( Energetic ). In the ..."
+    },
+    {
+      "id": "Entities:95",
+      "preview": "XLhFOgOx Bookstore in Dorith Agia's Pages ( Bookstore ) > > Vo'il > Village of dorith > Curator: Agia Frodegard .  She has delicate makeup, glowing dark eyes and a face tattoo ( Repentant ). In the po..."
+    },
+    {
+      "id": "Entities:98",
+      "preview": "awJ8h6Ky Occult in Dorith Reinwar's Ritual Goods ( Occult ) > > Vo'il > Village of dorith > Curator: Reinwar Samanilde .  He has glowing green eyes, a frowny expression and big round spectacles ( Mell..."
+    }
+  ],
+  "temples": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "strongholds": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    }
+  ],
+  "syndicates": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:94",
+      "preview": "Qow2ie1Z Craft in Dorith Rosin's Workshop ( Craft ) > > Vo'il > Village of dorith > Merchant: Rosin of Dokar .  He has a frowny expression, bulging red eyes and a missing tooth ( Helpless ). In the po..."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    }
+  ],
+  "clerics": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    },
+    {
+      "id": "Entities:91",
+      "preview": "dZ2FWBvZ General Goods in Dorith Grimhar's Reserves ( General Goods ) > > Vo'il > Village of dorith > Merchant: Grimhar Calomaria .  He has a frowny expression, sleepy red-looking eyes and a nose ring..."
+    }
+  ],
+  "wizards": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:26",
+      "preview": "0SODPUEB Village of Harad from The Lands of Vo'il harad > > The Lands of Vo'il Population: 405 villagers Village Shops & Services Tavern (\"The Black Mace Tavern\") \u25fe Tanner (Materia's Hides and Leather..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    }
+  ],
+  "rogues": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    }
+  ],
+  "weather": [
+    {
+      "id": "Entities:24",
+      "preview": "5PSoBIaV \"The Black Mace Tavern\" from Harad in Vo'il \"The Black Mace Tavern\" > > Vo'il > Village of harad > Keeper Owned and managed by Gerin of Kothian .  He has piercing black eyes, a goatee beard a..."
+    },
+    {
+      "id": "Entities:34",
+      "preview": "h9QSTC12 \"The Flaming Spear Tavern\" from Fearless Wilds in Vo'il \"The Flaming Spear Tavern\" > > Vo'il Keeper Owned and managed by Elspethria Fisherman .  She has painted skin decorations, wise dark ey..."
+    },
+    {
+      "id": "Entities:52",
+      "preview": "FstfgXXx Fearless Wilds > > The Lands of Vo'il Once a prison of the demon-queen,  these wilds now have a settlement, are frequently travelled, and a safe place to stay the night, but adventurers must ..."
+    }
+  ],
+  "settlements": [
+    {
+      "id": "Entities:52",
+      "preview": "FstfgXXx Fearless Wilds > > The Lands of Vo'il Once a prison of the demon-queen,  these wilds now have a settlement, are frequently travelled, and a safe place to stay the night, but adventurers must ..."
+    }
+  ],
+  "quests": [
+    {
+      "id": "Entities:52",
+      "preview": "FstfgXXx Fearless Wilds > > The Lands of Vo'il Once a prison of the demon-queen,  these wilds now have a settlement, are frequently travelled, and a safe place to stay the night, but adventurers must ..."
+    },
+    {
+      "id": "Entities:95",
+      "preview": "XLhFOgOx Bookstore in Dorith Agia's Pages ( Bookstore ) > > Vo'il > Village of dorith > Curator: Agia Frodegard .  She has delicate makeup, glowing dark eyes and a face tattoo ( Repentant ). In the po..."
+    }
+  ],
+  "dwellings": [
+    {
+      "id": "Entities:87",
+      "preview": "eW2X5rhF_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    }
+  ],
+  "cults": [
+    {
+      "id": "Entities:87",
+      "preview": "eW2X5rhF_city {\n  \"map_data\": {\n    \"type\": \"FeatureCollection\",\n    \"features\": [\n      {\n        \"type\": \"Feature\",\n        \"id\": \"values\",\n        \"roadWidth\": 7,\n        \"generator\": \"vg\",\n       ..."
+    },
+    {
+      "id": "Entities:98",
+      "preview": "awJ8h6Ky Occult in Dorith Reinwar's Ritual Goods ( Occult ) > > Vo'il > Village of dorith > Curator: Reinwar Samanilde .  He has glowing green eyes, a frowny expression and big round spectacles ( Mell..."
+    }
+  ],
+  "blacksmiths": [
+    {
+      "id": "Entities:89",
+      "preview": "GZJoxl0u Armor & Weapons in Dorith Hartwin's Spear ( Armor & Weapons ) > > Vo'il > Village of dorith > Blacksmith: Hartwin of Harad .  He has thin white hair, piercing dark eyes and a limp ( Hurt ). I..."
+    }
+  ]
+}

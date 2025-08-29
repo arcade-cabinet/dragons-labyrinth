@@ -1,0 +1,7 @@
+{
+  "dread_level": 3,
+  "environmental_decay_rate": 0.75,
+  "npc_fear_threshold": 0.65,
+  "economic_stability": 0.25,
+  "reality_distortion_effects": []
+}

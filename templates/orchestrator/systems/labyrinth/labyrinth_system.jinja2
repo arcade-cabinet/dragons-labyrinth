@@ -1,0 +1,658 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the labyrinth system for Dragon's Labyrinth - the first-person horror finale where all accumulated traits converge. This is where the entire game has been leading: a descent into darkness where your identity is tested.
+
+Key Philosophy:
+- Abrupt shift from hex-based to first-person
+- The dragon actively hunts you with intelligence
+- Your traits determine available paths and solutions
+- Sanity mechanics create false sounds and visions
+- Multiple endings based on understanding, not power
+
+The labyrinth is alive, responding to who you've become. A Guardian sees different passages than a Shadow. A Berserker hears different whispers than a Sage.
+
+Generate the complete labyrinth experience that serves as the culmination of the player's journey.
+
+<!-- FILE: res://systems/labyrinth/labyrinth_manager.gd -->
+extends Node
+class_name LabyrinthManager
+
+signal perspective_shifted_to_first_person()
+signal dragon_proximity_changed(distance: float)
+signal sanity_break_triggered(hallucination_type: String)
+signal ending_approached(ending_type: String)
+signal trait_path_revealed(path_id: String, required_trait: String)
+
+const TRAIT_SPECIFIC_PATHS = {
+	"guardian": {
+		"paths": ["passage_of_sacrifice", "hall_of_shields", "protector_shrine"],
+		"visions": ["fallen_companions", "those_you_failed", "future_without_you"],
+		"dragon_dialogue": ["So noble. So foolish. Who protects the protector?"]
+	},
+	"berserker": {
+		"paths": ["blood_corridor", "rage_pit", "warrior_grave"],
+		"visions": ["endless_violence", "becoming_the_monster", "peace_denied"],
+		"dragon_dialogue": ["Such anger. It tastes... familiar. We are alike."]
+	},
+	"shadow": {
+		"paths": ["hidden_ways", "assassin_vault", "shadow_maze"],
+		"visions": ["betrayals_committed", "trust_broken", "alone_forever"],
+		"dragon_dialogue": ["Hiding even from yourself. I see through shadows."]
+	},
+	"sage": {
+		"paths": ["library_of_madness", "puzzle_chambers", "knowledge_tomb"],
+		"visions": ["truths_unbearable", "ignorance_was_bliss", "mind_fracturing"],
+		"dragon_dialogue": ["You sought answers. Are you pleased with what you found?"]
+	}
+}
+
+var current_section: LabyrinthSection
+var dragon_ai: DragonAI
+var sanity_system: SanitySystem
+var trait_manager: TraitManager
+var player_traits: Array[String] = []
+
+func _ready() -> void:
+	trait_manager = get_node("/root/TraitManager")
+	dragon_ai = DragonAI.new()
+	sanity_system = SanitySystem.new()
+	
+	# Connect to trait changes
+	trait_manager.trait_gained.connect(_on_trait_gained)
+
+func enter_labyrinth() -> void:
+	# The moment of transition
+	perspective_shifted_to_first_person.emit()
+	
+	# Dramatic pause
+	await get_tree().create_timer(2.0).timeout
+	
+	# First words in the darkness
+	DialogueManager.show_dialogue([
+		"The door closes behind you.",
+		"The hex grid fades like a dream.",
+		"You are in the dark.",
+		"You are alone.",
+		"No. Not alone.",
+		"It breathes."
+	])
+	
+	_initialize_player_traits()
+	_generate_initial_section()
+	dragon_ai.begin_hunt(player_traits)
+
+func _initialize_player_traits() -> void:
+	# Get player's accumulated traits
+	player_traits.clear()
+	for trait in trait_manager.get_active_traits():
+		if trait.level >= 3:  # Only significant traits matter here
+			player_traits.append(trait.archetype)
+
+func _generate_initial_section() -> void:
+	current_section = LabyrinthSection.new()
+	current_section.id = "entrance_hall"
+	
+	# Different starting areas based on dominant trait
+	var dominant_trait = _get_dominant_trait()
+	if dominant_trait in TRAIT_SPECIFIC_PATHS:
+		current_section.available_paths = TRAIT_SPECIFIC_PATHS[dominant_trait].paths
+	else:
+		current_section.available_paths = ["generic_hallway", "dark_stairs", "echoing_chamber"]
+	
+	_populate_section_with_trait_elements()
+
+func _get_dominant_trait() -> String:
+	var highest_trait = ""
+	var highest_level = 0
+	
+	for trait in trait_manager.get_active_traits():
+		if trait.level > highest_level:
+			highest_level = trait.level
+			highest_trait = trait.archetype
+	
+	return highest_trait
+
+func navigate_to_path(path_id: String) -> void:
+	# Movement in the labyrinth
+	var new_section = _generate_section_from_path(path_id)
+	current_section = new_section
+	
+	# Dragon reacts to movement
+	dragon_ai.player_moved(current_section.id)
+	var dragon_distance = dragon_ai.get_distance_to_player()
+	dragon_proximity_changed.emit(dragon_distance)
+	
+	# Sanity effects
+	if randf() < sanity_system.get_hallucination_chance():
+		_trigger_sanity_break()
+
+func _trigger_sanity_break() -> void:
+	var hallucination_type = _determine_hallucination_type()
+	sanity_break_triggered.emit(hallucination_type)
+	
+	match hallucination_type:
+		"false_companion":
+			AudioManager.play_3d_sound("companion_voice_pleading", randf_range(-1, 1))
+			DialogueManager.show_dialogue(["'Help me!' But they're not here. They can't be."])
+		"dragon_everywhere":
+			# Multiple breathing sounds from different directions
+			for i in range(3):
+				AudioManager.play_3d_sound("dragon_breathing", randf_range(-1, 1))
+		"past_echoes":
+			# Hear conversations from earlier in the game
+			_play_memory_echo()
+
+func _play_memory_echo() -> void:
+	# Pull from actual game history
+	var memory = QuestManager.get_random_completed_quest_dialogue()
+	AudioManager.play_distorted_dialogue(memory)
+
+class LabyrinthSection:
+	var id: String
+	var description: String
+	var available_paths: Array[String] = []
+	var trait_interactions: Dictionary = {}
+	var dragon_proximity: float = 1.0  # 0 = here, 1 = far
+	var sanity_drain: float = 0.1
+
+<!-- FILE: res://systems/labyrinth/dragon_ai.gd -->
+extends Node
+class_name DragonAI
+
+# The dragon is not a boss. It's an intelligence that hunts.
+
+signal dragon_speaks(dialogue: String)
+signal dragon_approaching()
+signal dragon_found_you()
+
+const DRAGON_BEHAVIORS = {
+	"stalking": {
+		"speed": 0.3,
+		"detection_range": 5,
+		"gives_warnings": true
+	},
+	"hunting": {
+		"speed": 0.6,
+		"detection_range": 8,
+		"gives_warnings": false
+	},
+	"toying": {
+		"speed": 0.1,
+		"detection_range": 10,
+		"gives_warnings": true  # But misleading
+	}
+}
+
+var player_position: String = "entrance_hall"
+var dragon_position: String = "deep_lair"
+var behavior_mode: String = "stalking"
+var knows_player_traits: Array[String] = []
+var hunt_duration: float = 0.0
+
+func begin_hunt(player_traits: Array[String]) -> void:
+	knows_player_traits = player_traits
+	_select_initial_behavior()
+	_begin_approach()
+
+func _select_initial_behavior() -> void:
+	# Dragon's approach depends on who you've become
+	if "guardian" in knows_player_traits:
+		behavior_mode = "toying"  # Knows you won't abandon others
+		dragon_speaks.emit("A protector... How many have you failed to save?")
+	elif "berserker" in knows_player_traits:
+		behavior_mode = "hunting"  # Respects violence, meets it directly
+		dragon_speaks.emit("Blood calls to blood. Come, warrior.")
+	elif "shadow" in knows_player_traits:
+		behavior_mode = "stalking"  # Plays the stealth game
+		dragon_speaks.emit("You cannot hide from what lives in darkness.")
+	else:
+		behavior_mode = "stalking"
+		dragon_speaks.emit("Another comes. Why?")
+
+func player_moved(new_position: String) -> void:
+	var old_distance = _calculate_distance()
+	player_position = new_position
+	var new_distance = _calculate_distance()
+	
+	# Dragon responds to movement patterns
+	if new_distance < old_distance:
+		_player_approaching()
+	elif new_distance > old_distance:
+		_player_fleeing()
+	
+	# Continue hunt
+	_update_dragon_position()
+
+func _player_approaching() -> void:
+	# Player moving toward dragon
+	match behavior_mode:
+		"stalking":
+			behavior_mode = "toying"
+			dragon_speaks.emit("Interesting. You come willingly.")
+		"hunting":
+			# Dragon gets excited
+			AudioManager.play_sound("dragon_anticipation")
+		"toying":
+			dragon_speaks.emit("Yes... closer...")
+
+func _player_fleeing() -> void:
+	# Player trying to escape
+	if "berserker" in knows_player_traits:
+		dragon_speaks.emit("A berserker runs? Disappointing.")
+		behavior_mode = "hunting"  # Angered by cowardice
+	elif "guardian" in knows_player_traits:
+		dragon_speaks.emit("Where is your courage now, protector?")
+
+func _update_dragon_position() -> void:
+	var behavior = DRAGON_BEHAVIORS[behavior_mode]
+	var move_chance = behavior.speed
+	
+	if randf() < move_chance:
+		# Dragon moves intelligently
+		dragon_position = _calculate_next_position()
+		
+		if _calculate_distance() <= 1:
+			dragon_approaching.emit()
+			_give_proximity_warning()
+		
+		if dragon_position == player_position:
+			dragon_found_you.emit()
+
+func _give_proximity_warning() -> void:
+	# Environmental warnings of dragon's approach
+	var warnings = [
+		"The walls are warm.",
+		"Sulfur fills your nostrils.", 
+		"The ground trembles.",
+		"Your torch flickers in a windless hall.",
+		"Shadows move wrong."
+	]
+	
+	DialogueManager.show_immediate_text(warnings[randi() % warnings.size()])
+	
+	# Trait-specific warnings
+	if "sage" in knows_player_traits:
+		DialogueManager.show_immediate_text("Your knowledge screams warnings.")
+	elif "ranger" in knows_player_traits:
+		DialogueManager.show_immediate_text("Every instinct says: RUN.")
+
+func get_distance_to_player() -> float:
+	return _calculate_distance() / 10.0  # Normalized 0-1
+
+func _calculate_distance() -> int:
+	# Simplified pathfinding distance
+	# In reality, would use actual labyrinth graph
+	return 5  # Placeholder
+
+func _calculate_next_position() -> String:
+	# AI decision making
+	# Dragon moves strategically, not randomly
+	return "approaching_hall"  # Placeholder
+
+<!-- FILE: res://systems/labyrinth/sanity_system.gd -->
+extends Node
+class_name SanitySystem
+
+signal sanity_decreased(new_value: float)
+signal hallucination_triggered(type: String)
+signal reality_break()
+
+const TRAIT_SANITY_MODIFIERS = {
+	"sage": {
+		"base_resistance": -0.2,  # Knows too much
+		"hallucination_types": ["forbidden_knowledge", "reality_cracks", "truth_whispers"]
+	},
+	"berserker": {
+		"base_resistance": 0.3,  # Too angry to go mad
+		"hallucination_types": ["blood_visions", "enemy_multiplication", "rage_echoes"]
+	},
+	"shadow": {
+		"base_resistance": 0.0,
+		"hallucination_types": ["paranoid_whispers", "betrayal_visions", "shadow_doubles"]
+	},
+	"guardian": {
+		"base_resistance": 0.1,
+		"hallucination_types": ["failure_echoes", "protected_ghosts", "responsibility_weight"]
+	}
+}
+
+var current_sanity: float = 1.0
+var sanity_resistance: float = 0.0
+var active_hallucinations: Array[String] = []
+
+func initialize_for_traits(traits: Array[String]) -> void:
+	sanity_resistance = 0.0
+	
+	for trait in traits:
+		if trait in TRAIT_SANITY_MODIFIERS:
+			sanity_resistance += TRAIT_SANITY_MODIFIERS[trait].base_resistance
+
+func decrease_sanity(amount: float, source: String = "") -> void:
+	var actual_decrease = amount * (1.0 - sanity_resistance)
+	current_sanity = max(0.0, current_sanity - actual_decrease)
+	
+	sanity_decreased.emit(current_sanity)
+	
+	# Special reactions to sanity loss
+	if source == "dragon_proximity" and current_sanity < 0.3:
+		_trigger_dragon_madness()
+	elif source == "companion_death" and current_sanity < 0.5:
+		_trigger_grief_break()
+	
+	if current_sanity <= 0.0:
+		reality_break.emit()
+
+func get_hallucination_chance() -> float:
+	# Exponential increase as sanity decreases
+	return pow(1.0 - current_sanity, 2)
+
+func trigger_trait_specific_hallucination(trait: String) -> void:
+	if trait in TRAIT_SANITY_MODIFIERS:
+		var types = TRAIT_SANITY_MODIFIERS[trait].hallucination_types
+		var selected = types[randi() % types.size()]
+		hallucination_triggered.emit(selected)
+		_apply_hallucination_effect(selected)
+
+func _apply_hallucination_effect(type: String) -> void:
+	match type:
+		"forbidden_knowledge":
+			# Sage sees too much
+			UIManager.show_text_overlay("THE DRAGON IS THE WORLD THE WORLD IS ENDING")
+			AudioManager.play_sound("whispers_mathematical")
+		"blood_visions":
+			# Berserker sees everything as enemy
+			VisualEffects.apply_red_filter(3.0)
+			AudioManager.play_sound("heartbeat_aggressive")
+		"failure_echoes":
+			# Guardian hears those they failed
+			for i in range(3):
+				var position = Vector2(randf() * 1920, randf() * 1080)
+				AudioManager.play_positioned_sound("help_me_please", position)
+		"shadow_doubles":
+			# Shadow sees themselves
+			VisualEffects.spawn_shadow_duplicate()
+
+func _trigger_dragon_madness() -> void:
+	# When too close to dragon for too long
+	DialogueManager.show_distorted_text([
+		"IT SPEAKS IN YOUR MIND",
+		"YOU UNDERSTAND NOW",
+		"YOU ALWAYS UNDERSTOOD",
+		"YOU CAME HERE TO DIE"
+	])
+
+func _trigger_grief_break() -> void:
+	# When companion dies in labyrinth
+	TimeManager.slow_time(0.1, 5.0)
+	DialogueManager.show_dialogue([
+		"This is your fault.",
+		"You brought them here.",
+		"They trusted you.",
+		"Why did you come?"
+	])
+
+<!-- FILE: res://systems/labyrinth/labyrinth_endings.gd -->
+extends Node
+class_name LabyrinthEndings
+
+# Multiple endings based on understanding, not power
+
+const ENDING_TYPES = {
+	"understanding": {
+		"requirement": "Answer 'why did you come' with truth",
+		"description": "You and the dragon reach an accord",
+		"trait_requirement": ["sage", "high_empathy"],
+		"changes_world": true
+	},
+	"sacrifice": {
+		"requirement": "Offer yourself to save others",
+		"description": "Your death brings peace to the land", 
+		"trait_requirement": ["guardian", "high_compassion"],
+		"changes_world": true
+	},
+	"violence": {
+		"requirement": "Kill the dragon through combat",
+		"description": "You become what you fought",
+		"trait_requirement": ["berserker", "high_weapon_skill"],
+		"changes_world": false  # Cycle continues
+	},
+	"escape": {
+		"requirement": "Find the hidden exit",
+		"description": "You leave, but nothing changes",
+		"trait_requirement": ["shadow", "high_perception"],
+		"changes_world": false
+	},
+	"madness": {
+		"requirement": "Sanity reaches zero",
+		"description": "You join the dragon in eternal darkness",
+		"trait_requirement": null,  # Always available
+		"changes_world": false
+	},
+	"companion": {
+		"requirement": "Your companion convinces you to leave",
+		"description": "Love conquers ambition",
+		"trait_requirement": ["high_companion_bond"],
+		"changes_world": true
+	}
+}
+
+signal ending_triggered(type: String)
+signal ending_completed()
+
+func check_ending_availability(context: Dictionary) -> Array[String]:
+	var available_endings = []
+	
+	for ending_type in ENDING_TYPES:
+		var ending = ENDING_TYPES[ending_type]
+		if _check_ending_requirements(ending, context):
+			available_endings.append(ending_type)
+	
+	return available_endings
+
+func trigger_ending(type: String, context: Dictionary) -> void:
+	ending_triggered.emit(type)
+	
+	match type:
+		"understanding":
+			await _play_understanding_ending(context)
+		"sacrifice":
+			await _play_sacrifice_ending(context)
+		"violence":
+			await _play_violence_ending(context)
+		"escape":
+			await _play_escape_ending(context)
+		"madness":
+			await _play_madness_ending(context)
+		"companion":
+			await _play_companion_ending(context)
+	
+	ending_completed.emit()
+
+func _play_understanding_ending(context: Dictionary) -> void:
+	# The conversation that changes everything
+	DialogueManager.begin_ending_dialogue([
+		"Dragon: 'Why did you come?'",
+		"You: '" + context.player_answer + "'",
+		"Dragon: 'Truth. Finally, truth.'",
+		"Dragon: 'I too was called. I too answered.'",
+		"Dragon: 'We are the same, you and I.'",
+		"",
+		"The dragon's form shimmers, revealing...",
+		"Another person. Ancient. Tired. Human.",
+		"",
+		"'I've been waiting so long for someone who understood.'",
+		"'The curse can end now.'",
+		"'If you're willing to help me die.'"
+	])
+	
+	# Choice: Help the dragon die, or take their place
+	var choice = await DialogueManager.show_choice([
+		"Grant them peace",
+		"Take their burden"
+	])
+	
+	if choice == 0:
+		DialogueManager.show_ending_card(
+			"The Dragon's Peace",
+			"You helped an ancient soul find rest.\nThe labyrinth crumbles.\nThe world begins to heal."
+		)
+	else:
+		DialogueManager.show_ending_card(
+			"The New Dragon",
+			"You take their place in the labyrinth.\nBut you remember who you were.\nPerhaps that will make a difference."
+		)
+
+func _play_sacrifice_ending(context: Dictionary) -> void:
+	# Guardian's ultimate protection
+	DialogueManager.begin_ending_dialogue([
+		"Your companions made it out.",
+		"That's what matters.",
+		"",
+		"Dragon: 'You would die for them?'",
+		"You: 'I've lived for them. Dying is easier.'",
+		"Dragon: '...'",
+		"Dragon: 'I had forgotten such bonds existed.'",
+		"",
+		"The dragon's claw descends slowly, almost gently.",
+		"'Your death will mean something. I promise.'"
+	])
+	
+	TimeManager.slow_time(0.05, 10.0)
+	await get_tree().create_timer(5.0).timeout
+	
+	DialogueManager.show_ending_card(
+		"The Guardian's End",
+		"Your sacrifice broke the dragon's curse.\nThose you protected will remember.\nThe world is safe because you were not."
+	)
+
+func _check_ending_requirements(ending: Dictionary, context: Dictionary) -> bool:
+	if ending.trait_requirement == null:
+		return true
+	
+	for req in ending.trait_requirement:
+		if req.begins_with("high_"):
+			var stat = req.replace("high_", "")
+			if context.get(stat, 0) < 0.7:
+				return false
+		else:
+			if req not in context.player_traits:
+				return false
+	
+	return true
+
+<!-- FILE: res://systems/labyrinth/labyrinth_manifest.json -->
+{
+  "system": "labyrinth",
+  "version": "1.0.0",
+  "description": "First-person horror finale where traits determine everything",
+  "philosophy": "The labyrinth is not a dungeon - it's a mirror of who you've become",
+  
+  "perspective_shift": {
+    "trigger": "Entering the dragon's domain",
+    "from": "Hex-based tactical view",
+    "to": "First-person psychological horror",
+    "effect": "Jarring transition that signals the game has changed"
+  },
+  
+  "trait_specific_content": {
+    "guardian": {
+      "unique_paths": ["Hall of Fallen Heroes", "Shrine of Sacrifice", "Protector's Trial"],
+      "visions": ["Those you failed to save", "Companions dying", "World without guardians"],
+      "dragon_interaction": "Questions your need to protect others",
+      "ending": "Sacrifice yourself to save the world"
+    },
+    "berserker": {
+      "unique_paths": ["Blood Corridor", "Arena of Echoes", "Rage Prison"],
+      "visions": ["Endless violence", "Becoming a monster", "Peace forever denied"],
+      "dragon_interaction": "Recognizes a kindred spirit in violence",
+      "ending": "Fight the dragon, become the dragon"
+    },
+    "shadow": {
+      "unique_paths": ["Hidden Ways", "Assassin's Vault", "Betrayer's Mirror"],
+      "visions": ["Every betrayal", "Trust broken", "Dying alone"],
+      "dragon_interaction": "Sees through all deceptions",
+      "ending": "Escape unseen, unchanged"
+    },
+    "sage": {
+      "unique_paths": ["Library of Madness", "Truth's Tomb", "Knowledge Prison"],
+      "visions": ["Forbidden truths", "Reality breaking", "Ignorance's bliss"],
+      "dragon_interaction": "Philosophical discourse on existence",
+      "ending": "Understand the dragon, break the curse"
+    }
+  },
+  
+  "dragon_ai": {
+    "behaviors": ["stalking", "hunting", "toying", "conversing"],
+    "intelligence": "Responds to player patterns and traits",
+    "presence": "Felt through sound, temperature, environment",
+    "combat": "Not a boss fight - a horror encounter"
+  },
+  
+  "sanity_mechanics": {
+    "triggers": [
+      "Dragon proximity",
+      "Companion death",
+      "Reality contradictions",
+      "Isolation duration"
+    ],
+    "effects": [
+      "False audio cues",
+      "Visual distortions", 
+      "Incorrect pathways",
+      "Memory confusion"
+    ],
+    "trait_modifiers": {
+      "sage": "Lower sanity (knows too much)",
+      "berserker": "Higher sanity (too angry to break)",
+      "guardian": "Moderate sanity (purpose gives strength)",
+      "shadow": "Variable sanity (based on paranoia)"
+    }
+  },
+  
+  "endings": {
+    "understanding": "Reach philosophical accord with dragon",
+    "sacrifice": "Die to save others (Guardian path)",
+    "violence": "Kill dragon, become dragon (Berserker path)",
+    "escape": "Leave unchanged (Shadow path)",
+    "madness": "Join dragon in darkness (Sanity loss)",
+    "companion": "Convinced to leave by loved one"
+  },
+  
+  "audio_design": {
+    "dragon_presence": [
+      "breathing_echoes.ogg",
+      "wing_scrapes.ogg",
+      "ancient_whispers.ogg"
+    ],
+    "labyrinth_ambience": [
+      "dripping_darkness.ogg",
+      "stone_grinding.ogg",
+      "distant_screams.ogg"
+    ],
+    "sanity_breaks": [
+      "reality_tearing.ogg",
+      "memory_echoes.ogg",
+      "false_companion_voices.ogg"
+    ]
+  }
+}
+
+<!-- PHILOSOPHY -->
+The labyrinth is where Dragon's Labyrinth reveals its true nature. The jarring shift from hex-based tactical gameplay to first-person horror signals that everything has changed. This is not a dungeon to be conquered - it's a psychological space where your accumulated identity faces its ultimate test.
+
+Every trait you've developed opens different paths. A Guardian sees passages that lead to tests of sacrifice. A Shadow finds hidden routes that avoid direct confrontation. A Sage discovers libraries that contain maddening truths. The labyrinth physically manifests who you've become.
+
+The dragon is not a boss. It's an ancient intelligence that hunts you, speaks to you, questions you. It knows your traits, your choices, your fears. The dragon asks the central question: "Why did you come?" Your answer - and whether it's honest - determines everything.
+
+Sanity mechanics make the labyrinth a space of uncertainty. False sounds draw you into traps. Hallucinations of dead companions beg for help. The walls themselves lie. Your traits affect how you break - a Sage sees cosmic horrors, a Guardian hears everyone they failed to save.
+
+Multiple endings reflect the game's philosophy: there is no "correct" way to complete the journey. Understanding the dragon might break its curse. Sacrificing yourself might save the world. Escaping might preserve you but doom others. Violence might work, but at what cost?
+
+The labyrinth is the question the entire game has been asking: Who are you, really, when everything strips away except the dark and the choices you've made?
+
+<!-- INTEGRATION POINTS -->
+- Trait System: Determines available paths, visions, dragon interactions
+- Combat System: Combat becomes horror, not tactical battles
+- Companion System: Companions may die here, affecting endings
+- Sanity System: Reality breaks based on your journey
+- Quest System: Past choices echo in the labyrinth
+- Inventory System: Items have different meaning in first-person horror

@@ -1,0 +1,562 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the opening door scene for Dragon's Labyrinth at the {{ emotional_stage }} stage.
+
+NARRATIVE CONTEXT:
+- Previous state: {{ previous_state | default('none') }}
+- Current state: {{ current_state | default('peace') }}
+- Next state: {{ next_state | default('unease') }}
+- Dread level: {{ dread_level | default(0) }}
+
+This is THE MOST IMPORTANT SCENE in the entire game. The player starts in first-person view, looking at their front door from inside their home on a beautiful morning. This is the last moment of normalcy before the horror begins.
+
+VISUAL REQUIREMENTS:
+- First-person perspective looking at a simple wooden door
+- Warm morning sunlight filtering through nearby windows
+- Homey, comfortable interior (player's last safe space)
+- Door handle should be prominently visible and interactive
+- Subtle details that will later become sinister (door patterns, shadows)
+
+AUDIO REQUIREMENTS:
+- Peaceful morning ambience (birds chirping, distant life sounds)
+- Satisfying door handle turn sound
+- Door creak that's normal now but will haunt them later
+- Footsteps on wooden floor as player approaches
+- The last "normal" music they'll ever hear
+
+INTERACTION REQUIREMENTS:
+- Click/press to approach door (footstep sounds)
+- Click/press door handle to turn it (mechanical sound)
+- Door opens outward to reveal hex-based world
+- Smooth transition from first-person to isometric view
+- One-way transition (can never go back inside)
+
+FORESHADOWING ELEMENTS:
+- Door has subtle dragon-scale pattern in wood grain
+- Shadow under door seems too dark
+- Morning light has slight wrong color
+- Last photo of family barely visible on side table
+- Clock showing time that doesn't match sun position
+
+Generate complete implementation including:
+1. First-person door interaction system
+2. Door model with proper details
+3. Interior environment visible from start position
+4. Village scene outside the door
+5. Critical companion choice with your childhood friend
+6. All audio files for this critical moment
+7. Transition system to hex world (alone or with companion)
+
+Remember: This peaceful moment is what players will desperately wish to return to. The choice made here echoes through the entire journey.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: door_scene.gd -->
+extends Node3D
+class_name DoorScene
+
+# The last normal moment
+signal door_opened()
+signal entered_hex_world()
+
+@export var door_model: Node3D
+@export var door_handle: Area3D
+@export var player_camera: Camera3D
+@export var ambient_audio: AudioStreamPlayer3D
+@export var door_audio: AudioStreamPlayer3D
+
+var _can_interact: bool = false
+var _door_opening: bool = false
+var _handle_turned: bool = false
+
+const DOOR_OPEN_ANGLE = deg_to_rad(90)
+const TRANSITION_DURATION = 3.0
+
+func _ready() -> void:
+    # Set up the last peaceful moment
+    _setup_morning_ambience()
+    _setup_door_interaction()
+    _add_subtle_wrongness()
+    
+    # This is home. Was home.
+    print("You stand in your home, looking at the front door.")
+    print("Outside, birds sing. Inside, you are safe.")
+    print("For now.")
+
+func _setup_morning_ambience() -> void:
+    # Play the last normal sounds they'll hear
+    ambient_audio.stream = preload("res://opening/audio/morning_peace.ogg")
+    ambient_audio.play()
+    
+    # Gentle morning light - they'll miss this
+    var sun = DirectionalLight3D.new()
+    sun.light_energy = 0.8
+    sun.light_color = Color(1.0, 0.95, 0.8)  # Warm, but slightly off
+    sun.rotation_degrees = Vector3(-30, -45, 0)
+    add_child(sun)
+
+func _setup_door_interaction() -> void:
+    door_handle.mouse_entered.connect(_on_handle_hover)
+    door_handle.mouse_exited.connect(_on_handle_unhover)
+    door_handle.input_event.connect(_on_handle_clicked)
+
+func _add_subtle_wrongness() -> void:
+    # The pattern in the wood - scales? No, just wood grain. Surely.
+    var door_material = door_model.get_surface_override_material(0) as StandardMaterial3D
+    if door_material:
+        door_material.normal_scale = 1.2  # Enhance the "grain"
+    
+    # The shadow under the door is too dark
+    var shadow_plane = CSGBox3D.new()
+    shadow_plane.size = Vector3(0.8, 0.01, 0.1)
+    shadow_plane.position = Vector3(0, -1.0, 0.5)
+    shadow_plane.material_override = preload("res://opening/materials/too_dark_shadow.tres")
+    door_model.add_child(shadow_plane)
+
+func _on_handle_hover() -> void:
+    if not _door_opening:
+        _can_interact = true
+        # Change cursor to hand
+        Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+
+func _on_handle_unhover() -> void:
+    _can_interact = false
+    Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+func _on_handle_clicked(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
+    if event is InputEventMouseButton and event.pressed and _can_interact and not _door_opening:
+        _open_door_sequence()
+
+func _open_door_sequence() -> void:
+    _door_opening = true
+    _can_interact = false
+    
+    # Turn handle first
+    door_audio.stream = preload("res://opening/audio/handle_turn.ogg")
+    door_audio.play()
+    
+    var handle_tween = get_tree().create_tween()
+    handle_tween.tween_property(door_handle, "rotation:z", deg_to_rad(45), 0.5)
+    handle_tween.tween_callback(_handle_turn_complete)
+
+func _handle_turn_complete() -> void:
+    _handle_turned = true
+    
+    # The door opens outward - toward the world you can never leave
+    door_audio.stream = preload("res://opening/audio/door_creak_normal.ogg")
+    door_audio.play()
+    
+    var door_tween = get_tree().create_tween()
+    door_tween.tween_property(door_model, "rotation:y", -DOOR_OPEN_ANGLE, 2.0)
+    door_tween.tween_callback(_door_open_complete)
+    
+    # Fade morning sounds as door opens
+    var audio_tween = get_tree().create_tween()
+    audio_tween.tween_property(ambient_audio, "volume_db", -60, 3.0)
+
+func _door_open_complete() -> void:
+    door_opened.emit()
+    
+    # Begin transition to hex world
+    _transition_to_hex_world()
+
+func _transition_to_hex_world() -> void:
+    # This is the last time you'll see home
+    print("You step through the door. Behind you, it closes.")
+    print("You cannot go back.")
+    
+    # Fade to white, then to hex world
+    var fade_rect = ColorRect.new()
+    fade_rect.color = Color.WHITE
+    fade_rect.modulate.a = 0.0
+    fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    get_viewport().add_child(fade_rect)
+    
+    var fade_tween = get_tree().create_tween()
+    fade_tween.tween_property(fade_rect, "modulate:a", 1.0, 1.5)
+    fade_tween.tween_callback(_complete_transition)
+
+func _complete_transition() -> void:
+    # Step into the village - one last choice before the journey
+    get_tree().change_scene_to_file("res://opening/village_choice.tscn")
+
+# They will dream of this door. They will dream of going back.
+# They never can.
+<!-- /FILE -->
+
+<!-- FILE: village_choice.gd -->
+extends Node3D
+class_name VillageChoice
+
+# The last choice made in safety
+
+signal choice_made(took_companion: bool)
+signal entered_hex_world(with_companion: bool)
+
+@export var player_camera: Camera3D
+@export var friend_character: CharacterBody3D
+@export var dialogue_ui: DialogueUI
+
+var _choice_made: bool = false
+var _took_companion: bool = false
+
+func _ready() -> void:
+    # Still first-person, still home, but not for long
+    _setup_village_morning()
+    _spawn_friend()
+    _begin_conversation()
+    
+    print("The morning air is crisp. Your friend waits by the gate.")
+    print("'I heard what you're planning,' they say.")
+    print("This is where it truly begins.")
+
+func _setup_village_morning() -> void:
+    # Peaceful village ambience
+    var audio = AudioStreamPlayer3D.new()
+    audio.stream = preload("res://opening/audio/village_morning.ogg")
+    audio.play()
+    add_child(audio)
+    
+    # Morning light, last time you'll see it pure
+    var sun = DirectionalLight3D.new()
+    sun.light_energy = 1.0
+    sun.light_color = Color(1.0, 0.9, 0.7)
+    sun.rotation_degrees = Vector3(-25, -45, 0)
+    add_child(sun)
+
+func _spawn_friend() -> void:
+    # Your childhood friend, worried but loyal
+    friend_character.position = Vector3(2, 0, 3)
+    friend_character.look_at(player_camera.global_position, Vector3.UP)
+    
+    # They fidget, nervous but determined
+    var idle_animation = friend_character.get_node("AnimationPlayer")
+    if idle_animation:
+        idle_animation.play("nervous_idle")
+
+func _begin_conversation() -> void:
+    await get_tree().create_timer(2.0).timeout
+    
+    # The conversation that changes everything
+    var dialogue = [
+        {"speaker": "Friend", "text": "You're really going, aren't you? To find out why the birds stopped singing."},
+        {"speaker": "Friend", "text": "I know that look. Nothing I say will stop you."},
+        {"speaker": "Friend", "text": "So I'm coming with you. Someone needs to watch your back."},
+        {"speaker": "Friend", "text": "Unless... unless you'd rather go alone. I'd understand."},
+        {"speaker": "Choice", "options": [
+            {"text": "Come with me. I could use a friend.", "result": "companion"},
+            {"text": "Stay here where it's safe. I'll handle this.", "result": "alone"}
+        ]}
+    ]
+    
+    dialogue_ui.start_dialogue(dialogue)
+    dialogue_ui.choice_made.connect(_on_choice_made)
+
+func _on_choice_made(choice: String) -> void:
+    if _choice_made:
+        return
+    
+    _choice_made = true
+    
+    match choice:
+        "companion":
+            _took_companion = true
+            _companion_accepts()
+        "alone":
+            _took_companion = false
+            _go_alone()
+
+func _companion_accepts() -> void:
+    # Your friend smiles, scared but grateful
+    var dialogue = [
+        {"speaker": "Friend", "text": "Thank you. I... I couldn't let you face this alone."},
+        {"speaker": "Friend", "text": "Remember when we used to dream about adventures?"},
+        {"speaker": "Friend", "text": "I suppose we should be careful what we wish for."},
+        {"speaker": "Friend", "text": "Come on then. Before I lose my nerve."}
+    ]
+    
+    dialogue_ui.start_dialogue(dialogue)
+    dialogue_ui.dialogue_finished.connect(_transition_to_world)
+    
+    # This choice will echo through everything
+    GameState.starting_companion = "childhood_friend"
+    GameState.companion_name = "Gwen"  # Or generated based on player choice
+    
+    # Achievement: Not Alone
+    Events.emit_signal("achievement_unlocked", "not_alone")
+
+func _go_alone() -> void:
+    # Your friend nods, hurt but understanding
+    var dialogue = [
+        {"speaker": "Friend", "text": "I... I understand. Maybe you're right."},
+        {"speaker": "Friend", "text": "Just... promise me you'll be careful?"},
+        {"speaker": "Friend", "text": "And if you need help, you know where to find me."},
+        {"speaker": "Friend", "text": "Good luck. Come back to us."}
+    ]
+    
+    dialogue_ui.start_dialogue(dialogue)
+    dialogue_ui.dialogue_finished.connect(_transition_to_world)
+    
+    # This choice opens different paths
+    GameState.starting_companion = "none"
+    GameState.can_hire_mercenary = true
+    
+    # Achievement: Lone Wolf
+    Events.emit_signal("achievement_unlocked", "lone_wolf")
+
+func _transition_to_world() -> void:
+    choice_made.emit(_took_companion)
+    
+    # Fade to the hex world
+    var fade = ColorRect.new()
+    fade.color = Color.WHITE
+    fade.modulate.a = 0.0
+    fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    get_viewport().add_child(fade)
+    
+    var tween = get_tree().create_tween()
+    tween.tween_property(fade, "modulate:a", 1.0, 2.0)
+    tween.tween_callback(_enter_hex_world)
+
+func _enter_hex_world() -> void:
+    entered_hex_world.emit(_took_companion)
+    
+    # Pass companion state to hex world
+    if _took_companion:
+        get_tree().change_scene_to_file("res://world/hexgrid/hex_world_with_companion.tscn")
+    else:
+        get_tree().change_scene_to_file("res://world/hexgrid/hex_world_alone.tscn")
+
+# This choice, made in sunlight
+# Will echo in darkness
+# When the dragon asks why you came
+<!-- /FILE -->
+
+<!-- FILE: door_handle_area.gd -->
+extends Area3D
+class_name DoorHandleArea
+
+# The last thing they'll touch in safety
+
+@export var highlight_material: Material
+@export var normal_material: Material
+
+@onready var mesh_instance: MeshInstance3D = $MeshInstance3D
+
+func _ready() -> void:
+    mouse_entered.connect(_on_mouse_entered)
+    mouse_exited.connect(_on_mouse_exited)
+
+func _on_mouse_entered() -> void:
+    if mesh_instance and highlight_material:
+        mesh_instance.material_override = highlight_material
+        
+        # Subtle glow - inviting, warm, safe
+        # They don't know this is goodbye
+
+func _on_mouse_exited() -> void:
+    if mesh_instance and normal_material:
+        mesh_instance.material_override = normal_material
+<!-- /FILE -->
+
+<!-- FILE: door_scene_setup.gd -->
+extends Node
+class_name DoorSceneSetup
+
+# Helper to set up the first-person perspective
+
+static func create_first_person_camera() -> Camera3D:
+    var camera = Camera3D.new()
+    camera.fov = 75  # Human-like field of view
+    camera.position = Vector3(0, 1.6, -3)  # Standing height, few steps from door
+    camera.rotation_degrees = Vector3(0, 0, 0)  # Looking straight at door
+    
+    # Add subtle head bob for realism
+    var bob_animation = Animation.new()
+    bob_animation.length = 4.0
+    bob_animation.loop_mode = Animation.LOOP_LINEAR
+    
+    var position_track = bob_animation.add_track(Animation.TYPE_POSITION_3D)
+    bob_animation.track_set_path(position_track, NodePath("."))
+    bob_animation.position_track_insert_key(position_track, 0.0, Vector3(0, 1.6, -3))
+    bob_animation.position_track_insert_key(position_track, 2.0, Vector3(0, 1.62, -3))
+    bob_animation.position_track_insert_key(position_track, 4.0, Vector3(0, 1.6, -3))
+    
+    return camera
+
+static func create_home_interior() -> Node3D:
+    var interior = Node3D.new()
+    interior.name = "HomeInterior"
+    
+    # The last safe space
+    # Simple, warm, everything they'll lose
+    
+    # Wooden floor
+    var floor = CSGBox3D.new()
+    floor.size = Vector3(8, 0.1, 8)
+    floor.position = Vector3(0, -0.05, 0)
+    floor.material_override = preload("res://opening/materials/warm_wood_floor.tres")
+    interior.add_child(floor)
+    
+    # Side table with family photo (barely visible)
+    var table = CSGBox3D.new()
+    table.size = Vector3(0.6, 0.8, 0.4)
+    table.position = Vector3(-2, 0.4, -2)
+    table.material_override = preload("res://opening/materials/dark_wood.tres")
+    interior.add_child(table)
+    
+    # The photo they'll never see again
+    var photo_frame = CSGBox3D.new()
+    photo_frame.size = Vector3(0.2, 0.25, 0.02)
+    photo_frame.position = Vector3(-2, 0.85, -2)
+    photo_frame.material_override = preload("res://opening/materials/photo_frame.tres")
+    interior.add_child(photo_frame)
+    
+    # Wall clock (time is wrong)
+    var clock = CSGCylinder3D.new()
+    clock.radius = 0.2
+    clock.height = 0.05
+    clock.position = Vector3(2, 2, -3.9)
+    clock.rotation_degrees = Vector3(90, 0, 0)
+    clock.material_override = preload("res://opening/materials/clock_face.tres")
+    interior.add_child(clock)
+    
+    return interior
+<!-- /FILE -->
+
+<!-- MODEL: door_model.glb -->
+Generate a simple, warm wooden door model:
+- Standard residential door size (2m x 0.8m x 0.05m)
+- Warm brown wood texture with subtle grain pattern
+- The grain pattern subtly resembles dragon scales (but could just be wood)
+- Bronze/brass door handle at standard height
+- Small window at top with frosted glass
+- Hinges on the right side (door opens outward to the left)
+- 500-800 triangles maximum
+- Must feel like "home" - safe, familiar, warm
+<!-- /MODEL -->
+
+<!-- MODEL: door_handle.glb -->
+Generate a classic round door handle:
+- Brass/bronze material
+- Worn from years of use (this is home)
+- Smooth, comfortable grip
+- Standard mounting plate
+- 200 triangles maximum
+- Should feel satisfying to interact with
+<!-- /MODEL -->
+
+<!-- AUDIO: audio/morning_peace.ogg -->
+Generate using Music21:
+- Gentle, warm morning ambience in C major
+- Slow tempo (60-70 BPM)
+- Simple piano or acoustic guitar
+- Include distant bird songs (high register flutes)
+- 30-45 seconds, looping
+- Should evoke safety, home, peace
+- This is what they'll desperately miss
+<!-- /AUDIO -->
+
+<!-- AUDIO: audio/door_creak_normal.ogg -->
+Source from Freesound:
+- Search: "wooden door creak open slow"
+- Duration: 2-3 seconds
+- Should sound normal, household, familiar
+- Not scary (yet) - just a door opening
+- This sound will haunt them later
+<!-- /AUDIO -->
+
+<!-- AUDIO: audio/handle_turn.ogg -->
+Source from Freesound:
+- Search: "door handle turn click"
+- Duration: 0.5-1 second
+- Mechanical click of latch disengaging
+- Satisfying, tactile sound
+- The last normal interaction
+<!-- /AUDIO -->
+
+<!-- AUDIO: audio/footsteps_approach.ogg -->
+Source from Freesound:
+- Search: "footsteps wood floor slow"
+- Duration: 3-4 seconds
+- 3-4 slow steps approaching door
+- Wooden floor creaks
+- Cautious but not fearful (yet)
+<!-- /AUDIO -->
+
+<!-- JSON: manifests/door_scene_content.json -->
+{
+  "scene_id": "opening_door",
+  "emotional_stage": "peace",
+  "dread_level": 0,
+  "scene_type": "first_person",
+  "duration_estimate": "30-60 seconds",
+  "elements": {
+    "models": [
+      {
+        "id": "door_model",
+        "path": "opening/door_model.glb",
+        "type": "interactive",
+        "material": "warm_wood"
+      },
+      {
+        "id": "door_handle", 
+        "path": "opening/door_handle.glb",
+        "type": "interactive",
+        "material": "worn_brass"
+      }
+    ],
+    "audio": [
+      {
+        "id": "morning_peace",
+        "path": "opening/audio/morning_peace.ogg",
+        "type": "ambient",
+        "emotional_tone": "peaceful"
+      },
+      {
+        "id": "door_creak_normal",
+        "path": "opening/audio/door_creak_normal.ogg",
+        "type": "effect",
+        "emotional_tone": "neutral"
+      },
+      {
+        "id": "handle_turn",
+        "path": "opening/audio/handle_turn.ogg",
+        "type": "effect",
+        "emotional_tone": "neutral"
+      }
+    ],
+    "interactions": [
+      {
+        "type": "look_around",
+        "description": "Player can look around their home"
+      },
+      {
+        "type": "approach_door",
+        "description": "Walk to the door"
+      },
+      {
+        "type": "open_door",
+        "description": "Turn handle and open door"
+      },
+      {
+        "type": "exit_home",
+        "description": "Step through into hex world"
+      }
+    ]
+  },
+  "narrative": {
+    "themes": ["last_safety", "innocent_beginning", "point_of_no_return"],
+    "foreshadowing": ["dragon_scale_pattern", "wrong_shadows", "time_discrepancy"],
+    "emotional_journey": "comfort -> curiosity -> commitment"
+  },
+  "technical": {
+    "camera_type": "first_person",
+    "transition": "first_person_to_isometric",
+    "performance": {
+      "triangles": 2000,
+      "draw_calls": 10,
+      "texture_memory": "5MB"
+    }
+  }
+}
+<!-- /JSON -->

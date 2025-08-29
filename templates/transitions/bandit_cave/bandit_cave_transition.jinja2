@@ -1,0 +1,576 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the Bandit Cave Transition for Dragon's Labyrinth - the transition from PEACE to UNEASE.
+
+NARRATIVE CONTEXT:
+- Current emotional stage: {{ emotional_stage }}
+- This is the FIRST major transition - the last moment of normalcy before everything changes
+- The player has been living in peace, helping villagers with simple tasks
+- Now bandits threaten the town, and no one else will act
+- This is where the player first discovers they can be more than a simple villager
+
+CORE CONCEPT - THE LAST NORMAL FIGHT:
+This isn't just a bandit cave - it's the last time combat feels "normal" and video-gamey. After this, everything gets stranger and more horrifying. This transition should feel like a traditional RPG dungeon that slowly becomes "wrong."
+
+THE EXPERIENCE:
+
+1. **The Approach** (Still in hex view):
+   - Villagers gather, begging you to help
+   - Your first real choice: Accept quest (gain "helpful" trait) or demand payment (gain "mercenary" trait)
+   - The cave mouth looks normal from outside
+   - Last chance to prepare, buy supplies
+
+2. **Entering the Cave** (Transition begins):
+   - Camera slowly transitions from isometric hex to over-the-shoulder
+   - The familiar hex grid fades away beneath your feet
+   - "You feel the weight of real danger for the first time"
+   - Torches cast real shadows that move independently
+
+3. **The Descent** (Exploration phase):
+   - Third-person exploration through cave tunnels
+   - Environmental storytelling: Previous adventurers' remains
+   - Bandits talk in the distance - you can hear their plans
+   - Choice: Sneak past (shadow trait) or confront (warrior trait)
+   - Find disturbing evidence: These aren't normal bandits
+
+4. **First Ambush** (Combat transition):
+   - Triggered by movement or detection
+   - VIOLENT camera snap back to hex combat
+   - But something's different - the bandits are too organized
+   - They use actual tactics, try to flank
+   - One whispers "The dragon told us you'd come"
+
+5. **Deeper Caves** (Horror creeps in):
+   - Return to exploration after combat
+   - Cave paintings that seem to move
+   - Bandits praying to something
+   - Find journal: "Day 12 - The dreams won't stop. HE speaks to us."
+   - Your torch starts flickering for no reason
+
+6. **Bandit Leader** (Boss fight):
+   - Large cavern with makeshift throne
+   - Leader wears strange dragon-scale armor
+   - Pre-fight dialogue: "You think you're a hero? You're just the next sacrifice."
+   - Fight has phases:
+     * Phase 1: Normal bandit captain fight
+     * Phase 2: He drinks a vial of dragon blood, transforms slightly
+     * Phase 3: Cave starts collapsing, shadows move wrong
+   - Victory: He laughs, "You've started something you can't stop"
+
+MECHANICS TO TEST:
+- Basic combat competency
+- Gear check (undergeared = much harder)
+- Resource management (torches, potions)
+- Environmental awareness
+- First stealth vs combat choice
+
+FAILURE STATES:
+- Die in combat → Wake up outside cave, villagers disappointed
+- Run out of torches → Forced to retreat in darkness
+- Ignore environmental clues → Ambushed repeatedly
+
+PERFORMANCE TRACKING:
+- Time taken (changes bandit preparedness)
+- Stealth vs combat approach
+- Damage taken (indicates gear adequacy)
+- Clues discovered (affects later story)
+- Villagers saved (some are prisoners)
+
+PERMANENT CONSEQUENCES:
+- Trait gains based on choices:
+  * Helped for free → +Altruistic
+  * Demanded payment → +Mercenary
+  * Used stealth → +Shadow
+  * Fought everything → +Warrior
+  * Found all clues → +Investigator
+- Bandit leader's fate:
+  * Killed → Town celebrates, but dragon cultists take notice
+  * Spared → He becomes recurring character
+  * Converted → He warns you about what's coming
+
+ENVIRONMENTAL DETAILS:
+- Cave starts natural, becomes more worked stone deeper in
+- Strange symbols carved in walls (dragon worship)
+- Echoes that don't match your movements
+- Temperature drops near the leader's chamber
+- Shadows that have too many angles
+
+AUDIO DESIGN:
+- Begins with typical cave ambience
+- Slowly introduces wrong sounds:
+  * Breathing that isn't yours
+  * Whispers in unknown language
+  * Distant dragon roar (very faint)
+- Combat music has unsettling undertones
+- Victory music is oddly hollow
+
+ENDING:
+- Exit cave to find it's now dusk (was morning when you entered)
+- Villagers seem different, nervous
+- One child asks: "Did you see HIM in there?"
+- The world has shifted to UNEASE phase
+- Fog now common, colors slightly desaturated
+- Your first achievement: "No Longer Innocent"
+
+Generate complete implementation including exploration mechanics, combat encounters, and the slow introduction of horror elements.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: bandit_cave_transition.gd -->
+extends Node3D
+
+class_name BanditCaveTransition
+
+signal transition_complete(performance: Dictionary)
+signal transition_failed(reason: String)
+signal trait_gained(trait: String, amount: int)
+
+@onready var player = $Player
+@onready var cave_environment = $CaveEnvironment
+@onready var lighting_system = $LightingSystem
+@onready var ambush_triggers = $AmbushTriggers
+@onready var narrative_ui = $UI/NarrativePanel
+@onready var camera_controller = $CameraController
+
+var performance_tracker = {
+    "approach": "neutral",  # helpful, mercenary, reluctant
+    "combat_rating": 0.0,
+    "stealth_rating": 0.0,
+    "investigation_rating": 0.0,
+    "damage_taken": 0,
+    "time_elapsed": 0.0,
+    "villagers_saved": 0,
+    "clues_found": [],
+    "leader_fate": "",  # killed, spared, converted
+    "torch_management": 1.0
+}
+
+var cave_depth: float = 0.0  # 0-1, affects horror intensity
+var torches_remaining: int = 5
+var sanity_seeds_planted: int = 0  # Subtle hints at future sanity system
+
+# Clue definitions
+const CLUES = {
+    "dragon_worship": "Crude dragon symbols carved into walls",
+    "blood_vials": "Strange vials of viscous, warm liquid",
+    "dream_journal": "A bandit's journal describing nightmares",
+    "scale_armor": "Armor made from impossibly large scales",
+    "whisper_stone": "A stone that whispers when held"
+}
+
+func _ready():
+    # Start in hex view outside cave
+    camera_controller.set_mode("hex_isometric")
+    _setup_cave_approach()
+
+func _setup_cave_approach():
+    # Spawn villagers with worried animations
+    var villagers = preload("res://entities/npcs/worried_villagers.tscn").instantiate()
+    add_child(villagers)
+    
+    # Create dialogue choices
+    var dialogue = preload("res://ui/dialogue_choice.tscn").instantiate()
+    add_child(dialogue)
+    
+    dialogue.add_choice("I'll help. No one else will.", "helpful")
+    dialogue.add_choice("This is dangerous. I'll need payment.", "mercenary")
+    dialogue.add_choice("Fine, but only because you insist.", "reluctant")
+    
+    dialogue.choice_made.connect(_on_approach_choice)
+
+func _on_approach_choice(choice: String):
+    performance_tracker.approach = choice
+    
+    # Grant initial trait
+    match choice:
+        "helpful":
+            trait_gained.emit("altruistic", 10)
+            GlobalState.player_gold -= 10  # Give gold to villagers
+        "mercenary":
+            trait_gained.emit("mercenary", 10)
+            GlobalState.player_gold += 50  # Paid upfront
+        "reluctant":
+            trait_gained.emit("dutiful", 5)
+    
+    # Begin cave entrance
+    _enter_cave()
+
+func _enter_cave():
+    # Dramatic camera transition
+    narrative_ui.show_text("You approach the cave mouth...")
+    await get_tree().create_timer(2.0).timeout
+    
+    camera_controller.transition_to_third_person(3.0)
+    
+    # Fade out hex grid
+    var hex_grid = get_node_or_null("/root/HexGrid")
+    if hex_grid:
+        create_tween().tween_property(hex_grid, "modulate:a", 0.0, 2.0)
+    
+    # Enable player third-person controls
+    player.enable_exploration_mode()
+    
+    # Start cave ambience
+    AudioManager.crossfade_ambience("cave_entrance", 2.0)
+    
+    # Begin depth tracking
+    cave_environment.player_entered.connect(_on_cave_progress)
+
+func _on_cave_progress(new_depth: float):
+    cave_depth = new_depth
+    
+    # Adjust horror elements based on depth
+    _adjust_horror_intensity(cave_depth)
+    
+    # Trigger events at certain depths
+    if cave_depth > 0.3 and not "first_whisper" in performance_tracker.clues_found:
+        _trigger_first_whisper()
+    
+    if cave_depth > 0.6 and not "dragon_vision" in performance_tracker.clues_found:
+        _trigger_dragon_vision()
+
+func _adjust_horror_intensity(depth: float):
+    # Lighting becomes more unstable
+    lighting_system.set_flicker_intensity(depth * 0.5)
+    
+    # Shadows start moving
+    if depth > 0.4:
+        cave_environment.enable_moving_shadows(depth - 0.4)
+    
+    # Audio gets more unsettling
+    AudioManager.set_ambience_filter("horror_intensity", depth)
+    
+    # Add subtle breathing sounds
+    if depth > 0.5:
+        AudioManager.play_3d_loop("distant_breathing", 
+            player.global_position + Vector3(randf() * 10 - 5, 0, randf() * 10 - 5))
+
+func _trigger_first_whisper():
+    performance_tracker.clues_found.append("first_whisper")
+    sanity_seeds_planted += 1
+    
+    # Player hears whisper
+    AudioManager.play_3d("whisper_dragon_comes", player.global_position + Vector3.BACK * 5)
+    
+    # Subtle camera shake
+    camera_controller.add_trauma(0.2)
+    
+    # UI hint
+    UI.show_investigation_hint("You hear whispers in a language you don't recognize...")
+
+func _handle_ambush(trigger_name: String):
+    var bandits_count = 3 + int(cave_depth * 2)  # More bandits deeper in
+    
+    # Dramatic transition to hex combat
+    UI.flash_screen(Color.WHITE, 0.1)
+    camera_controller.snap_to_hex_combat()
+    
+    # Spawn hex combat arena
+    var arena = preload("res://systems/combat/combat_arena.tscn").instantiate()
+    add_child(arena)
+    arena.setup_cave_combat(bandits_count, cave_depth)
+    
+    # Bandit dialogue based on depth
+    if cave_depth < 0.3:
+        arena.set_bandit_dialogue("Just another fool seeking treasure!")
+    elif cave_depth < 0.6:
+        arena.set_bandit_dialogue("You shouldn't have come here... HE sees all!")
+    else:
+        arena.set_bandit_dialogue("The dragon's blood sings! You'll join us soon!")
+    
+    arena.combat_finished.connect(_on_combat_finished)
+
+func _on_combat_finished(victory: bool, stats: Dictionary):
+    if not victory:
+        # Player defeated
+        performance_tracker.leader_fate = "player_defeated"
+        transition_failed.emit("combat_failure")
+        return
+    
+    # Update performance
+    performance_tracker.combat_rating = max(performance_tracker.combat_rating, stats.rating)
+    performance_tracker.damage_taken += stats.damage_taken
+    
+    # Return to exploration
+    camera_controller.transition_to_third_person(1.0)
+    
+    # Bandits drop clues
+    if randf() < 0.3 + cave_depth * 0.4:
+        _discover_clue(CLUES.keys()[randi() % CLUES.size()])
+
+func _discover_clue(clue_id: String):
+    if clue_id in performance_tracker.clues_found:
+        return
+        
+    performance_tracker.clues_found.append(clue_id)
+    performance_tracker.investigation_rating += 0.2
+    
+    # Show clue UI
+    var clue_ui = preload("res://ui/clue_discovered.tscn").instantiate()
+    add_child(clue_ui)
+    clue_ui.show_clue(CLUES[clue_id])
+    
+    # Special handling for certain clues
+    match clue_id:
+        "dragon_worship":
+            sanity_seeds_planted += 1
+            trait_gained.emit("investigator", 5)
+        "blood_vials":
+            # Player can choose to take them
+            var choice = await _offer_choice("Take the blood vials?", ["Take them", "Leave them"])
+            if choice == "Take them":
+                GlobalState.inventory.add_item("dragon_blood_vial", 1)
+                trait_gained.emit("curious", 5)
+            else:
+                trait_gained.emit("cautious", 5)
+
+func _setup_boss_chamber():
+    # Large cavern with dramatic lighting
+    cave_environment.load_boss_chamber()
+    lighting_system.set_boss_lighting()
+    
+    # Bandit leader introduction
+    var leader = preload("res://entities/bosses/bandit_leader.tscn").instantiate()
+    add_child(leader)
+    leader.global_position = cave_environment.get_boss_spawn_point()
+    
+    # Pre-fight dialogue
+    var dialogue = DialogueSystem.start_dialogue("bandit_leader_intro")
+    dialogue.add_line("You think you're a hero? You're just the next sacrifice.")
+    dialogue.add_line("The dragon showed us the truth in our dreams...")
+    dialogue.add_line("Soon, you'll understand. Pain is just the beginning.")
+    
+    await dialogue.finished
+    
+    # Boss fight begins
+    _start_boss_fight(leader)
+
+func _start_boss_fight(leader):
+    # Transition to hex combat with special arena
+    camera_controller.snap_to_hex_combat()
+    
+    var boss_arena = preload("res://systems/combat/boss_arena.tscn").instantiate()
+    add_child(boss_arena)
+    boss_arena.setup_bandit_leader(leader)
+    
+    # Boss phase transitions
+    leader.phase_changed.connect(_on_boss_phase_change)
+    boss_arena.combat_finished.connect(_on_boss_defeated)
+
+func _on_boss_phase_change(phase: int):
+    match phase:
+        2:
+            # Leader drinks dragon blood
+            UI.show_narrative("The bandit leader drinks a vial of dark liquid...")
+            UI.show_narrative("His eyes burn with unnatural fire!")
+            AudioManager.play_stinger("transformation")
+            lighting_system.flash_red()
+            
+        3:
+            # Cave starts collapsing
+            UI.show_narrative("The cave trembles! Shadows writhe on the walls!")
+            camera_controller.start_earthquake(5.0)
+            cave_environment.start_collapse_effect()
+            AudioManager.play_3d_loop("cave_collapse")
+
+func _on_boss_defeated(victory: bool, stats: Dictionary):
+    if not victory:
+        performance_tracker.leader_fate = "player_defeated"
+        transition_failed.emit("boss_failure")
+        return
+    
+    # Player choice for leader's fate
+    var choice_ui = preload("res://ui/moral_choice.tscn").instantiate()
+    add_child(choice_ui)
+    
+    choice_ui.setup_choice(
+        "The bandit leader lies defeated before you...",
+        [
+            {"text": "End his suffering", "id": "kill"},
+            {"text": "Spare his life", "id": "spare"},
+            {"text": "Try to break the dragon's hold", "id": "convert"}
+        ]
+    )
+    
+    var choice = await choice_ui.choice_made
+    _handle_leader_fate(choice)
+
+func _handle_leader_fate(choice: String):
+    performance_tracker.leader_fate = choice
+    
+    match choice:
+        "kill":
+            trait_gained.emit("decisive", 10)
+            trait_gained.emit("merciless", 5)
+            UI.show_narrative("His last words: 'You've... doomed us all...'")
+            
+        "spare":
+            trait_gained.emit("merciful", 10)
+            trait_gained.emit("hopeful", 5)
+            UI.show_narrative("He flees, screaming about dragon nightmares...")
+            # He'll appear later
+            GlobalState.bandit_leader_spared = true
+            
+        "convert":
+            trait_gained.emit("compassionate", 15)
+            trait_gained.emit("wise", 10)
+            if performance_tracker.investigation_rating > 0.6:
+                UI.show_narrative("Using the clues you found, you break the dragon's mental hold!")
+                UI.show_narrative("He warns: 'The dragon... it's not what you think. It's so much worse.'")
+                GlobalState.bandit_leader_converted = true
+                sanity_seeds_planted += 2
+            else:
+                UI.show_narrative("You lack the knowledge to help him. He dies, mind shattered.")
+                performance_tracker.leader_fate = "failed_convert"
+    
+    # Begin exit sequence
+    _exit_cave()
+
+func _exit_cave():
+    # Fade to black
+    UI.fade_to_black(2.0)
+    await get_tree().create_timer(2.0).timeout
+    
+    # Show time passage
+    UI.show_narrative("You emerge from the cave...")
+    UI.show_narrative("The sun has set. How long were you inside?")
+    
+    # Update world state
+    GlobalState.current_phase = "unease"
+    GlobalState.time_of_day = "dusk"
+    
+    # Complete transition
+    _calculate_final_performance()
+    transition_complete.emit(performance_tracker)
+
+func _calculate_final_performance():
+    # Combine all metrics
+    var combat = performance_tracker.combat_rating * 0.3
+    var stealth = performance_tracker.stealth_rating * 0.2
+    var investigation = performance_tracker.investigation_rating * 0.3
+    var mercy = 0.1 if performance_tracker.leader_fate == "spare" else 0.0
+    var torch = performance_tracker.torch_management * 0.1
+    
+    var final_score = combat + stealth + investigation + mercy + torch
+    performance_tracker["final_score"] = final_score
+    
+    # Award achievement
+    var achievement_system = get_node("/root/AchievementSystem")
+    achievement_system.check_achievement_earned("cave_survivor", performance_tracker)
+
+<!-- FILE: bandit_cave_environment.gd -->
+extends Node3D
+
+signal player_entered
+signal depth_changed(new_depth: float)
+
+@onready var cave_sections = $CaveSections
+@onready var lighting_zones = $LightingZones
+@onready var shadow_system = $ShadowSystem
+@onready var collapse_particles = $CollapseParticles
+
+var current_section: int = 0
+var total_sections: int = 5
+var moving_shadows_enabled: bool = false
+var collapse_active: bool = false
+
+func _ready():
+    # Set up progressive cave sections
+    for i in total_sections:
+        var section = cave_sections.get_child(i)
+        section.visible = i == 0  # Only first section visible
+        
+        # Deeper sections are more corrupted
+        if i > 2:
+            _corrupt_section(section, (i - 2) / 3.0)
+
+func _corrupt_section(section: Node3D, intensity: float):
+    # Add dragon worship elements
+    var symbols = preload("res://assets/environment/dragon_symbols.tscn").instantiate()
+    section.add_child(symbols)
+    symbols.modulate.a = intensity
+    
+    # Adjust materials to be darker/redder
+    for child in section.get_children():
+        if child.has_method("get_surface_override_material"):
+            var mat = child.get_surface_override_material(0)
+            if mat:
+                mat.albedo_color = mat.albedo_color.lerp(Color(0.5, 0.2, 0.2), intensity)
+
+func get_current_depth() -> float:
+    return float(current_section) / float(total_sections - 1)
+
+func enable_moving_shadows(intensity: float):
+    moving_shadows_enabled = true
+    shadow_system.start_autonomous_movement(intensity)
+    
+    # Shadows whisper occasionally
+    if randf() < intensity * 0.3:
+        AudioManager.play_3d("shadow_whisper", 
+            shadow_system.get_random_shadow_position())
+
+func start_collapse_effect():
+    collapse_active = true
+    collapse_particles.emitting = true
+    
+    # Shake intensity increases over time
+    var tween = create_tween()
+    tween.tween_method(_set_shake_intensity, 0.0, 1.0, 10.0)
+    
+    # Rocks fall from ceiling
+    _spawn_falling_rocks()
+
+func load_boss_chamber():
+    # Hide all sections except boss chamber
+    for section in cave_sections.get_children():
+        section.visible = false
+    
+    var boss_chamber = preload("res://environments/bandit_boss_chamber.tscn").instantiate()
+    add_child(boss_chamber)
+    
+    # Boss chamber has unique properties
+    boss_chamber.setup_dragon_shrine()
+    
+    return boss_chamber.get_node("BossSpawnPoint").global_position
+
+<!-- JSON: manifests/bandit_cave_content.json -->
+{
+  "transition": {
+    "name": "Bandit Cave",
+    "type": "peace_to_unease",
+    "description": "The last normal fight before horror begins",
+    "key_mechanics": [
+      "Basic combat tutorial",
+      "Gear check",
+      "Introduction to exploration",
+      "First moral choices",
+      "Horror foreshadowing"
+    ],
+    "performance_metrics": {
+      "combat_rating": "How well player handles combat",
+      "stealth_rating": "Use of alternative approaches",
+      "investigation_rating": "Clues and secrets found",
+      "moral_choices": "Approach, leader fate",
+      "resource_management": "Torch usage, potion conservation"
+    },
+    "permanent_effects": {
+      "traits_gained": ["altruistic/mercenary", "warrior/shadow", "investigator", "decisive/merciful"],
+      "world_changes": ["Phase shifts to unease", "Time advances to dusk", "Fog appears"],
+      "story_seeds": ["Dragon worship discovered", "Bandit leader fate", "Sanity system hinted"]
+    },
+    "horror_elements": {
+      "subtle": ["Moving shadows", "Whispers", "Time distortion"],
+      "environmental": ["Dragon symbols", "Previous adventurer remains", "Unnatural cave formations"],
+      "psychological": ["Bandits' madness", "Dream journals", "Player's first doubt"],
+      "foreshadowing": ["Dragon presence", "Blood transformation", "Reality instability"]
+    }
+  }
+}
+
+<!-- PHILOSOPHY -->
+The Bandit Cave is the player's last taste of "normal" adventure before Dragon's Labyrinth reveals its true nature. It must feel like a traditional RPG dungeon that slowly becomes wrong. Every design choice serves two purposes:
+
+1. **Tutorial**: Teach basic mechanics (combat, exploration, choices)
+2. **Corruption**: Plant seeds of horror that will bloom later
+
+The transition from hex-based to third-person exploration and back creates a sense of disorientation. The deeper you go, the more the game's rules seem to bend. By the time you face the leader, you're not sure if this is still the same game you started playing.
+
+Most importantly, this transition establishes that your choices have permanent consequences. The leader's fate, the traits you gain, and the clues you find will all echo throughout your journey to the dragon.

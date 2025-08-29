@@ -1,0 +1,190 @@
+# Generate Companion System
+
+## Context
+Create a rich companion system where NPCs join the player's party, providing combat support, unique dialogue, and personal storylines. Companions should feel like real characters with their own motivations and relationships.
+
+## Companion Recruitment
+
+### 1. Available Companions
+Based on discovered character assets:
+{% for character in discovered_characters %}
+- **{{ character.name }}**:
+  - Class: {{ character.class }}
+  - Recruitment: {{ character.recruitment_method }}
+  - Personality: {{ character.traits }}
+  - Combat Role: {{ character.combat_style }}
+{% endfor %}
+
+### 2. Recruitment Methods
+- **Story Companions**: Join through main quests
+- **Optional Companions**: Found through exploration
+- **Faction Companions**: Require reputation
+- **Hidden Companions**: Secret requirements
+- **Mercenary Companions**: Hired for gold
+
+## Combat Integration
+
+### 1. Companion AI in Hex Combat
+- Companions take turns after player
+- Each has unique AP pool (3-5 based on class)
+- AI behaviors based on personality:
+  - Aggressive: Prioritize damage
+  - Defensive: Protect player/allies
+  - Tactical: Optimal positioning
+  - Support: Buffs and healing
+
+### 2. Companion Commands
+Player can issue general orders:
+- **Attack Target**: Focus specific enemy
+- **Defend Position**: Hold specific hex
+- **Free Action**: AI decides
+- **Use Ability**: Trigger special skill
+- **Retreat**: Move away from enemies
+
+### 3. Combo Abilities
+When specific companions are together:
+```
+Fighter + Mage = "Enchanted Blade" (weapon buff)
+Rogue + Archer = "Coordinated Strike" (flanking bonus)
+Healer + Tank = "Divine Protection" (damage shield)
+Any 3 companions = "United We Stand" (group buff)
+```
+
+## Companion Development
+
+### 1. Loyalty System
+- Starts at 0, max 100
+- Increased by:
+  - Completing companion quests
+  - Dialogue choices they approve
+  - Gifts matching their interests
+  - Combat victories together
+- Decreased by:
+  - Choices against their values
+  - Letting them fall in combat
+  - Ignoring their quests
+
+### 2. Companion Perks
+At loyalty milestones:
+- **25**: Unlock personal quest
+- **50**: Learn companion's ultimate ability  
+- **75**: Unlock romance option (if applicable)
+- **100**: Permanent stat bonus to player
+
+### 3. Equipment System
+- Companions have equipment slots
+- Can give them player's items
+- They have gear preferences:
+  - Class-appropriate bonuses
+  - Personal style choices
+  - Special companion-only items
+
+## Companion Interactions
+
+### 1. Camp Conversations
+Between adventures:
+- Learn backstories
+- Develop relationships
+- Influence their decisions
+- Trigger side quests
+- Romance dialogues
+
+### 2. Inter-Companion Dynamics
+Companions interact with each other:
+- Some are friends (combat bonuses together)
+- Some are rivals (banter but penalities)
+- Some are neutral (can be influenced)
+- Romance triangles possible
+- Group dynamics affect morale
+
+### 3. Companion Quests
+Each companion has:
+- **Introduction Quest**: Learn their motivation
+- **Personal Quest Chain**: 3-5 quests about their past
+- **Loyalty Quest**: Major decision point
+- **Romance Quest**: If romance pursued
+- **Epilogue Quest**: Post-dragon content
+
+## Companion Customization
+
+### 1. Skill Development
+- Companions gain XP alongside player
+- Choose between 2-3 specialization paths
+- Player influences their growth:
+  - Aggressive choices → damage skills
+  - Defensive choices → tank skills
+  - Supportive choices → healing skills
+
+### 2. Appearance Options
+- Alternate outfits unlocked through play
+- Armor appearance separate from stats
+- Special costumes from events
+- Player-gifted accessories visible
+
+## Party Management
+
+### 1. Party Composition
+- Maximum 3 companions at once
+- Can swap at camp/town
+- Some quests require specific companions
+- Inactive companions gain reduced XP
+
+### 2. Formation System
+On hex grid:
+- Set default positions relative to player
+- Formations saved as presets
+- Quick-change for different situations:
+  - Defensive Circle
+  - Offensive Wedge  
+  - Scattered Recon
+  - Escort Formation
+
+## Romance System
+
+### 1. Romanceable Companions
+- Not all companions are romanceable
+- Some have gender preferences
+- Some have other requirements
+- Multiple romance paths possible
+
+### 2. Romance Progression
+- Friendship must reach 50+ first
+- Special dialogue options appear
+- Gift giving becomes important
+- Exclusive romance quests unlock
+- Affects ending scenarios
+
+### 3. Romance Benefits
+- Combat bonuses when together
+- Unique combo abilities
+- Special dialogue in story
+- Exclusive equipment sets
+- Alternate endings
+
+## Companion Consequences
+
+### 1. Story Impact
+- Companions comment on main quests
+- Their presence changes some outcomes
+- Can convince player of alternate solutions
+- May leave if strongly opposed to choices
+
+### 2. Death and Departure
+- Companions can permanently die (optional)
+- May leave if loyalty too low
+- Some mutually exclusive (choose one)
+- Departure affects other companions
+
+### 3. Ending Variations
+- Each companion has unique ending
+- Romance affects their epilogue
+- Max loyalty unlocks best ending
+- Their fate based on player choices
+
+Generate complete companion system with:
+- AI behavior trees for combat
+- Dialogue system integration
+- Relationship tracking
+- Equipment management
+- Save state for companion progress
+- Balanced combat contributions

@@ -1,0 +1,734 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the local co-op/PVP system for Dragon's Labyrinth at the {{ emotional_stage }} stage.
+
+NARRATIVE CONTEXT:
+- Previous state: {{ previous_state | default('peace') }}
+- Current state: {{ current_state | default('unease') }}
+- Next state: {{ next_state | default('dread') }}
+- Dread level: {{ dread_level | default(1) }}
+
+CRITICAL PHILOSOPHY:
+Dragon's Labyrinth supports BOTH holy and dark paths as equally valid playstyles:
+1. **Dark Path is NOT Punishment** - It's a power fantasy of corruption
+2. **Holy Path is NOT Easy Mode** - It's a different kind of strength
+3. **Mixed Parties Create Drama** - Paladin + Death Knight = Interesting dynamics
+4. **Shared Horror, Different Reactions** - Same events, opposite responses
+5. **Cooperation Despite Opposition** - The dragon threatens ALL paths
+
+PLAYER ARCHETYPES THAT EMERGE:
+
+**Holy Path Archetypes:**
+- **Paladin**: Tank, protector, group healing, undead bane
+- **Cleric**: Healer, buffer, sanctify ground, exorcism
+- **Holy Mage**: Defensive magic, purification, light damage
+- **Ranger**: Nature ally, animal companion, corruption cleanser
+
+**Dark Path Archetypes:**
+- **Death Knight**: Tank, life drain, corpse explosion, fear aura
+- **Warlock**: Damage dealer, demon summoning, curses, sacrificial magic
+- **Necromancer**: Minion master, bone shields, death magic
+- **Blood Mage**: Health as resource, blood rituals, vampiric powers
+
+**Neutral/Balanced Archetypes:**
+- **Warrior**: Physical might, adaptable to either path
+- **Rogue**: Stealth and cunning, morally flexible
+- **Elementalist**: Natural forces, beyond good/evil
+- **Bard**: Support through stories, mirrors party alignment
+
+CO-OP MECHANICS:
+
+1. **Complementary Powers**:
+   - Holy Aura + Death Aura = Unstable Reality Field (massive damage)
+   - Blessing + Curse on same target = Chaos Explosion
+   - Sanctified Ground + Corrupted Ground = Void Rift
+   - Life Drain + Healing = Energy Transfer Between Players
+
+2. **Relationship Dynamics**:
+   {% if emotional_stage in ["peace", "unease"] %}
+   - Players can hide their true nature from each other
+   - Small hints: "Your companion's shadow seems too long"
+   - Cooperation is easy, differences are subtle
+   {% elif emotional_stage in ["dread", "terror"] %}
+   - Alignments become obvious through visual changes
+   - Holy players glow faintly, dark players trail shadows
+   - Some abilities require moral compromise to combine
+   {% elif emotional_stage in ["despair", "madness", "horror"] %}
+   - Physical appearance fully transformed by path
+   - Holy players are beacons, dark players are voids
+   - Merely standing together causes reality distortions
+   {% endif %}
+
+3. **Shared Resources, Different Uses**:
+   - **Shrine**: Holy players pray for buffs, Dark players desecrate for power
+   - **Corpses**: Holy players consecrate for peace, Dark players animate
+   - **Villagers**: Holy players protect for faith, Dark players terrorize for fear
+   - **Companions**: Holy players inspire loyalty, Dark players demand servitude
+
+4. **Scaling Challenges**:
+   - Solo: Extremely difficult but possible, unique rewards
+   - 2 Players: Balanced difficulty, relationship dynamics
+   - 3-4 Players: Complex group dynamics, role specialization
+   - Mixed Alignment Groups: Special "Chaos" events and rewards
+
+UNIQUE CO-OP EVENTS:
+
+1. **The Moral Crossroads** (appears randomly):
+   - Save or sacrifice an innocent together
+   - Both must agree or fight each other
+   - Shapes both players' paths permanently
+
+2. **The Power Source**:
+   - Holy players see an angel trapped in crystal
+   - Dark players see a demon offering power
+   - It's the SAME entity - perspective shapes reality
+
+3. **The Corruption Tide**:
+   - Dark players can surf it for speed
+   - Holy players must create safe bubbles
+   - Cooperation: Dark player carries Holy player through
+
+COMPANION/MOUNT INTERACTIONS:
+
+**Holy Player Companions**:
+- Provide group healing and buffs
+- Glow brighter near evil, warning system
+- Can temporarily sanctify dark player's abilities
+- May try to "save" dark player's companions
+
+**Dark Player Companions**:
+- Fanatical cultists who worship the player
+- Can be sacrificed for group-wide damage boosts
+- Spread fear that helps holy players too (enemies flee)
+- May try to "corrupt" holy player's companions
+
+**Mount Dynamics**:
+- Holy mounts won't carry dark players (and vice versa)
+- But CAN create "mount chains" for traversal
+- Corrupted ground: Dark mounts protect all riders
+- Sacred ground: Holy mounts protect all riders
+
+PVP ELEMENTS (Optional):
+
+1. **Betrayal Mechanics**:
+   - At certain points, players can choose to betray
+   - Massive power boost for betrayer
+   - Permanent mark of "Oath Breaker" or "Fallen"
+   - Changes entire game trajectory
+
+2. **Duel for Leadership**:
+   - When players disagree on major choices
+   - Winner's choice shapes the world
+   - Loser gets compensation (items, different quest)
+   - Can be settled through combat OR puzzle challenge
+
+3. **Competitive Collection**:
+   - Some resources are limited
+   - Players race to gather power
+   - Can trade, steal, or destroy resources
+   - Creates natural tension without forced PVP
+
+TECHNICAL REQUIREMENTS:
+- Split-screen that merges during key moments
+- Shared inventory with permission system
+- Relationship tracking between players
+- Dynamic difficulty scaling
+- Crossplay between alignment types
+- Spectator mode for eliminated players
+
+Generate a co-op system where holy knights and blood mages can work together against the dragon, each growing more powerful in their chosen path, creating a shared narrative where both light and darkness are equally valid responses to horror.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: local_coop_manager.gd -->
+extends Node
+class_name LocalCoopManager
+
+# Where light and darkness dance together against the void
+
+signal player_joined(player_id: int, alignment: String)
+signal alignment_revealed(player_id: int, true_nature: String)
+signal cooperation_bonus(action: String, multiplier: float)
+signal betrayal_occurred(betrayer_id: int, victim_id: int)
+signal relationship_changed(player1: int, player2: int, new_status: String)
+
+const MAX_PLAYERS = 4
+const ALIGNMENT_THRESHOLD = 30  # Actions before alignment becomes obvious
+
+var players: Dictionary = {}  # player_id: PlayerData
+var relationships: Dictionary = {}  # "p1_p2": RelationshipData
+var shared_resources: Dictionary = {}
+var active_challenges: Array = []
+
+class PlayerData:
+    var id: int
+    var alignment_score: float = 0.0  # -100 (dark) to +100 (holy)
+    var visible_alignment: String = "neutral"
+    var true_alignment: String = "neutral"
+    var trait_archetype: String = ""
+    var action_count: int = 0
+    var betrayal_history: Array = []
+    var cooperative_actions: Dictionary = {}  # player_id: count
+
+class RelationshipData:
+    var trust_level: float = 50.0
+    var cooperation_count: int = 0
+    var betrayal_count: int = 0
+    var synergy_discovered: Array = []  # Special combo moves unlocked
+    var relationship_type: String = "neutral"  # allied, suspicious, hostile
+
+func _ready() -> void:
+    GameState.moral_choice_made.connect(_on_moral_choice)
+    CombatSystem.ability_used.connect(_on_ability_used)
+    
+func add_player(player_id: int) -> void:
+    var player_data = PlayerData.new()
+    player_data.id = player_id
+    players[player_id] = player_data
+    
+    # Initialize relationships with existing players
+    for existing_id in players:
+        if existing_id != player_id:
+            _create_relationship(player_id, existing_id)
+    
+    player_joined.emit(player_id, "neutral")
+
+func _create_relationship(player1: int, player2: int) -> void:
+    var key = _get_relationship_key(player1, player2)
+    relationships[key] = RelationshipData.new()
+
+func _get_relationship_key(player1: int, player2: int) -> String:
+    var sorted = [player1, player2]
+    sorted.sort()
+    return "%d_%d" % [sorted[0], sorted[1]]
+
+func _on_moral_choice(player_id: int, choice: String, weight: int) -> void:
+    if not player_id in players:
+        return
+    
+    var player = players[player_id]
+    
+    # Update alignment based on choice
+    match choice:
+        "save_innocent", "heal_enemy", "sacrifice_self":
+            player.alignment_score = min(100, player.alignment_score + weight)
+        "kill_innocent", "raise_dead", "blood_ritual":
+            player.alignment_score = max(-100, player.alignment_score - weight)
+        "steal", "lie", "intimidate":
+            player.alignment_score = max(-100, player.alignment_score - weight/2)
+        "protect", "inspire", "bless":
+            player.alignment_score = min(100, player.alignment_score + weight/2)
+    
+    player.action_count += 1
+    
+    # Check if alignment should be revealed
+    if player.action_count >= ALIGNMENT_THRESHOLD:
+        _reveal_alignment(player_id)
+
+func _reveal_alignment(player_id: int) -> void:
+    var player = players[player_id]
+    
+    if player.alignment_score > 30:
+        player.true_alignment = "holy"
+        player.visible_alignment = "holy"
+    elif player.alignment_score < -30:
+        player.true_alignment = "dark"
+        player.visible_alignment = "dark"
+    else:
+        player.true_alignment = "neutral"
+        player.visible_alignment = "neutral"
+    
+    alignment_revealed.emit(player_id, player.true_alignment)
+    
+    # Visual changes based on alignment
+    _apply_alignment_visuals(player_id)
+
+func _apply_alignment_visuals(player_id: int) -> void:
+    var player = players[player_id]
+    var player_node = get_node("/root/Game/Players/Player%d" % player_id)
+    
+    match player.visible_alignment:
+        "holy":
+            player_node.add_aura_effect("holy_glow")
+            player_node.footstep_particle = "golden_light"
+        "dark":
+            player_node.add_aura_effect("shadow_trail")
+            player_node.footstep_particle = "dark_wisps"
+        "neutral":
+            player_node.clear_aura_effects()
+
+func attempt_cooperation(player1_id: int, player2_id: int, action: String) -> bool:
+    if not player1_id in players or not player2_id in players:
+        return false
+    
+    var p1 = players[player1_id]
+    var p2 = players[player2_id]
+    var relationship = relationships[_get_relationship_key(player1_id, player2_id)]
+    
+    # Check if cooperation is possible
+    var can_cooperate = _check_cooperation_compatibility(p1, p2, action)
+    
+    if can_cooperate:
+        # Record cooperation
+        relationship.cooperation_count += 1
+        relationship.trust_level = min(100, relationship.trust_level + 5)
+        
+        if not player2_id in p1.cooperative_actions:
+            p1.cooperative_actions[player2_id] = 0
+        p1.cooperative_actions[player2_id] += 1
+        
+        # Check for synergy
+        var synergy = _check_synergy(p1, p2, action)
+        if synergy != "":
+            _unlock_synergy(player1_id, player2_id, synergy)
+        
+        # Apply cooperation bonus
+        var bonus = _calculate_cooperation_bonus(p1, p2, relationship)
+        cooperation_bonus.emit(action, bonus)
+        
+        return true
+    
+    return false
+
+func _check_cooperation_compatibility(p1: PlayerData, p2: PlayerData, action: String) -> bool:
+    # Some actions require alignment compatibility
+    match action:
+        "channel_holy_power":
+            return p1.true_alignment == "holy" or p2.true_alignment == "holy"
+        "perform_blood_ritual":
+            return p1.true_alignment == "dark" or p2.true_alignment == "dark"
+        "create_sanctuary":
+            return p1.true_alignment != "dark" and p2.true_alignment != "dark"
+        "summon_demons":
+            return p1.true_alignment != "holy" and p2.true_alignment != "holy"
+        _:
+            return true  # Most actions work regardless of alignment
+
+func _check_synergy(p1: PlayerData, p2: PlayerData, action: String) -> String:
+    # Discover powerful combinations
+    if p1.true_alignment == "holy" and p2.true_alignment == "dark":
+        match action:
+            "simultaneous_channel":
+                return "chaos_rift"  # Holy + Dark energy creates reality tear
+            "combined_aura":
+                return "nullification_field"  # Cancels all magic
+            "dual_blessing":
+                return "paradox_blessing"  # Target becomes both blessed and cursed
+    
+    elif p1.true_alignment == "holy" and p2.true_alignment == "holy":
+        match action:
+            "combined_prayer":
+                return "divine_intervention"
+            "dual_heal":
+                return "resurrection_aura"
+            "joint_consecration":
+                return "sacred_ground_permanent"
+    
+    elif p1.true_alignment == "dark" and p2.true_alignment == "dark":
+        match action:
+            "blood_pact":
+                return "shared_vitality"  # Damage to one heals the other
+            "dual_curse":
+                return "death_mark"  # Instant kill at 25% hp
+            "necromantic_ritual":
+                return "army_of_darkness"
+    
+    return ""
+
+func _unlock_synergy(player1_id: int, player2_id: int, synergy: String) -> void:
+    var relationship = relationships[_get_relationship_key(player1_id, player2_id)]
+    
+    if not synergy in relationship.synergy_discovered:
+        relationship.synergy_discovered.append(synergy)
+        
+        # Announce discovery
+        UIManager.show_synergy_discovered(synergy, player1_id, player2_id)
+        
+        # Grant synergy ability
+        AbilityManager.grant_synergy_ability(synergy, [player1_id, player2_id])
+
+func betray_player(betrayer_id: int, victim_id: int, betrayal_type: String) -> void:
+    if not betrayer_id in players or not victim_id in players:
+        return
+    
+    var betrayer = players[betrayer_id]
+    var victim = players[victim_id]
+    var relationship = relationships[_get_relationship_key(betrayer_id, victim_id)]
+    
+    # Record betrayal
+    betrayer.betrayal_history.append({
+        "victim": victim_id,
+        "type": betrayal_type,
+        "stage": GameState.emotional_stage
+    })
+    
+    relationship.betrayal_count += 1
+    relationship.trust_level = max(0, relationship.trust_level - 30)
+    
+    # Alignment shift
+    betrayer.alignment_score = max(-100, betrayer.alignment_score - 20)
+    
+    # Grant betrayal rewards (power at a cost)
+    match betrayal_type:
+        "steal_power":
+            PlayerStats.transfer_stats(victim_id, betrayer_id, "power", 10)
+        "sacrifice_ally":
+            PlayerStats.grant_temporary_buff(betrayer_id, "sacrificial_might", 300)
+        "corrupt_companion":
+            CompanionManager.corrupt_companion(victim_id)
+    
+    betrayal_occurred.emit(betrayer_id, victim_id)
+    
+    # Update relationship
+    relationship.relationship_type = "hostile"
+    relationship_changed.emit(betrayer_id, victim_id, "hostile")
+
+func _calculate_cooperation_bonus(p1: PlayerData, p2: PlayerData, relationship: RelationshipData) -> float:
+    var base_bonus = 1.0
+    
+    # Trust increases effectiveness
+    base_bonus += relationship.trust_level / 100.0
+    
+    # Alignment synergy
+    if p1.true_alignment == p2.true_alignment:
+        base_bonus += 0.5  # Same alignment works well together
+    elif (p1.true_alignment == "holy" and p2.true_alignment == "dark") or \
+         (p1.true_alignment == "dark" and p2.true_alignment == "holy"):
+        base_bonus += 0.3  # Opposite alignments create unique power
+    
+    # History matters
+    base_bonus += relationship.cooperation_count * 0.01
+    base_bonus -= relationship.betrayal_count * 0.2
+    
+    return max(0.5, base_bonus)
+
+func handle_shared_resource(resource_type: String, amount: int, finder_id: int) -> void:
+    # How do players divide found resources?
+    var player_count = players.size()
+    
+    if player_count == 1:
+        PlayerInventory.add_resource(finder_id, resource_type, amount)
+        return
+    
+    # Show division UI
+    UIManager.show_resource_division(resource_type, amount, finder_id)
+    
+    # Players can:
+    # - Split equally (builds trust)
+    # - Finder keeps all (neutral)
+    # - Fight for it (PvP)
+    # - Trade for other resources
+    # - Sacrifice to shared pool
+
+func create_moral_crossroads(choice_data: Dictionary) -> void:
+    # Force players to make a group decision
+    active_challenges.append(choice_data)
+    
+    # Pause game
+    GameState.pause_for_decision()
+    
+    # Show choice to all players
+    for player_id in players:
+        UIManager.show_moral_choice(player_id, choice_data)
+    
+    # Wait for consensus or conflict
+    _await_group_decision(choice_data)
+
+func _await_group_decision(choice_data: Dictionary) -> void:
+    var votes = {}
+    
+    # Collect votes
+    for player_id in players:
+        var vote = yield(UIManager.await_player_vote(player_id), "completed")
+        votes[player_id] = vote
+    
+    # Check for consensus
+    var vote_counts = {}
+    for vote in votes.values():
+        vote_counts[vote] = vote_counts.get(vote, 0) + 1
+    
+    var max_votes = 0
+    var winning_choice = ""
+    for choice in vote_counts:
+        if vote_counts[choice] > max_votes:
+            max_votes = vote_counts[choice]
+            winning_choice = choice
+    
+    if max_votes == players.size():
+        # Unanimous decision
+        _execute_group_choice(winning_choice, true)
+    else:
+        # Conflict - might trigger PvP or compromise
+        _handle_group_conflict(votes, winning_choice)
+
+func _execute_group_choice(choice: String, unanimous: bool) -> void:
+    # Apply choice consequences
+    match choice:
+        "save_village":
+            for player_id in players:
+                players[player_id].alignment_score += 10
+                if unanimous:
+                    PlayerStats.grant_blessing(player_id, "unity_of_purpose")
+        
+        "burn_village":
+            for player_id in players:
+                players[player_id].alignment_score -= 10
+                if unanimous:
+                    PlayerStats.grant_curse(player_id, "shared_damnation")
+        
+        "split_party":
+            # Some save, some burn
+            _split_party_event()
+
+func get_party_alignment() -> String:
+    # Calculate overall party alignment
+    var total_alignment = 0.0
+    for player in players.values():
+        total_alignment += player.alignment_score
+    
+    var average = total_alignment / players.size()
+    
+    if average > 30:
+        return "holy_party"
+    elif average < -30:
+        return "dark_party"
+    else:
+        return "mixed_party"
+
+func apply_party_synergies() -> void:
+    var party_type = get_party_alignment()
+    
+    match party_type:
+        "holy_party":
+            # All holy = massive defensive bonuses
+            for player_id in players:
+                PlayerStats.add_aura(player_id, "divine_protection")
+                CompanionManager.inspire_all_companions(player_id)
+        
+        "dark_party":
+            # All dark = overwhelming offensive power
+            for player_id in players:
+                PlayerStats.add_aura(player_id, "bloodthirsty_frenzy")
+                CompanionManager.terrify_all_enemies(player_id)
+        
+        "mixed_party":
+            # Mixed = chaos magic and unique abilities
+            for player_id in players:
+                PlayerStats.add_aura(player_id, "reality_flux")
+                AbilityManager.unlock_chaos_abilities(player_id)
+
+# Light and darkness need each other
+# To face the void that consumes both
+# The dragon cares not for your morality
+<!-- /FILE -->
+
+<!-- FILE: coop_relationship_system.gd -->
+extends Node
+class_name CoopRelationshipSystem
+
+# The bonds that form in darkness - love or servitude
+
+signal bond_formed(player1: int, player2: int, bond_type: String)
+signal synergy_mastered(players: Array, synergy: String)
+signal party_transformed(transformation: String)
+
+# Relationship evolution based on alignment combinations
+const RELATIONSHIP_PATHS = {
+    "holy_holy": {
+        "stages": ["allies", "brothers_in_faith", "divine_bond", "celestial_twins"],
+        "abilities": ["shared_prayer", "divine_link", "resurrection_pact", "angelic_fusion"]
+    },
+    "dark_dark": {
+        "stages": ["conspirators", "blood_brothers", "demonic_pact", "void_twins"],
+        "abilities": ["blood_sharing", "soul_link", "death_pact", "abyssal_fusion"]
+    },
+    "holy_dark": {
+        "stages": ["suspicious", "reluctant_allies", "strange_bond", "paradox_twins"],
+        "abilities": ["reality_break", "balance_of_power", "void_resistance", "chaos_mastery"]
+    },
+    "neutral_any": {
+        "stages": ["companions", "trusted_allies", "sworn_friends", "legendary_duo"],
+        "abilities": ["teamwork", "combination_attacks", "shared_destiny", "legendary_synergy"]
+    }
+}
+
+# How relationships affect gameplay
+const BOND_BENEFITS = {
+    "divine_bond": {
+        "shared_healing": true,
+        "damage_split": 0.3,
+        "resurrection_chance": 0.5,
+        "sanity_share": true
+    },
+    "demonic_pact": {
+        "life_drain_share": true,
+        "kill_power_boost": 0.5,
+        "corruption_spread": true,
+        "betrayal_impossible": false  # Can still betray!
+    },
+    "paradox_twins": {
+        "reality_manipulation": true,
+        "alignment_immunity": true,
+        "dragon_confusion": true,  # Dragon doesn't understand you
+        "unique_ending": true
+    }
+}
+
+var relationship_progress: Dictionary = {}  # "p1_p2": progress_data
+
+func advance_relationship(player1: int, player2: int, action: String) -> void:
+    var key = _get_key(player1, player2)
+    
+    if not key in relationship_progress:
+        relationship_progress[key] = {
+            "stage": 0,
+            "path": _determine_path(player1, player2),
+            "shared_experiences": [],
+            "synergies_used": {},
+            "trust_breaks": 0
+        }
+    
+    var progress = relationship_progress[key]
+    
+    # Add shared experience
+    progress.shared_experiences.append({
+        "action": action,
+        "stage": GameState.emotional_stage,
+        "timestamp": Time.get_ticks_msec()
+    })
+    
+    # Check for stage advancement
+    if _should_advance_stage(progress):
+        _advance_stage(player1, player2, progress)
+
+func _determine_path(player1: int, player2: int) -> String:
+    var p1_alignment = LocalCoopManager.players[player1].true_alignment
+    var p2_alignment = LocalCoopManager.players[player2].true_alignment
+    
+    if p1_alignment == "holy" and p2_alignment == "holy":
+        return "holy_holy"
+    elif p1_alignment == "dark" and p2_alignment == "dark":
+        return "dark_dark"
+    elif (p1_alignment == "holy" and p2_alignment == "dark") or \
+         (p1_alignment == "dark" and p2_alignment == "holy"):
+        return "holy_dark"
+    else:
+        return "neutral_any"
+
+func _should_advance_stage(progress: Dictionary) -> bool:
+    var required_experiences = [5, 15, 30, 50]  # Per stage
+    var current_stage = progress.stage
+    
+    if current_stage >= 4:
+        return false  # Max stage
+    
+    var exp_count = progress.shared_experiences.size()
+    var required = required_experiences[current_stage]
+    
+    # Trust breaks slow progression
+    required += progress.trust_breaks * 10
+    
+    return exp_count >= required
+
+func _advance_stage(player1: int, player2: int, progress: Dictionary) -> void:
+    progress.stage += 1
+    
+    var path = RELATIONSHIP_PATHS[progress.path]
+    var new_stage_name = path.stages[progress.stage - 1]
+    var new_ability = path.abilities[progress.stage - 1]
+    
+    # Grant new ability
+    AbilityManager.grant_relationship_ability(new_ability, [player1, player2])
+    
+    # Apply bond benefits
+    if new_stage_name in BOND_BENEFITS:
+        _apply_bond_benefits(player1, player2, BOND_BENEFITS[new_stage_name])
+    
+    bond_formed.emit(player1, player2, new_stage_name)
+    
+    # Special scenes for major bonds
+    if progress.stage == 4:
+        _play_ultimate_bond_scene(player1, player2, progress.path)
+
+func _apply_bond_benefits(player1: int, player2: int, benefits: Dictionary) -> void:
+    for benefit in benefits:
+        match benefit:
+            "shared_healing":
+                HealthSystem.link_health_pools(player1, player2, 0.5)
+            "life_drain_share":
+                CombatSystem.share_life_drain(player1, player2)
+            "reality_manipulation":
+                WorldSystem.grant_reality_control([player1, player2])
+            "dragon_confusion":
+                DragonAI.add_confusion_targets([player1, player2])
+
+func handle_companion_interactions(player1_comp: Companion, player2_comp: Companion) -> void:
+    var p1_alignment = player1_comp.master_alignment
+    var p2_alignment = player2_comp.master_alignment
+    
+    if p1_alignment == "holy" and p2_alignment == "dark":
+        # Companions try to convert each other
+        DialogueSystem.play_companion_debate(player1_comp, player2_comp)
+        
+        # May result in:
+        # - One companion leaving
+        # - Both companions fighting
+        # - Rare: Both finding middle ground
+    
+    elif p1_alignment == "dark" and p2_alignment == "dark":
+        # Dark companions compete for favor
+        var winner = _companion_dominance_contest(player1_comp, player2_comp)
+        winner.gain_trait("pack_leader")
+        
+    elif p1_alignment == "holy" and p2_alignment == "holy":
+        # Holy companions support each other
+        player1_comp.trust_level += 10
+        player2_comp.trust_level += 10
+        _create_companion_bond(player1_comp, player2_comp)
+
+func _companion_dominance_contest(comp1: Companion, comp2: Companion) -> Companion:
+    # Dark companions establish hierarchy through:
+    var comp1_power = comp1.level + comp1.corruption_level + comp1.kills
+    var comp2_power = comp2.level + comp2.corruption_level + comp2.kills
+    
+    return comp1 if comp1_power > comp2_power else comp2
+
+func handle_shared_mount_riding() -> void:
+    # Some mounts can carry multiple players
+    for mount in MountManager.get_party_mounts():
+        if mount.size == "large":
+            # Can carry 2 players
+            if mount.corruption_level > 0.5:
+                # Corrupted mounts create dark bonds
+                var riders = mount.get_riders()
+                if riders.size() == 2:
+                    _create_corruption_link(riders[0], riders[1])
+            else:
+                # Pure mounts strengthen holy bonds
+                var riders = mount.get_riders()
+                if riders.size() == 2:
+                    _strengthen_pure_bond(riders[0], riders[1])
+
+func _play_ultimate_bond_scene(player1: int, player2: int, path: String) -> void:
+    match path:
+        "holy_holy":
+            DialogueSystem.play_scene("celestial_twin_birth", {
+                "player1": player1,
+                "player2": player2,
+                "power": "Your souls merge into blinding light"
+            })
+        
+        "dark_dark":
+            DialogueSystem.play_scene("void_twin_birth", {
+                "player1": player1,
+                "player2": player2,
+                "power": "Your souls merge into consuming darkness"
+            })
+        
+        "holy_dark":
+            DialogueSystem.play_scene("paradox_twin_birth", {
+                "player1": player1,
+                "player2": player2,
+                "power": "Reality cracks as your souls create impossibility"
+            })
+
+# In shared horror, bonds transcend morality
+# The paladin and death knight

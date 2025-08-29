@@ -1,0 +1,1 @@
+// missing or failed to render template: src/dragons_labyrinth/code_generation/templates/orchestrator/inventory_crafting_system.jinja2

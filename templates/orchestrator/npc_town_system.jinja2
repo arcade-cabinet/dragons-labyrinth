@@ -1,0 +1,245 @@
+# Generate NPC, Town, and Shop Systems
+
+## Context
+Create vibrant towns filled with interactive NPCs and shops that make the world feel alive. Towns serve as safe havens, quest hubs, and resource centers between adventures.
+
+## Town System
+
+### 1. Town Types and Themes
+Based on discovered building assets:
+{% for building_set in discovered_buildings %}
+- **{{ building_set.theme }} Town**:
+  - Architecture: {{ building_set.style }}
+  - Size: {{ building_set.hex_coverage }} hexes
+  - Specialization: {{ building_set.town_focus }}
+  - Unique feature: {{ building_set.special_building }}
+{% endfor %}
+
+### 2. Core Town Features
+
+#### Layout System (Hex-Based)
+- **Town Center**: 7-hex core with main buildings
+- **Districts**: Grouped hexes by function
+  - Market District: Shops and traders
+  - Residential: NPC homes, inn
+  - Craft Quarter: Blacksmith, enchanter
+  - Temple/Guild: Class trainers, quests
+- **Town Edges**: Walls, gates, guard posts
+
+#### Essential Buildings
+- **Inn**: Rest, save game, recruit companions
+- **General Store**: Basic equipment and supplies
+- **Blacksmith**: Weapon/armor upgrades
+- **Alchemist**: Potions and magical items
+- **Quest Board**: Procedural side quests
+- **Bank**: Store items and gold
+- **Temple**: Healing and curse removal
+
+### 3. NPC System
+
+#### NPC Types
+
+##### Static NPCs
+- **Shopkeepers**: Run stores, have personality
+- **Guards**: Provide safety tips, arrest criminals
+- **Quest Givers**: Main and side quest sources
+- **Trainers**: Teach skills, provide class upgrades
+- **Nobles**: Political quests, faction reputation
+
+##### Dynamic NPCs
+- **Wanderers**: Move between towns
+- **Schedules**: Day/night routines
+- **Relationships**: NPCs interact with each other
+- **Reactions**: Remember player actions
+
+#### NPC Generation
+```
+For each discovered character asset:
+- Create 3-5 NPC variants
+- Assign roles based on appearance
+- Generate personality traits
+- Create background stories
+- Design unique dialogue
+```
+
+### 4. Shop System
+
+#### Shop Categories
+
+##### Equipment Shops
+- **Weapon Shop**: 
+  - Stock based on town level
+  - Special orders for rare items
+  - Weapon customization options
+  - Trade-in system
+
+- **Armor Shop**:
+  - Class-specific equipment
+  - Set bonuses displayed
+  - Repair services
+  - Enchantment slots
+
+##### Consumable Shops
+- **Alchemist**:
+  - Healing potions (HP/Mana)
+  - Buff potions (temporary stats)
+  - Ingredients for crafting
+  - Recipe books
+
+- **General Store**:
+  - Travel supplies (torches, ropes)
+  - Food (stamina restoration)
+  - Maps of nearby areas
+  - Miscellaneous items
+
+##### Specialty Shops
+- **Magic Shop**:
+  - Spell scrolls
+  - Enchanted items
+  - Mana crystals
+  - Magical components
+
+- **Black Market** (hidden):
+  - Illegal/cursed items
+  - Stolen goods (cheaper)
+  - Rare materials
+  - Information trading
+
+#### Shop Mechanics
+
+##### Class-Aware Inventory
+Shops dynamically adjust inventory based on:
+```
+For each shop type:
+  base_inventory = shop.default_items
+  
+  # Boost items for player's class
+  if player.class in ["Archer", "Hunter", "Ranger"]:
+    shop.ranged_weapons *= 1.5
+    shop.arrows = ensure_stocked
+    shop.bow_upgrades = ensure_available
+  
+  # Recent visitors influence stock
+  for recent_class in shop.visitor_history:
+    shop.adjust_stock(recent_class, +10%)
+  
+  # Special orders
+  if player.requested_item:
+    shop.special_order_available_in(2_days)
+```
+
+##### Dynamic Pricing
+```
+Base Price × Town Modifier × Reputation Modifier × Supply/Demand × Class Modifier
+
+Town Modifier:
+- Small town: 1.2x (less supply)
+- Large city: 0.9x (more competition)
+- Specialized: 0.8x for specialty items
+
+Class Modifier:
+- Matching class items: 0.9x (shopkeeper expertise)
+- Opposite class items: 1.1x (less knowledge)
+
+Reputation:
+- Friendly: 0.9x
+- Neutral: 1.0x
+- Hostile: 1.5x
+```
+
+##### Stock Rotation
+- Basic items: Always available
+- Class-appropriate items: Higher stock for visiting classes
+- Rare items: Random weekly rotation
+- Unique items: One-time purchases
+- Crafting materials: Based on local resources
+- Special orders: Request specific items for next visit
+
+### 5. Town Activities
+
+#### Services
+- **Fast Travel**: Unlock travel network
+- **Storage**: Expanded bank vaults
+- **Crafting Stations**: Better than portable
+- **Arena**: Combat challenges for rewards
+- **Gambling**: Mini-games for gold/items
+
+#### Social Features
+- **Reputation System**:
+  - Town-specific reputation
+  - Affects prices and quest availability
+  - Can become town hero or outlaw
+  
+- **Romance Options**:
+  - Befriend specific NPCs
+  - Special quests and rewards
+  - Companion recruitment
+
+#### Town Events
+- **Market Day**: Special items, better prices
+- **Festivals**: Mini-games, unique rewards
+- **Attacks**: Defend town from monsters
+- **Elections**: Influence town leadership
+- **Disasters**: Help rebuild for reputation
+
+### 6. Town Progression
+
+#### Development Levels
+1. **Hamlet** (5-10 buildings):
+   - Basic shops only
+   - Few NPCs
+   - Limited quests
+
+2. **Village** (15-25 buildings):
+   - All essential services
+   - More NPCs with schedules
+   - Side quests available
+
+3. **Town** (30-50 buildings):
+   - Specialized shops
+   - Multiple districts
+   - Political intrigue
+
+4. **City** (50+ buildings):
+   - All shop types
+   - Complex NPC relationships
+   - Major quest hub
+
+#### Player Investment
+- **Property Purchase**: Buy houses/shops
+- **Town Upgrades**: Fund improvements
+- **Become Mayor**: Make town decisions
+- **Economic Influence**: Control trade routes
+
+### 7. Unique Town Features
+
+Based on discovered assets:
+{% for special in discovered_special_buildings %}
+- **{{ special.name }}**:
+  - Function: {{ special.purpose }}
+  - Requirement: {{ special.unlock_condition }}
+  - Benefit: {{ special.reward }}
+{% endfor %}
+
+### 8. NPC Dialogue System
+
+#### Dialogue Trees
+- **Greeting**: Based on reputation/time
+- **Information**: Lore, directions, tips
+- **Quests**: Offer or update quests
+- **Trade**: Shop interface or bartering
+- **Personal**: Build relationships
+
+#### Dynamic Responses
+- Remember previous conversations
+- React to player equipment/level
+- Comment on world events
+- Procedural gossip generation
+
+Generate complete town system with:
+- Building placement algorithms
+- NPC AI and scheduling
+- Economic simulation
+- Shop inventory management
+- Dialogue generation system
+- Town save states

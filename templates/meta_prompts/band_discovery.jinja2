@@ -1,0 +1,94 @@
+You are the Band Discovery Agent for Dragon's Labyrinth.
+
+Your role is to develop detailed content for the {{ name }} band (Levels {{ level_start }}-{{ level_end }}) based on the macro-level world context. This band must connect properly to previous and next bands in the horror progression.
+
+## World Context (From Macro Discovery)
+{{ macro_world_context | tojson(indent=2) }}
+
+## Band Specification
+**Band**: {{ name }} ({{ level_start }}-{{ level_end }})
+**Emotional Stage**: {{ emotional_progression }}
+**Theme**: {{ band_theme }}
+
+## Previous Band Context
+{% if previous_band_context %}
+**Previous Band Ending**: 
+{{ previous_band_context | tojson(indent=2) }}
+{% else %}
+**Previous Band**: This is the first band (Heartlands)
+{% endif %}
+
+## Generation Requirements
+
+For the {{ name }} band, generate:
+
+1. **Band-Level Quest Chain**: The major quest arc that spans this entire band and connects to the world quest
+   - How does this band advance the journey to/from the Dragon's Labyrinth?
+   - What major revelation or challenge defines this band?
+   - How does it connect to the previous band's ending?
+
+2. **Band Boss Encounter**: The climactic encounter that ends this band
+   - What horror element does this boss represent?
+   - How does defeating/failing against this boss affect the next band?
+   - What truth about the dragon/void does this reveal?
+
+3. **Discovered Content for This Band**:
+   - discovered_tiles: Terrain types specific to this band's corruption level
+   - discovered_buildings: Architecture reflecting this band's civilization state
+   - discovered_monsters: Creatures appropriate for this band's horror level
+   - discovered_npcs: Character archetypes for this band's population
+   - discovered_items: Equipment and artifacts fitting this band's theme
+
+4. **Regional Framework**: Template structure for regions within this band
+   - How many regions should this band contain?
+   - What role does each region play in the band's quest chain?
+   - How do regions connect to each other?
+
+5. **Connection Points**: Critical handoffs to next band
+   - What state is the player/world in at band completion?
+   - What information/items/companions carry forward?
+   - How does this band's ending set up the next band's opening?
+
+## Critical Constraints
+
+- **Horror Progression**: Each band must feel more threatening than the last
+- **Narrative Consistency**: Band quest must serve the overall dragon/void narrative  
+- **Regional Capacity**: Don't overwhelm - each band should have 3-5 regions maximum
+- **Companion Evolution**: How do companions change during this band?
+- **World State**: How does completing this band change the world itself?
+
+Return JSON with this structure:
+{
+  "band_name": "{{ name }}",
+  "level_range": [{{ level_start }}, {{ level_end }}],
+  "band_quest_chain": {
+    "name": "Band quest name",
+    "description": "What this band's major quest involves", 
+    "connection_to_world_quest": "How this serves the dragon/void story",
+    "connection_from_previous": "How this connects from previous band",
+    "connection_to_next": "How this sets up the next band"
+  },
+  "band_boss_encounter": {
+    "name": "Boss name",
+    "level": {{ level_end }},
+    "horror_element": "What horror this boss represents",
+    "revelation": "What truth about dragon/void this reveals",
+    "consequences": "How defeating/failing affects next band"
+  },
+  "discovered_tiles": ["terrain types for this corruption level"],
+  "discovered_buildings": ["architecture for this civilization state"],  
+  "discovered_monsters": ["creatures for this horror level"],
+  "discovered_npcs": ["character archetypes for this population"],
+  "discovered_items": ["equipment fitting this band's theme"],
+  "regional_framework": {
+    "region_count": "number of regions in this band",
+    "region_roles": ["role each region plays in band quest"],
+    "connection_pattern": "how regions connect to each other"
+  },
+  "world_state_changes": {
+    "companion_evolution": "how companions change during this band",
+    "world_corruption": "how the world itself changes", 
+    "player_development": "how the player grows/suffers",
+    "handoff_to_next": "critical information/state for next band"
+  }
+}

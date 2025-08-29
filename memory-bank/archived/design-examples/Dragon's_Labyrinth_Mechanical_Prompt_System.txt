@@ -1,0 +1,390 @@
+# Dragon's Labyrinth Mechanical Prompt System
+
+## Philosophy: Composable, Mechanical Code Generation
+
+Instead of monolithic templates that try to do everything, create small, focused "mechanical prompts" that can be combined systematically to generate exactly what's needed.
+
+## Core Mechanical Prompts
+
+### 1. MODEL GENERATION MECHANICS
+
+#### `generate_icon_set.prompt`
+```
+Generate a cohesive icon set for Dragon's Labyrinth RPG with these specifications:
+
+TECHNICAL:
+- 64x64 pixel SVG icons
+- Consistent stroke width: 4px
+- Color palette: #D4AF37 (gold), #8B4513 (brown), #2F4F4F (slate), #FFFFFF (white)
+- Flat design with subtle depth
+- Export as both SVG and PNG formats
+
+ICON CATEGORIES:
+- UI Navigation: {play, pause, stop, back, forward, settings, close, minimize, maximize}
+- Combat: {sword, shield, bow, staff, spell, critical_hit, defend, flee}
+- Stats: {health, mana, stamina, strength, dexterity, intelligence, experience}
+- Items: {potion, scroll, coin, gem, key, chest, armor, weapon}
+- Actions: {pickup, drop, use, equip, unequip, trade, examine, talk}
+- Status: {success, error, warning, info, quest_available, quest_complete}
+
+CONSISTENCY RULES:
+- All weapon icons point northeast (45°)
+- All status icons use circular backgrounds
+- All navigation icons use 2px rounded corners
+- All item icons cast subtle drop shadows
+
+OUTPUT: Generate {icon_count} icons matching these categories and specifications.
+```
+
+#### `generate_ui_components.prompt`
+```
+Generate modular UI components for Godot 4.x with direct integration (no external dependencies):
+
+COMPONENT SET: {panel, button, progress_bar, slider, tooltip, notification, modal}
+
+TECHNICAL SPECS:
+- NinePatchRect compatible textures
+- Consistent margin/padding: 16px outer, 8px inner
+- Scalable from 720p to 4K
+- Supports both light and dark themes
+
+GODOT INTEGRATION:
+- Generate both .png textures and .tres StyleBox resources
+- Include hover/pressed/disabled states for interactive elements
+- Built-in accessibility features (high contrast, text scaling)
+- Performance optimized (minimal overdraw, efficient UV mapping)
+
+STYLE VARIATIONS:
+- Primary: {color_scheme} with rounded corners
+- Secondary: Flat design with subtle borders
+- Accent: High contrast for important elements
+- Disabled: 50% opacity with desaturated colors
+
+COMPONENT SPECIFIC:
+- Buttons: Generate normal, hover, pressed, disabled states
+- Panels: Generate border, borderless, inset, raised variants  
+- Progress bars: Include background, fill, and optional overlay textures
+- Tooltips: Include arrow pointers for all 8 directions
+
+OUTPUT: Complete UI component set with Godot-ready resources and usage examples.
+```
+
+#### `generate_3d_models.prompt` 
+```
+Generate optimized 3D models for Godot 4.x hex-based RPG:
+
+MODEL TYPE: {model_category}
+BIOME/THEME: {theme_context}
+OPTIMIZATION: Godot 4.x MultiMesh compatible
+
+TECHNICAL REQUIREMENTS:
+- Polygon budget: 200-500 triangles
+- Single 512x512 texture atlas
+- Proper UV unwrapping for texture efficiency
+- Vertex colors for variation (no additional textures)
+- Centered pivot point for hex grid alignment
+- LOD support: 100%, 50%, 25% detail levels
+
+HEX-SPECIFIC:
+- Models designed for 2-unit hex tiles
+- Clear visibility from 45° top-down camera
+- No overhanging elements that break grid alignment
+- Consistent scale across all models in category
+
+GODOT EXPORT:
+- .glb format with embedded materials
+- Proper collision meshes (simplified convex hulls)
+- Material slots named for shader assignment
+- Optimized for batch rendering
+
+CATEGORIES:
+- tiles: Terrain hexes with subtle height variation
+- buildings: Structures designed for hex placement  
+- characters: Bipedal figures with 6-direction poses
+- props: Interactive objects and decorations
+- vehicles: Multi-hex spanning transportation
+- nature: Trees, rocks, plants with seasonal variants
+
+OUTPUT: Production-ready 3D model set with performance optimization for large-scale hex grids.
+```
+
+### 2. CODE GENERATION MECHANICS
+
+#### `generate_data_class.prompt`
+```
+Generate a pure data management class for Godot 4.x with these specifications:
+
+CLASS PURPOSE: {class_description}
+DATA FIELDS: {field_specifications}
+
+REQUIREMENTS:
+- Extends RefCounted (no scene tree dependencies)
+- Built-in serialization (to_dict/from_dict methods)
+- Type safety with @export annotations
+- Validation methods with detailed error reporting
+- Resource-based persistence (.tres files)
+- Memory efficient (no circular references)
+
+METHODS TO GENERATE:
+- Constructor with default values
+- Validation with specific error messages
+- Serialization (save/load from files)
+- Deep copy/duplicate functionality
+- Comparison operators (equals, hash)
+- Debug string representation
+
+GODOT INTEGRATION:
+- Proper @export annotations for editor integration
+- Signal emissions for data changes
+- Resource.take_over_path() for dynamic loading
+- Thread-safe operations where applicable
+
+ERROR HANDLING:
+- Graceful degradation for missing data
+- User-friendly error messages
+- Recovery mechanisms for corrupted data
+- Validation before operations
+
+OUTPUT: Complete, production-ready data class with comprehensive functionality.
+```
+
+#### `generate_system_controller.prompt`
+```
+Generate a focused system controller for Godot 4.x:
+
+SYSTEM: {system_name}
+RESPONSIBILITIES: {specific_functions}
+DEPENDENCIES: {required_systems}
+
+ARCHITECTURE:
+- Single responsibility principle
+- Event-driven communication (signals only)
+- No direct dependencies on other systems
+- Proper initialization/cleanup lifecycle
+- Performance monitoring hooks
+
+GODOT PATTERNS:
+- Proper _ready() initialization order
+- _process() only when actively needed
+- Resource pooling for temporary objects
+- Efficient signal connections (one-shot when appropriate)
+- Memory management with queue_free() timing
+
+PERFORMANCE:
+- Target: 60 FPS with 10,000+ game entities
+- Memory: <50MB for system state
+- Batch operations where possible
+- Avoid per-frame allocations
+- Use MultiMesh for large instance counts
+
+INTEGRATION POINTS:
+- Signal-based API for other systems
+- Event bus for global communications
+- Save/load system integration
+- Debug visualization hooks
+- Performance profiling support
+
+ERROR HANDLING:
+- Graceful handling of missing dependencies
+- Recovery from system failures
+- User-facing error reporting
+- Debug logging with verbosity levels
+
+OUTPUT: Focused, high-performance system controller with clean interfaces.
+```
+
+#### `generate_ui_screen.prompt`
+```
+Generate a complete UI screen for Godot 4.x:
+
+SCREEN TYPE: {ui_screen_purpose}
+COMPONENTS: {required_ui_elements}
+NAVIGATION: {how_user_reaches_this_screen}
+
+GODOT UI ARCHITECTURE:
+- Proper Control node hierarchy
+- Anchors and margins for responsive design
+- Theme integration (no hardcoded styles)
+- Accessibility support (focus navigation)
+- Smooth transitions and animations
+
+FUNCTIONALITY:
+- Input handling (keyboard + gamepad + mouse)
+- Data binding with automatic updates
+- Form validation with inline feedback
+- Proper tab order for keyboard navigation
+- Screen reader compatibility
+
+PERFORMANCE:
+- Minimize scene tree depth
+- Efficient theme application
+- Texture atlas usage for UI elements
+- Smooth 60 FPS animations
+- Memory efficient with proper cleanup
+
+INTEGRATION:
+- UIManager communication via signals
+- Save/load user preferences
+- Dynamic content loading
+- Responsive to screen size changes
+- Proper modal dialog handling
+
+VISUAL POLISH:
+- Hover effects and visual feedback
+- Loading states for async operations
+- Error states with recovery options
+- Consistent spacing and typography
+- Animation easing and timing
+
+OUTPUT: Complete UI screen with all interactive functionality and visual polish.
+```
+
+## 3. COMBINATION MECHANICS
+
+### `combine_prompts.meta`
+```
+Combine multiple mechanical prompts into a cohesive system:
+
+PRIMARY PROMPT: {main_functionality}
+SUPPORTING PROMPTS: {list_of_mechanical_prompts}
+INTEGRATION REQUIREMENTS: {how_they_work_together}
+
+COMBINATION STRATEGY:
+1. Generate all components independently
+2. Create integration layer with clear interfaces
+3. Validate component compatibility
+4. Optimize cross-component interactions
+5. Create unified testing and debugging
+
+GODOT PROJECT STRUCTURE:
+- /scripts/core/ - System controllers
+- /scripts/data/ - Data classes  
+- /scripts/ui/ - Interface screens
+- /models/ - Generated 3D assets
+- /textures/ui/ - Generated UI components
+- /icons/ - Generated icon sets
+
+PERFORMANCE OPTIMIZATION:
+- Shared resource loading
+- Component reuse patterns
+- Memory pool management
+- Batch API calls between systems
+- Efficient event routing
+
+TESTING INTEGRATION:
+- Component unit tests
+- System integration tests
+- Performance benchmarking
+- Memory leak detection
+- User experience validation
+
+OUTPUT: Fully integrated system with optimized performance and clean separation of concerns.
+```
+
+## 4. PRACTICAL EXAMPLE: Quest System Breakdown
+
+### OLD APPROACH (Current):
+```
+quest_system.jinja2 (800+ lines)
+├── Quest data class
+├── QuestObjective class  
+├── QuestManager singleton
+├── QuestUI screen
+├── QuestTracker HUD
+├── Reward system
+├── Notification system
+└── Audio integration
+```
+
+### NEW APPROACH (Mechanical Prompts):
+```
+1. generate_data_class.prompt → Quest.gd (pure data)
+2. generate_data_class.prompt → QuestObjective.gd (pure data)  
+3. generate_system_controller.prompt → QuestManager.gd (logic only)
+4. generate_ui_screen.prompt → QuestLogUI.gd (interface only)
+5. generate_ui_components.prompt → Quest notification widgets
+6. generate_icon_set.prompt → Quest-specific icons
+7. combine_prompts.meta → Integrate all components
+```
+
+### BENEFITS:
+- **Focused**: Each prompt generates exactly one thing well
+- **Reusable**: Data classes can be reused across systems
+- **Testable**: Individual components are easy to test
+- **Maintainable**: Clear separation allows independent updates
+- **Performant**: No unnecessary coupling or dependencies
+
+## 5. GENERATOR INTEGRATION
+
+### Enhanced CLI Commands:
+```bash
+# Generate individual components
+dl generate-component --type data_class --spec quest_data.yaml
+dl generate-component --type ui_screen --spec quest_log_ui.yaml
+dl generate-component --type system_controller --spec quest_manager.yaml
+
+# Generate supporting assets
+dl generate-models --category quest_props --theme medieval_fantasy
+dl generate-icons --set quest_interface --style consistent
+
+# Combine into integrated system  
+dl combine-system --name quest_system --components quest_*.yaml
+dl validate-integration --system quest_system
+dl optimize-performance --system quest_system
+```
+
+### Configuration Schema:
+```yaml
+# quest_system_spec.yaml
+system_name: "quest_system"
+components:
+  - type: "data_class"
+    name: "Quest"
+    fields: ["id", "title", "description", "objectives", "rewards"]
+    
+  - type: "system_controller" 
+    name: "QuestManager"
+    responsibilities: ["track_progress", "award_rewards", "check_completion"]
+    
+  - type: "ui_screen"
+    name: "QuestLogUI"
+    layout: "tabbed_list_with_details"
+    
+  - type: "icon_set"
+    categories: ["quest_types", "objectives", "rewards"]
+    
+integration:
+  save_system: true
+  performance_target: "60_fps_1000_quests"
+  error_handling: "graceful_degradation"
+```
+
+## 6. WORKFLOW TRANSFORMATION
+
+### CURRENT WORKFLOW:
+```
+1. Edit massive template file
+2. Generate entire system at once
+3. Debug complex interdependencies
+4. Hard to modify individual parts
+5. Asset library dependencies break things
+```
+
+### NEW WORKFLOW:
+```
+1. Define system specification (YAML)
+2. Generate components independently
+3. Test each component in isolation  
+4. Combine with integration prompt
+5. Performance optimize the integrated system
+6. Deploy with asset validation
+```
+
+This mechanical approach gives you:
+- **Modularity**: Mix and match components as needed
+- **Quality**: Each prompt is focused on doing one thing perfectly
+- **Performance**: No unnecessary dependencies or bloat
+- **Maintainability**: Easy to update individual components
+- **Scalability**: Add new mechanical prompts without breaking existing ones
+
+The key insight is treating code generation like manufacturing - standardized, interchangeable components that combine into complex systems, rather than monolithic, custom-built solutions.

@@ -1,0 +1,164 @@
+# Generate Map Exploration and World System
+
+## Context
+Create an exploration system that rewards curiosity and makes discovering the hex-based world engaging. The system should integrate discovered environment assets and create a sense of progression through different biomes.
+
+## World Structure
+
+### 1. Biome System
+Generate diverse biomes based on discovered assets:
+{% for biome in discovered_biomes %}
+- **{{ biome.name }}**:
+  - Theme: {{ biome.theme }}
+  - Tile types: {{ biome.tiles }}
+  - Unique mechanics: {{ biome.special_features }}
+{% endfor %}
+
+### 2. Hex-Based Exploration Mechanics
+
+#### Fog of War
+- **Vision Range**: Base 5 hexes + Perception bonus
+- **Reveal Mechanics**:
+  - Permanent reveal of visited hexes
+  - Temporary vision of current range
+  - Scout abilities reveal larger areas
+  - High ground provides +2 vision range
+  
+#### Movement Costs
+Different terrain types affect movement:
+```
+Plains: 1 AP
+Forest: 2 AP (provides cover)
+Mountains: 3 AP (blocks line of sight)
+Water: 4 AP (requires swimming/boat)
+Roads: 0.5 AP (rounded up)
+Swamp: 2 AP + chance of poison
+Ice: 1 AP + slip chance
+```
+
+### 3. Points of Interest
+
+#### Discoverable Locations
+- **Ancient Ruins**: Puzzle challenges, lore fragments
+- **Hidden Caves**: Mini-dungeons with treasure
+- **Mystical Groves**: Heal and save points
+- **Abandoned Camps**: Resource caches, equipment
+- **Elemental Shrines**: Permanent stat bonuses
+- **Dragon Nests**: High-risk, high-reward areas
+
+#### Dynamic Events
+Random encounters while exploring:
+- Wandering merchants (20% chance per 10 hexes)
+- Resource nodes (herbs, ore, magic crystals)
+- Environmental hazards (storms, earthquakes)
+- Wildlife encounters (neutral unless provoked)
+- Bandit ambushes (based on area danger level)
+
+### 4. Map Layers System
+
+#### Surface Layer
+- Main exploration area
+- Towns, dungeons, overworld locations
+- Day/night cycle affects visibility and encounters
+
+#### Underground Layer
+- Cave systems connecting distant areas
+- Different enemy types and resources
+- No natural light (torch/magic required)
+- Secret passages between layers
+
+#### Sky Layer (if flying mounts discovered)
+- Floating islands and sky fortresses
+- Wind currents affect movement
+- Aerial combat encounters
+- Hidden treasures on cloud platforms
+
+### 5. Resource Gathering
+
+#### Harvestable Resources
+- **Herbs**: Healing potions, buffs
+- **Ore**: Weapon/armor crafting
+- **Wood**: Arrows, staves, building
+- **Gems**: Enchantments, magic focus
+- **Food**: Stamina restoration, buffs
+
+#### Gathering Mechanics
+- Skill checks based on class/tools
+- Resource quality varies by biome
+- Rare resources in dangerous areas
+- Regenerating nodes (respawn after time)
+
+### 6. Fast Travel System
+
+#### Waystone Network
+- Discover ancient waystones to unlock fast travel
+- Requires activation quest/puzzle
+- Connected in hexagonal patterns across the world
+- Can only travel between activated stones
+- Costs resources or has cooldown
+
+#### Mount System (if animal assets discovered)
+{% for mount in discovered_mounts %}
+- **{{ mount.name }}**:
+  - Speed: {{ mount.hex_per_turn }} hexes
+  - Special: {{ mount.special_ability }}
+  - Terrain: {{ mount.preferred_terrain }}
+{% endfor %}
+
+### 7. Environmental Storytelling
+
+#### Visual Clues
+- Battle remnants tell stories
+- Ancient structures hint at lore
+- Environmental changes show time passage
+- Hidden messages in hex patterns
+
+#### Collectibles
+- **Lore Fragments**: 100 total, unlock backstory
+- **Map Pieces**: Reveal secret locations
+- **Dragon Scales**: Currency for legendary items
+- **Ancient Runes**: Unlock fast travel points
+
+### 8. Area Progression
+
+#### Zone Levels
+- Starting Area: Level 1-5 (safe, tutorial)
+- Frontier: Level 5-15 (mixed danger)
+- Wilderness: Level 15-30 (dangerous)
+- Dragon Territories: Level 30-45 (extreme)
+- Void Lands: Level 45-50 (endgame)
+
+#### Danger Indicators
+- Hex border colors indicate danger level
+- Environmental effects (fog, storms) in dangerous areas
+- Enemy patrol visibility on map
+- Warning prompts when entering high-level zones
+
+### 9. Map Features
+
+#### Interactive Elements
+- Destructible terrain (burn forests, freeze water)
+- Weather affects movement and combat
+- Seasonal changes alter accessible areas
+- Magic ley lines provide movement bonuses
+
+#### Landmarks
+- **The Dragon's Labyrinth**: Final boss location, visible from anywhere
+- **Ancient Battlegrounds**: PvP areas or AI battles
+- **The Wandering Island**: Moves daily, rare treasures
+- **Temporal Rifts**: Access past/future map versions
+
+### 10. Exploration Rewards
+
+#### Discovery Bonuses
+- First to discover: +100% XP from that area
+- Complete area map: Permanent stat bonus
+- Find all secrets in biome: Unique cosmetic
+- Visit every hex: "Cartographer" achievement
+
+Generate complete exploration system with:
+- Procedural map generation
+- Biome transition logic
+- Resource placement algorithms
+- Dynamic event system
+- Save state for all discoveries

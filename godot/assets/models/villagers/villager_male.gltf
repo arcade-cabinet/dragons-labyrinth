@@ -1,0 +1,285 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "dragons-labyrinth/blender-bridge"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "VillagerMale",
+      "nodes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "head",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        1.5
+      ],
+      "rotation": null,
+      "scale": [
+        0.1,
+        0.1,
+        0.12
+      ]
+    },
+    {
+      "name": "body",
+      "mesh": 1,
+      "translation": [
+        0.0,
+        0.0,
+        0.9
+      ],
+      "rotation": null,
+      "scale": [
+        0.15,
+        0.12,
+        0.35
+      ]
+    },
+    {
+      "name": "arm_left",
+      "mesh": 2,
+      "translation": [
+        0.2,
+        0.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.25852984,
+        0.0,
+        0.9660033
+      ],
+      "scale": [
+        0.04,
+        0.04,
+        0.25
+      ]
+    },
+    {
+      "name": "arm_right",
+      "mesh": 3,
+      "translation": [
+        -0.2,
+        0.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        -0.25852984,
+        0.0,
+        0.9660033
+      ],
+      "scale": [
+        0.04,
+        0.04,
+        0.25
+      ]
+    },
+    {
+      "name": "leg_left",
+      "mesh": 4,
+      "translation": [
+        0.08,
+        0.0,
+        0.3
+      ],
+      "rotation": null,
+      "scale": [
+        0.05,
+        0.05,
+        0.3
+      ]
+    },
+    {
+      "name": "leg_right",
+      "mesh": 5,
+      "translation": [
+        -0.08,
+        0.0,
+        0.3
+      ],
+      "rotation": null,
+      "scale": [
+        0.05,
+        0.05,
+        0.3
+      ]
+    },
+    {
+      "name": "hair",
+      "mesh": 6,
+      "translation": [
+        0.0,
+        0.0,
+        1.58
+      ],
+      "rotation": null,
+      "scale": [
+        0.11,
+        0.11,
+        0.08
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "head",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "body",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "arm_left",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "arm_right",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "leg_left",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "leg_right",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "hair",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Skin",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.8,
+          0.65,
+          0.5,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.7
+      },
+      "doubleSided": false
+    },
+    {
+      "name": "Clothes",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.25,
+          0.2,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9
+      },
+      "doubleSided": false
+    },
+    {
+      "name": "Hair",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.15,
+          0.1,
+          0.08,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8
+      },
+      "doubleSided": false
+    }
+  ],
+  "buffers": [],
+  "bufferViews": [],
+  "accessors": []
+}

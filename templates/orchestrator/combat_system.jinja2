@@ -1,0 +1,180 @@
+# Generate Hex-Based Combat System
+
+## Context
+Create a tactical turn-based combat system for Dragon's Labyrinth that leverages the hexagonal grid for strategic depth. Combat should feel engaging and reward positioning, timing, and resource management.
+
+## Core Combat Mechanics
+
+### 1. Turn-Based Combat Flow
+Generate a combat system with:
+- **Initiative System**: Speed stat + 1d6 roll determines turn order
+- **Action Points**: Each character gets AP based on Speed (3-7 AP per turn)
+  - Movement: 1 AP per hex
+  - Basic Attack: 2 AP
+  - Skills: 2-5 AP depending on power
+  - Defend: 1 AP (increases defense for the turn)
+- **Combat Phases**:
+  1. Initiative Roll
+  2. Player Planning (queue actions)
+  3. Action Resolution
+  4. Status Effect Processing
+  5. Victory/Defeat Check
+
+### 2. Hex-Based Positioning
+Implement tactical positioning:
+- **Facing Direction**: Characters face a hex edge (6 directions)
+  - Attacks from behind: +50% damage
+  - Attacks from sides: +25% damage
+- **Zone of Control**: Enemies can't move past adjacent hexes
+- **Line of Sight**: Blocked by terrain and other characters
+- **Range Categories**:
+  - Melee: Adjacent hexes only
+  - Short Range: 2-3 hexes
+  - Long Range: 4-6 hexes
+- **Area Effects**: Hex-based patterns (cone, circle, line)
+
+### 3. Class-Based Combat Styles
+
+#### Melee Classes
+- **Knight/Warrior**: 
+  - Heavy armor reduces movement (1 less AP)
+  - Shield bash ability (stun adjacent enemy)
+  - Defensive stance (+50% defense, -1 AP next turn)
+  - Weapon mastery: Swords deal +20% damage
+  
+- **Berserker/Barbarian**:
+  - Rage mode: +damage but -defense
+  - Cleave attacks hit multiple adjacent hexes
+  - No heavy armor allowed (mobility focused)
+  - Two-handed weapons grant extra AP on kill
+
+#### Ranged Classes  
+- **Archer/Hunter**:
+  - Increased accuracy at 3+ hex range
+  - Marked target: Next attack crits
+  - Mobility shot: Attack + move 1 hex
+  - Arrows have different types (fire, ice, piercing)
+  
+- **Gunslinger** (if tech-themed assets found):
+  - Reload mechanic (1 AP to reload)
+  - Ricochet shots bounce to nearby enemies
+  - Different ammo types
+  - Point-blank shots deal melee damage
+
+#### Caster Classes
+- **Wizard/Mage**:
+  - Mana-based abilities instead of stamina
+  - Area effect spells with hex patterns
+  - Channeling: Spend extra AP for stronger spells
+  - Elemental attunement bonuses
+  
+- **Priest/Cleric**:
+  - Healing uses AP but no mana
+  - Buff/debuff focused
+  - Holy ground: Blessed hexes damage undead
+  - Support positioning matters (stay near allies)
+
+#### Hybrid Classes
+- **Spellblade**: Melee + magic combos
+- **Ranger**: Ranged + pet companion
+- **Paladin**: Tank + healing
+
+### 4. Weapon Type Combat Modifiers
+
+#### Melee Weapons
+- **Swords**: Balanced, parry chance
+- **Axes**: High damage, armor penetration
+- **Spears**: 2-hex reach, zone control
+- **Daggers**: Low damage, high crit, backstab bonus
+- **Hammers**: Stun chance, breaks shields
+
+#### Ranged Weapons
+- **Bows**: Silent, arc shots over obstacles
+- **Crossbows**: High damage, slow reload
+- **Thrown**: Limited ammo, retrievable
+- **Guns**: Loud (alerts enemies), penetration
+
+#### Magic Implements
+- **Staffs**: Spell power boost, melee option
+- **Wands**: Quick cast, lower mana cost
+- **Orbs**: Area effects enhanced
+- **Tomes**: Extra spell slots
+
+### 5. Damage Calculation (Class-Modified)
+```
+Base Damage = Weapon Damage + (Primary Stat * Class Modifier)
+Class Modifier:
+  - Melee: Strength * 1.5
+  - Ranged: Dexterity * 1.3 + Perception * 0.5
+  - Magic: Intelligence * 2.0
+
+Final Damage = Base Damage * Weapon Type Bonus * Position Modifier * Critical * Defense Reduction
+```
+- Critical Hits: Base 5% + (Luck/10)% + Class bonuses
+- Elemental Weaknesses: 1.5x damage multiplier
+- Armor effectiveness varies by damage type
+
+### 4. Status Effects
+Implement various conditions:
+- **Poison**: 5 damage per turn for 3 turns
+- **Burn**: 10 damage per turn for 2 turns
+- **Freeze**: Skip next turn, take 1.5x damage
+- **Stun**: Lose 2 AP next turn
+- **Blind**: 50% miss chance for 2 turns
+- **Slow**: -2 AP per turn
+- **Hex-Locked**: Cannot move for 1 turn
+
+### 5. Combo System
+Chain attacks for bonus effects:
+- Same element chains: Damage multiplier increases
+- Status + Attack combos: Enhanced effects
+- Position-based combos: Pincer attacks, flanking
+
+## Special Combat Features
+
+### 1. Terrain Effects
+Hex tiles affect combat:
+- **Water**: -1 AP movement cost, Lightning damage +50%
+- **Lava**: 5 damage per turn, Fire resistance
+- **Ice**: Chance to slip when moving
+- **High Ground**: +20% ranged damage, +10% accuracy
+
+### 2. Combat Skills Integration
+{% for skill_type in discovered_skill_types %}
+- **{{ skill_type.name }}**: {{ skill_type.combat_effect }}
+{% endfor %}
+
+### 3. Enemy AI Behaviors
+Generate intelligent enemy patterns:
+- **Aggressive**: Rush player, maximize damage
+- **Defensive**: Maintain distance, use cover
+- **Support**: Heal allies, apply buffs
+- **Tactical**: Flank player, use terrain
+- **Berserker**: Ignore defense, all-out attack
+
+## Visual Combat Feedback
+- Damage numbers float up with color coding
+- Hit effects based on damage type
+- Screen shake for critical hits
+- Hex grid highlights for movement/targeting
+- Turn order display with portraits
+
+## Victory Conditions
+- **Standard**: Defeat all enemies
+- **Survival**: Survive X turns
+- **Objective**: Reach specific hex
+- **Boss**: Defeat boss within time limit
+
+## Rewards System
+Post-combat rewards:
+- Experience points (scaled by level difference)
+- Random loot drops based on enemy type
+- Skill points every 3rd combat
+- Rare equipment from mini-bosses
+
+Generate complete GDScript implementation with:
+- Combat state machine
+- AI decision trees
+- Damage calculation functions
+- Visual effect triggers
+- Tutorial-friendly first combat

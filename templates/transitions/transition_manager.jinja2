@@ -1,0 +1,698 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the Transition Manager for Dragon's Labyrinth - the system that orchestrates the dual-path narrative structure.
+
+NARRATIVE CONTEXT:
+- Current emotional stage: {{ emotional_stage }}
+- Every transition has TWO versions based on player's dominant playstyle
+- First 3 transitions test STRENGTH vs HARMONY
+- Next 3 transitions test LIGHT vs DARK morality
+- Then the Labyrinth itself adapts to who you've become
+- Journey home reveals the world changing
+- Home destroyed, void spreading
+- Final journey to seal what the dragon protected against
+
+CORE PHILOSOPHY - YOUR CHOICES CREATE YOUR GAME:
+There is no single Dragon's Labyrinth experience. The game fundamentally changes based on whether you favor companions (harmony) or mercenaries (strength), and later whether you embrace light or darkness. Each player's journey is unique.
+
+THE TRANSITION STRUCTURE:
+
+**ACT 1: STRENGTH VS HARMONY (To Labyrinth)**
+
+1. **PEACE → UNEASE**
+   - Harmony Path: "The Lost Child" (save a child, gain first companion)
+   - Strength Path: "The Bandit Cave" (prove combat prowess)
+
+2. **UNEASE → DREAD**
+   - Harmony Path: "Crossroads Meeting" (deepen bonds)
+   - Strength Path: "Fighting Pit" (prove command)
+
+3. **DREAD → TERROR**
+   - Harmony Path: "The Dying Village" (save through compassion)
+   - Strength Path: "The Siege Command" (defend through tactics)
+
+**ACT 2: LIGHT VS DARK (Approaching Labyrinth)**
+
+4. **TERROR → DESPAIR**
+   - Light Path: "The Cleansing Ritual" (purify corruption)
+   - Dark Path: "The Blood Pact" (embrace corruption)
+
+5. **DESPAIR → MADNESS**
+   - Light Path: "The Last Sanctuary" (protect innocents)
+   - Dark Path: "The Harvesting" (sacrifice for power)
+
+6. **MADNESS → VOID**
+   - Light Path: "The Final Prayer" (faith against darkness)
+   - Dark Path: "The Consumption" (become the darkness)
+
+**ACT 3: THE LABYRINTH**
+- Adapts completely based on your journey
+- Multiple versions based on path combinations
+
+**ACT 4: THE JOURNEY HOME**
+- Same transitions but reversed and changed
+- World reacts to dragon's death
+- Growing sense something is wrong
+
+**ACT 5: THE VOID AWAKENS**
+- Home destroyed, void spreading
+- Must return through all areas
+- Each transition now about sealing void rifts
+
+TRANSITION SELECTION LOGIC:
+
+```gdscript
+func determine_next_transition() -> TransitionData:
+    var phase = GlobalState.current_phase
+    var traits = TraitManager.get_dominant_traits()
+    var companions = GlobalState.get_companion_count()
+    var mercenaries = GlobalState.get_party_count()
+    var morality = calculate_morality_score()
+    
+    # Act 1: Strength vs Harmony
+    if phase in ["peace", "unease", "dread"]:
+        if companions > mercenaries or traits.has("compassionate"):
+            return get_harmony_transition(phase)
+        else:
+            return get_strength_transition(phase)
+    
+    # Act 2: Light vs Dark
+    elif phase in ["terror", "despair", "madness"]:
+        if morality > 0.5:
+            return get_light_transition(phase)
+        else:
+            return get_dark_transition(phase)
+    
+    # Act 3: Labyrinth adapts
+    elif phase == "void":
+        return generate_adaptive_labyrinth()
+```
+
+DYNAMIC SCALING:
+- Each transition scales to include both companions AND mercenaries
+- Harmony paths have minor combat elements
+- Strength paths have minor relationship elements
+- Perfect balance unlocks secret "Unity" outcomes
+
+ACHIEVEMENT INTEGRATION:
+- World's expectations shape available transitions
+- Some transitions locked based on reputation
+- Hidden transitions for specific achievement combinations
+
+THE THREE VERSIONS PHILOSOPHY:
+
+**Version 1: Journey TO Labyrinth**
+- Establishes your identity
+- Builds your force (companions/mercenaries)
+- Plants narrative seeds
+
+**Version 2: Journey HOME**
+- Tests your established identity
+- Force begins questioning/fragmenting
+- World shows signs of change
+
+**Version 3: Sealing the VOID**
+- Ultimate test of identity
+- Who remains loyal to the end?
+- Can you maintain yourself against eldritch horror?
+
+MORALITY TRACKING:
+
+```gdscript
+var morality_actions = {
+    "saved_innocent": +0.1,
+    "sacrificed_ally": -0.2,
+    "showed_mercy": +0.05,
+    "chose_brutality": -0.1,
+    "protected_weak": +0.15,
+    "exploited_desperate": -0.15
+}
+
+func calculate_morality_score() -> float:
+    var score = 0.5  # Start neutral
+    for action in GlobalState.moral_choices:
+        score += morality_actions.get(action, 0)
+    return clamp(score, 0.0, 1.0)
+```
+
+LABYRINTH VARIATIONS:
+
+**Pure Harmony + Light:**
+- Labyrinth is tragic, not horrific
+- Dragon speaks of burden of guardianship
+- Can potentially redeem the dragon
+
+**Pure Strength + Dark:**
+- Labyrinth is brutal combat gauntlet
+- Dragon respects your power
+- Can potentially replace the dragon
+
+**Balanced Unity:**
+- Labyrinth tests everything
+- Dragon recognizes you as true successor
+- Can potentially understand the full truth
+
+THE VOID REVELATION:
+- Dragon was prison warden, not prisoner
+- Its death releases ancient horror
+- Your approach determines how to reseal it:
+  * Harmony: Gather allies to perform ritual
+  * Strength: Command army to hold line
+  * Light: Sacrifice yourself as new guardian
+  * Dark: Become new prison by consuming void
+  * Unity: Forge new solution combining all approaches
+
+TRANSITION INHERITANCE:
+Each transition remembers previous outcomes:
+- NPCs reference earlier choices
+- Environments show lasting changes
+- Companions/mercenaries bring up past events
+- Your reputation precedes you
+
+SCALING COMBAT/SOCIAL:
+Even in opposite paths, both elements present:
+- Harmony transitions: 70% social, 30% combat
+- Strength transitions: 70% combat, 30% social
+- Light transitions: 70% moral, 30% practical
+- Dark transitions: 70% practical, 30% moral
+
+Generate complete transition management system with path selection, morality tracking, and dynamic adaptation.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: transition_manager.gd -->
+extends Node
+
+class_name TransitionManager
+
+signal transition_triggered(transition_data: TransitionData)
+signal path_locked(path_type: String)
+signal act_completed(act_number: int)
+signal game_state_changed(new_state: String)
+
+var current_act: int = 1
+var current_phase: String = "peace"
+var completed_transitions: Array[String] = []
+var morality_score: float = 0.5
+var journey_direction: String = "to_labyrinth"  # to_labyrinth, from_labyrinth, to_void
+
+# Transition definitions organized by act and path
+var transition_registry = {}
+
+# Path preferences based on player actions
+var path_weights = {
+    "harmony": 0.5,
+    "strength": 0.5,
+    "light": 0.5,
+    "dark": 0.5
+}
+
+class TransitionData:
+    var id: String
+    var name: String
+    var path_type: String  # harmony, strength, light, dark
+    var from_phase: String
+    var to_phase: String
+    var scene_path: String
+    var prerequisites: Dictionary
+    var scaling_data: Dictionary
+    var version: String  # to_labyrinth, from_labyrinth, to_void
+
+func _ready():
+    _initialize_transition_registry()
+    _connect_to_game_systems()
+    
+    # Start monitoring for transition triggers
+    set_process(true)
+
+func _initialize_transition_registry():
+    # Act 1: Strength vs Harmony
+    transition_registry["peace_to_unease"] = {
+        "harmony": {
+            "id": "lost_child",
+            "name": "The Lost Child",
+            "scene": "res://transitions/lost_child/lost_child_transition.tscn",
+            "description": "A child's cry in the darkness tests your compassion"
+        },
+        "strength": {
+            "id": "bandit_cave", 
+            "name": "The Bandit Cave",
+            "scene": "res://transitions/bandit_cave/bandit_cave_transition.tscn",
+            "description": "Bandits threaten the town, testing your combat prowess"
+        }
+    }
+    
+    transition_registry["unease_to_dread"] = {
+        "harmony": {
+            "id": "crossroads_meeting",
+            "name": "The Crossroads Meeting",
+            "scene": "res://transitions/crossroads/crossroads_meeting.tscn",
+            "description": "At the crossroads, bonds are tested and deepened"
+        },
+        "strength": {
+            "id": "fighting_pit",
+            "name": "The Fighting Pit",
+            "scene": "res://transitions/fighting_pit/fighting_pit_transition.tscn",
+            "description": "Prove your command in the blood-soaked arena"
+        }
+    }
+    
+    # Continue for all transitions...
+
+func _connect_to_game_systems():
+    # Monitor trait changes
+    var trait_manager = get_node("/root/TraitManager")
+    trait_manager.trait_gained.connect(_on_trait_gained)
+    trait_manager.trait_milestone.connect(_on_trait_milestone)
+    
+    # Monitor moral choices
+    GlobalState.moral_choice_made.connect(_on_moral_choice)
+    
+    # Monitor companion/party changes
+    GlobalState.companion_added.connect(_on_companion_change)
+    GlobalState.party_member_added.connect(_on_party_change)
+
+func determine_next_transition() -> TransitionData:
+    var available_transitions = _get_available_transitions()
+    
+    if available_transitions.is_empty():
+        push_error("No available transitions for current phase: " + current_phase)
+        return null
+    
+    # Determine path preference
+    var path_type = _calculate_dominant_path()
+    
+    # Get specific transition
+    var transition_def = available_transitions[path_type]
+    
+    # Create transition data with scaling
+    return _create_transition_data(transition_def)
+
+func _calculate_dominant_path() -> String:
+    match current_act:
+        1:  # Strength vs Harmony
+            return "harmony" if path_weights.harmony > path_weights.strength else "strength"
+        2:  # Light vs Dark
+            return "light" if morality_score > 0.5 else "dark"
+        _:
+            return "balanced"
+
+func _get_available_transitions() -> Dictionary:
+    var phase_key = current_phase + "_to_" + _get_next_phase()
+    return transition_registry.get(phase_key, {})
+
+func _get_next_phase() -> String:
+    var phase_progression = {
+        "peace": "unease",
+        "unease": "dread",
+        "dread": "terror",
+        "terror": "despair", 
+        "despair": "madness",
+        "madness": "void"
+    }
+    
+    return phase_progression.get(current_phase, "unknown")
+
+func _create_transition_data(definition: Dictionary) -> TransitionData:
+    var data = TransitionData.new()
+    data.id = definition.id
+    data.name = definition.name
+    data.path_type = definition.path_type
+    data.from_phase = current_phase
+    data.to_phase = _get_next_phase()
+    data.scene_path = definition.scene
+    data.version = journey_direction
+    
+    # Add scaling data based on party composition
+    data.scaling_data = _calculate_scaling_data()
+    
+    return data
+
+func _calculate_scaling_data() -> Dictionary:
+    var companions = GlobalState.get_companion_count()
+    var mercenaries = GlobalState.get_party_count()
+    var total_allies = companions + mercenaries
+    
+    return {
+        "companion_integration": companions > 0,
+        "mercenary_integration": mercenaries > 0,
+        "force_size": total_allies,
+        "balance_ratio": float(companions) / max(1, total_allies),
+        "unity_possible": companions > 0 and mercenaries > 0
+    }
+
+func _on_trait_gained(trait: String, amount: int):
+    # Adjust path weights based on traits
+    match trait:
+        "compassionate", "protector", "healer":
+            path_weights.harmony += 0.1
+        "warrior", "tyrant", "commander":
+            path_weights.strength += 0.1
+        "altruistic", "selfless", "pure":
+            path_weights.light += 0.1
+        "ruthless", "corrupted", "pragmatic":
+            path_weights.dark += 0.1
+
+func _on_moral_choice(choice: String, weight: float):
+    morality_score = clamp(morality_score + weight, 0.0, 1.0)
+    
+    # Track for achievement system
+    var achievement_system = get_node("/root/AchievementSystem")
+    achievement_system.check_achievement_earned("moral_path_" + choice)
+
+func trigger_transition():
+    var transition = determine_next_transition()
+    if not transition:
+        return
+    
+    # Save current state
+    GlobalState.save_pre_transition_state()
+    
+    # Emit signal for other systems
+    transition_triggered.emit(transition)
+    
+    # Load transition scene
+    get_tree().change_scene_to_file(transition.scene_path)
+
+func complete_transition(transition_id: String, performance: Dictionary):
+    completed_transitions.append(transition_id)
+    
+    # Update phase
+    current_phase = _get_next_phase()
+    
+    # Check for act completion
+    if _is_act_complete():
+        _advance_act()
+    
+    # Special handling for labyrinth completion
+    if transition_id == "dragons_labyrinth" and journey_direction == "to_labyrinth":
+        _begin_journey_home()
+
+func _is_act_complete() -> bool:
+    match current_act:
+        1: return current_phase == "terror"
+        2: return current_phase == "void"
+        3: return current_phase == "complete"
+        _: return false
+
+func _advance_act():
+    current_act += 1
+    act_completed.emit(current_act - 1)
+    
+    # Special act transitions
+    match current_act:
+        4:  # Journey home begins
+            _begin_journey_home()
+        5:  # Void awakens
+            _begin_void_crisis()
+
+func _begin_journey_home():
+    journey_direction = "from_labyrinth"
+    game_state_changed.emit("journey_home")
+    
+    # Reverse the phase progression
+    current_phase = "madness"  # Start journey home from madness
+    
+    # World begins changing
+    GlobalState.world_state = "dragon_dead"
+    GlobalState.void_awakening_progress = 0.1
+
+func _begin_void_crisis():
+    journey_direction = "to_void"
+    game_state_changed.emit("void_crisis")
+    
+    # Reset to beginning with void rifts
+    current_phase = "peace"  # But it's corrupted now
+    
+    # World fully corrupted
+    GlobalState.world_state = "void_spreading"
+    GlobalState.void_awakening_progress = 1.0
+
+func get_labyrinth_configuration() -> Dictionary:
+    # Labyrinth adapts based on full journey
+    var config = {
+        "primary_path": _calculate_dominant_path(),
+        "morality": morality_score,
+        "unity_achieved": path_weights.harmony > 0.4 and path_weights.strength > 0.4,
+        "transitions_completed": completed_transitions,
+        "special_flags": _get_special_flags()
+    }
+    
+    return config
+
+func _get_special_flags() -> Array[String]:
+    var flags = []
+    
+    # Check for special conditions
+    if completed_transitions.has("crossroads_meeting") and completed_transitions.has("fighting_pit"):
+        flags.append("experienced_both_paths")
+    
+    if morality_score > 0.8:
+        flags.append("paragon")
+    elif morality_score < 0.2:
+        flags.append("fallen")
+    
+    if GlobalState.get_companion_count() >= 3:
+        flags.append("beloved_leader")
+    
+    if GlobalState.get_party_count() >= 5:
+        flags.append("war_commander")
+    
+    return flags
+
+<!-- FILE: transition_data.gd -->
+extends Resource
+
+class_name TransitionData
+
+@export var id: String
+@export var name: String
+@export var path_type: String  # harmony, strength, light, dark
+@export var from_phase: String
+@export var to_phase: String
+@export var scene_path: String
+@export var version: String  # to_labyrinth, from_labyrinth, to_void
+
+@export var prerequisites: Dictionary = {}
+@export var scaling_data: Dictionary = {}
+@export var narrative_context: Dictionary = {}
+
+var performance_metrics: Dictionary = {}
+var permanent_consequences: Dictionary = {}
+
+func meets_prerequisites() -> bool:
+    for key in prerequisites:
+        match key:
+            "min_companions":
+                if GlobalState.get_companion_count() < prerequisites[key]:
+                    return false
+            "min_mercenaries":
+                if GlobalState.get_party_count() < prerequisites[key]:
+                    return false
+            "required_trait":
+                if not TraitManager.has_trait(prerequisites[key]):
+                    return false
+            "morality_range":
+                var morality = TransitionManager.morality_score
+                var range = prerequisites[key]
+                if morality < range[0] or morality > range[1]:
+                    return false
+    
+    return true
+
+func get_scaled_difficulty() -> float:
+    var base_difficulty = 1.0
+    
+    # Scale based on party size
+    var total_allies = scaling_data.get("force_size", 1)
+    base_difficulty *= (1.0 + total_allies * 0.1)
+    
+    # Scale based on version
+    match version:
+        "from_labyrinth":
+            base_difficulty *= 1.5  # Harder on return journey
+        "to_void":
+            base_difficulty *= 2.0  # Extremely hard during void crisis
+    
+    # Scale based on player performance
+    var average_performance = GlobalState.get_average_transition_performance()
+    if average_performance > 0.8:
+        base_difficulty *= 1.2  # Adaptive difficulty
+    
+    return base_difficulty
+
+func apply_version_modifiers(scene_data: Dictionary) -> Dictionary:
+    match version:
+        "to_labyrinth":
+            # Normal version - establishing identity
+            scene_data.tone = "adventurous_with_growing_dread"
+            
+        "from_labyrinth":
+            # Return version - world changing
+            scene_data.tone = "melancholic_and_wrong"
+            scene_data.world_changes = [
+                "npcs_acting_strange",
+                "void_whispers_beginning",
+                "dragon_cultists_vanishing"
+            ]
+            
+        "to_void":
+            # Final version - everything corrupted
+            scene_data.tone = "desperate_last_stand"
+            scene_data.world_changes = [
+                "void_rifts_everywhere",
+                "reality_breaking_down",
+                "allies_going_mad"
+            ]
+    
+    return scene_data
+
+<!-- FILE: transitions/lost_child/lost_child_transition.jinja2 -->
+<!-- Creating the harmony version of the first transition -->
+<!-- SYSTEM_PROMPT -->
+You are creating the Lost Child Transition for Dragon's Labyrinth - the harmony path from PEACE to UNEASE.
+
+NARRATIVE CONTEXT:
+- Current emotional stage: {{ emotional_stage }}
+- This triggers if player shows preference for helping others
+- Alternative to the Bandit Cave for compassionate players
+- Where empathy becomes your first strength
+- First companion gained through kindness, not combat
+
+CORE CONCEPT - THE CRY IN THE DARKNESS:
+A child is lost in the expanding fog at the edge of town. While others cower in fear, you venture into the unnatural mist. This tests compassion over combat, establishing you as protector rather than warrior.
+
+THE EXPERIENCE:
+
+1. **The Plea** (Moral choice):
+   - Desperate mother at town square
+   - "My daughter... she went into the fog..."
+   - Guards refuse to help: "Nothing comes back from the fog"
+   - Choice: Help immediately (compassion) or demand payment (pragmatic)
+
+2. **Entering the Fog** (First taste of wrongness):
+   - Visibility drops to mere feet
+   - Sounds distort - child's cry seems to move
+   - Your own footsteps echo wrong
+   - Whispers in the fog: "Turn back..."
+
+3. **The Search** (Environmental puzzle):
+   - Must track child through increasingly dense fog
+   - Sound-based navigation (cries get fainter)
+   - Find disturbing clues: torn clothing, small footprints, blood?
+   - Fog plays tricks - see child's silhouette that vanishes
+
+4. **The Other Searcher** (First companion):
+   - Meet another searching for the child
+   - Could be:
+     * Sibling who defied parents to search
+     * Town outcast seeking redemption
+     * Mysterious stranger who "hears the lost"
+   - Must work together or fail
+
+5. **The Truth** (Horror revelation):
+   - Child found in clearing where fog is thickest
+   - She's changed - eyes reflect too much light
+   - She speaks of "the nice dragon who sings"
+   - Drawings in dirt: crude dragon surrounded by smaller figures
+
+6. **The Return** (Permanent change):
+   - Fog follows you back, town boundary shifted
+   - Child sometimes speaks in unknown language
+   - Mother grateful but terrified of her own daughter
+   - Companion bonds with you over shared experience
+   - Town whispers about what you brought back
+
+UNIQUE MECHANICS:
+
+**Empathy Navigation:**
+- No combat, pure environmental challenge
+- Must interpret child's emotional state from cries
+- Wrong choices make child flee deeper
+- Companion provides emotional support
+
+**Fog Mechanics:**
+- Reduces visibility progressively
+- Distorts sound direction
+- Shows false visions based on fears
+- Can only be navigated through trust
+
+**Child Psychology:**
+- Must approach carefully to not scare
+- Speak soothingly (dialogue choices matter)
+- Understand she's not entirely human anymore
+- Choice: Tell mother truth or lie
+
+SCALING ELEMENTS:
+- If you have mercenaries: They refuse to enter fog
+- If you have items: Torch helps but attracts... things
+- If aggressive: Child flees, challenge becomes harder
+
+PERMANENT CONSEQUENCES:
+- Gain first companion (the other searcher)
+- Trait: "Protector of Innocents" OR "Pragmatic Helper"
+- Child becomes recurring character (prophet? threat?)
+- Fog now permanent fixture near town
+- Reputation: "The one who walks in fog"
+
+Generate complete implementation focusing on emotional challenge, environmental navigation, and establishing companion bonds through shared trauma.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- JSON: manifests/transition_system.json -->
+{
+  "transition_system": {
+    "philosophy": "Every player experiences a unique Dragon's Labyrinth based on choices",
+    "structure": {
+      "act_1": {
+        "name": "Path to Power",
+        "test": "Harmony vs Strength",
+        "transitions": 3,
+        "establishes": "Leadership style"
+      },
+      "act_2": {
+        "name": "Path to Purpose", 
+        "test": "Light vs Dark",
+        "transitions": 3,
+        "establishes": "Moral alignment"
+      },
+      "act_3": {
+        "name": "The Dragon's Test",
+        "adaptive": true,
+        "reflects": "Everything you've become"
+      },
+      "act_4": {
+        "name": "The Journey Home",
+        "tone": "Things are wrong",
+        "reveals": "Consequences beginning"
+      },
+      "act_5": {
+        "name": "The Void Rises",
+        "tone": "Apocalyptic",
+        "mission": "Seal what was released"
+      }
+    },
+    "branching_logic": {
+      "primary_axis": ["harmony", "strength"],
+      "secondary_axis": ["light", "dark"],
+      "unity_path": "Available if balanced",
+      "locked_paths": "Choices eliminate options"
+    },
+    "world_evolution": {
+      "dragon_alive": "Slow corruption spreading",
+      "dragon_dead": "Rapid void emergence",
+      "void_released": "Reality breakdown"
+    },
+    "the_revelation": {
+      "truth": "Dragon was guardian, not threat",
+      "horror": "You released the true evil",
+      "redemption": "Can you become new guardian?"
+    }
+  }
+}
+
+<!-- PHILOSOPHY -->
+The Transition Manager creates a unique game for each player. Your choices don't just affect dialogue - they fundamentally change which challenges you face, how the world treats you, and what ending is possible.
+
+The dual-path system means players comparing experiences will discover they played different games. The harmony player's "Lost Child" is completely different from the strength player's "Bandit Cave," yet both lead to the same phase shift.
+
+Most importantly, the revelation that the dragon was protecting the world from something worse recontextualizes everything. Your journey to becoming strong enough to defeat the dragon made you strong enough to replace it - if you can understand what's needed in time.
+
+The three versions of each transition create a feeling of cyclical doom. Places you know become corrupted, allies you trusted become suspicious, and the growing certainty that you've made a terrible mistake drives the narrative to its climactic choice: become the new guardian, or find another way to seal the void.

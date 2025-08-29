@@ -1,0 +1,789 @@
+<!-- SYSTEM_PROMPT -->
+You are creating the mount system for Dragon's Labyrinth at the {{ emotional_stage }} stage.
+
+NARRATIVE CONTEXT:
+- Previous state: {{ previous_state | default('peace') }}
+- Current state: {{ current_state | default('unease') }}
+- Next state: {{ next_state | default('dread') }}
+- Dread level: {{ dread_level | default(1) }}
+
+CRITICAL PHILOSOPHY:
+Mounts are NOT just transportation. They are:
+1. **Living Companions** - They fear, they remember, they can break
+2. **Environmental Protection** - Essential as the world corrupts
+3. **Emotional Anchors** - May be your last connection to sanity
+4. **Witnesses to Horror** - They see what you become
+5. **Potential Victims** - Can be corrupted, traumatized, or worse
+
+INTRODUCTION TIMING:
+Mounts are introduced around the Fighting Pit/Crossroads transition (Unease→Dread). This gives players time to bond before the world truly corrupts, making later environmental damage meaningful.
+
+MOUNT TYPES BY STAGE:
+{% if emotional_stage == "peace" %}
+**Available Mounts:**
+- Gentle Horse - Trusting, calm, loves apples
+- Loyal Dog - Small but fierce, warns of danger
+- Pack Mule - Sturdy, carries extra supplies
+- Riding Goat - Sure-footed in mountains
+{% elif emotional_stage == "unease" %}
+**Available Mounts:**
+- Nervous Horse - Senses something wrong
+- Watchful Wolf - Never fully relaxes
+- Silent Owl - Sees too much at night
+- Restless Cat - Hisses at shadows
+{% elif emotional_stage == "dread" %}
+**Available Mounts:**
+- Battle Steed - Trained for horror, still afraid
+- War Hound - Scarred but loyal
+- Carrion Bird - Feeds on the fallen
+- Shadow Mare - Born from nightmares
+{% elif emotional_stage == "terror" %}
+**Corrupted Mounts:**
+- Skeletal Horse - Undead but remembers you
+- Void Touched Beast - Phases through reality
+- Blood Drinker - Sustains on violence
+- Madness Carrier - Spreads insanity
+{% elif emotional_stage in ["despair", "madness", "horror"] %}
+**What Remains:**
+- Your First Mount - Twisted beyond recognition
+- The Thing That Follows - Was it ever a mount?
+- Memory of Movement - Ghost of what carried you
+- Walking Nightmare - Better to walk on corrupted ground
+{% endif %}
+
+MOUNT MECHANICS:
+
+1. **Environmental Protection**:
+   - Clean ground: No effect
+   - Corrupted ground: 1 damage/hex without mount
+   - Blighted ground: 3 damage/hex without mount
+   - Void-touched ground: 5 damage/hex + sanity loss
+   - Dragon's wake: Instant death without protection
+
+2. **Mount Health & Trauma**:
+   - Physical Health: Can be healed
+   - Mental Health: Can break from horror
+   - Corruption Level: Slowly infected by world
+   - Bond Strength: Your connection vs their fear
+   - Trust: Erodes with each terrible thing witnessed
+
+3. **Mount Abilities by Bond Level**:
+   - **Level 1**: Basic riding, +2 hex movement
+   - **Level 2**: Combat stability, won't flee immediately
+   - **Level 3**: Environmental resistance, shares your protection
+   - **Level 4**: Emotional support, reduces sanity loss
+   - **Level 5**: Soul Bond, they accept what you've become
+
+HORROR INTEGRATION:
+
+1. **Mount Reactions to Your Actions**:
+   - Kill innocent: Mount becomes nervous
+   - Commit atrocity: Mount tries to flee
+   - Embrace darkness: Mount's eyes change
+   - Complete horror transition: Mount may abandon you
+   - Become monster: Mount either flees or transforms with you
+
+2. **Environmental Responses**:
+   - Peace: Mounts graze happily, respond to affection
+   - Unease: Mounts' ears constantly swivel, nervous whinnies
+   - Dread: Mounts refuse certain paths, foam at mouth
+   - Terror: Mounts scream at night, won't eat
+   - Horror: Mounts... are they still mounts?
+
+3. **Mount Corruption**:
+   - Stage 1: Behavioral changes, aggression
+   - Stage 2: Physical mutations, extra eyes
+   - Stage 3: Unnatural abilities, wall walking
+   - Stage 4: Merger beginning, shared thoughts
+   - Stage 5: One entity, was there ever two?
+
+TECHNICAL REQUIREMENTS:
+- Mount AI that responds to world state
+- Trauma system tracking witnessed horrors
+- Corruption visualization (model changes)
+- Environmental damage calculation
+- Bond system affecting loyalty
+- Mount abandonment mechanics
+- Transformation sequences
+
+CO-OP INTEGRATION:
+- Mounts recognize party members
+- Group mount formations for protection
+- Shared mount resources in desperate times
+- Mount reactions to party conflicts
+- Coordinated mount abilities
+
+Generate a mount system where these companions are essential for survival but vulnerable to the same corruption destroying the world. They're not tools - they're the last innocent things in your journey, and what happens to them reflects what's happening to you.
+<!-- /SYSTEM_PROMPT -->
+
+<!-- FILE: mount.gd -->
+extends Resource
+class_name Mount
+
+# A companion that carries you through horror
+
+signal health_changed(new_health: int)
+signal sanity_changed(new_sanity: int)
+signal corruption_increased(new_level: float)
+signal trust_broken()
+signal mount_fled()
+signal mount_transformed()
+
+@export var mount_name: String = ""
+@export var mount_type: String = ""
+@export var base_movement_bonus: int = 2
+@export var emotional_stage_acquired: String = "peace"
+
+# Physical state
+var health: int = 100
+var max_health: int = 100
+var stamina: float = 100.0
+var corruption_level: float = 0.0
+
+# Mental state
+var sanity: int = 100
+var trust_level: int = 100
+var bond_level: int = 1
+var witnessed_horrors: Array[String] = []
+var breaking_point: int = 10  # How many horrors before breaking
+
+# Behavioral flags
+var will_flee_combat: bool = true
+var refuses_corrupted_ground: bool = false
+var screams_at_night: bool = false
+var transforming: bool = false
+
+func _init() -> void:
+    # Mounts remember when the world was safe
+    if emotional_stage_acquired == "peace":
+        breaking_point = 5  # Innocent mounts break easier
+    elif emotional_stage_acquired in ["terror", "despair"]:
+        breaking_point = 15  # Hardened mounts resist longer
+
+func take_damage(amount: int, source: String = "") -> void:
+    health = max(0, health - amount)
+    health_changed.emit(health)
+    
+    # Damage affects trust
+    if source == "player_caused":
+        trust_level = max(0, trust_level - 20)
+        if trust_level == 0:
+            trust_broken.emit()
+    
+    if health == 0:
+        _on_mount_death()
+
+func witness_horror(horror_type: String, severity: int = 1) -> void:
+    # Every terrible thing leaves a mark
+    witnessed_horrors.append(horror_type)
+    sanity = max(0, sanity - (severity * 10))
+    sanity_changed.emit(sanity)
+    
+    # Specific reactions
+    match horror_type:
+        "player_kills_innocent":
+            trust_level = max(0, trust_level - 5)
+            screams_at_night = true
+        "companion_dies":
+            will_flee_combat = true
+            stamina *= 0.8
+        "enter_void_zone":
+            corruption_level += 0.1
+            _check_corruption_effects()
+        "player_transforms":
+            if bond_level < 5:
+                mount_fled.emit()
+            else:
+                transforming = true
+                mount_transformed.emit()
+    
+    # Check breaking point
+    if witnessed_horrors.size() >= breaking_point:
+        _break_mount_spirit()
+
+func _break_mount_spirit() -> void:
+    # The mount can't handle any more
+    screams_at_night = true
+    refuses_corrupted_ground = true
+    will_flee_combat = true
+    
+    # 50% chance to flee immediately
+    if randf() > 0.5:
+        mount_fled.emit()
+    else:
+        # Becomes unreliable
+        trust_level = min(trust_level, 20)
+
+func walk_on_corrupted_ground(corruption_type: String) -> int:
+    # Calculate environmental damage prevented
+    var base_damage = 0
+    
+    match corruption_type:
+        "corrupted":
+            base_damage = 1
+        "blighted":
+            base_damage = 3
+            corruption_level += 0.01
+        "void_touched":
+            base_damage = 5
+            corruption_level += 0.05
+            witness_horror("void_exposure", 2)
+        "dragon_wake":
+            base_damage = 999  # Instant death
+            corruption_level += 0.2
+    
+    # Mount absorbs some damage
+    var mount_protection = bond_level * 0.2
+    var actual_damage = int(base_damage * (1.0 - mount_protection))
+    
+    # But at a cost
+    if base_damage > 0:
+        take_damage(1, "environmental")
+        stamina = max(0, stamina - base_damage * 2)
+    
+    _check_corruption_effects()
+    
+    return actual_damage
+
+func _check_corruption_effects() -> void:
+    corruption_increased.emit(corruption_level)
+    
+    if corruption_level > 0.2:
+        # Physical changes begin
+        refuses_corrupted_ground = false  # No longer cares
+    
+    if corruption_level > 0.5:
+        # Mount is changing
+        will_flee_combat = false  # Becomes aggressive
+        screams_at_night = true
+    
+    if corruption_level > 0.8:
+        # Near transformation
+        transforming = true
+    
+    if corruption_level >= 1.0:
+        # Complete transformation
+        mount_transformed.emit()
+
+func get_movement_bonus() -> int:
+    # Movement degrades with mount state
+    var bonus = base_movement_bonus
+    
+    # Physical condition
+    if health < 50:
+        bonus -= 1
+    
+    # Mental condition
+    if sanity < 50:
+        bonus -= 1
+    
+    # Corruption effects
+    if corruption_level > 0.5:
+        bonus += 1  # Corrupted mounts move unnaturally fast
+    
+    # Trust affects cooperation
+    if trust_level < 50:
+        bonus = max(1, bonus - 1)
+    
+    return max(0, bonus)
+
+func can_traverse_terrain(terrain_type: String) -> bool:
+    # Some mounts refuse certain terrains
+    if refuses_corrupted_ground and terrain_type in ["corrupted", "blighted", "void_touched"]:
+        return false
+    
+    if terrain_type == "dragon_wake" and not transforming:
+        return false  # Only transformed mounts enter dragon zones
+    
+    return true
+
+func rest_and_recover() -> void:
+    # Recovery depends on world state
+    var world_state = GameState.emotional_stage
+    
+    match world_state:
+        "peace":
+            health = min(max_health, health + 20)
+            sanity = min(100, sanity + 10)
+            stamina = 100.0
+        "unease":
+            health = min(max_health, health + 15)
+            sanity = min(100, sanity + 5)
+            stamina = min(100.0, stamina + 80.0)
+        "dread", "terror":
+            health = min(max_health, health + 10)
+            # Sanity doesn't recover
+            stamina = min(100.0, stamina + 60.0)
+        _:
+            # No recovery in horror stages
+            pass
+
+func bond_with_player(action: String) -> void:
+    # Positive interactions
+    match action:
+        "feed":
+            trust_level = min(100, trust_level + 5)
+            health = min(max_health, health + 5)
+        "groom":
+            trust_level = min(100, trust_level + 3)
+            sanity = min(100, sanity + 5)
+        "speak_gently":
+            sanity = min(100, sanity + 10)
+        "protect_from_horror":
+            trust_level = min(100, trust_level + 10)
+            bond_level = min(5, bond_level + 1)
+
+func _on_mount_death() -> void:
+    # Mounts don't truly die in Dragon's Labyrinth
+    # They become something else
+    if corruption_level > 0.5:
+        # Rises as corrupted version
+        mount_transformed.emit()
+    else:
+        # Becomes a haunting memory
+        GameState.add_haunting_memory(mount_name)
+
+# Your mount trusted you
+# You led them into nightmare
+# What they become is your fault
+<!-- /FILE -->
+
+<!-- FILE: mount_manager.gd -->
+extends Node
+class_name MountManager
+
+# Managing the last innocent companions
+
+signal mount_acquired(mount: Mount)
+signal mount_lost(mount: Mount, reason: String)
+signal all_mounts_fled()
+signal mount_corruption_critical(mount: Mount)
+
+var active_mount: Mount = null
+var stable_mounts: Array[Mount] = []
+var lost_mounts: Array[String] = []  # Names of mounts that fled/died/transformed
+
+const MAX_STABLE_SIZE = 5
+const CORRUPTION_SPREAD_RATE = 0.01
+
+func _ready() -> void:
+    # Listen for world events that affect mounts
+    GameState.emotional_stage_changed.connect(_on_stage_changed)
+    Events.horror_witnessed.connect(_on_horror_witnessed)
+    Events.ground_corrupted.connect(_on_ground_corrupted)
+    
+    # Start mount checks
+    set_process(true)
+
+func _process(delta: float) -> void:
+    if not active_mount:
+        return
+    
+    # Passive corruption from world state
+    var corruption_rate = _get_world_corruption_rate()
+    if corruption_rate > 0:
+        active_mount.corruption_level += corruption_rate * delta
+        active_mount._check_corruption_effects()
+
+func acquire_mount(mount_type: String, source: String = "found") -> Mount:
+    var mount = Mount.new()
+    mount.mount_type = mount_type
+    mount.mount_name = _generate_mount_name(mount_type)
+    mount.emotional_stage_acquired = GameState.emotional_stage
+    
+    # Set base stats based on type and stage
+    _configure_mount_stats(mount)
+    
+    # Connect mount signals
+    mount.mount_fled.connect(_on_mount_fled.bind(mount))
+    mount.mount_transformed.connect(_on_mount_transformed.bind(mount))
+    mount.trust_broken.connect(_on_trust_broken.bind(mount))
+    
+    # Add to stable or make active
+    if not active_mount:
+        active_mount = mount
+    else:
+        stable_mounts.append(mount)
+    
+    mount_acquired.emit(mount)
+    
+    # Special dialogue for first mount
+    if source == "found" and lost_mounts.is_empty():
+        _play_first_mount_scene(mount)
+    
+    return mount
+
+func _configure_mount_stats(mount: Mount) -> void:
+    # Stats based on type and world state
+    match mount.mount_type:
+        "horse":
+            mount.max_health = 120
+            mount.base_movement_bonus = 3
+            mount.breaking_point = 8
+        "wolf":
+            mount.max_health = 80
+            mount.base_movement_bonus = 2
+            mount.breaking_point = 12
+            mount.will_flee_combat = false
+        "shadow_mare":
+            mount.max_health = 100
+            mount.base_movement_bonus = 4
+            mount.breaking_point = 20
+            mount.corruption_level = 0.3  # Starts corrupted
+    
+    mount.health = mount.max_health
+    
+    # World state affects starting condition
+    match GameState.emotional_stage:
+        "peace":
+            mount.sanity = 100
+            mount.trust_level = 80
+        "unease":
+            mount.sanity = 90
+            mount.trust_level = 70
+        "dread":
+            mount.sanity = 70
+            mount.trust_level = 60
+        "terror":
+            mount.sanity = 50
+            mount.trust_level = 40
+            mount.corruption_level += 0.1
+        _:
+            mount.sanity = 30
+            mount.trust_level = 20
+            mount.corruption_level += 0.3
+
+func switch_mount(index: int) -> void:
+    if index >= stable_mounts.size():
+        return
+    
+    # Swap active and stabled mount
+    var temp = active_mount
+    active_mount = stable_mounts[index]
+    stable_mounts[index] = temp
+
+func _on_mount_fled(mount: Mount) -> void:
+    lost_mounts.append(mount.mount_name)
+    
+    if mount == active_mount:
+        active_mount = null
+        # Try to use stabled mount
+        if not stable_mounts.is_empty():
+            active_mount = stable_mounts.pop_front()
+    else:
+        stable_mounts.erase(mount)
+    
+    mount_lost.emit(mount, "fled")
+    
+    # Show fleeing scene
+    DialogueSystem.queue_dialogue([
+        "%s looks at you one last time." % mount.mount_name,
+        "There is no recognition in those eyes.",
+        "Only fear.",
+        "The sound of hoofbeats fades into the darkness.",
+        "You are alone."
+    ])
+    
+    if active_mount == null and stable_mounts.is_empty():
+        all_mounts_fled.emit()
+
+func _on_mount_transformed(mount: Mount) -> void:
+    lost_mounts.append(mount.mount_name + " (transformed)")
+    
+    # Create corrupted version
+    var corrupted = _create_corrupted_mount(mount)
+    
+    if mount == active_mount:
+        active_mount = corrupted
+    else:
+        var idx = stable_mounts.find(mount)
+        if idx >= 0:
+            stable_mounts[idx] = corrupted
+    
+    mount_lost.emit(mount, "transformed")
+    
+    # Transformation scene
+    DialogueSystem.queue_dialogue([
+        "%s begins to change." % mount.mount_name,
+        "Bones crack and reform.",
+        "Eyes multiply across its hide.",
+        "It still knows you.",
+        "It still serves.",
+        "But it is no longer what it was."
+    ])
+
+func _create_corrupted_mount(original: Mount) -> Mount:
+    var corrupted = Mount.new()
+    corrupted.mount_name = "Corrupted " + original.mount_name
+    corrupted.mount_type = "corrupted_" + original.mount_type
+    corrupted.base_movement_bonus = original.base_movement_bonus + 1
+    corrupted.max_health = original.max_health * 2
+    corrupted.health = corrupted.max_health
+    corrupted.corruption_level = 1.0
+    corrupted.transforming = true
+    corrupted.will_flee_combat = false
+    corrupted.refuses_corrupted_ground = false
+    
+    # Corrupted mounts have different abilities
+    corrupted.bond_level = 5  # Unnaturally bonded
+    corrupted.trust_level = 100  # Beyond trust - enslaved
+    corrupted.sanity = 0  # No sanity left
+    
+    return corrupted
+
+func _get_world_corruption_rate() -> float:
+    # World itself corrupts mounts
+    match GameState.emotional_stage:
+        "peace", "unease":
+            return 0.0
+        "dread":
+            return 0.001
+        "terror":
+            return 0.005
+        "despair":
+            return 0.01
+        "madness":
+            return 0.02
+        "horror", "void":
+            return 0.05
+        _:
+            return 0.0
+
+func _on_horror_witnessed(horror_type: String, severity: int) -> void:
+    # All mounts react to horrors
+    if active_mount:
+        active_mount.witness_horror(horror_type, severity)
+    
+    for mount in stable_mounts:
+        # Stabled mounts feel it less
+        mount.witness_horror(horror_type, severity / 2)
+
+func _on_ground_corrupted(hex_position: Vector2i) -> void:
+    # Mounts remember corrupted areas
+    if active_mount:
+        if active_mount.corruption_level < 0.5:
+            active_mount.refuses_corrupted_ground = true
+
+func calculate_movement_cost(terrain_type: String) -> int:
+    if not active_mount:
+        # Walking on corrupted ground without mount
+        match terrain_type:
+            "corrupted":
+                PlayerStats.take_damage(1, "corruption")
+                return 2
+            "blighted":
+                PlayerStats.take_damage(3, "corruption")
+                return 3
+            "void_touched":
+                PlayerStats.take_damage(5, "corruption")
+                PlayerStats.sanity -= 1
+                return 4
+            "dragon_wake":
+                # Instant death without mount
+                PlayerStats.take_damage(999, "dragon_corruption")
+                return 999
+    
+    # With mount
+    var base_cost = HexGrid.get_terrain_cost(terrain_type)
+    var mount_bonus = active_mount.get_movement_bonus()
+    
+    # Mount takes environmental damage
+    if terrain_type in ["corrupted", "blighted", "void_touched", "dragon_wake"]:
+        var damage = active_mount.walk_on_corrupted_ground(terrain_type)
+        if damage > 0:
+            PlayerStats.take_damage(damage, "corruption_leakage")
+    
+    return max(1, base_cost - mount_bonus)
+
+func _play_first_mount_scene(mount: Mount) -> void:
+    # The moment of innocence before horror
+    DialogueSystem.queue_dialogue([
+        "You find %s grazing peacefully." % mount.mount_name,
+        "It approaches without fear.",
+        "The world hasn't broken it yet.",
+        "It trusts you.",
+        "",
+        "You will lead it into darkness.",
+        "It doesn't know.",
+        "How could it?"
+    ])
+
+func _generate_mount_name(mount_type: String) -> String:
+    # Names that will hurt when they flee
+    var names = {
+        "horse": ["Swift", "Faithful", "Sunny", "Hope", "Dancer"],
+        "wolf": ["Grey", "Hunter", "Loyal", "Shadow", "Guardian"],
+        "mule": ["Steady", "Patient", "Hardy", "Burden", "Friend"],
+        "shadow_mare": ["Nightmare", "Void", "Whisper", "Eclipse", "Sorrow"]
+    }
+    
+    if mount_type in names:
+        return names[mount_type][randi() % names[mount_type].size()]
+    
+    return "Companion"
+
+func _on_stage_changed(new_stage: String) -> void:
+    # World changes affect all mounts
+    match new_stage:
+        "dread":
+            _show_mount_unease()
+        "terror":
+            _show_mount_fear()
+        "despair":
+            _show_mount_breaking()
+
+func _show_mount_unease() -> void:
+    if active_mount and active_mount.emotional_stage_acquired == "peace":
+        DialogueSystem.queue_dialogue([
+            "%s paws the ground nervously." % active_mount.mount_name,
+            "Its ears swivel constantly.",
+            "It knows something you don't.",
+            "Animals always know first."
+        ])
+
+# They carried you faithfully
+# Through beauty into horror  
+# What right did you have?
+<!-- /FILE -->
+
+<!-- FILE: mount_bonding.gd -->
+extends Node
+class_name MountBonding
+
+# The connections that make horror personal
+
+signal bond_increased(mount: Mount, new_level: int)
+signal bond_broken(mount: Mount)
+signal soul_bonded(mount: Mount)
+
+const BOND_ACTIONS = {
+    "feed": {"trust": 5, "sanity": 2},
+    "groom": {"trust": 3, "sanity": 5}, 
+    "speak": {"trust": 2, "sanity": 8},
+    "rest_together": {"trust": 8, "sanity": 10},
+    "protect": {"trust": 15, "sanity": 5},
+    "share_food": {"trust": 10, "sanity": 3}
+}
+
+const BOND_LEVEL_REQUIREMENTS = {
+    2: {"actions": 20, "trust": 60, "no_betrayals": true},
+    3: {"actions": 50, "trust": 70, "horrors_together": 3},
+    4: {"actions": 100, "trust": 80, "saved_mount": true},
+    5: {"actions": 200, "trust": 90, "chose_mount_over_power": true}
+}
+
+var bonding_history: Dictionary = {}  # mount_name: {actions: [], betrayals: []}
+
+func attempt_bonding_action(mount: Mount, action: String) -> bool:
+    if not action in BOND_ACTIONS:
+        return false
+    
+    if not _can_perform_action(mount, action):
+        return false
+    
+    # Record action
+    if not mount.mount_name in bonding_history:
+        bonding_history[mount.mount_name] = {
+            "actions": [],
+            "betrayals": [],
+            "horrors_together": 0,
+            "times_saved": 0
+        }
+    
+    bonding_history[mount.mount_name].actions.append({
+        "action": action,
+        "timestamp": Time.get_ticks_msec(),
+        "stage": GameState.emotional_stage
+    })
+    
+    # Apply effects
+    var effects = BOND_ACTIONS[action]
+    mount.trust_level = min(100, mount.trust_level + effects.trust)
+    mount.sanity = min(100, mount.sanity + effects.sanity)
+    
+    # Check for bond level increase
+    _check_bond_progression(mount)
+    
+    # Special scenes for high bond actions
+    if mount.bond_level >= 3:
+        _play_bonding_scene(mount, action)
+    
+    return true
+
+func _can_perform_action(mount: Mount, action: String) -> bool:
+    # Some actions require conditions
+    match action:
+        "rest_together":
+            return GameState.is_safe_location()
+        "protect":
+            return GameState.in_combat
+        "share_food":
+            return PlayerInventory.has_food()
+        _:
+            return true
+
+func betray_mount(mount: Mount, betrayal_type: String) -> void:
+    # Some actions break trust forever
+    if not mount.mount_name in bonding_history:
+        bonding_history[mount.mount_name] = {"actions": [], "betrayals": []}
+    
+    bonding_history[mount.mount_name].betrayals.append({
+        "type": betrayal_type,
+        "timestamp": Time.get_ticks_msec(),
+        "stage": GameState.emotional_stage
+    })
+    
+    match betrayal_type:
+        "abandoned_in_combat":
+            mount.trust_level = max(0, mount.trust_level - 30)
+            mount.witness_horror("abandonment", 3)
+        "used_as_bait":
+            mount.trust_level = max(0, mount.trust_level - 50)
+            mount.bond_level = min(mount.bond_level, 2)
+        "forced_into_corruption":
+            mount.trust_level = 0
+            bond_broken.emit(mount)
+        "chose_power_over_mount":
+            # This prevents level 5 bond forever
+            mount.bond_level = min(mount.bond_level, 4)
+
+func _check_bond_progression(mount: Mount) -> void:
+    var current_level = mount.bond_level
+    var next_level = current_level + 1
+    
+    if next_level > 5:
+        return
+    
+    if not next_level in BOND_LEVEL_REQUIREMENTS:
+        return
+    
+    var reqs = BOND_LEVEL_REQUIREMENTS[next_level]
+    var history = bonding_history.get(mount.mount_name, {})
+    
+    # Check requirements
+    var meets_requirements = true
+    
+    if reqs.has("actions"):
+        if history.get("actions", []).size() < reqs.actions:
+            meets_requirements = false
+    
+    if reqs.has("trust"):
+        if mount.trust_level < reqs.trust:
+            meets_requirements = false
+    
+    if reqs.has("no_betrayals"):
+        if history.get("betrayals", []).size() > 0:
+            meets_requirements = false
+    
+    if reqs.has("horrors_together"):
+        if history.get("horrors_together", 0) < reqs.horrors_together:
+            meets_requirements = false
+    
+    if meets_requirements:
+        mount.bond_level = next_level
+        bond_increased.emit(mount, next_level)
+        
+        if next_level == 5:
+            _achieve_soul_bond(mount)
+
+func _achieve_

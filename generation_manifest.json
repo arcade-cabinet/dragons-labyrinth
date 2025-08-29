@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "generated_timestamp": "1756402711.1710799",
+  "hex_tiles": [
+    "res://resources/hex_tiles/hex_E1.tres",
+    "res://resources/hex_tiles/hex_BASE.tres",
+    "res://resources/hex_tiles/hex_S2.tres",
+    "res://resources/hex_tiles/hex_N3.tres",
+    "res://resources/hex_tiles/hex_N2.tres",
+    "res://resources/hex_tiles/hex_N1.tres",
+    "res://resources/hex_tiles/hex_E1N2.tres",
+    "res://resources/hex_tiles/hex_S1.tres",
+    "res://resources/hex_tiles/hex_W1N1.tres",
+    "res://resources/hex_tiles/hex_W1S1.tres"
+  ],
+  "creatures": [],
+  "npcs": [],
+  "regions": [
+    {
+      "name": "Fearless Wilds",
+      "type": "jungle",
+      "dread_modifier": 0.8,
+      "features": [
+        "ancient_ruins",
+        "vine_bridges",
+        "toxic_flora"
+      ],
+      "corruption_stage_1": "vines_blacken",
+      "corruption_stage_2": "trees_weep_blood",
+      "corruption_stage_3": "canopy_blocks_sun",
+      "corruption_stage_4": "living_jungle_hunts"
+    },
+    {
+      "name": "Vicious Crags",
+      "type": "mountains",
+      "dread_modifier": 1.2,
+      "features": [
+        "narrow_passes",
+        "echoing_caves",
+        "unstable_ground"
+      ],
+      "corruption_stage_1": "rocks_whisper",
+      "corruption_stage_2": "paths_shift",
+      "corruption_stage_3": "gravity_fluctuates",
+      "corruption_stage_4": "mountains_consume"
+    },
+    {
+      "name": "Ragthorn Woods",
+      "type": "forest",
+      "dread_modifier": 1.0,
+      "features": [
+        "thorny_paths",
+        "clearings",
+        "hollow_trees"
+      ],
+      "corruption_stage_1": "leaves_watch",
+      "corruption_stage_2": "trees_move",
+      "corruption_stage_3": "forest_maze",
+      "corruption_stage_4": "woods_are_alive"
+    },
+    {
+      "name": "Heartseeker Forest",
+      "type": "deep_forest",
+      "dread_modifier": 1.5,
+      "features": [
+        "no_paths",
+        "eternal_twilight",
+        "whispers"
+      ],
+      "corruption_stage_1": "hearts_exposed",
+      "corruption_stage_2": "emotions_manifest",
+      "corruption_stage_3": "past_haunts_present",
+      "corruption_stage_4": "forest_knows_all"
+    }
+  ],
+  "dread_stages": 5,
+  "corruption_mechanics": {
+    "spread_rate": "1_hex_per_day",
+    "visual_stages": [
+      "subtle",
+      "obvious",
+      "overwhelming",
+      "reality_breaking"
+    ],
+    "mechanical_effects": {
+      "stage_1": "disadvantage_on_perception",
+      "stage_2": "exhaustion_accumulates_faster",
+      "stage_3": "hallucinations_begin",
+      "stage_4": "reality_unreliable"
+    }
+  }
+}

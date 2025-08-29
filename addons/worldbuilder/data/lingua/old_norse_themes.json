@@ -1,0 +1,21 @@
+{
+  "magic_key": "norse_themes",
+  "themes": {
+    "sea": [
+      "mar",
+      "sær"
+    ],
+    "storm": [
+      "stormr",
+      "veðr"
+    ],
+    "kinship": [
+      "faðir",
+      "móðir"
+    ],
+    "battle": [
+      "víg",
+      "orrusta"
+    ]
+  }
+}

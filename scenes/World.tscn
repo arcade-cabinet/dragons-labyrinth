@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="World" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+position = Vector2(0, 0)
+zoom = Vector2(1.0, 1.0)
+
+[node name="TileMap" type="TileMap" parent="."]
+format = 2
+cell_size = Vector2(128, 128)
+rendering_quadrant_size = 64
+
+[node name="World" type="Node" parent="."]
+script = ExtResource("res://scripts/World.gd")

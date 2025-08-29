@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "total_entities": 35,
+    "clusters": 10,
+    "anomalies": 2,
+    "graph_nodes": 81,
+    "graph_edges": 195
+  },
+  "target_hits": {
+    "regions": 4,
+    "biomes": 2,
+    "dungeons": 1,
+    "cities": 3,
+    "towns": 1,
+    "villages": 31,
+    "inns": 14,
+    "factions": 1,
+    "monsters": 8,
+    "combat": 21,
+    "druids": 8,
+    "economics": 27,
+    "treasure": 4,
+    "armor": 10,
+    "shops": 15,
+    "taverns": 16,
+    "weapons": 14,
+    "tombs": 4,
+    "militias": 6,
+    "fighters": 7,
+    "scrolls": 4,
+    "artifacts": 3,
+    "temples": 1,
+    "strongholds": 2,
+    "syndicates": 2,
+    "npcs": 2,
+    "clerics": 4,
+    "wizards": 3,
+    "rogues": 1,
+    "weather": 4,
+    "settlements": 1,
+    "quests": 2,
+    "dwellings": 1,
+    "cults": 2,
+    "blacksmiths": 1
+  },
+  "patterns": {
+    "hex_tiles": 65,
+    "json_records": 0,
+    "general": 35
+  }
+}

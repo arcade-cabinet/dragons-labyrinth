@@ -1,0 +1,54 @@
+{
+  "forest": {
+    "cy": [
+      "coedwig"
+    ],
+    "ar": [
+      "غابة"
+    ],
+    "he": [
+      "יַעַר"
+    ],
+    "non": [
+      "viðr"
+    ]
+  },
+  "night": {
+    "he": [
+      "לַיְלָה"
+    ],
+    "non": [
+      "nótt"
+    ],
+    "ang": [
+      "niht"
+    ]
+  },
+  "wolf": {
+    "non": [
+      "ulfr"
+    ],
+    "ang": [
+      "wulf"
+    ]
+  },
+  "winter": {
+    "non": [
+      "vetr"
+    ],
+    "ang": [
+      "winter"
+    ]
+  },
+  "dragon": {
+    "cy": [
+      "draig"
+    ],
+    "ang": [
+      "draca"
+    ],
+    "non": [
+      "dreki"
+    ]
+  }
+}

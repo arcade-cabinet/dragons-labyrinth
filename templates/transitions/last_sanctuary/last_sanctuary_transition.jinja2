@@ -1,0 +1,612 @@
+# Last Sanctuary Transition - Dragon's Labyrinth
+# Light Path: Despair → Madness
+# Theme: Protecting others while your sanity crumbles
+
+extends Node
+class_name LastSanctuaryTransition
+
+## Core Design: Hold sanctuary while reality breaks down around you
+## Revelation: The dragon experienced this same madness holding back the void
+
+signal transition_complete(outcome: Dictionary)
+signal refugee_saved(refugee: Node, sanctuary_time: float)
+signal reality_fracture_appeared(fracture: Dictionary, danger_level: float)
+signal sanity_test_failed(test_type: String, consequence: Dictionary)
+signal miracle_performed(miracle_type: String, cost: Dictionary)
+signal sanctuary_breached(breach_point: String, refugees_lost: int)
+
+@export_group("Transition Settings")
+@export var sanctuary_name: String = "Chapel of Final Hope"
+@export var initial_refugee_count: int = 200
+@export var void_assault_waves: int = 7
+@export var reality_stability_decay: float = 0.05  # Per hour
+@export var base_sanctuary_duration_hours: int = 168  # One week
+
+@export_group("Sanity Mechanics")
+@export var initial_sanity: float = 1.0
+@export var sanity_loss_per_death: float = 0.05
+@export var sanity_loss_per_fracture: float = 0.03
+@export var madness_threshold: float = 0.3
+@export var hallucination_frequency: float = 0.2
+
+@export_group("Scaling Settings")
+@export var companion_sanity_anchor: float = 0.1  # Companions help maintain sanity
+@export var mercenary_fear_multiplier: float = 1.5  # Mercenaries panic easier
+@export var solo_madness_resistance: float = -0.2  # Solo is much harder
+
+var _world_state: Node
+var _party_manager: Node
+var _trait_system: Node
+var _achievement_system: Node
+var _companion_system: Node
+
+var _refugees: Array[Dictionary] = []
+var _saved_refugees: Array[Dictionary] = []
+var _lost_refugees: Array[Dictionary] = []
+var _reality_fractures: Array[Dictionary] = []
+var _current_sanity: float = 1.0
+var _party_sanity: Dictionary = {}
+var _sanctuary_barriers: Array[Dictionary] = []
+var _miracles_performed: int = 0
+var _hours_survived: int = 0
+var _revelation_stages: Array[bool] = [false, false, false]
+
+## Three Versions of the Transition
+enum TransitionVersion {
+	TO_LABYRINTH,    # Establishing sanctuary before dragon
+	FROM_LABYRINTH,  # Sanctuary overwhelmed after dragon's death
+	SEALING_VOID     # Final stand as reality collapses
+}
+
+@export var current_version: TransitionVersion = TransitionVersion.TO_LABYRINTH
+
+func _ready() -> void:
+	_world_state = get_node("/root/WorldState")
+	_party_manager = get_node("/root/PartyManager")
+	_trait_system = get_node("/root/TraitSystem")
+	_achievement_system = get_node("/root/AchievementSystem")
+	_companion_system = get_node("/root/CompanionSystem")
+	
+	_initialize_sanctuary_state()
+
+func _initialize_sanctuary_state() -> void:
+	# Generate refugees based on version
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_generate_desperate_refugees()
+		TransitionVersion.FROM_LABYRINTH:
+			_generate_void_touched_masses()
+		TransitionVersion.SEALING_VOID:
+			_generate_last_survivors()
+	
+	# Initialize party sanity tracking
+	for member in _party_manager.get_all_members():
+		_party_sanity[member.id] = initial_sanity
+	
+	# Create sanctuary barriers
+	_establish_sanctuary_defenses()
+
+## Journey TO Labyrinth - The Breaking Point
+func _generate_desperate_refugees() -> void:
+	for i in range(initial_refugee_count):
+		var refugee = {
+			"id": "refugee_" + str(i),
+			"name": _generate_refugee_name(),
+			"type": _determine_refugee_type(),
+			"desperation_level": randf_range(0.5, 0.9),
+			"family_group": _generate_family_group(),
+			"special_need": _generate_special_need(),
+			"void_exposure": randf_range(0.0, 0.3),
+			"trust_in_protector": randf_range(0.4, 0.8)
+		}
+		_refugees.append(refugee)
+
+func start_transition() -> void:
+	_present_sanctuary_state()
+	
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_begin_desperate_defense()
+		TransitionVersion.FROM_LABYRINTH:
+			_begin_impossible_siege()
+		TransitionVersion.SEALING_VOID:
+			_begin_reality_collapse()
+
+## Core Mechanic: Protect While Breaking
+func maintain_sanctuary(hours_to_maintain: int) -> Dictionary:
+	var result = {
+		"survived": false,
+		"refugees_saved": 0,
+		"refugees_lost": 0,
+		"sanity_remaining": _current_sanity,
+		"barriers_held": 0,
+		"miracles_needed": 0,
+		"final_state": ""
+	}
+	
+	# Each hour tests your resolve
+	for hour in range(hours_to_maintain):
+		_hours_survived = hour
+		
+		# Reality decays
+		var stability = 1.0 - (hour * reality_stability_decay)
+		
+		# Void assault intensifies
+		if hour % 24 == 0:  # Daily waves
+			_handle_void_assault(hour / 24)
+		
+		# Random events based on stability
+		if randf() > stability:
+			_spawn_reality_fracture()
+		
+		# Check sanctuary integrity
+		if not _check_sanctuary_barriers():
+			result.final_state = "sanctuary_breached"
+			break
+		
+		# Sanity checks
+		if not _perform_sanity_check():
+			result.final_state = "madness_consumed"
+			if _current_sanity <= 0:
+				break
+		
+		# Refugee management
+		_manage_refugee_needs(hour)
+		
+		# Check for desperate measures
+		if _should_perform_miracle():
+			_attempt_miracle()
+	
+	# Calculate results
+	result.survived = _hours_survived >= base_sanctuary_duration_hours
+	result.refugees_saved = _saved_refugees.size()
+	result.refugees_lost = _lost_refugees.size()
+	result.sanity_remaining = _current_sanity
+	result.barriers_held = _count_intact_barriers()
+	result.miracles_needed = _miracles_performed
+	
+	return result
+
+func _handle_void_assault(wave_number: int) -> void:
+	var assault_strength = wave_number * 1.5
+	
+	# Each barrier tested
+	for barrier in _sanctuary_barriers:
+		if barrier.integrity > 0:
+			var damage = assault_strength * randf_range(0.5, 1.5)
+			barrier.integrity -= damage
+			
+			if barrier.integrity <= 0:
+				_barrier_breached(barrier)
+	
+	# Refugees panic
+	var panic_level = assault_strength * 0.1
+	for refugee in _refugees:
+		refugee.desperation_level = min(1.0, refugee.desperation_level + panic_level)
+		
+		# Some may flee in terror
+		if refugee.desperation_level >= 0.95 and randf() > refugee.trust_in_protector:
+			_refugee_flees(refugee)
+
+func _spawn_reality_fracture() -> void:
+	var fracture = {
+		"id": "fracture_" + str(_reality_fractures.size()),
+		"type": _generate_fracture_type(),
+		"location": _determine_fracture_location(),
+		"danger_level": randf_range(0.3, 0.9),
+		"growth_rate": randf_range(0.05, 0.15),
+		"manifestation": _generate_manifestation()
+	}
+	
+	_reality_fractures.append(fracture)
+	reality_fracture_appeared.emit(fracture, fracture.danger_level)
+	
+	# Sanity impact
+	for member_id in _party_sanity:
+		_party_sanity[member_id] -= sanity_loss_per_fracture
+	_current_sanity -= sanity_loss_per_fracture
+
+## The Horror: Madness Through Compassion
+func _perform_sanity_check() -> bool:
+	var passed = true
+	
+	# Different tests based on situation
+	var test_type = _determine_sanity_test()
+	var difficulty = _calculate_test_difficulty()
+	
+	if _current_sanity < difficulty:
+		passed = false
+		var consequence = _generate_madness_consequence(test_type)
+		sanity_test_failed.emit(test_type, consequence)
+		
+		# Apply consequence
+		_apply_madness_effect(consequence)
+	
+	# Companions provide anchor
+	var anchor_strength = 0.0
+	for companion in _companion_system.get_active_companions():
+		if _party_sanity[companion.id] > madness_threshold:
+			anchor_strength += companion_sanity_anchor
+	
+	if anchor_strength > 0:
+		_current_sanity = min(1.0, _current_sanity + anchor_strength)
+	
+	# Check for revelations
+	_check_madness_revelations()
+	
+	return passed
+
+func _check_madness_revelations() -> void:
+	# First revelation: You can't save everyone
+	if not _revelation_stages[0] and _lost_refugees.size() >= 20:
+		_reveal_madness_truth(0, "The children's faces blur together. Were they ever real? Does it matter? You failed them all.")
+	
+	# Second revelation: Dragon's similar burden
+	if not _revelation_stages[1] and _current_sanity < 0.5:
+		_reveal_madness_truth(1, "In your madness, clarity: The dragon stood here once, protecting the world. Century after century. Alone.")
+	
+	# Third revelation: Madness is mercy
+	if not _revelation_stages[2] and _miracles_performed >= 3:
+		_reveal_madness_truth(2, "The void whispers truth: Madness is mercy. To see clearly is to despair. The dragon knew. Now you know.")
+
+func _reveal_madness_truth(stage: int, truth: String) -> void:
+	# In madness, revelations hit differently
+	_world_state.add_madness_revelation("last_sanctuary", stage, truth)
+	_revelation_stages[stage] = true
+	_achievement_system.trigger_achievement("madness_insight_" + str(stage))
+	
+	# Permanent sanity damage
+	_current_sanity -= 0.1
+
+## Light Path Miracles
+func _attempt_miracle() -> void:
+	var miracle_options = [
+		{
+			"type": "mass_healing",
+			"description": "Channel divine light to heal all wounds",
+			"sanity_cost": 0.15,
+			"faith_required": 0.7,
+			"effect": "heal_all_refugees"
+		},
+		{
+			"type": "reality_stabilization", 
+			"description": "Force reality to hold through will alone",
+			"sanity_cost": 0.2,
+			"faith_required": 0.8,
+			"effect": "close_fractures"
+		},
+		{
+			"type": "barrier_restoration",
+			"description": "Rebuild barriers with pure faith",
+			"sanity_cost": 0.1,
+			"faith_required": 0.6,
+			"effect": "restore_barriers"
+		},
+		{
+			"type": "divine_intervention",
+			"description": "Call upon higher power directly",
+			"sanity_cost": 0.3,
+			"faith_required": 0.9,
+			"effect": "stop_assault"
+		}
+	]
+	
+	# Present choice to player
+	_world_state.present_miracle_choice(miracle_options, self, "_on_miracle_chosen")
+
+func _on_miracle_chosen(miracle: Dictionary) -> void:
+	# Check if possible
+	var faith_level = _calculate_current_faith()
+	
+	if faith_level >= miracle.faith_required:
+		# Perform miracle
+		_execute_miracle(miracle)
+		_miracles_performed += 1
+		
+		# Pay sanity cost
+		_current_sanity -= miracle.sanity_cost
+		
+		# Track miracle
+		miracle_performed.emit(miracle.type, {"sanity_cost": miracle.sanity_cost})
+		
+		# Refugees witness divine power
+		for refugee in _refugees:
+			refugee.trust_in_protector = min(1.0, refugee.trust_in_protector + 0.2)
+	else:
+		# Miracle fails, devastating morale
+		_miracle_failure(miracle)
+
+## The Choice: Who Lives When Not All Can
+func present_triage_decisions() -> void:
+	var decisions = []
+	
+	# Option 1: Save the children first
+	decisions.append({
+		"id": "save_children",
+		"text": "Evacuate all children and their mothers first",
+		"saves": _count_refugee_type("child") + _count_refugee_type("mother"),
+		"abandons": "elderly, sick, defenders",
+		"sanity_impact": -0.2,
+		"trait_gained": "protector_of_innocence"
+	})
+	
+	# Option 2: Save the useful
+	decisions.append({
+		"id": "save_useful",
+		"text": "Prioritize those who can help rebuild",
+		"saves": _count_refugee_type("skilled") + _count_refugee_type("healthy"),
+		"abandons": "weak, old, wounded",
+		"sanity_impact": -0.3,
+		"trait_gained": "pragmatic_savior"
+	})
+	
+	# Option 3: Random lottery
+	decisions.append({
+		"id": "random_selection",
+		"text": "Draw lots - let fate decide fairly",
+		"saves": initial_refugee_count * 0.5,
+		"abandons": "random half",
+		"sanity_impact": -0.15,
+		"trait_gained": "arbiter_of_fate"
+	})
+	
+	# Option 4: Stay with all (certain death)
+	decisions.append({
+		"id": "die_together",
+		"text": "We stay together. All or none.",
+		"saves": 0,
+		"abandons": "none - all die together",
+		"sanity_impact": -0.5,
+		"trait_gained": "martyr_of_hope"
+	})
+	
+	_world_state.present_impossible_choice(decisions, self, "_on_triage_decided")
+
+func _on_triage_decided(decision: Dictionary) -> void:
+	# Apply the horrible choice
+	match decision.id:
+		"save_children":
+			_evacuate_by_criteria(["child", "mother"])
+		"save_useful":
+			_evacuate_by_criteria(["skilled", "healthy", "young"])
+		"random_selection":
+			_evacuate_randomly(decision.saves)
+		"die_together":
+			_make_final_stand()
+	
+	# Sanity impact
+	_current_sanity += decision.sanity_impact
+	
+	# Grant trait
+	_trait_system.add_trait(_party_manager.get_player(), decision.trait_gained)
+	
+	# Those left behind react
+	_handle_abandonment_reactions()
+
+## Journey FROM Labyrinth - Everything Worse
+func _begin_impossible_siege() -> void:
+	# Void erupts from where dragon died
+	initial_refugee_count *= 5  # Massive influx
+	void_assault_waves *= 2
+	reality_stability_decay *= 3
+	
+	# Previous sanctuary fortifications failing
+	for barrier in _sanctuary_barriers:
+		barrier.integrity *= 0.3
+		barrier.decay_rate *= 2
+	
+	# Mass panic
+	_initiate_cascade_failure()
+
+## Sealing the Void - Reality Ending
+func _begin_reality_collapse() -> void:
+	# Sanctuary is one of last stable points
+	# Must hold while final ritual performed
+	# Every hour counts down to oblivion
+	_initiate_final_countdown()
+
+## Light Path Consequences
+func _apply_permanent_sanctuary_consequences() -> void:
+	# Sanity forever broken
+	if _current_sanity < 0.3:
+		_trait_system.add_trait(_party_manager.get_player(), "shattered_mind")
+		_world_state.add_permanent_madness("last_sanctuary", _generate_permanent_delusions())
+	elif _current_sanity < 0.6:
+		_trait_system.add_trait(_party_manager.get_player(), "haunted_protector")
+	
+	# Saved refugees remember
+	for refugee in _saved_refugees:
+		_world_state.add_grateful_survivor(refugee.id, {
+			"savior": _party_manager.get_player().id,
+			"sanctuary": sanctuary_name,
+			"miracles_witnessed": _miracles_performed
+		})
+	
+	# Lost refugees haunt
+	if _lost_refugees.size() > 0:
+		_world_state.add_haunting("abandoned_refugees", _lost_refugees)
+		
+	# Companions scarred by experience
+	for companion in _companion_system.get_active_companions():
+		var companion_sanity = _party_sanity.get(companion.id, 0)
+		if companion_sanity < 0.5:
+			companion.add_permanent_trauma("sanctuary_madness", {
+				"refugees_lost": _lost_refugees.size(),
+				"reality_fractures": _reality_fractures.size(),
+				"miracles_witnessed": _miracles_performed
+			})
+
+func _complete_transition(outcome: String) -> void:
+	var result = {
+		"transition": "last_sanctuary",
+		"path": "light",
+		"outcome": outcome,
+		"hours_survived": _hours_survived,
+		"refugees_saved": _saved_refugees.size(),
+		"refugees_lost": _lost_refugees.size(),
+		"final_sanity": _current_sanity,
+		"party_sanity": _party_sanity,
+		"miracles_performed": _miracles_performed,
+		"barriers_held": _count_intact_barriers(),
+		"revelations": _revelation_stages,
+		"sanctuary_fate": _determine_sanctuary_fate()
+	}
+	
+	# Apply permanent changes
+	_apply_permanent_sanctuary_consequences()
+	
+	# Update world state
+	_world_state.set_sanctuary_state(sanctuary_name, result.sanctuary_fate)
+	
+	transition_complete.emit(result)
+
+## Helper Functions
+func _generate_refugee_name() -> String:
+	var descriptors = ["Terrified", "Weeping", "Praying", "Desperate", "Hollow-eyed", "Trembling"]
+	var identities = ["Mother", "Child", "Elder", "Soldier", "Merchant", "Farmer", "Priest"]
+	return descriptors[randi() % descriptors.size()] + " " + identities[randi() % identities.size()]
+
+func _determine_refugee_type() -> String:
+	var types = ["child", "mother", "elder", "skilled", "wounded", "healthy", "sick"]
+	return types[randi() % types.size()]
+
+func _generate_family_group() -> Array:
+	if randf() > 0.6:
+		var size = randi_range(2, 5)
+		var group = []
+		for i in range(size):
+			group.append("family_member_" + str(i))
+		return group
+	return []
+
+func _generate_special_need() -> String:
+	var needs = ["medicine", "food_for_baby", "crutches", "prayer", "last_rites", "none"]
+	return needs[randi() % needs.size()]
+
+func _establish_sanctuary_defenses() -> void:
+	var barrier_types = [
+		{"name": "North Wall", "integrity": 1.0, "importance": "critical"},
+		{"name": "South Gate", "integrity": 0.8, "importance": "high"},
+		{"name": "East Tower", "integrity": 0.9, "importance": "moderate"},
+		{"name": "West Passage", "integrity": 0.7, "importance": "low"},
+		{"name": "Sacred Circle", "integrity": 1.0, "importance": "critical"}
+	]
+	
+	for barrier_data in barrier_types:
+		_sanctuary_barriers.append(barrier_data)
+
+func _determine_sanity_test() -> String:
+	var tests = [
+		"watching_children_die",
+		"choosing_who_lives",
+		"reality_breakdown",
+		"miracle_failure",
+		"companion_madness",
+		"void_whispers"
+	]
+	return tests[randi() % tests.size()]
+
+func _calculate_test_difficulty() -> float:
+	var base = 0.5
+	base += _lost_refugees.size() * 0.01
+	base += _reality_fractures.size() * 0.05
+	base += (_hours_survived / 24.0) * 0.1
+	return min(base, 0.95)
+
+func _generate_madness_consequence(test_type: String) -> Dictionary:
+	return {
+		"type": test_type,
+		"effect": _determine_madness_effect(test_type),
+		"duration": randf_range(1, 24),  # Hours
+		"severity": randf_range(0.1, 0.5)
+	}
+
+func _determine_madness_effect(test_type: String) -> String:
+	match test_type:
+		"watching_children_die":
+			return "see_all_children_as_lost_ones"
+		"choosing_who_lives":
+			return "paralysis_of_choice"
+		"reality_breakdown":
+			return "cannot_distinguish_real_from_void"
+		_:
+			return "general_hallucinations"
+
+func _calculate_current_faith() -> float:
+	# Light path relies on faith
+	var base_faith = 0.5
+	var player = _party_manager.get_player()
+	
+	if _trait_system.has_trait(player, "unshakeable_faith"):
+		base_faith += 0.3
+	if _trait_system.has_trait(player, "broken_faith"):
+		base_faith -= 0.4
+		
+	# Miracles strengthen or weaken faith
+	base_faith += _miracles_performed * 0.05
+	base_faith -= _lost_refugees.size() * 0.005
+	
+	return clamp(base_faith, 0.0, 1.0)
+
+func _determine_sanctuary_fate() -> String:
+	if _hours_survived >= base_sanctuary_duration_hours:
+		if _saved_refugees.size() > initial_refugee_count * 0.8:
+			return "beacon_of_hope"
+		else:
+			return "pyrrhic_victory"
+	elif _current_sanity <= 0:
+		return "consumed_by_madness"
+	else:
+		return "fallen_sanctuary"
+
+func _count_intact_barriers() -> int:
+	var intact = 0
+	for barrier in _sanctuary_barriers:
+		if barrier.integrity > 0:
+			intact += 1
+	return intact
+
+func _count_refugee_type(type: String) -> int:
+	var count = 0
+	for refugee in _refugees:
+		if refugee.type == type:
+			count += 1
+	return count
+
+func _generate_permanent_delusions() -> Array:
+	return [
+		"still_hear_refugees_screaming",
+		"see_void_fractures_everywhere",
+		"cannot_trust_reality",
+		"believe_still_in_sanctuary",
+		"count_saved_that_died"
+	]
+
+## Save/Load Support
+func save_transition_state() -> Dictionary:
+	return {
+		"version": current_version,
+		"refugees": _refugees,
+		"saved": _saved_refugees,
+		"lost": _lost_refugees,
+		"fractures": _reality_fractures,
+		"sanity": _current_sanity,
+		"party_sanity": _party_sanity,
+		"barriers": _sanctuary_barriers,
+		"miracles": _miracles_performed,
+		"hours": _hours_survived,
+		"revelations": _revelation_stages
+	}
+
+func load_transition_state(data: Dictionary) -> void:
+	current_version = data.get("version", TransitionVersion.TO_LABYRINTH)
+	_refugees = data.get("refugees", [])
+	_saved_refugees = data.get("saved", [])
+	_lost_refugees = data.get("lost", [])
+	_reality_fractures = data.get("fractures", [])
+	_current_sanity = data.get("sanity", 1.0)
+	_party_sanity = data.get("party_sanity", {})
+	_sanctuary_barriers = data.get("barriers", [])
+	_miracles_performed = data.get("miracles", 0)
+	_hours_survived = data.get("hours", 0)
+	_revelation_stages = data.get("revelations", [false, false, false])

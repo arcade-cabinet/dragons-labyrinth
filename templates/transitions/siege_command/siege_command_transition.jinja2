@@ -1,0 +1,474 @@
+# Siege Command Transition - Dragon's Labyrinth
+# Strength Path: Dread → Terror
+# Theme: Leadership means sending others to die
+
+extends Node
+class_name SiegeCommandTransition
+
+## Core Design: Deploy units knowing some won't return
+## Revelation: The fortress was defending AGAINST the labyrinth, not for the dragon
+
+signal transition_complete(outcome: Dictionary)
+signal unit_deployed(unit: Node, mission: String, survival_chance: float)
+signal casualty_report(unit: Node, death_type: String)
+signal tactical_revelation(insight: String)
+signal morale_shifted(new_morale: float, cause: String)
+
+@export_group("Transition Settings")
+@export var fortress_name: String = "Ironhold Keep"
+@export var initial_defender_count: int = 150
+@export var fortress_defense_rating: float = 0.7
+@export var siege_time_limit_hours: int = 72
+@export var acceptable_loss_threshold: float = 0.3
+
+@export_group("Forces Composition")
+@export var player_mercenaries: int = 0  # Set by party manager
+@export var player_companions: int = 0  # Set by companion system
+@export var allied_forces: int = 50     # Local militia
+@export var siege_equipment_quality: float = 0.5
+
+@export_group("Scaling Settings") 
+@export var companion_morale_weight: float = 2.0  # Companions matter more
+@export var mercenary_efficiency: float = 1.5     # Better at combat
+@export var solo_hero_multiplier: float = 10.0   # Solo is nearly impossible
+
+var _world_state: Node
+var _party_manager: Node
+var _trait_system: Node
+var _achievement_system: Node
+var _companion_system: Node
+
+var _fortress_sections: Array[Dictionary] = []
+var _deployed_units: Array[Dictionary] = []
+var _casualties: Array[Dictionary] = []
+var _tactical_insights: Array[String] = []
+var _current_morale: float = 0.7
+var _hours_elapsed: int = 0
+var _revelation_stages: Array[bool] = [false, false, false]
+
+## Three Versions of the Transition
+enum TransitionVersion {
+	TO_LABYRINTH,    # Taking fortress to reach dragon
+	FROM_LABYRINTH,  # Fortress overrun by void
+	SEALING_VOID     # Last stand defense
+}
+
+@export var current_version: TransitionVersion = TransitionVersion.TO_LABYRINTH
+
+func _ready() -> void:
+	_world_state = get_node("/root/WorldState")
+	_party_manager = get_node("/root/PartyManager")
+	_trait_system = get_node("/root/TraitSystem")
+	_achievement_system = get_node("/root/AchievementSystem")
+	_companion_system = get_node("/root/CompanionSystem")
+	
+	_initialize_siege_state()
+
+func _initialize_siege_state() -> void:
+	# Set force composition from actual party
+	player_mercenaries = _party_manager.get_mercenary_count()
+	player_companions = _companion_system.get_active_companions().size()
+	
+	# Generate fortress layout
+	_generate_fortress_sections()
+	
+	# Initialize morale based on force composition
+	_calculate_initial_morale()
+
+func _generate_fortress_sections() -> void:
+	var sections = [
+		{"name": "Main Gate", "defense": 0.8, "strategic_value": "critical"},
+		{"name": "North Tower", "defense": 0.6, "strategic_value": "high"},
+		{"name": "South Tower", "defense": 0.6, "strategic_value": "high"},
+		{"name": "Inner Bailey", "defense": 0.7, "strategic_value": "critical"},
+		{"name": "Supply Route", "defense": 0.3, "strategic_value": "moderate"},
+		{"name": "Underground Tunnels", "defense": 0.4, "strategic_value": "unknown"}
+	]
+	
+	for section in sections:
+		section["status"] = "defended"
+		section["defender_strength"] = initial_defender_count / sections.size()
+		_fortress_sections.append(section)
+
+func start_transition() -> void:
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_begin_siege_scenario()
+		TransitionVersion.FROM_LABYRINTH:
+			_begin_void_defense()
+		TransitionVersion.SEALING_VOID:
+			_begin_last_stand()
+
+## Journey TO Labyrinth - Taking the Fortress
+func _begin_siege_scenario() -> void:
+	_present_siege_briefing()
+	_initiate_command_interface()
+
+func _present_siege_briefing() -> void:
+	var briefing = {
+		"fortress_intel": _gather_fortress_intelligence(),
+		"force_assessment": _assess_available_forces(),
+		"time_pressure": "Dragon grows stronger each day",
+		"moral_weight": "This fortress has never fallen"
+	}
+	
+	# Strength path focuses on tactical efficiency
+	var strategic_options = _generate_strategic_options()
+	_world_state.present_tactical_briefing(briefing, strategic_options)
+
+## Core Mechanic: Command Decisions Have Permanent Consequences
+func deploy_unit(unit: Dictionary, target_section: Dictionary, mission_type: String) -> void:
+	var deployment = {
+		"unit": unit,
+		"section": target_section,
+		"mission": mission_type,
+		"deployed_hour": _hours_elapsed,
+		"survival_chance": _calculate_survival_chance(unit, target_section, mission_type)
+	}
+	
+	_deployed_units.append(deployment)
+	unit_deployed.emit(unit, mission_type, deployment.survival_chance)
+	
+	# Resolve deployment outcome
+	_resolve_deployment(deployment)
+
+func _calculate_survival_chance(unit: Dictionary, section: Dictionary, mission: String) -> float:
+	var base_chance = 0.5
+	
+	# Unit type matters
+	match unit.type:
+		"companion":
+			base_chance += 0.2  # Companions are more survivable
+			if _trait_system.has_trait(unit.node, "tactical_genius"):
+				base_chance += 0.1
+		"mercenary":
+			base_chance += 0.1  # Mercenaries are combat-efficient
+			base_chance *= mercenary_efficiency
+		"militia":
+			base_chance -= 0.1  # Militia are less trained
+		"player":
+			base_chance += 0.3  # Player has plot armor (mostly)
+	
+	# Mission type affects survival
+	match mission:
+		"frontal_assault":
+			base_chance -= 0.3
+		"infiltration":
+			base_chance += 0.1
+		"siege_equipment":
+			base_chance -= 0.1
+		"feint":
+			base_chance += 0.2
+	
+	# Section defense rating
+	base_chance -= section.defense * 0.5
+	
+	return clamp(base_chance, 0.05, 0.95)
+
+func _resolve_deployment(deployment: Dictionary) -> void:
+	var unit = deployment.unit
+	var survived = randf() < deployment.survival_chance
+	
+	if survived:
+		# Unit completes mission
+		_apply_mission_success(deployment)
+		
+		# But may be traumatized
+		if unit.type == "companion" and deployment.survival_chance < 0.5:
+			unit.node.add_trauma("near_death_experience", deployment.section.name)
+			unit.node.trust_modifier -= 5
+	else:
+		# Unit becomes casualty
+		_handle_casualty(unit, deployment)
+		
+		# Morale impact
+		var morale_loss = 0.1
+		if unit.type == "companion":
+			morale_loss *= companion_morale_weight
+		_current_morale -= morale_loss
+		morale_shifted.emit(_current_morale, "casualty: " + unit.name)
+	
+	# Check for revelations
+	_check_tactical_revelations()
+
+func _handle_casualty(unit: Dictionary, deployment: Dictionary) -> void:
+	var death_types = [
+		"heroic_last_stand",
+		"overwhelmed_by_numbers", 
+		"betrayed_by_defender",
+		"crushed_by_fortification",
+		"vanished_in_tunnels"
+	]
+	
+	var death_type = death_types[randi() % death_types.size()]
+	
+	_casualties.append({
+		"unit": unit,
+		"location": deployment.section.name,
+		"death_type": death_type,
+		"final_words": _generate_final_words(unit)
+	})
+	
+	casualty_report.emit(unit, death_type)
+	
+	# Remove from available forces
+	match unit.type:
+		"companion":
+			_companion_system.companion_killed(unit.node, death_type)
+		"mercenary":
+			player_mercenaries -= 1
+		"militia":
+			allied_forces -= 1
+
+## The Horror: Realizing What You're Destroying
+func _check_tactical_revelations() -> void:
+	# First revelation: Defenders seem afraid of something else
+	if not _revelation_stages[0] and _casualties.size() >= 5:
+		var insight = "Dying defender gasps: 'You fools... we weren't keeping you out... we were keeping IT in...'"
+		_reveal_tactical_truth(0, insight)
+	
+	# Second revelation: Fortress architecture is wrong
+	if not _revelation_stages[1] and _deployed_units.size() >= 10:
+		var insight = "The fortress defenses face INWARD. This isn't a fortress... it's a prison."
+		_reveal_tactical_truth(1, insight)
+	
+	# Third revelation: What the dragon was guarding against
+	if not _revelation_stages[2] and _has_breached_inner_sanctum():
+		var insight = "Ancient runes everywhere: 'Here the First Guard sealed the Void. Here the Last Guard maintains the seal.'"
+		_reveal_tactical_truth(2, insight)
+
+func _reveal_tactical_truth(stage: int, insight: String) -> void:
+	_tactical_insights.append(insight)
+	tactical_revelation.emit(insight)
+	_revelation_stages[stage] = true
+	_achievement_system.trigger_achievement("tactical_insight_" + str(stage))
+	_world_state.add_revelation("siege_command", stage, insight)
+
+## Strategic Command Choices
+func present_assault_options() -> void:
+	var options = []
+	
+	# Option 1: Overwhelming force (high casualties)
+	options.append({
+		"id": "overwhelm",
+		"name": "Full Frontal Assault",
+		"description": "Storm all walls simultaneously",
+		"time_cost": 8,
+		"expected_casualties": 0.6,
+		"success_chance": 0.9,
+		"traits_gained": ["brutal_commander", "victory_at_any_cost"]
+	})
+	
+	# Option 2: Tactical precision (moderate casualties)
+	options.append({
+		"id": "tactical",
+		"name": "Combined Arms Approach", 
+		"description": "Siege equipment, then waves",
+		"time_cost": 24,
+		"expected_casualties": 0.3,
+		"success_chance": 0.7,
+		"traits_gained": ["tactical_commander", "calculated_risk"]
+	})
+	
+	# Option 3: Deception and infiltration (low casualties)
+	options.append({
+		"id": "deception",
+		"name": "False Retreat and Infiltration",
+		"description": "Feint withdrawal, strike from within",
+		"time_cost": 48,
+		"expected_casualties": 0.15,
+		"success_chance": 0.5,
+		"traits_gained": ["cunning_commander", "patience_of_stone"]
+	})
+	
+	# Option 4: Prolonged siege (time pressure)
+	options.append({
+		"id": "siege",
+		"name": "Starve Them Out",
+		"description": "Cut supplies and wait",
+		"time_cost": 72,
+		"expected_casualties": 0.05,
+		"success_chance": 0.6,
+		"traits_gained": ["patient_commander", "iron_will"]
+	})
+	
+	_world_state.present_strategic_choice(options, self, "_on_strategy_chosen")
+
+func _on_strategy_chosen(strategy: Dictionary) -> void:
+	# Fast-forward time
+	_hours_elapsed += strategy.time_cost
+	
+	# Apply casualties
+	var total_forces = player_mercenaries + player_companions + allied_forces
+	var casualties_to_apply = int(total_forces * strategy.expected_casualties)
+	
+	# Distribute casualties (mercenaries and militia first)
+	for i in range(casualties_to_apply):
+		_apply_strategic_casualty(strategy.id)
+	
+	# Check success
+	if randf() < strategy.success_chance:
+		_fortress_captured(strategy)
+	else:
+		_assault_failed(strategy)
+	
+	# Grant commander traits
+	for trait in strategy.traits_gained:
+		_trait_system.add_trait(_party_manager.get_player(), trait)
+
+## Journey FROM Labyrinth - Defending Against Void
+func _begin_void_defense() -> void:
+	# Fortress now overrun by void creatures
+	for section in _fortress_sections:
+		section.status = "void_corrupted"
+		section.void_strength = randf_range(0.6, 1.0)
+	
+	# Previous casualties rise as void thralls
+	_raise_void_thralls()
+	
+	# Must hold line while refugees escape
+	_initiate_desperate_defense()
+
+func _raise_void_thralls() -> void:
+	for casualty in _casualties:
+		if casualty.death_type != "vanished_in_tunnels":  # Those are gone forever
+			var thrall = {
+				"name": casualty.unit.name + " (Void Thrall)",
+				"type": "void_thrall",
+				"strength": casualty.unit.strength * 1.5,
+				"remembers_commander": true
+			}
+			# They specifically target their former commander
+			_world_state.spawn_vengeful_thrall(thrall, self)
+
+## Sealing the Void - Last Stand
+func _begin_last_stand() -> void:
+	# Fortress is final defensive position
+	# Must coordinate massive defense
+	_prepare_final_defenses()
+	_rally_all_survivors()
+
+## Leadership Consequences
+func _apply_permanent_command_consequences() -> void:
+	# Survivors remember your decisions
+	var command_reputation = {
+		"casualties_caused": _casualties.size(),
+		"decisive_victories": _count_victories(),
+		"tactical_insights": _tactical_insights,
+		"command_style": _determine_command_style()
+	}
+	
+	# Mercenaries respect or fear you
+	if _casualties.size() > total_forces * acceptable_loss_threshold:
+		_world_state.set_mercenary_reputation("butcher")
+		_trait_system.add_trait(_party_manager.get_player(), "feared_commander")
+	else:
+		_world_state.set_mercenary_reputation("tactical")
+		_trait_system.add_trait(_party_manager.get_player(), "respected_commander")
+	
+	# Companions judge your choices
+	for companion in _companion_system.get_active_companions():
+		var casualty_count = _count_companion_casualties()
+		if casualty_count > 0:
+			companion.add_permanent_modifier("witnessed_commander_sacrifice_friends", -20)
+		else:
+			companion.add_permanent_modifier("commander_protected_us", 10)
+
+func _complete_transition(outcome: String) -> void:
+	var result = {
+		"transition": "siege_command",
+		"path": "strength",
+		"outcome": outcome,
+		"time_taken": _hours_elapsed,
+		"casualties": _casualties,
+		"revelations": _revelation_stages,
+		"fortress_fate": _determine_fortress_fate(),
+		"command_reputation": _determine_command_style()
+	}
+	
+	# Apply permanent changes
+	_apply_permanent_command_consequences()
+	
+	# Update world state
+	_world_state.set_fortress_state(fortress_name, result.fortress_fate)
+	
+	transition_complete.emit(result)
+
+## Helper Functions
+func _calculate_initial_morale() -> float:
+	var morale = 0.5
+	
+	# Force composition affects starting morale
+	if player_companions > 0:
+		morale += 0.1 * player_companions
+	if player_mercenaries > 20:
+		morale += 0.2
+	if allied_forces > 30:
+		morale += 0.1
+		
+	# Solo commander is terrifying (for enemies)
+	if player_companions == 0 and player_mercenaries == 0:
+		morale += 0.3  # Legendary commander aura
+		
+	return clamp(morale, 0.0, 1.0)
+
+func _generate_final_words(unit: Dictionary) -> String:
+	var words_by_type = {
+		"companion": [
+			"Tell them... I followed willingly...",
+			"It was an honor, commander...",
+			"The dragon... it's not what we think..."
+		],
+		"mercenary": [
+			"At least... I die rich...",
+			"Should have... charged more...",
+			"Worth it... for the glory..."
+		],
+		"militia": [
+			"For my family...",
+			"Protect... the village...",
+			"I just wanted to help..."
+		]
+	}
+	
+	var type_words = words_by_type.get(unit.type, ["..."])
+	return type_words[randi() % type_words.size()]
+
+func _determine_command_style() -> String:
+	var casualty_rate = float(_casualties.size()) / float(total_forces)
+	
+	if casualty_rate > 0.5:
+		return "butcher"
+	elif casualty_rate > 0.3:
+		return "aggressive"
+	elif casualty_rate > 0.15:
+		return "balanced"
+	else:
+		return "cautious"
+
+func _has_breached_inner_sanctum() -> bool:
+	for section in _fortress_sections:
+		if section.name == "Inner Bailey" and section.status == "captured":
+			return true
+	return false
+
+## Save/Load Support
+func save_transition_state() -> Dictionary:
+	return {
+		"version": current_version,
+		"fortress_sections": _fortress_sections,
+		"deployed_units": _deployed_units,
+		"casualties": _casualties,
+		"morale": _current_morale,
+		"hours": _hours_elapsed,
+		"revelations": _revelation_stages
+	}
+
+func load_transition_state(data: Dictionary) -> void:
+	current_version = data.get("version", TransitionVersion.TO_LABYRINTH)
+	_fortress_sections = data.get("fortress_sections", [])
+	_deployed_units = data.get("deployed_units", [])
+	_casualties = data.get("casualties", [])
+	_current_morale = data.get("morale", 0.7)
+	_hours_elapsed = data.get("hours", 0)
+	_revelation_stages = data.get("revelations", [false, false, false])

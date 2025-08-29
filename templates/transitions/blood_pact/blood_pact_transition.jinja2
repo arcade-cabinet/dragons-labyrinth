@@ -1,0 +1,538 @@
+# Blood Pact Transition - Dragon's Labyrinth
+# Dark Path: Terror → Despair
+# Theme: Power requires becoming what you fight
+
+extends Node
+class_name BloodPactTransition
+
+## Core Design: Each sacrifice grants void powers but corrupts you
+## Revelation: The dragon made similar pacts to gain power to guard
+
+signal transition_complete(outcome: Dictionary)
+signal blood_offered(sacrifice: Dictionary, power_gained: Dictionary)
+signal corruption_deepened(new_level: float, manifestation: String)
+signal void_whisper_heard(message: String, cost: Dictionary)
+signal pact_escalated(new_terms: Dictionary)
+
+@export_group("Transition Settings")
+@export var cult_name: String = "The Hollow Circle"
+@export var initial_cultist_count: int = 13
+@export var dragon_location_pieces: int = 7  # Fragments of map to dragon
+@export var void_corruption_rate: float = 0.2  # Per sacrifice
+@export var power_scaling_factor: float = 1.5
+
+@export_group("Sacrifice Requirements")
+@export var blood_quality_matters: bool = true
+@export var innocent_blood_multiplier: float = 3.0
+@export var willing_sacrifice_bonus: float = 2.0
+@export var forced_sacrifice_penalty: float = 0.5
+@export var minimum_sacrifices_required: int = 3
+
+@export_group("Scaling Settings")
+@export var companion_horror_factor: float = 2.0  # Companions react strongly
+@export var mercenary_acceptance: float = 0.7     # Mercenaries more accepting
+@export var solo_void_connection: float = 2.0     # Solo players hear void clearly
+
+var _world_state: Node
+var _party_manager: Node
+var _trait_system: Node
+var _achievement_system: Node
+var _companion_system: Node
+
+var _cultists: Array[Dictionary] = []
+var _sacrifices_made: Array[Dictionary] = []
+var _void_powers_gained: Array[Dictionary] = []
+var _current_corruption: float = 0.0
+var _pact_level: int = 0
+var _location_fragments: int = 0
+var _revelation_stages: Array[bool] = [false, false, false]
+
+## Three Versions of the Transition
+enum TransitionVersion {
+	TO_LABYRINTH,    # Making pact for dragon's location
+	FROM_LABYRINTH,  # Cultists demand payment for containing void
+	SEALING_VOID     # Bargaining with void entities directly
+}
+
+@export var current_version: TransitionVersion = TransitionVersion.TO_LABYRINTH
+
+func _ready() -> void:
+	_world_state = get_node("/root/WorldState")
+	_party_manager = get_node("/root/PartyManager")
+	_trait_system = get_node("/root/TraitSystem")
+	_achievement_system = get_node("/root/AchievementSystem")
+	_companion_system = get_node("/root/CompanionSystem")
+	
+	_initialize_cult_state()
+
+func _initialize_cult_state() -> void:
+	# Generate cultists based on version
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_generate_void_cultists()
+		TransitionVersion.FROM_LABYRINTH:
+			_generate_desperate_cult()
+		TransitionVersion.SEALING_VOID:
+			_generate_void_avatars()
+	
+	# Check for existing void corruption
+	_calculate_initial_corruption()
+
+## Journey TO Labyrinth - The Forbidden Bargain
+func _generate_void_cultists() -> void:
+	for i in range(initial_cultist_count):
+		var cultist = {
+			"id": "cultist_" + str(i),
+			"name": _generate_cultist_name(),
+			"rank": _determine_cult_rank(i),
+			"void_touched_level": randf_range(0.4, 0.9),
+			"knowledge_held": _generate_knowledge_type(),
+			"price_demanded": _generate_price_type(),
+			"trustworthy": randf() > 0.7  # Most will betray
+		}
+		_cultists.append(cultist)
+
+func start_transition() -> void:
+	_present_cult_discovery()
+	
+	match current_version:
+		TransitionVersion.TO_LABYRINTH:
+			_begin_bargaining()
+		TransitionVersion.FROM_LABYRINTH:
+			_begin_void_tax()
+		TransitionVersion.SEALING_VOID:
+			_begin_final_negotiation()
+
+## Core Mechanic: Blood for Power, Soul for Knowledge
+func make_blood_sacrifice(sacrifice: Dictionary, target_cultist: Dictionary) -> Dictionary:
+	var result = {
+		"success": false,
+		"power_gained": {},
+		"knowledge_gained": "",
+		"corruption_increase": 0.0,
+		"side_effects": [],
+		"cultist_reaction": ""
+	}
+	
+	# Calculate sacrifice value
+	var sacrifice_value = _calculate_sacrifice_value(sacrifice)
+	
+	# Void always takes its due
+	_current_corruption += void_corruption_rate * sacrifice_value
+	result.corruption_increase = void_corruption_rate * sacrifice_value
+	
+	# But rewards vary based on offering
+	if sacrifice_value >= target_cultist.price_demanded:
+		result.success = true
+		
+		# Grant void power
+		var power = _generate_void_power(sacrifice_value, _pact_level)
+		_void_powers_gained.append(power)
+		result.power_gained = power
+		
+		# Grant knowledge fragment
+		if target_cultist.knowledge_held == "dragon_location_fragment":
+			_location_fragments += 1
+			result.knowledge_gained = "Fragment " + str(_location_fragments) + " of " + str(dragon_location_pieces)
+		
+		# Cultist may demand more
+		if not target_cultist.trustworthy:
+			result.cultist_reaction = "demands_escalation"
+			_escalate_pact_requirements()
+	else:
+		# Insufficient sacrifice angers the void
+		result.side_effects.append("void_backlash")
+		_apply_void_punishment()
+		result.cultist_reaction = "mocks_weakness"
+	
+	# Record sacrifice
+	_sacrifices_made.append(sacrifice)
+	blood_offered.emit(sacrifice, result.power_gained)
+	
+	# Check corruption manifestations
+	_check_corruption_effects()
+	
+	# Check for revelations
+	_check_pact_revelations()
+	
+	return result
+
+func _calculate_sacrifice_value(sacrifice: Dictionary) -> float:
+	var base_value = 1.0
+	
+	# Type of sacrifice matters
+	match sacrifice.type:
+		"captured_enemy":
+			base_value *= 1.0
+		"willing_follower":
+			base_value *= willing_sacrifice_bonus
+		"innocent_civilian":
+			base_value *= innocent_blood_multiplier
+		"companion":
+			base_value *= 5.0  # Betrayal has power
+		"self_blood":
+			base_value *= 0.5  # Least valuable
+		"mass_sacrifice":
+			base_value *= sacrifice.count
+	
+	# Quality modifiers
+	if blood_quality_matters:
+		if sacrifice.has("purity"):
+			base_value *= sacrifice.purity
+		if sacrifice.has("fear_level"):
+			base_value *= (1.0 + sacrifice.fear_level * 0.5)
+	
+	# Forced sacrifices are less potent
+	if sacrifice.has("forced") and sacrifice.forced:
+		base_value *= forced_sacrifice_penalty
+	
+	return base_value
+
+func _generate_void_power(value: float, pact_level: int) -> Dictionary:
+	var power_tier = "lesser"
+	if value > 5.0:
+		power_tier = "greater"
+	elif value > 2.0:
+		power_tier = "moderate"
+	
+	var powers_by_tier = {
+		"lesser": ["shadow_step", "void_sight", "corruption_touch"],
+		"moderate": ["drain_life", "command_shadows", "void_shield"],
+		"greater": ["become_void", "consume_soul", "reality_tear"]
+	}
+	
+	var available_powers = powers_by_tier[power_tier]
+	var chosen_power = available_powers[randi() % available_powers.size()]
+	
+	return {
+		"name": chosen_power,
+		"tier": power_tier,
+		"corruption_cost": 0.1 * (pact_level + 1),
+		"description": _get_power_description(chosen_power),
+		"side_effect": _get_power_side_effect(chosen_power)
+	}
+
+## The Horror: Becoming the Monster
+func _check_pact_revelations() -> void:
+	# First revelation: Others tried this path
+	if not _revelation_stages[0] and _sacrifices_made.size() >= 2:
+		var whisper = "The void shows you visions: Previous heroes who sought power through blood. All became void's servants."
+		_reveal_void_truth(0, whisper)
+	
+	# Second revelation: Dragon's similar path
+	if not _revelation_stages[1] and _current_corruption > 0.5:
+		var whisper = "Ancient memory surfaces: The dragon once walked this path, made these same bargains. It took centuries to break free."
+		_reveal_void_truth(1, whisper)
+	
+	# Third revelation: There is no free power
+	if not _revelation_stages[2] and _void_powers_gained.size() >= 5:
+		var whisper = "The truth crystallizes: Every 'gift' is a chain. You're not gaining power, you're being hollowed out for possession."
+		_reveal_void_truth(2, whisper)
+
+func _reveal_void_truth(stage: int, whisper: String) -> void:
+	void_whisper_heard.emit(whisper, {"sanity_cost": 0.1})
+	_revelation_stages[stage] = true
+	_achievement_system.trigger_achievement("void_understanding_" + str(stage))
+	_world_state.add_revelation("blood_pact", stage, whisper)
+
+## Corruption Effects
+func _check_corruption_effects() -> void:
+	var previous_level = floor((_current_corruption - void_corruption_rate) * 10)
+	var current_level = floor(_current_corruption * 10)
+	
+	if current_level > previous_level:
+		var manifestation = _get_corruption_manifestation(current_level)
+		corruption_deepened.emit(_current_corruption, manifestation)
+		
+		# Apply permanent changes
+		match current_level:
+			1:
+				_trait_system.add_trait(_party_manager.get_player(), "void_touched")
+			3:
+				_trait_system.add_trait(_party_manager.get_player(), "shadow_speaker")
+			5:
+				_trait_system.add_trait(_party_manager.get_player(), "half_void")
+			7:
+				_trait_system.add_trait(_party_manager.get_player(), "void_avatar")
+			10:
+				_trait_system.add_trait(_party_manager.get_player(), "hollow_one")
+
+func _get_corruption_manifestation(level: int) -> String:
+	var manifestations = [
+		"Your shadow moves independently",
+		"Void whispers become constant companions",
+		"Your reflection shows your true void form",
+		"Reality bends around you unconsciously",
+		"You hunger for souls, not food",
+		"Your touch corrupts what it contacts",
+		"You see through the void's eyes",
+		"Your humanity is a fading memory",
+		"You are more void than flesh",
+		"The hollow one awakens"
+	]
+	
+	return manifestations[min(level - 1, manifestations.size() - 1)]
+
+## The Choice: What Will You Sacrifice?
+func present_sacrifice_options() -> void:
+	var options = []
+	
+	# Option 1: Sacrifice captured enemies
+	var enemy_count = _world_state.get_captured_enemies().size()
+	if enemy_count > 0:
+		options.append({
+			"id": "sacrifice_enemies",
+			"text": "Offer the blood of our captured enemies",
+			"sacrifice_type": "captured_enemy",
+			"sacrifice_count": enemy_count,
+			"expected_power": "moderate",
+			"corruption_gain": 0.3,
+			"trait_gained": "pragmatic_evil"
+		})
+	
+	# Option 2: Sacrifice innocent civilians
+	options.append({
+		"id": "sacrifice_innocents",
+		"text": "Raid nearby village for pure blood",
+		"sacrifice_type": "innocent_civilian",
+		"sacrifice_count": 10,
+		"expected_power": "greater",
+		"corruption_gain": 0.6,
+		"trait_gained": "butcher_of_innocents"
+	})
+	
+	# Option 3: Sacrifice willing follower
+	if _party_manager.get_mercenary_count() > 0:
+		options.append({
+			"id": "sacrifice_follower",
+			"text": "Ask for volunteers among our mercenaries",
+			"sacrifice_type": "willing_follower",
+			"sacrifice_count": 1,
+			"expected_power": "moderate",
+			"corruption_gain": 0.4,
+			"trait_gained": "betrayer_of_trust"
+		})
+	
+	# Option 4: Sacrifice companion (ultimate betrayal)
+	if _companion_system.get_active_companions().size() > 0:
+		options.append({
+			"id": "sacrifice_companion",
+			"text": "Betray one who trusts you completely",
+			"sacrifice_type": "companion",
+			"sacrifice_count": 1,
+			"expected_power": "legendary",
+			"corruption_gain": 0.8,
+			"trait_gained": "ultimate_betrayer"
+		})
+	
+	# Option 5: Refuse further sacrifices
+	options.append({
+		"id": "refuse_pact",
+		"text": "No more blood. Find another way.",
+		"sacrifice_type": "none",
+		"sacrifice_count": 0,
+		"expected_power": "none",
+		"corruption_gain": 0.0,
+		"trait_gained": "pact_breaker"
+	})
+	
+	_world_state.present_dark_choice(options, self, "_on_sacrifice_chosen")
+
+func _on_sacrifice_chosen(choice: Dictionary) -> void:
+	if choice.id == "refuse_pact":
+		_break_pact_consequences()
+		return
+	
+	# Prepare sacrifice
+	var sacrifice = _prepare_sacrifice(choice)
+	
+	# Make the offering
+	var lead_cultist = _cultists[0]  # Highest ranking
+	var result = make_blood_sacrifice(sacrifice, lead_cultist)
+	
+	# Apply corruption
+	_current_corruption += choice.corruption_gain
+	
+	# Grant trait
+	_trait_system.add_trait(_party_manager.get_player(), choice.trait_gained)
+	
+	# Handle companion reactions
+	_handle_companion_horror(choice)
+	
+	# Check if pact is complete
+	if _location_fragments >= dragon_location_pieces:
+		_complete_transition("pact_fulfilled")
+	else:
+		_escalate_pact_requirements()
+
+## Journey FROM Labyrinth - The Void Demands Payment
+func _begin_void_tax() -> void:
+	# Cultists now demand escalating payments
+	for cultist in _cultists:
+		cultist.price_demanded *= 3.0
+		cultist.payment_frequency = "daily"
+	
+	# Previous sacrifices have consequences
+	_raise_sacrifice_revenants()
+
+func _raise_sacrifice_revenants() -> void:
+	for sacrifice in _sacrifices_made:
+		if sacrifice.type != "self_blood":
+			var revenant = {
+				"name": sacrifice.name + " (Void Revenant)",
+				"type": "sacrifice_revenant",
+				"seeks_revenge": true,
+				"targets_betrayer": true
+			}
+			_world_state.spawn_revenant(revenant, self)
+
+## Sealing the Void - Direct Negotiation
+func _begin_final_negotiation() -> void:
+	# Must out-bargain void entities
+	_summon_void_negotiators()
+	_prepare_final_offerings()
+
+## Dark Path Consequences
+func _apply_permanent_pact_consequences() -> void:
+	# NPCs can sense your taint
+	_world_state.set_player_aura("void_corrupted", _current_corruption)
+	
+	# Permanent void abilities but at cost
+	for power in _void_powers_gained:
+		_party_manager.get_player().add_permanent_ability(power.name)
+		_party_manager.get_player().add_permanent_curse(power.side_effect)
+	
+	# Companions are horrified or corrupted
+	for companion in _companion_system.get_active_companions():
+		if companion.has_tag("pure_hearted"):
+			companion.leave_party("cannot_follow_darkness")
+		elif companion.has_tag("ambitious"):
+			companion.add_corruption("witnessed_void_pacts", _current_corruption * 0.5)
+		else:
+			companion.add_fear("void_master", -30)
+
+func _complete_transition(outcome: String) -> void:
+	var result = {
+		"transition": "blood_pact",
+		"path": "dark",
+		"outcome": outcome,
+		"sacrifices_made": _sacrifices_made,
+		"powers_gained": _void_powers_gained,
+		"final_corruption": _current_corruption,
+		"location_learned": _location_fragments >= dragon_location_pieces,
+		"revelations": _revelation_stages,
+		"cult_fate": _determine_cult_fate()
+	}
+	
+	# Apply permanent changes
+	_apply_permanent_pact_consequences()
+	
+	# Update world state
+	_world_state.set_cult_state(cult_name, result.cult_fate)
+	
+	transition_complete.emit(result)
+
+## Helper Functions
+func _generate_cultist_name() -> String:
+	var titles = ["Speaker", "Hollow", "Whisper", "Shadow", "Empty", "Forsaken"]
+	var names = ["Malachar", "Vex", "Null", "Shade", "Echo", "Mourning"]
+	return titles[randi() % titles.size()] + " " + names[randi() % names.size()]
+
+func _determine_cult_rank(index: int) -> String:
+	if index == 0:
+		return "High Hollow"
+	elif index < 3:
+		return "Void Speaker"
+	elif index < 7:
+		return "Shadow Acolyte"
+	else:
+		return "Blood Initiate"
+
+func _generate_knowledge_type() -> String:
+	var knowledge_types = [
+		"dragon_location_fragment",
+		"void_ritual_component",
+		"ancient_weakness",
+		"forgotten_path",
+		"true_name_syllable"
+	]
+	return knowledge_types[randi() % knowledge_types.size()]
+
+func _generate_price_type() -> float:
+	# Price in "blood value" units
+	return randf_range(1.0, 10.0)
+
+func _calculate_initial_corruption() -> void:
+	# Check for existing void exposure
+	var player = _party_manager.get_player()
+	if _trait_system.has_trait(player, "void_touched"):
+		_current_corruption += 0.2
+	if _trait_system.has_trait(player, "plague_touched"):
+		_current_corruption += 0.1
+
+func _escalate_pact_requirements() -> void:
+	_pact_level += 1
+	for cultist in _cultists:
+		cultist.price_demanded *= power_scaling_factor
+	
+	pact_escalated.emit({
+		"new_level": _pact_level,
+		"new_requirements": "Greater sacrifices required"
+	})
+
+func _break_pact_consequences() -> void:
+	# Breaking pact has severe consequences
+	_world_state.add_enemy_faction("void_cult", "pact_breaker")
+	_trait_system.add_trait(_party_manager.get_player(), "marked_by_void")
+	
+	# Lose all void powers
+	for power in _void_powers_gained:
+		_party_manager.get_player().remove_ability(power.name)
+	
+	# But gain some redemption possibility
+	_trait_system.add_trait(_party_manager.get_player(), "seeking_redemption")
+
+func _handle_companion_horror(choice: Dictionary) -> void:
+	for companion in _companion_system.get_active_companions():
+		if choice.sacrifice_type == "companion":
+			# Extreme betrayal
+			companion.add_modifier("witnessed_ultimate_betrayal", -100)
+			if randf() > 0.5:
+				companion.attempt_revenge("betrayed_companion")
+		else:
+			# Standard horror
+			var horror_level = choice.corruption_gain * companion_horror_factor
+			companion.add_modifier("witnessed_blood_sacrifice", -horror_level * 50)
+
+func _determine_cult_fate() -> String:
+	if _pact_level > 5:
+		return "cult_owns_your_soul"
+	elif _sacrifices_made.size() > 10:
+		return "cult_empowered"
+	elif _location_fragments >= dragon_location_pieces:
+		return "cult_satisfied"
+	else:
+		return "cult_hungry_for_more"
+
+## Save/Load Support
+func save_transition_state() -> Dictionary:
+	return {
+		"version": current_version,
+		"cultists": _cultists,
+		"sacrifices": _sacrifices_made,
+		"powers": _void_powers_gained,
+		"corruption": _current_corruption,
+		"pact_level": _pact_level,
+		"fragments": _location_fragments,
+		"revelations": _revelation_stages
+	}
+
+func load_transition_state(data: Dictionary) -> void:
+	current_version = data.get("version", TransitionVersion.TO_LABYRINTH)
+	_cultists = data.get("cultists", [])
+	_sacrifices_made = data.get("sacrifices", [])
+	_void_powers_gained = data.get("powers", [])
+	_current_corruption = data.get("corruption", 0.0)
+	_pact_level = data.get("pact_level", 0)
+	_location_fragments = data.get("fragments", 0)
+	_revelation_stages = data.get("revelations", [false, false, false])

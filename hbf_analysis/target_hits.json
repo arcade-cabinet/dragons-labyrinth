@@ -1,0 +1,302 @@
+{
+  "regions": [
+    "Entities:0",
+    "Entities:52",
+    "Entities:79",
+    "Entities:95"
+  ],
+  "biomes": [
+    "Entities:0",
+    "Entities:98"
+  ],
+  "dungeons": [
+    "Entities:0"
+  ],
+  "cities": [
+    "Entities:0",
+    "Entities:8",
+    "Entities:87"
+  ],
+  "towns": [
+    "Entities:0"
+  ],
+  "villages": [
+    "Entities:0",
+    "Entities:9",
+    "Entities:10",
+    "Entities:11",
+    "Entities:12",
+    "Entities:13",
+    "Entities:14",
+    "Entities:15",
+    "Entities:16",
+    "Entities:17",
+    "Entities:18",
+    "Entities:19",
+    "Entities:20",
+    "Entities:21",
+    "Entities:22",
+    "Entities:23",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:52",
+    "Entities:88",
+    "Entities:89",
+    "Entities:90",
+    "Entities:91",
+    "Entities:92",
+    "Entities:93",
+    "Entities:94",
+    "Entities:95",
+    "Entities:96",
+    "Entities:98",
+    "Entities:99"
+  ],
+  "inns": [
+    "Entities:0",
+    "Entities:8",
+    "Entities:9",
+    "Entities:16",
+    "Entities:19",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:52",
+    "Entities:87",
+    "Entities:89",
+    "Entities:91",
+    "Entities:92"
+  ],
+  "factions": [
+    "Entities:0"
+  ],
+  "monsters": [
+    "Entities:0",
+    "Entities:23",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:93",
+    "Entities:95"
+  ],
+  "combat": [
+    "Entities:0",
+    "Entities:8",
+    "Entities:9",
+    "Entities:12",
+    "Entities:13",
+    "Entities:17",
+    "Entities:19",
+    "Entities:22",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:79",
+    "Entities:87",
+    "Entities:88",
+    "Entities:89",
+    "Entities:91",
+    "Entities:93",
+    "Entities:94",
+    "Entities:95",
+    "Entities:98"
+  ],
+  "druids": [
+    "Entities:0",
+    "Entities:22",
+    "Entities:24",
+    "Entities:34",
+    "Entities:52",
+    "Entities:90",
+    "Entities:95",
+    "Entities:98"
+  ],
+  "economics": [
+    "Entities:0",
+    "Entities:10",
+    "Entities:11",
+    "Entities:12",
+    "Entities:13",
+    "Entities:14",
+    "Entities:15",
+    "Entities:16",
+    "Entities:17",
+    "Entities:20",
+    "Entities:22",
+    "Entities:23",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:52",
+    "Entities:88",
+    "Entities:89",
+    "Entities:90",
+    "Entities:91",
+    "Entities:92",
+    "Entities:93",
+    "Entities:94",
+    "Entities:95",
+    "Entities:98",
+    "Entities:99"
+  ],
+  "treasure": [
+    "Entities:0",
+    "Entities:24",
+    "Entities:34",
+    "Entities:92"
+  ],
+  "armor": [
+    "Entities:0",
+    "Entities:9",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:87",
+    "Entities:89",
+    "Entities:91",
+    "Entities:93"
+  ],
+  "shops": [
+    "Entities:8",
+    "Entities:13",
+    "Entities:14",
+    "Entities:16",
+    "Entities:17",
+    "Entities:22",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:87",
+    "Entities:91",
+    "Entities:92",
+    "Entities:94",
+    "Entities:95",
+    "Entities:96"
+  ],
+  "taverns": [
+    "Entities:8",
+    "Entities:9",
+    "Entities:13",
+    "Entities:14",
+    "Entities:16",
+    "Entities:19",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:52",
+    "Entities:79",
+    "Entities:88",
+    "Entities:91",
+    "Entities:92",
+    "Entities:96"
+  ],
+  "weapons": [
+    "Entities:8",
+    "Entities:9",
+    "Entities:16",
+    "Entities:17",
+    "Entities:19",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:52",
+    "Entities:87",
+    "Entities:89",
+    "Entities:91",
+    "Entities:92"
+  ],
+  "tombs": [
+    "Entities:9",
+    "Entities:24",
+    "Entities:34",
+    "Entities:93"
+  ],
+  "militias": [
+    "Entities:10",
+    "Entities:11",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:99"
+  ],
+  "fighters": [
+    "Entities:10",
+    "Entities:11",
+    "Entities:24",
+    "Entities:25",
+    "Entities:26",
+    "Entities:34",
+    "Entities:99"
+  ],
+  "scrolls": [
+    "Entities:22",
+    "Entities:91",
+    "Entities:95",
+    "Entities:98"
+  ],
+  "artifacts": [
+    "Entities:22",
+    "Entities:95",
+    "Entities:98"
+  ],
+  "temples": [
+    "Entities:24"
+  ],
+  "strongholds": [
+    "Entities:24",
+    "Entities:34"
+  ],
+  "syndicates": [
+    "Entities:24",
+    "Entities:94"
+  ],
+  "npcs": [
+    "Entities:24",
+    "Entities:34"
+  ],
+  "clerics": [
+    "Entities:24",
+    "Entities:34",
+    "Entities:91",
+    "Entities:98"
+  ],
+  "wizards": [
+    "Entities:24",
+    "Entities:26",
+    "Entities:34"
+  ],
+  "rogues": [
+    "Entities:24"
+  ],
+  "weather": [
+    "Entities:24",
+    "Entities:34",
+    "Entities:52",
+    "Entities:79"
+  ],
+  "settlements": [
+    "Entities:52"
+  ],
+  "quests": [
+    "Entities:52",
+    "Entities:95"
+  ],
+  "dwellings": [
+    "Entities:87"
+  ],
+  "cults": [
+    "Entities:87",
+    "Entities:98"
+  ],
+  "blacksmiths": [
+    "Entities:89"
+  ]
+}

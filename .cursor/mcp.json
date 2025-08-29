@@ -1,0 +1,26 @@
+{
+    "mcpServers": {
+        "dragons_labyrinth_database": {
+            "command": "cargo",
+            "args": [
+                "run",
+                "--package",
+                "game-database",
+                "--bin",
+                "mcp-server"
+            ],
+            "disabled": false,
+            "alwaysAllow": [
+                "query_world_corruption_level",
+                "query_companion_trauma_states",
+                "query_philosophical_progression",
+                "query_npc_fear_states",
+                "query_companion_states",
+                "query_forge_readiness",
+                "cross_system_intelligence_query",
+                "server_info",
+                "health_check"
+            ]
+        }
+    }
+}
