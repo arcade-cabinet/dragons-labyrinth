@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://8ad1pwbjuqpt"]
 
-[ext_resource type="Script" uid="uid://b31djiq7b5og0" path="res://addons/dialogic/Modules/Text/character_settings/character_moods_settings.gd" id="1_3px07"]
+[ext_resource type="Script" uid="uid://6qkd50m2lqnx" path="res://addons/dialogic/Modules/Text/character_settings/character_moods_settings.gd" id="1_3px07"]
 [ext_resource type="PackedScene" uid="uid://7mvxuaulctcq" path="res://addons/dialogic/Editor/Events/Fields/field_file.tscn" id="2_e1vyd"]
 [ext_resource type="PackedScene" uid="uid://kdpp3mibml33" path="res://addons/dialogic/Editor/Events/Fields/field_number.tscn" id="3_yjcns"]
-[ext_resource type="Script" uid="uid://d2m1ihese0dnf" path="res://addons/dialogic/Modules/Text/node_type_sound.gd" id="5_yscws"]
+[ext_resource type="Script" uid="uid://dpv2dfiv5dhmr" path="res://addons/dialogic/Modules/Text/node_type_sound.gd" id="5_yscws"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y7t05"]
 content_margin_left = 10.0

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://jg5r5uha6xge"
+path="res://.godot/imported/q_medieval_architecture_window_bars_overgrown.obj-a9f1fb6ae8721709fe1629d8edb11b27.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_architecture_window_bars_overgrown.obj-a9f1fb6ae8721709fe1629d8edb11b27.mesh"]
+
+source_file="res://assets/models/medieval/dungeon/q_medieval_architecture_window_bars_overgrown.obj"
+dest_files=["res://.godot/imported/q_medieval_architecture_window_bars_overgrown.obj-a9f1fb6ae8721709fe1629d8edb11b27.mesh", "res://.godot/imported/q_medieval_architecture_window_bars_overgrown.obj-a9f1fb6ae8721709fe1629d8edb11b27.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bil71vf777flt"
+path="res://.godot/imported/k_rocket_baseb.obj-3dbf78b68c9d83c5589054b28dc2d714.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_rocket_baseb.obj-3dbf78b68c9d83c5589054b28dc2d714.mesh"]
+
+source_file="res://assets/models/misc/k_rocket_baseb.obj"
+dest_files=["res://.godot/imported/k_rocket_baseb.obj-3dbf78b68c9d83c5589054b28dc2d714.mesh", "res://.godot/imported/k_rocket_baseb.obj-3dbf78b68c9d83c5589054b28dc2d714.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://7hyx4itywaud"
+path="res://.godot/imported/q_architecture_window_double_roof.obj-b0b4ca9753ff8d5e4634532647862120.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_architecture_window_double_roof.obj-b0b4ca9753ff8d5e4634532647862120.mesh"]
+
+source_file="res://assets/models/architecture/q_architecture_window_double_roof.obj"
+dest_files=["res://.godot/imported/q_architecture_window_double_roof.obj-b0b4ca9753ff8d5e4634532647862120.mesh", "res://.godot/imported/q_architecture_window_double_roof.obj-b0b4ca9753ff8d5e4634532647862120.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cffn44a2nccvl"
+path="res://.godot/imported/q_nature_cube_grass_1x1center.obj-fa83211e047e6637781d9c96ec666d50.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_nature_cube_grass_1x1center.obj-fa83211e047e6637781d9c96ec666d50.mesh"]
+
+source_file="res://assets/models/nature/q_nature_cube_grass_1x1center.obj"
+dest_files=["res://.godot/imported/q_nature_cube_grass_1x1center.obj-fa83211e047e6637781d9c96ec666d50.mesh", "res://.godot/imported/q_nature_cube_grass_1x1center.obj-fa83211e047e6637781d9c96ec666d50.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://de006bm3tntdm"
+path="res://.godot/imported/k_walls_wall_roof.obj-0f958e17a30e8a625c1f139a8d28539c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_walls_wall_roof.obj-0f958e17a30e8a625c1f139a8d28539c.mesh"]
+
+source_file="res://assets/models/walls/k_walls_wall_roof.obj"
+dest_files=["res://.godot/imported/k_walls_wall_roof.obj-0f958e17a30e8a625c1f139a8d28539c.mesh", "res://.godot/imported/k_walls_wall_roof.obj-0f958e17a30e8a625c1f139a8d28539c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

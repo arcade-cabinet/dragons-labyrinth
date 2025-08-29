@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ce1rled6e0vla"
+path="res://.godot/imported/q_towerhouse_secondage.obj-931c1c26dd6357bd9adbac2ce267b8f9.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_towerhouse_secondage.obj-931c1c26dd6357bd9adbac2ce267b8f9.mesh"]
+
+source_file="res://assets/models/misc/q_towerhouse_secondage.obj"
+dest_files=["res://.godot/imported/q_towerhouse_secondage.obj-931c1c26dd6357bd9adbac2ce267b8f9.mesh", "res://.godot/imported/q_towerhouse_secondage.obj-931c1c26dd6357bd9adbac2ce267b8f9.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bnkck3hocbkk5"]
 
-[ext_resource type="Script" uid="uid://ckciittntgy8x" path="res://addons/dialogic/Editor/CharacterEditor/char_edit_section_general.gd" id="1_3e1i1"]
+[ext_resource type="Script" uid="uid://c0nilv2pybryh" path="res://addons/dialogic/Editor/CharacterEditor/char_edit_section_general.gd" id="1_3e1i1"]
 [ext_resource type="PackedScene" uid="uid://dbpkta2tjsqim" path="res://addons/dialogic/Editor/Common/hint_tooltip_icon.tscn" id="2_cxfqm"]
 
 [sub_resource type="Image" id="Image_ywoka"]

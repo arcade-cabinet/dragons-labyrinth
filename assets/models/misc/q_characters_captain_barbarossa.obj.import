@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://crl7a2crmtsn6"
+path="res://.godot/imported/q_characters_captain_barbarossa.obj-3a759a7b7f6135536cd23e94d41b4cd0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_characters_captain_barbarossa.obj-3a759a7b7f6135536cd23e94d41b4cd0.mesh"]
+
+source_file="res://assets/models/misc/q_characters_captain_barbarossa.obj"
+dest_files=["res://.godot/imported/q_characters_captain_barbarossa.obj-3a759a7b7f6135536cd23e94d41b4cd0.mesh", "res://.godot/imported/q_characters_captain_barbarossa.obj-3a759a7b7f6135536cd23e94d41b4cd0.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

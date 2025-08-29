@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cwil0xpnb3p73"
+path="res://.godot/imported/q_decoration_walllight.obj-479b51c21bd8cd00a14912737e91a82e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_decoration_walllight.obj-479b51c21bd8cd00a14912737e91a82e.mesh"]
+
+source_file="res://assets/models/misc/q_decoration_walllight.obj"
+dest_files=["res://.godot/imported/q_decoration_walllight.obj-479b51c21bd8cd00a14912737e91a82e.mesh", "res://.godot/imported/q_decoration_walllight.obj-479b51c21bd8cd00a14912737e91a82e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cc8moyet5xg0h"
+path="res://.godot/imported/k_medieval_architecture_tower_square_top_roof_rounded.obj-a34664d45bbc96bd73b759008b61102e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_medieval_architecture_tower_square_top_roof_rounded.obj-a34664d45bbc96bd73b759008b61102e.mesh"]
+
+source_file="res://assets/models/medieval/architecture/k_medieval_architecture_tower_square_top_roof_rounded.obj"
+dest_files=["res://.godot/imported/k_medieval_architecture_tower_square_top_roof_rounded.obj-a34664d45bbc96bd73b759008b61102e.mesh", "res://.godot/imported/k_medieval_architecture_tower_square_top_roof_rounded.obj-a34664d45bbc96bd73b759008b61102e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

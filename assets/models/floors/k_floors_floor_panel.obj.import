@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cxf8v5figrb8o"
+path="res://.godot/imported/k_floors_floor_panel.obj-dd4f3265fadf43cc1dd18b4ba9b1cf87.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_floors_floor_panel.obj-dd4f3265fadf43cc1dd18b4ba9b1cf87.mesh"]
+
+source_file="res://assets/models/floors/k_floors_floor_panel.obj"
+dest_files=["res://.godot/imported/k_floors_floor_panel.obj-dd4f3265fadf43cc1dd18b4ba9b1cf87.mesh", "res://.godot/imported/k_floors_floor_panel.obj-dd4f3265fadf43cc1dd18b4ba9b1cf87.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

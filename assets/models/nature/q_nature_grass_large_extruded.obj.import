@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c3n2egl3p8krc"
+path="res://.godot/imported/q_nature_grass_large_extruded.obj-04485ad378b4f450059d621740d3717b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_nature_grass_large_extruded.obj-04485ad378b4f450059d621740d3717b.mesh"]
+
+source_file="res://assets/models/nature/q_nature_grass_large_extruded.obj"
+dest_files=["res://.godot/imported/q_nature_grass_large_extruded.obj-04485ad378b4f450059d621740d3717b.mesh", "res://.godot/imported/q_nature_grass_large_extruded.obj-04485ad378b4f450059d621740d3717b.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bk1tgu7y08ocx"
+path="res://.godot/imported/k_architecture_building_window_door_window.obj-4de354a917efd40a8733709db832970e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_building_window_door_window.obj-4de354a917efd40a8733709db832970e.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_building_window_door_window.obj"
+dest_files=["res://.godot/imported/k_architecture_building_window_door_window.obj-4de354a917efd40a8733709db832970e.mesh", "res://.godot/imported/k_architecture_building_window_door_window.obj-4de354a917efd40a8733709db832970e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

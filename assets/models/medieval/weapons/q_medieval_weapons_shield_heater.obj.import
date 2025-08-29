@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://7s0k8yb4ikwg"
+path="res://.godot/imported/q_medieval_weapons_shield_heater.obj-38e647386dc67e7eb887f37e2efeebfe.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_weapons_shield_heater.obj-38e647386dc67e7eb887f37e2efeebfe.mesh"]
+
+source_file="res://assets/models/medieval/weapons/q_medieval_weapons_shield_heater.obj"
+dest_files=["res://.godot/imported/q_medieval_weapons_shield_heater.obj-38e647386dc67e7eb887f37e2efeebfe.mesh", "res://.godot/imported/q_medieval_weapons_shield_heater.obj-38e647386dc67e7eb887f37e2efeebfe.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

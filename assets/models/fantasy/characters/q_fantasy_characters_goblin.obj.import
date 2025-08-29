@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c5u66q0ar6i1f"
+path="res://.godot/imported/q_fantasy_characters_goblin.obj-64b843268ab7a8a1d76ad9dc7fb68255.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_fantasy_characters_goblin.obj-64b843268ab7a8a1d76ad9dc7fb68255.mesh"]
+
+source_file="res://assets/models/fantasy/characters/q_fantasy_characters_goblin.obj"
+dest_files=["res://.godot/imported/q_fantasy_characters_goblin.obj-64b843268ab7a8a1d76ad9dc7fb68255.mesh", "res://.godot/imported/q_fantasy_characters_goblin.obj-64b843268ab7a8a1d76ad9dc7fb68255.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c10b86os5ix7l"
+path="res://.godot/imported/k_village_stairswidewoodhandrail.obj-a7e52da3d5ad0b786ee70406b86a02a0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_village_stairswidewoodhandrail.obj-a7e52da3d5ad0b786ee70406b86a02a0.mesh"]
+
+source_file="res://assets/models/village/k_village_stairswidewoodhandrail.obj"
+dest_files=["res://.godot/imported/k_village_stairswidewoodhandrail.obj-a7e52da3d5ad0b786ee70406b86a02a0.mesh", "res://.godot/imported/k_village_stairswidewoodhandrail.obj-a7e52da3d5ad0b786ee70406b86a02a0.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

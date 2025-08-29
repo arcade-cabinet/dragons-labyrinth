@@ -19,6 +19,7 @@ signal variable_changed(info:Dictionary)
 ## `new_value` | [type Variant]| The value that [variable] has after the change (the result). [br]
 ## `value`     | [type Variant]| The value that the variable is changed by/to. [br]
 ## `value_str` | [type String] | Whatever has been given as the value (not interpreted, so a variable is just a string).[br]
+@warning_ignore("unused_signal") # This is emitted from the variable event
 signal variable_was_set(info:Dictionary)
 
 
@@ -59,7 +60,7 @@ func parse_variables(text:String) -> String:
 
 	# Trying to extract the curly brackets from the text
 	var regex := RegEx.new()
-	regex.compile("(?<!\\\\)\\{(?<variable>([^{}]|\\{.*\\})*)\\}")
+	regex.compile(r"(?<!\\)\{(?<variable>([^{}]|\{[^}]*\})*)\}")
 
 	var parsed := text.replace('\\{', '{')
 	for result in regex.search_all(text):
@@ -165,10 +166,10 @@ func has(variable:="") -> bool:
 ## Allows to set dialogic built-in variables
 func _set(property, value) -> bool:
 	property = str(property)
-	var variables: Dictionary = dialogic.current_state_info['variables']
-	if property in variables.keys():
-		if typeof(variables[property]) != TYPE_DICTIONARY:
-			variables[property] = value
+	var vars: Dictionary = dialogic.current_state_info['variables']
+	if property in vars.keys():
+		if typeof(vars[property]) != TYPE_DICTIONARY:
+			vars[property] = value
 			return true
 		if value is VariableFolder:
 			return true
@@ -193,7 +194,7 @@ func folders() -> Array:
 	return result
 
 
-func variables(absolute:=false) -> Array:
+func variables(_absolute:=false) -> Array:
 	var result := []
 	for i in dialogic.current_state_info['variables'].keys():
 		if not dialogic.current_state_info['variables'][i] is Dictionary:
@@ -229,7 +230,7 @@ func merge_folder(new:Dictionary, defs:Dictionary) -> Dictionary:
 class VariableFolder:
 	var data := {}
 	var path := ""
-	var outside : DialogicSubsystem
+	var outside: DialogicSubsystem
 
 	func _init(_data:Dictionary, _path:String, _outside:DialogicSubsystem):
 		data = _data

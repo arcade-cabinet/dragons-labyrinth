@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c1igsuxi7mhmu"
+path="res://.godot/imported/q_grass3.obj-c4172f5e0419793e072a2b66f6889b0c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_grass3.obj-c4172f5e0419793e072a2b66f6889b0c.mesh"]
+
+source_file="res://assets/models/misc/q_grass3.obj"
+dest_files=["res://.godot/imported/q_grass3.obj-c4172f5e0419793e072a2b66f6889b0c.mesh", "res://.godot/imported/q_grass3.obj-c4172f5e0419793e072a2b66f6889b0c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

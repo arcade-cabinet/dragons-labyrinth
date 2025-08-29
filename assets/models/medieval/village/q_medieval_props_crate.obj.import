@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cyd8crgtwmhke"
+path="res://.godot/imported/q_medieval_props_crate.obj-e1737c139a8e3f11f798472aecfd49fd.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_props_crate.obj-e1737c139a8e3f11f798472aecfd49fd.mesh"]
+
+source_file="res://assets/models/medieval/village/q_medieval_props_crate.obj"
+dest_files=["res://.godot/imported/q_medieval_props_crate.obj-e1737c139a8e3f11f798472aecfd49fd.mesh", "res://.godot/imported/q_medieval_props_crate.obj-e1737c139a8e3f11f798472aecfd49fd.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

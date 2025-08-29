@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://d0h0pev7suofb"
+path="res://.godot/imported/q_prop_coins.obj-32b665a77cbba30e2b59a3b95d01b4fa.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_prop_coins.obj-32b665a77cbba30e2b59a3b95d01b4fa.mesh"]
+
+source_file="res://assets/models/misc/q_prop_coins.obj"
+dest_files=["res://.godot/imported/q_prop_coins.obj-32b665a77cbba30e2b59a3b95d01b4fa.mesh", "res://.godot/imported/q_prop_coins.obj-32b665a77cbba30e2b59a3b95d01b4fa.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

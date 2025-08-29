@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cpaw8xjsaechu"
+path="res://.godot/imported/k_architecture_bridge_center_woodround.obj-2e584255e3bba41bbbe367358007962d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_bridge_center_woodround.obj-2e584255e3bba41bbbe367358007962d.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_bridge_center_woodround.obj"
+dest_files=["res://.godot/imported/k_architecture_bridge_center_woodround.obj-2e584255e3bba41bbbe367358007962d.mesh", "res://.godot/imported/k_architecture_bridge_center_woodround.obj-2e584255e3bba41bbbe367358007962d.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

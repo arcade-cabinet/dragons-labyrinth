@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bbdgoyvi1e0cm"
+path="res://.godot/imported/k_track_road_wide_straight_bend_large.obj-7ed3020b95b2c9ddb5e4c3b21fbe1f26.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_track_road_wide_straight_bend_large.obj-7ed3020b95b2c9ddb5e4c3b21fbe1f26.mesh"]
+
+source_file="res://assets/models/misc/k_track_road_wide_straight_bend_large.obj"
+dest_files=["res://.godot/imported/k_track_road_wide_straight_bend_large.obj-7ed3020b95b2c9ddb5e4c3b21fbe1f26.mesh", "res://.godot/imported/k_track_road_wide_straight_bend_large.obj-7ed3020b95b2c9ddb5e4c3b21fbe1f26.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

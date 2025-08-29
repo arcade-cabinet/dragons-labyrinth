@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bb6cgi20sgjcu"
+path="res://.godot/imported/k_architecture_stairs_diagonal_narrow.obj-c9c7abd3fbdcf6188f4e286e4e9de934.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_stairs_diagonal_narrow.obj-c9c7abd3fbdcf6188f4e286e4e9de934.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_stairs_diagonal_narrow.obj"
+dest_files=["res://.godot/imported/k_architecture_stairs_diagonal_narrow.obj-c9c7abd3fbdcf6188f4e286e4e9de934.mesh", "res://.godot/imported/k_architecture_stairs_diagonal_narrow.obj-c9c7abd3fbdcf6188f4e286e4e9de934.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

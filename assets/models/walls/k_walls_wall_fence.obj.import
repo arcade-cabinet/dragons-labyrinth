@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://68h6pafa37gt"
+path="res://.godot/imported/k_walls_wall_fence.obj-1c97cb15fa4e97e3086225d264deb9dd.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_walls_wall_fence.obj-1c97cb15fa4e97e3086225d264deb9dd.mesh"]
+
+source_file="res://assets/models/walls/k_walls_wall_fence.obj"
+dest_files=["res://.godot/imported/k_walls_wall_fence.obj-1c97cb15fa4e97e3086225d264deb9dd.mesh", "res://.godot/imported/k_walls_wall_fence.obj-1c97cb15fa4e97e3086225d264deb9dd.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

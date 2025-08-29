@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://mvd4r3iaidbk"
+path="res://.godot/imported/k_walls_wall_detail_painted.obj-d86216d3c1923742b66c3ef5e209eb79.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_walls_wall_detail_painted.obj-d86216d3c1923742b66c3ef5e209eb79.mesh"]
+
+source_file="res://assets/models/walls/k_walls_wall_detail_painted.obj"
+dest_files=["res://.godot/imported/k_walls_wall_detail_painted.obj-d86216d3c1923742b66c3ef5e209eb79.mesh", "res://.godot/imported/k_walls_wall_detail_painted.obj-d86216d3c1923742b66c3ef5e209eb79.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

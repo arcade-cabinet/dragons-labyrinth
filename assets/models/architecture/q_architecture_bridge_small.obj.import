@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b6ct5m0fnvlnn"
+path="res://.godot/imported/q_architecture_bridge_small.obj-8efb0f1a68b7e7d9411a7167e7e2d263.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_architecture_bridge_small.obj-8efb0f1a68b7e7d9411a7167e7e2d263.mesh"]
+
+source_file="res://assets/models/architecture/q_architecture_bridge_small.obj"
+dest_files=["res://.godot/imported/q_architecture_bridge_small.obj-8efb0f1a68b7e7d9411a7167e7e2d263.mesh", "res://.godot/imported/q_architecture_bridge_small.obj-8efb0f1a68b7e7d9411a7167e7e2d263.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bel64rlikg2yu"
+path="res://.godot/imported/q_potion4halffull.obj-a2b9019a9960f381f4adbcc0ec14620f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_potion4halffull.obj-a2b9019a9960f381f4adbcc0ec14620f.mesh"]
+
+source_file="res://assets/models/misc/q_potion4halffull.obj"
+dest_files=["res://.godot/imported/q_potion4halffull.obj-a2b9019a9960f381f4adbcc0ec14620f.mesh", "res://.godot/imported/q_potion4halffull.obj-a2b9019a9960f381f4adbcc0ec14620f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

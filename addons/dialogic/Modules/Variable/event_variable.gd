@@ -18,7 +18,7 @@ enum VarValueType {
 ## Settings
 
 ## Name/Path of the variable that should be changed.
-var name: String = "":
+var name := "":
 	set(_value):
 		name = _value
 		if Engine.is_editor_hint() and not value:
@@ -33,7 +33,7 @@ var name: String = "":
 		update_editor_warning()
 
 ## The operation to perform.
-var operation: int = Operations.SET:
+var operation := Operations.SET:
 	set(value):
 		operation = value
 		if operation != Operations.SET and _value_type == VarValueType.STRING:
@@ -65,7 +65,7 @@ var random_max: int = 100
 
 ## Used to suppress _value_type from overwriting value with a default value when the type changes
 ## This is only used when initializing the event_variable.
-var _suppress_default_value: bool = false
+var _suppress_default_value := false
 
 
 ################################################################################
@@ -228,7 +228,7 @@ func is_valid_event(string:String) -> bool:
 ## 						EDITOR REPRESENTATION
 ################################################################################
 
-func build_event_editor():
+func build_event_editor() -> void:
 	add_header_edit('name', ValueType.DYNAMIC_OPTIONS, {
 			'left_text'		: 'Set',
 			'suggestions_func' 	: get_var_suggestions,
@@ -303,14 +303,30 @@ func build_event_editor():
 
 func get_var_suggestions(filter:String) -> Dictionary:
 	var suggestions := {}
-	if filter:
-		suggestions[filter] = {'value':filter, 'editor_icon':["GuiScrollArrowRight", "EditorIcons"]}
 	for var_path in DialogicUtil.list_variables(DialogicUtil.get_default_variables()):
 		suggestions[var_path] = {'value':var_path, 'icon':load("res://addons/dialogic/Editor/Images/Pieces/variable.svg")}
+
+	var autoloads := DialogicUtil.get_autoload_suggestions().keys()
+	var is_autoload := ""
+	for autoload in autoloads:
+		if autoload == filter:
+			is_autoload = autoload
+			break
+		suggestions[autoload] = {'value':autoload, 'editor_icon':["Node", "EditorIcons"]}
+
+	if is_autoload or filter.count(".") == 1 and filter.split(".")[0] in autoloads:
+		var autoload := filter.trim_suffix(".")
+		var properties := DialogicUtil.get_autoload_property_suggestions("", autoload)
+		for property in properties:
+			suggestions["."+property] = {'value':autoload+"."+property, 'editor_icon':["MemberProperty", "EditorIcons"]}
+
+	if not filter in suggestions:
+		suggestions[filter] = {'value':filter, 'editor_icon':["GuiScrollArrowRight", "EditorIcons"]}
+
 	return suggestions
 
 
-func get_value_suggestions(filter:String) -> Dictionary:
+func get_value_suggestions(_filter:String) -> Dictionary:
 	var suggestions := {}
 
 	for var_path in DialogicUtil.list_variables(DialogicUtil.get_default_variables()):
@@ -318,8 +334,8 @@ func get_value_suggestions(filter:String) -> Dictionary:
 	return suggestions
 
 
-func _on_variable_editor_pressed():
-	var editor_manager := _editor_node.find_parent('EditorsManager')
+func _on_variable_editor_pressed() -> void:
+	var editor_manager := editor_node.find_parent('EditorsManager')
 	if editor_manager:
 		editor_manager.open_editor(editor_manager.editors['VariablesEditor']['node'], true)
 
@@ -341,14 +357,27 @@ func update_editor_warning() -> void:
 ####################### CODE COMPLETION ########################################
 ################################################################################
 
-func _get_code_completion(CodeCompletionHelper:Node, TextNode:TextEdit, line:String, word:String, symbol:String) -> void:
-	if CodeCompletionHelper.get_line_untill_caret(line) == 'set ':
+func _get_code_completion(CodeCompletionHelper:Node, TextNode:TextEdit, line:String, _word:String, symbol:String) -> void:
+	var autoloads := DialogicUtil.get_autoload_suggestions()
+	var line_until_caret: String = CodeCompletionHelper.get_line_untill_caret(line)
+	if line_until_caret.count(" ") == 1 and not "{" in line and not line_until_caret.ends_with("."):
+
 		TextNode.add_code_completion_option(CodeEdit.KIND_MEMBER, '{', '{', TextNode.syntax_highlighter.variable_color)
-	if symbol == '{':
+		for i in autoloads:
+			TextNode.add_code_completion_option(CodeEdit.KIND_MEMBER, i, i+'.', event_color.lerp(TextNode.syntax_highlighter.normal_color, 0.3), TextNode.get_theme_icon("Node", "EditorIcons"))
+
+	if (line_until_caret.ends_with(".") or symbol == "."):
+		var autoload_name := line_until_caret.split(" ")[-1].split(".")[0]
+		if autoload_name in autoloads:
+			var properties := DialogicUtil.get_autoload_property_suggestions("", autoload_name)
+			for i in properties.keys():
+				TextNode.add_code_completion_option(CodeEdit.KIND_MEMBER, i, i+" ", event_color.lerp(TextNode.syntax_highlighter.normal_color, 0.3), TextNode.get_theme_icon("MemberMethod", "EditorIcons"))
+
+	elif symbol == '{':
 		CodeCompletionHelper.suggest_variables(TextNode)
 
 
-func _get_start_code_completion(CodeCompletionHelper:Node, TextNode:TextEdit) -> void:
+func _get_start_code_completion(_CodeCompletionHelper:Node, TextNode:TextEdit) -> void:
 	TextNode.add_code_completion_option(CodeEdit.KIND_PLAIN_TEXT, 'set', 'set ', event_color.lerp(TextNode.syntax_highlighter.normal_color, 0.5))
 
 

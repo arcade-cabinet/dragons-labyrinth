@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bt71g5isti5cn"
+path="res://.godot/imported/k_walls_stone_wall_column.obj-c717abee0ff8954f54a2b48495871142.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_walls_stone_wall_column.obj-c717abee0ff8954f54a2b48495871142.mesh"]
+
+source_file="res://assets/models/walls/k_walls_stone_wall_column.obj"
+dest_files=["res://.godot/imported/k_walls_stone_wall_column.obj-c717abee0ff8954f54a2b48495871142.mesh", "res://.godot/imported/k_walls_stone_wall_column.obj-c717abee0ff8954f54a2b48495871142.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

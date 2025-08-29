@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cajyy3iktq7e0"
+path="res://.godot/imported/k_architecture_roof_flat_top.obj-73e0b33a3b5bcae704b64cfce966429b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_roof_flat_top.obj-73e0b33a3b5bcae704b64cfce966429b.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_roof_flat_top.obj"
+dest_files=["res://.godot/imported/k_architecture_roof_flat_top.obj-73e0b33a3b5bcae704b64cfce966429b.mesh", "res://.godot/imported/k_architecture_roof_flat_top.obj-73e0b33a3b5bcae704b64cfce966429b.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

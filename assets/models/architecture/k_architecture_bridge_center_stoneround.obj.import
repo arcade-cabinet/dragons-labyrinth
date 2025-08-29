@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dyp5yyulr618"
+path="res://.godot/imported/k_architecture_bridge_center_stoneround.obj-89b51b0c288463be558ccb26bd717fed.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_bridge_center_stoneround.obj-89b51b0c288463be558ccb26bd717fed.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_bridge_center_stoneround.obj"
+dest_files=["res://.godot/imported/k_architecture_bridge_center_stoneround.obj-89b51b0c288463be558ccb26bd717fed.mesh", "res://.godot/imported/k_architecture_bridge_center_stoneround.obj-89b51b0c288463be558ccb26bd717fed.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

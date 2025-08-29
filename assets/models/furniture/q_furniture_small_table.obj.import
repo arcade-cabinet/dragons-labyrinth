@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bc1d8w5r5dafy"
+path="res://.godot/imported/q_furniture_small_table.obj-0a17d9d513e3da249273aa3b1c3879bf.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_furniture_small_table.obj-0a17d9d513e3da249273aa3b1c3879bf.mesh"]
+
+source_file="res://assets/models/furniture/q_furniture_small_table.obj"
+dest_files=["res://.godot/imported/q_furniture_small_table.obj-0a17d9d513e3da249273aa3b1c3879bf.mesh", "res://.godot/imported/q_furniture_small_table.obj-0a17d9d513e3da249273aa3b1c3879bf.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

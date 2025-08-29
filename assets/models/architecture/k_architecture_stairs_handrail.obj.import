@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://vv3xtxmdanwy"
+path="res://.godot/imported/k_architecture_stairs_handrail.obj-01b2448c3d6d646aba864d21bb26b40c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_stairs_handrail.obj-01b2448c3d6d646aba864d21bb26b40c.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_stairs_handrail.obj"
+dest_files=["res://.godot/imported/k_architecture_stairs_handrail.obj-01b2448c3d6d646aba864d21bb26b40c.mesh", "res://.godot/imported/k_architecture_stairs_handrail.obj-01b2448c3d6d646aba864d21bb26b40c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

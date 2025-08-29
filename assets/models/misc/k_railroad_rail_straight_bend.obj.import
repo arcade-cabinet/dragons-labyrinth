@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bfioavfin15xb"
+path="res://.godot/imported/k_railroad_rail_straight_bend.obj-9a966ba46e8134072432cb619cf9499f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_railroad_rail_straight_bend.obj-9a966ba46e8134072432cb619cf9499f.mesh"]
+
+source_file="res://assets/models/misc/k_railroad_rail_straight_bend.obj"
+dest_files=["res://.godot/imported/k_railroad_rail_straight_bend.obj-9a966ba46e8134072432cb619cf9499f.mesh", "res://.godot/imported/k_railroad_rail_straight_bend.obj-9a966ba46e8134072432cb619cf9499f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

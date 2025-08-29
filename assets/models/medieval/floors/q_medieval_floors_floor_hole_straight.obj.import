@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://t1k577msg5id"
+path="res://.godot/imported/q_medieval_floors_floor_hole_straight.obj-8aa000961a9a443539f56dbab63e861e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_floors_floor_hole_straight.obj-8aa000961a9a443539f56dbab63e861e.mesh"]
+
+source_file="res://assets/models/medieval/floors/q_medieval_floors_floor_hole_straight.obj"
+dest_files=["res://.godot/imported/q_medieval_floors_floor_hole_straight.obj-8aa000961a9a443539f56dbab63e861e.mesh", "res://.godot/imported/q_medieval_floors_floor_hole_straight.obj-8aa000961a9a443539f56dbab63e861e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

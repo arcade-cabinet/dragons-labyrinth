@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://yvhb55c377ds"
+path="res://.godot/imported/q_medieval_architecture_window_3.obj-02732d309a11642862c1bd6f63bd23d7.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_architecture_window_3.obj-02732d309a11642862c1bd6f63bd23d7.mesh"]
+
+source_file="res://assets/models/medieval/village/q_medieval_architecture_window_3.obj"
+dest_files=["res://.godot/imported/q_medieval_architecture_window_3.obj-02732d309a11642862c1bd6f63bd23d7.mesh", "res://.godot/imported/q_medieval_architecture_window_3.obj-02732d309a11642862c1bd6f63bd23d7.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

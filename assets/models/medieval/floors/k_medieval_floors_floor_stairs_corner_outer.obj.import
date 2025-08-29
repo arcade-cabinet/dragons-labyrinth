@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bgr6jsxnu0oka"
+path="res://.godot/imported/k_medieval_floors_floor_stairs_corner_outer.obj-a1a611df777e1813515737b47ddfbade.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_medieval_floors_floor_stairs_corner_outer.obj-a1a611df777e1813515737b47ddfbade.mesh"]
+
+source_file="res://assets/models/medieval/floors/k_medieval_floors_floor_stairs_corner_outer.obj"
+dest_files=["res://.godot/imported/k_medieval_floors_floor_stairs_corner_outer.obj-a1a611df777e1813515737b47ddfbade.mesh", "res://.godot/imported/k_medieval_floors_floor_stairs_corner_outer.obj-a1a611df777e1813515737b47ddfbade.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dni2gujhc4vux"
+path="res://.godot/imported/k_medieval_architecture_roof_high_side.obj-2475cecb12376d061e4c602aec36bd3e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_medieval_architecture_roof_high_side.obj-2475cecb12376d061e4c602aec36bd3e.mesh"]
+
+source_file="res://assets/models/medieval/architecture/k_medieval_architecture_roof_high_side.obj"
+dest_files=["res://.godot/imported/k_medieval_architecture_roof_high_side.obj-2475cecb12376d061e4c602aec36bd3e.mesh", "res://.godot/imported/k_medieval_architecture_roof_high_side.obj-2475cecb12376d061e4c602aec36bd3e.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dwx1avtpra1pp"
+path="res://.godot/imported/k_rocket_topb.obj-e07d71f32d85358af39960e59902a84c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_rocket_topb.obj-e07d71f32d85358af39960e59902a84c.mesh"]
+
+source_file="res://assets/models/misc/k_rocket_topb.obj"
+dest_files=["res://.godot/imported/k_rocket_topb.obj-e07d71f32d85358af39960e59902a84c.mesh", "res://.godot/imported/k_rocket_topb.obj-e07d71f32d85358af39960e59902a84c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

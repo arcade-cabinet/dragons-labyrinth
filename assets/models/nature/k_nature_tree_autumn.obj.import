@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dcsnxq3tkog46"
+path="res://.godot/imported/k_nature_tree_autumn.obj-2403895e0a9ab32e181d009a8ca90b20.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_nature_tree_autumn.obj-2403895e0a9ab32e181d009a8ca90b20.mesh"]
+
+source_file="res://assets/models/nature/k_nature_tree_autumn.obj"
+dest_files=["res://.godot/imported/k_nature_tree_autumn.obj-2403895e0a9ab32e181d009a8ca90b20.mesh", "res://.godot/imported/k_nature_tree_autumn.obj-2403895e0a9ab32e181d009a8ca90b20.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

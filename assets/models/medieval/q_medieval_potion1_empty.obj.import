@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dvgp4l8vw87hv"
+path="res://.godot/imported/q_medieval_potion1_empty.obj-ae2ebdf61d0731eae87213ed77412594.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_potion1_empty.obj-ae2ebdf61d0731eae87213ed77412594.mesh"]
+
+source_file="res://assets/models/medieval/q_medieval_potion1_empty.obj"
+dest_files=["res://.godot/imported/q_medieval_potion1_empty.obj-ae2ebdf61d0731eae87213ed77412594.mesh", "res://.godot/imported/q_medieval_potion1_empty.obj-ae2ebdf61d0731eae87213ed77412594.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

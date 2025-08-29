@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://5qmlrprdspst"
+path="res://.godot/imported/k_architecture_wall_window_medium.obj-2d79a2672a5cef2e36840b7d66f56301.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_architecture_wall_window_medium.obj-2d79a2672a5cef2e36840b7d66f56301.mesh"]
+
+source_file="res://assets/models/architecture/k_architecture_wall_window_medium.obj"
+dest_files=["res://.godot/imported/k_architecture_wall_window_medium.obj-2d79a2672a5cef2e36840b7d66f56301.mesh", "res://.godot/imported/k_architecture_wall_window_medium.obj-2d79a2672a5cef2e36840b7d66f56301.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

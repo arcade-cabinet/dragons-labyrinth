@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dbsunc3lsltds"
+path="res://.godot/imported/k_floors_snow_tile_river_corner.obj-a4a412c5668d318b954981f3c368f4ce.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_floors_snow_tile_river_corner.obj-a4a412c5668d318b954981f3c368f4ce.mesh"]
+
+source_file="res://assets/models/floors/k_floors_snow_tile_river_corner.obj"
+dest_files=["res://.godot/imported/k_floors_snow_tile_river_corner.obj-a4a412c5668d318b954981f3c368f4ce.mesh", "res://.godot/imported/k_floors_snow_tile_river_corner.obj-a4a412c5668d318b954981f3c368f4ce.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

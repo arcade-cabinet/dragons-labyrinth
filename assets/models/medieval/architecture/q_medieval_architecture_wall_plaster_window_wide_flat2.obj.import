@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b37im7jls7hu4"
+path="res://.godot/imported/q_medieval_architecture_wall_plaster_window_wide_flat2.obj-bce69cbaa6f42b4302e7f86178233aec.mesh"
+
+[deps]
+
+files=["res://.godot/imported/q_medieval_architecture_wall_plaster_window_wide_flat2.obj-bce69cbaa6f42b4302e7f86178233aec.mesh"]
+
+source_file="res://assets/models/medieval/architecture/q_medieval_architecture_wall_plaster_window_wide_flat2.obj"
+dest_files=["res://.godot/imported/q_medieval_architecture_wall_plaster_window_wide_flat2.obj-bce69cbaa6f42b4302e7f86178233aec.mesh", "res://.godot/imported/q_medieval_architecture_wall_plaster_window_wide_flat2.obj-bce69cbaa6f42b4302e7f86178233aec.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

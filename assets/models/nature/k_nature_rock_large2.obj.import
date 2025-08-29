@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cl8cf0xtnihx3"
+path="res://.godot/imported/k_nature_rock_large2.obj-1ef121ac777ff1d72f55a3bd386ad76c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_nature_rock_large2.obj-1ef121ac777ff1d72f55a3bd386ad76c.mesh"]
+
+source_file="res://assets/models/nature/k_nature_rock_large2.obj"
+dest_files=["res://.godot/imported/k_nature_rock_large2.obj-1ef121ac777ff1d72f55a3bd386ad76c.mesh", "res://.godot/imported/k_nature_rock_large2.obj-1ef121ac777ff1d72f55a3bd386ad76c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

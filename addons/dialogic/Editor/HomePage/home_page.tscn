@@ -1,6 +1,6 @@
 [gd_scene load_steps=23 format=3 uid="uid://cqy73hshqqgga"]
 
-[ext_resource type="Script" uid="uid://dg1fs2e5gehd6" path="res://addons/dialogic/Editor/HomePage/home_page.gd" id="1_6g38w"]
+[ext_resource type="Script" uid="uid://bl3vudjf3wn2x" path="res://addons/dialogic/Editor/HomePage/home_page.gd" id="1_6g38w"]
 [ext_resource type="Texture2D" uid="uid://cvmlp5nxb2rer" path="res://addons/dialogic/Editor/HomePage/icon_bg.png" id="1_ed1g1"]
 [ext_resource type="Texture2D" uid="uid://bt87p6qlso0ya" path="res://addons/dialogic/Editor/Images/dialogic-logo.svg" id="3_3leok"]
 
@@ -111,7 +111,7 @@ data = {
 "width": 16
 }
 
-[sub_resource type="ImageTexture" id="ImageTexture_jsefb"]
+[sub_resource type="ImageTexture" id="ImageTexture_sr7s6"]
 image = SubResource("Image_ipcwk")
 
 [node name="HomePage" type="TextureRect"]
@@ -234,7 +234,7 @@ modulate = Color(1, 1, 1, 0.501961)
 layout_mode = 2
 size_flags_vertical = 8
 theme_override_font_sizes/font_size = 10
-text = "2.0-Alpha-13 (Godot 4.2+)"
+text = "2.0-Alpha-15 WIP (Godot 4.2+)"
 horizontal_alignment = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/HomePageBox/BottomPanel"]
@@ -305,7 +305,7 @@ layout_mode = 2
 theme_type_variation = &"DialogicLink"
 text = "  Donate"
 underline = 2
-uri = "https://www.patreon.com/coppolaemilio"
+uri = "https://www.patreon.com/JowanSpooner"
 
 [node name="CenterContainer2" type="VBoxContainer" parent="CenterContainer/HomePageBox/BottomPanel/ScrollContainer/HBoxContainer"]
 layout_mode = 2
@@ -369,5 +369,5 @@ grow_vertical = 0
 tooltip_text = "Check it out!"
 theme_override_styles/normal = SubResource("StyleBoxFlat_ckyhx")
 theme_override_styles/hover = SubResource("StyleBoxFlat_l1doy")
-icon = SubResource("ImageTexture_jsefb")
+icon = SubResource("ImageTexture_sr7s6")
 expand_icon = true

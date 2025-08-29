@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://58cec5tnh406"
+path="res://.godot/imported/k_road_dirt_damaged.obj-05a664d943a8614b6e1e0a4b18674651.mesh"
+
+[deps]
+
+files=["res://.godot/imported/k_road_dirt_damaged.obj-05a664d943a8614b6e1e0a4b18674651.mesh"]
+
+source_file="res://assets/models/misc/k_road_dirt_damaged.obj"
+dest_files=["res://.godot/imported/k_road_dirt_damaged.obj-05a664d943a8614b6e1e0a4b18674651.mesh", "res://.godot/imported/k_road_dirt_damaged.obj-05a664d943a8614b6e1e0a4b18674651.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

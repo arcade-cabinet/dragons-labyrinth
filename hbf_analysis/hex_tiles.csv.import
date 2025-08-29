@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://iaicbjs6i76m"
+
+[deps]
+
+files=["res://hbf_analysis/hex_tiles.coordinate.translation", "res://hbf_analysis/hex_tiles.region.translation", "res://hbf_analysis/hex_tiles.world.translation", "res://hbf_analysis/hex_tiles.feature.translation", "res://hbf_analysis/hex_tiles.description.translation"]
+
+source_file="res://hbf_analysis/hex_tiles.csv"
+dest_files=["res://hbf_analysis/hex_tiles.coordinate.translation", "res://hbf_analysis/hex_tiles.region.translation", "res://hbf_analysis/hex_tiles.world.translation", "res://hbf_analysis/hex_tiles.feature.translation", "res://hbf_analysis/hex_tiles.description.translation"]
+
+[params]
+
+compress=true
+delimiter=0

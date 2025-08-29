@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bl877dnkduif6"
+
+[deps]
+
+files=["res://hbf_analysis/entities.text.translation", "res://hbf_analysis/entities.cluster.translation", "res://hbf_analysis/entities.anomaly.translation"]
+
+source_file="res://hbf_analysis/entities.csv"
+dest_files=["res://hbf_analysis/entities.text.translation", "res://hbf_analysis/entities.cluster.translation", "res://hbf_analysis/entities.anomaly.translation"]
+
+[params]
+
+compress=true
+delimiter=0
