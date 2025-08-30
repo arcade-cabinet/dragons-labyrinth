@@ -15,8 +15,12 @@ from typing import Any
 from rich.console import Console
 from rich.logging import RichHandler
 
+from sqlmodel import create_engine, Session
+
 from generator.constants import GAME_DB_PATH, HBF_RAW_PATH
 from generator.entities.transformer import EntityTransformer, transform_hbf_to_clusters, extract_world_hooks_for_pandora, route_to_specialized_processor
+from generator.entities.models import create_all_tables, get_table_stats
+from generator.entities.integration import get_simple_statistics
 
 
 class EntitiesManager:
@@ -322,6 +326,87 @@ def cli_test_pipeline(
     # Test world hooks
     hooks_categories = len([cat for cat, data in results['world_hooks'].items() if data])
     print(f"🌍 World hooks: {hooks_categories} categories with data")
+
+
+@app.command("init-db")
+def cli_init_db() -> None:
+    """Initialize the simple 5-table database schema."""
+    
+    print("🗄️ Initializing simple 5-table database schema...")
+    
+    engine = create_engine(f"sqlite:///{GAME_DB_PATH}")
+    create_all_tables(engine)
+    
+    print("✅ Database initialized with 5 simple tables:")
+    print("   - hex_tiles (spatial data for hexagon_tilemaplayer)")
+    print("   - entities (all entity data from ML processing)")
+    print("   - companions (companion psychology data)")
+    print("   - encounters (encounter data)")
+    print("   - assets (asset references)")
+    print(f"📍 Database: {GAME_DB_PATH}")
+
+
+@app.command("db-stats")
+def cli_db_stats() -> None:
+    """Show statistics for the simple 5-table database."""
+    
+    engine = create_engine(f"sqlite:///{GAME_DB_PATH}")
+    
+    try:
+        with Session(engine) as session:
+            stats = get_simple_statistics(session)
+            
+            print("📊 Simple 5-Table Database Statistics:")
+            print(f"   Hex Tiles: {stats['hex_tiles']}")
+            print(f"   Entities: {stats['entities']}")
+            print(f"   Companions: {stats['companions']}")
+            print(f"   Encounters: {stats['encounters']}")
+            print(f"   Assets: {stats['assets']}")
+            print(f"   Entities with coordinates: {stats['entities_with_coordinates']}")
+            print(f"   Database schema: {stats['database_schema']}")
+            print(f"   Godot integration ready: {stats['godot_integration_ready']}")
+            print(f"   Hexagon tilemap compatible: {stats['hexagon_tilemaplayer_compatible']}")
+            print(f"   SQLite addon compatible: {stats['godot_sqlite_compatible']}")
+    
+    except Exception as e:
+        print(f"❌ Error reading database: {str(e)}")
+        print("💡 Try running 'init-db' first to create the database schema")
+
+
+@app.command("consolidate")
+def cli_consolidate(
+    hbf: str = typer.Option(str(HBF_RAW_PATH), help="Path to HBF SQLite database")
+) -> None:
+    """Run complete architectural consolidation: extract → process → populate 5 tables."""
+    
+    print("🔄 Running complete architectural consolidation...")
+    print("   Phase 1: Initialize simple 5-table database")
+    
+    # Initialize database
+    engine = create_engine(f"sqlite:///{GAME_DB_PATH}")
+    create_all_tables(engine)
+    
+    print("   Phase 2: Extract and process entities")
+    
+    # Run entity processing
+    manager = EntitiesManager(hbf)
+    results = manager.run()
+    
+    print("   Phase 3: Database population complete")
+    
+    # Show results
+    with Session(engine) as session:
+        stats = get_simple_statistics(session)
+        
+        print("\n✅ Architectural consolidation complete!")
+        print(f"📊 Pipeline Stats: {results['pipeline_stats']}")
+        print(f"📊 Database Stats:")
+        print(f"   Hex Tiles: {stats['hex_tiles']}")
+        print(f"   Entities: {stats['entities']}")
+        print(f"   Companions: {stats['companions']}")
+        print(f"   Encounters: {stats['encounters']}")
+        print(f"   Assets: {stats['assets']}")
+        print(f"🎮 Ready for Godot integration via godot-sqlite addon")
 
 
 def create_entities_manager(hbf_db_path: str | None = None) -> EntitiesManager:

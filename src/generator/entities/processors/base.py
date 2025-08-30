@@ -111,26 +111,26 @@ class BaseProcessor:
 
     def _route_to_integrations(self, result: dict[str, Any], logger, console) -> None:
         """
-        Route processing results to world integration as MASTER COORDINATOR.
+        Route processing results to simple entities integration.
         
-        ARCHITECTURAL CHANGE: Entity processors now route ONLY to world integration,
-        which acts as the master coordinator for all world hooks and Godot integration.
-        World integration then coordinates with maps/sprites/encounters as data providers.
+        ARCHITECTURAL CONSOLIDATION: Route directly to simple 5-table integration
+        that populates hex_tiles, entities, companions, encounters, assets tables
+        with REAL ML-processed data for direct godot-sqlite access.
         """
         
         engine = create_engine(f"sqlite:///{GAME_DB_PATH}")
         with Session(engine) as session:
-            from generator.world.integration import integrate_from_entities_processors as world_integrate
+            from generator.entities.integration import integrate_from_entities_processors
             
-            logger.info(f"🌍 Routing {self.processor_type} to world integration (master coordinator)")
-            console.print(f"🌍 Routing {self.processor_type} to world integration (master coordinator)")
+            logger.info(f"📝 Routing {self.processor_type} to simple entities integration")
+            console.print(f"📝 Routing {self.processor_type} to [bold green]simple entities integration[/bold green]")
             
-            # Route ONLY to world integration as master coordinator
-            world_stats = world_integrate(session, {self.processor_type: result})
-            result["world_master_coordination"] = world_stats.to_dict()
+            # Route to simple 5-table integration
+            integration_stats = integrate_from_entities_processors(session, {self.processor_type: result})
+            result["entities_integration"] = integration_stats.to_dict()
             
-            logger.info(f"✅ World master coordination complete for {self.processor_type}")
-            console.print(f"✅ World master coordination complete for {self.processor_type}")
+            logger.info(f"✅ Simple integration complete for {self.processor_type}")
+            console.print(f"✅ Simple integration complete: [bold green]{self.processor_type}[/bold green]")
 
     def _serialize_entity(self, entity: dict[str, Any]) -> str:
         """Serialize entity dict to string for processing."""
