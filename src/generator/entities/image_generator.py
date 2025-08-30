@@ -84,26 +84,17 @@ def _generate_image_with_retry(prompt: str, size: str = "1024x1024", retries: in
     
     for attempt in range(retries):
         try:
-            response = client.responses.create(
-                model="gpt-4.1",
-                input=[{
-                    "role": "user",
-                    "content": [{"type": "input_text", "text": prompt}]
-                }],
-                tools=[{
-                    "type": "image_generation",
-                    "background": "transparent",
-                    "quality": "high",
-                    "size": size
-                }]
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size=size,
+                quality="hd",
+                response_format="b64_json",
+                n=1
             )
             
-            # Extract image data
-            image_calls = [output for output in response.output if output.type == "image_generation_call"]
-            if not image_calls:
-                raise RuntimeError("No image data returned from generation call")
-            
-            image_b64 = image_calls[0].result
+            # Extract base64 image data
+            image_b64 = response.data[0].b64_json
             return base64.b64decode(image_b64)
             
         except Exception as e:

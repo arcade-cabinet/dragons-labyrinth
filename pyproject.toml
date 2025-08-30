@@ -61,7 +61,7 @@ dependencies = [
 ]
 
 [project.scripts]
-dl_cli = "generator.manager:app"
+dl_cli = "generator.entities.manager:app"
 dl_mcp = "generator.mcp_server:main"
 
 [project.urls]

@@ -1,6 +1,0 @@
-dread_level = 4
-base_opacity = 0.4000000059604645
-corruption_overlay = true
-trauma_indicators = ["heartbeat_indicator", "heavy_breathing", "blurred_vision"]
-interface_degradation = 0.800000011920929
-color_scheme = "nightmare"

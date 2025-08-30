@@ -12,10 +12,10 @@ import logging
 from typing import Any
 
 from .meta import get_training_metadata
-from .regions import run as run_regions
-from .settlements import run as run_settlements  
-from .factions import run as run_factions
-from .dungeons import run as run_dungeons
+from .regions import process_region_cluster
+from .settlements import process_settlement_cluster  
+from .factions import process_faction_cluster
+from .dungeons import process_dungeon_cluster
 
 
 def run(engine, logger: logging.Logger, console) -> dict[str, Any]:

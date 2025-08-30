@@ -1,5 +1,7 @@
+test_output
 
 # Godot-specific ignores
+.plugged
 .import/
 export.cfg
 export_presets.cfg

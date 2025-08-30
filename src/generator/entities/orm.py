@@ -9,7 +9,7 @@ from datetime import datetime
 
 from sqlmodel import Field, SQLModel, Relationship
 
-from generator.entities.types import (
+from generator.entities.entity_types import (
     BiomeType,
     DungeonType,
     SettlementType,

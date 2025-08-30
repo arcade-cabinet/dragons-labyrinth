@@ -1,65 +1,301 @@
 """
-Settlement Processor - Process settlement entity clusters using base ML foundation.
+SettlementsProcessor - Specialized processor for settlement entity clusters.
 
-Uses the DragonLabyrinthMLProcessor from base.py to process settlement clusters
-from the transformer. Extracts scale detection, economic analysis, establishment
-categorization, and NPC relationship mapping with world_hooks for Godot integration.
+Processes settlement clusters from the transformer, extracting scale detection,
+economic analysis, establishment categorization, and NPC relationship mapping
+with world_hooks for Godot integration.
 """
 
 from __future__ import annotations
 
-import logging
 import re
 from typing import Any
 
-from generator.entities.processors.base import DragonLabyrinthMLProcessor
+from generator.constants import (
+    ESTABLISHMENT_KEYWORDS, SERVICE_TYPES, ECONOMIC_THRESHOLDS, RESISTANCE_FACTORS
+)
+from generator.entities.processors.base import BaseProcessor
 
 
-def process_settlement_cluster(cluster) -> dict[str, Any]:
+class SettlementsProcessor(BaseProcessor):
     """
-    Process settlement entity cluster using base ML foundation.
+    Specialized processor for settlement entity clusters.
+    
+    Extracts:
+    - Settlement scale (village/town/city) detection
+    - Economic activity and establishment analysis
+    - NPC counts and service diversity
+    - Infrastructure and connectivity features
+    - Corruption resistance based on settlement characteristics
+    """
+    
+    def __init__(self):
+        super().__init__("settlements")
+        
+        # Load settlement-specific configuration from constants
+        self.establishment_keywords = ESTABLISHMENT_KEYWORDS
+        self.service_types_config = SERVICE_TYPES
+        self.economic_thresholds = ECONOMIC_THRESHOLDS
+        self.resistance_factors = RESISTANCE_FACTORS
+        
+        # Configure settlement processing parameters
+        self.scale_detection_patterns = {
+            "city": re.compile(r"City of ([^<\"]+)", re.IGNORECASE),
+            "town": re.compile(r"Town of ([^<\"]+)", re.IGNORECASE),
+            "village": re.compile(r"Village of ([^<\"]+)", re.IGNORECASE)
+        }
+        
+        # Currency detection patterns
+        self.currency_patterns = [
+            re.compile(r"(\d+)\s*(gp|gold)", re.IGNORECASE),
+            re.compile(r"(\d+)\s*(sp|silver)", re.IGNORECASE),
+            re.compile(r"(\d+)\s*(cp|copper)", re.IGNORECASE)
+        ]
+    
+    def _extract_specific_data(self, cluster, ml_results: dict[str, Any], logger, console) -> dict[str, Any]:
+        """Extract settlement-specific data from cluster entities and ML results."""
+        
+        entities = ml_results.get("entities", [])
+        
+        # Determine settlement scale from name
+        scale_hint = self._determine_scale_from_name(cluster.name)
+        
+        # Analyze settlement characteristics
+        establishment_count = self._count_establishments(cluster)
+        service_types = self._analyze_service_types(cluster)
+        economic_activity = self._assess_economic_activity(cluster)
+        npc_count = self._count_npcs_from_ml(entities)
+        infrastructure = self._analyze_infrastructure(cluster)
+        
+        # Use ML results for enhanced analysis
+        ml_confidence = self._calculate_ml_confidence(entities)
+        relationships = ml_results.get("relationships", [])
+        
+        logger.info(f"Settlement analysis - Scale: {scale_hint}, Establishments: {establishment_count}, NPCs: {npc_count}, Economic: {economic_activity}")
+        
+        return {
+            "name": cluster.name,
+            "scale_hint": scale_hint,
+            "establishment_count": establishment_count,
+            "service_types": list(service_types),
+            "economic_activity_level": economic_activity,
+            "npc_count": npc_count,
+            "service_diversity": len(service_types),
+            "infrastructure": infrastructure,
+            "corruption_resistance": self._calculate_corruption_resistance(scale_hint, service_types, economic_activity),
+            "ml_confidence": ml_confidence,
+            "entity_relationships": len(relationships),
+            "anomaly_count": ml_results.get("anomaly_count", 0)
+        }
+    
+    def _generate_world_hooks(self, cluster, specific_data: dict[str, Any]) -> dict[str, Any]:
+        """Generate settlement-specific world_hooks for Godot integration."""
+        
+        return {
+            "settlement_name": cluster.name,
+            "scale_hint": specific_data.get("scale_hint", "unknown"),
+            "establishment_count": specific_data.get("establishment_count", 0),
+            "service_types": specific_data.get("service_types", []),
+            "economic_activity": specific_data.get("economic_activity_level", 0),
+            "npc_density": specific_data.get("npc_count", 0),
+            "has_tavern": "lodging" in specific_data.get("service_types", []),
+            "has_shops": "commerce" in specific_data.get("service_types", []),
+            "has_crafting": "crafting" in specific_data.get("service_types", []),
+            "has_temple": "religious" in specific_data.get("service_types", []),
+            "infrastructure": specific_data.get("infrastructure", {}),
+            "corruption_resistance": specific_data.get("corruption_resistance", 0),
+            "godot_integration": {
+                "settlement_sprite": f"res://art/settlements/{specific_data.get('scale_hint', 'village')}.png",
+                "npc_spawn_count": min(20, max(5, specific_data.get("npc_count", 0))),
+                "service_spawn_points": specific_data.get("establishment_count", 0),
+                "economic_level": self._classify_economic_level(specific_data.get("economic_activity_level", 0)),
+                "defense_rating": specific_data.get("corruption_resistance", 0) / 5.0,
+                "trade_hub_rating": min(1.0, specific_data.get("economic_activity_level", 0) / 10.0)
+            }
+        }
+    
+    def _determine_scale_from_name(self, settlement_name: str) -> str:
+        """Determine settlement scale from name."""
+        
+        if settlement_name.startswith("City of"):
+            return "city"
+        elif settlement_name.startswith("Town of"):
+            return "town"
+        elif settlement_name.startswith("Village of"):
+            return "village"
+        else:
+            return "unknown"
+    
+    def _count_establishments(self, cluster) -> int:
+        """Count establishments (buildings/services) in the settlement."""
+        
+        establishment_count = 0
+        
+        for entity in cluster.entities:
+            content = str(entity).lower()
+            
+            # Count named establishments
+            for keyword in self.establishment_keywords:
+                if keyword in content:
+                    establishment_count += 1
+                    break  # Count each entity only once
+        
+        return establishment_count
+    
+    def _analyze_service_types(self, cluster) -> set[str]:
+        """Analyze types of services available in the settlement."""
+        
+        service_types = set()
+        
+        for entity in cluster.entities:
+            content = str(entity).lower()
+            
+            if "tavern" in content or "inn" in content:
+                service_types.add("lodging")
+            if "shop" in content or "market" in content:
+                service_types.add("commerce")
+            if "smith" in content or "forge" in content:
+                service_types.add("crafting")
+            if "temple" in content or "shrine" in content:
+                service_types.add("religious")
+            if "guard" in content or "militia" in content:
+                service_types.add("defense")
+            if "healer" in content or "medicine" in content:
+                service_types.add("healing")
+        
+        return service_types
+    
+    def _assess_economic_activity(self, cluster) -> int:
+        """Assess economic activity level based on currency mentions and trade indicators."""
+        
+        economic_activity = 0
+        
+        for entity in cluster.entities:
+            content = str(entity).lower()
+            
+            # Count currency mentions
+            if any(currency in content for currency in ["gp", "sp", "cp", "gold", "silver", "copper"]):
+                economic_activity += 1
+            
+            # Count trade indicators
+            if any(trade in content for trade in ["merchant", "trade", "commerce", "goods", "caravan", "price"]):
+                economic_activity += 1
+            
+            # Count specific economic activities
+            if any(activity in content for activity in ["buy", "sell", "cost", "inventory", "stock"]):
+                economic_activity += 1
+        
+        return economic_activity
+    
+    def _count_npcs_from_ml(self, ml_entities: list[dict[str, Any]]) -> int:
+        """Count NPCs from ML analysis results."""
+        
+        npc_count = 0
+        
+        for entity in ml_entities:
+            ml_features = entity.get("ml_features", {})
+            extracted_data = entity.get("extracted_data", {})
+            
+            # Check for NPC indicators from ML
+            if ml_features.get("has_stat_blocks", False):
+                npc_count += 1
+            elif ml_features.get("class_mentions", 0) > 0:
+                npc_count += 1
+            elif ml_features.get("title_mentions", 0) > 0:
+                npc_count += 1
+            elif extracted_data.get("content_type") == "settlement" and ml_features.get("named_entities", 0) > 0:
+                npc_count += 1
+        
+        return npc_count
+    
+    def _analyze_infrastructure(self, cluster) -> dict[str, bool]:
+        """Analyze settlement infrastructure."""
+        
+        infrastructure = {
+            "has_walls": False,
+            "has_harbor": False,
+            "river_adjacent": False,
+            "road_access": False,
+            "defensive_structures": False
+        }
+        
+        for entity in cluster.entities:
+            content = str(entity).lower()
+            
+            if any(word in content for word in ["wall", "fortified", "gate"]):
+                infrastructure["has_walls"] = True
+            if any(word in content for word in ["harbor", "port", "dock"]):
+                infrastructure["has_harbor"] = True
+            if "river" in content:
+                infrastructure["river_adjacent"] = True
+            if any(word in content for word in ["road", "path", "trail"]):
+                infrastructure["road_access"] = True
+            if any(word in content for word in ["tower", "garrison", "barracks"]):
+                infrastructure["defensive_structures"] = True
+        
+        return infrastructure
+    
+    def _calculate_corruption_resistance(self, scale: str, service_types: list[str], economic_activity: int) -> int:
+        """Calculate corruption resistance based on settlement characteristics."""
+        
+        resistance = 0
+        
+        # Religious presence provides resistance
+        if "religious" in service_types:
+            resistance += self.resistance_factors["religious_bonus"]
+        
+        # Economic activity provides resistance
+        if economic_activity >= self.economic_thresholds["high"]:
+            resistance += self.resistance_factors["economic_high"]
+        elif economic_activity >= self.economic_thresholds["moderate"]:
+            resistance += self.resistance_factors["economic_moderate"] 
+        elif economic_activity >= self.economic_thresholds["low"]:
+            resistance += self.resistance_factors["economic_low"]
+        
+        # Population size provides resistance
+        if scale == "city":
+            resistance += self.resistance_factors["city_bonus"]
+        elif scale == "town":
+            resistance += self.resistance_factors["town_bonus"]
+        elif scale == "village":
+            resistance += self.resistance_factors["village_bonus"]
+        
+        # Defense services provide resistance
+        if "defense" in service_types:
+            resistance += self.resistance_factors["defense_bonus"]
+        
+        return min(resistance, 5)  # Cap at 5
+    
+    def _classify_economic_level(self, activity_level: int) -> str:
+        """Classify economic activity level."""
+        
+        if activity_level >= self.economic_thresholds["very_high"]:
+            return "very_high"
+        elif activity_level >= self.economic_thresholds["high"]:
+            return "high"
+        elif activity_level >= self.economic_thresholds["moderate"]:
+            return "moderate"
+        elif activity_level >= self.economic_thresholds["low"]:
+            return "low"
+        else:
+            return "none"
+
+
+def process_settlement_cluster(cluster, logger, console) -> dict[str, Any]:
+    """
+    Process settlement entity cluster using SettlementsProcessor.
     
     Args:
         cluster: EntityCluster containing settlement entities from transformer
+        logger: Logger instance from orchestrator
+        console: Rich console from orchestrator
         
     Returns:
         Processed settlement data with world_hooks for Godot integration
     """
     
-    print(f"🏘️ Processing settlement cluster: {cluster.name} ({cluster.get_entity_count()} entities)")
-    
-    # Initialize ML processor
-    processor = DragonLabyrinthMLProcessor()
-    
-    # Convert cluster entities to format expected by base processor
-    entity_pairs = []
-    for i, entity in enumerate(cluster.entities):
-        entity_id = f"{cluster.name}_{i}"
-        entity_content = _serialize_entity_for_processing(entity)
-        entity_pairs.append((entity_id, entity_content))
-    
-    # Process entities with base ML
-    ml_results = processor.process_entity_batch(entity_pairs)
-    
-    # Extract settlement-specific data
-    settlement_data = _extract_settlement_specific_data(cluster, ml_results)
-    
-    # Generate world_hooks for Godot integration
-    world_hooks = _generate_settlement_world_hooks(cluster, settlement_data)
-    
-    result = {
-        "cluster_name": cluster.name,
-        "cluster_category": cluster.category,
-        "entity_count": cluster.get_entity_count(),
-        "settlement_data": settlement_data,
-        "world_hooks": world_hooks,
-        "ml_processing_results": ml_results,
-        "processor_type": "settlements"
-    }
-    
-    print(f"✅ Settlement processing complete: {cluster.name}")
-    
-    return result
+    processor = SettlementsProcessor()
+    return processor.process_cluster(cluster, logger, console)
 
 
 def _serialize_entity_for_processing(entity: dict[str, Any]) -> str:

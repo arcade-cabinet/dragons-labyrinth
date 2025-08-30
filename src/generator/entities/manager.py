@@ -7,12 +7,16 @@ Supports both library usage and CLI commands via Typer.
 
 from __future__ import annotations
 
+import logging
 import typer
 from pathlib import Path
 from typing import Any
 
+from rich.console import Console
+from rich.logging import RichHandler
+
 from generator.constants import GAME_DB_PATH, HBF_RAW_PATH
-from generator.entities.transformer import EntityTransformer, transform_hbf_to_clusters, extract_world_hooks_for_pandora
+from generator.entities.transformer import EntityTransformer, transform_hbf_to_clusters, extract_world_hooks_for_pandora, route_to_specialized_processor
 
 
 class EntitiesManager:
@@ -37,6 +41,11 @@ class EntitiesManager:
         
         print("🚀 Starting entity extraction and processing pipeline")
         
+        # Set up logger and console for processors
+        console = Console()
+        logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[RichHandler(console=console)])
+        logger = logging.getLogger("entities")
+        
         # Step 1: Transform and cluster entities
         clusters = self.transformer.extract_and_cluster_entities()
         
@@ -46,13 +55,8 @@ class EntitiesManager:
             if cluster.get_entity_count() > 0:
                 print(f"🔍 Processing {cluster.name} ({cluster.get_entity_count()} entities)")
                 
-                try:
-                    from generator.entities.transformer import route_to_specialized_processor
-                    result = route_to_specialized_processor(cluster)
-                    processing_results[cluster_key] = result
-                except ImportError as e:
-                    print(f"⚠️ Specialized processor not available for {cluster.name}: {e}")
-                    processing_results[cluster_key] = {"error": str(e)}
+                result = route_to_specialized_processor(cluster, logger, console)
+                processing_results[cluster_key] = result
         
         # Step 3: Extract world hooks for Pandora
         world_hooks = extract_world_hooks_for_pandora(clusters)
@@ -305,24 +309,19 @@ def cli_test_pipeline(
     
     print("🧪 Testing complete entities pipeline...")
     
-    try:
-        manager = EntitiesManager(hbf)
-        results = manager.run()
-        
-        print("\n✅ Pipeline test successful!")
-        print(f"📊 Stats: {results['pipeline_stats']}")
-        
-        # Test clustering
-        non_empty_clusters = len([c for c in results['clusters'].values() if c['count'] > 0])
-        print(f"📦 Clusters: {non_empty_clusters} non-empty clusters")
-        
-        # Test world hooks
-        hooks_categories = len([cat for cat, data in results['world_hooks'].items() if data])
-        print(f"🌍 World hooks: {hooks_categories} categories with data")
-        
-    except Exception as e:
-        print(f"❌ Pipeline test failed: {e}")
-        raise typer.Exit(1)
+    manager = EntitiesManager(hbf)
+    results = manager.run()
+    
+    print("\n✅ Pipeline test successful!")
+    print(f"📊 Stats: {results['pipeline_stats']}")
+    
+    # Test clustering
+    non_empty_clusters = len([c for c in results['clusters'].values() if c['count'] > 0])
+    print(f"📦 Clusters: {non_empty_clusters} non-empty clusters")
+    
+    # Test world hooks
+    hooks_categories = len([cat for cat, data in results['world_hooks'].items() if data])
+    print(f"🌍 World hooks: {hooks_categories} categories with data")
 
 
 def create_entities_manager(hbf_db_path: str | None = None) -> EntitiesManager:

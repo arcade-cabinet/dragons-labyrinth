@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Bowel of the Raging Pits",
+    "category": "dungeons",
+    "entity_count": 7,
+    "world_hooks": {
+      "entrance_type": "unknown",
+      "depth_hint": "shallow",
+      "room_count_estimate": 0,
+      "has_treasure": false,
+      "entity_count": 7
+    }
+  }
+]

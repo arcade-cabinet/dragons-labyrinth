@@ -1,0 +1,13 @@
+[
+  {
+    "name": "The Defiled Wolves",
+    "category": "factions",
+    "entity_count": 1,
+    "world_hooks": {
+      "operating_places": [],
+      "hostility": "neutral",
+      "member_count_estimate": 0,
+      "territorial_reach": "local"
+    }
+  }
+]

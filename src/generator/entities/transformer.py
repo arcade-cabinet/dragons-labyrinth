@@ -14,43 +14,11 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-# Known categories from extract_hbf_worldbuilding.sh
-REGIONS = [
-    "Aurora Bushes", "Black Shield Timberlands", "Blood Blade Fields",
-    "Bonecrusher Plains", "Darkfall Dunes", "Darkfall Plains", "Fallen Star Steppe",
-    "Fearless Wilds", "Firefly Cliffs", "Goblinchaser Jungle", "Goblinchaser Wilderness",
-    "Goldenswan Timberlands", "Goldseeker's Cliffs", "Grey Mist Snowlands",
-    "Heartseeker Forest", "Heartseeker Moors", "Hell's Gate Desert",
-    "Holloweye Wilderness", "Iceborn Wilderness", "Javelin Plains", "Javelin Wetlands",
-    "Moonwatcher Wetlands", "Nightmare Desert", "Ragthorn Meadows", "Ragthorn Woods",
-    "Thunderwave Woodlands", "Vicious Crags"
-]
-
-SETTLEMENTS = [
-    "Village of Ashamar", "Village of Balaal", "Town of Devilville",
-    "Village of Dokar", "Village of Dorith", "Village of Harad",
-    "Village of Headbone", "City of Headsmen", "Village of Kothian",
-    "City of Palemoon"
-]
-
-FACTIONS = [
-    "The Defiled Wolves", "The Fists Of Justice", "The Red Snakes",
-    "The Swords Of Justice", "The White Wyverns"
-]
-
-DUNGEONS = [
-    "Bowel of the Raging Pits", "Caverns of the Burning Souls",
-    "Caverns of the Infernal Lich", "Crypt of the Corrupted Order",
-    "Crypt of the Infernal Blades", "Crypt of the Mourning Goblin",
-    "Crypt of the Unholy Goblin", "Crypt of the Violent Ogre",
-    "Hideout of the Corrupted Order", "Hideout of the Unspoken Desire",
-    "Lair of the Foresaken Desire", "Lair of the Mourning Hopes",
-    "Shrine of the Infernal Blades", "Shrine of the Infernal Desire",
-    "Temple of the Violent Ogre", "Tomb of the Cursed Pits",
-    "Tomb of the Grey Ogre", "Tomb of the Unspoken Skeletons"
-]
-
-BIOMES = ["Desert", "Forest", "Jungle", "Mountains", "Plains", "Swamps", "Tundra"]
+from generator.constants import REGIONS, SETTLEMENTS, FACTIONS, DUNGEONS, BIOMES
+from generator.entities.processors.regions import process_region_cluster
+from generator.entities.processors.settlements import process_settlement_cluster
+from generator.entities.processors.factions import process_faction_cluster
+from generator.entities.processors.dungeons import process_dungeon_cluster
 
 
 class EntityCluster:
@@ -399,12 +367,14 @@ def transform_hbf_to_clusters(hbf_db_path: str, output_dir: str = "clusters") ->
     }
 
 
-def route_to_specialized_processor(cluster: EntityCluster) -> dict[str, Any]:
+def route_to_specialized_processor(cluster: EntityCluster, logger, console) -> dict[str, Any]:
     """
     Route cluster to appropriate specialized processor.
     
     Args:
         cluster: Entity cluster to process
+        logger: Logger instance from orchestrator
+        console: Rich console from orchestrator
         
     Returns:
         Processing results from specialized processor
@@ -412,25 +382,23 @@ def route_to_specialized_processor(cluster: EntityCluster) -> dict[str, Any]:
     
     processor_type = cluster.processor_type
     
-    # Import and use specialized processor
+    # Route to specialized processors
     if processor_type == "regions":
-        from generator.entities.processors.regions import process_region_cluster
-        return process_region_cluster(cluster)
+        return process_region_cluster(cluster, logger, console)
     elif processor_type == "settlements":
-        from generator.entities.processors.settlements import process_settlement_cluster
-        return process_settlement_cluster(cluster)
+        return process_settlement_cluster(cluster, logger, console)
     elif processor_type == "factions":
-        from generator.entities.processors.factions import process_faction_cluster
-        return process_faction_cluster(cluster)
+        return process_faction_cluster(cluster, logger, console)
     elif processor_type == "dungeons":
-        from generator.entities.processors.dungeons import process_dungeon_cluster
-        return process_dungeon_cluster(cluster)
+        return process_dungeon_cluster(cluster, logger, console)
     else:
-        # Use base processor for unknown types
-        from generator.entities.processors.base import DragonLabyrinthMLProcessor
-        base_processor = DragonLabyrinthMLProcessor()
-        entity_pairs = [(str(i), json.dumps(entity)) for i, entity in enumerate(cluster.entities)]
-        return base_processor.process_entity_batch(entity_pairs)
+        # Unknown processor type - return error result
+        logger.warning(f"Unknown processor type: {processor_type} for cluster {cluster.name}")
+        return {
+            "error": f"Unknown processor type: {processor_type}",
+            "cluster_name": cluster.name,
+            "processor_type": processor_type
+        }
 
 
 def extract_world_hooks_for_pandora(clusters: dict[str, EntityCluster]) -> dict[str, Any]:
