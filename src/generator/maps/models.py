@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, ConfigDict
-from sqlmodel import SQLModel, Field as SQLField, Relationship, Column, JSON, DateTime
+from sqlmodel import SQLModel, Field as SQLField, Relationship, Column, JSON
 
 
 # ======================================
@@ -106,15 +106,15 @@ HorrorProgression = float  # 0.0-1.0
 
 class MapsTimestampedModel(SQLModel):
     """Base model with maps-specific tracking."""
-    
-    created_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    updated_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    
+
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
     # Cross-system integration tracking
     entities_placed: bool = SQLField(default=False, description="Entities placed on map")
     world_coordinated: bool = SQLField(default=False, description="World regions coordinated")
     psychology_overlaid: bool = SQLField(default=False, description="Psychology corruption applied")
-    
+
     # Hex grid validation
     coordinate_validated: bool = SQLField(default=False, description="Hex coordinate validated")
     adjacency_calculated: bool = SQLField(default=False, description="Adjacency relationships calculated")
@@ -122,48 +122,54 @@ class MapsTimestampedModel(SQLModel):
 
 class HexTiles(MapsTimestampedModel, table=True):
     """Individual hex tiles with cross-system coordination."""
-    
+
     id: int | None = SQLField(default=None, primary_key=True)
-    
+
     # Hex identification
     hex_coordinate: str = SQLField(index=True, unique=True, description="Hex coordinate (BASE, N1, E2S3)")
     coordinate_type: str = SQLField(description="CoordinateType enum value")
-    
+
     # Spatial positioning
     grid_x: int = SQLField(description="Grid X position")
     grid_y: int = SQLField(description="Grid Y position")
     distance_from_base: int = SQLField(default=0, description="Distance from BASE hex")
-    
+
     # Terrain from entities
-    base_tile_type: str = SQLField(description="TileType enum value from entities biome")
-    biome_type: str = SQLField(description="BiomeType from entities subpackage")
-    
+    base_tile_type: str = SQLField(index=True, description="TileType enum value from entities biome")
+    biome_type: str = SQLField(index=True, description="BiomeType from entities subpackage")
+
     # Corruption from psychology
     corruption_level: int = SQLField(default=0, ge=0, le=4, description="CorruptionLevel from psychology")
     dread_level: int = SQLField(default=0, ge=0, le=4, description="DreadLevel from psychology")
     horror_intensity: float = SQLField(default=0.0, ge=0.0, le=1.0, description="Horror intensity from psychology")
-    
+
     # World coordination
     region_id: str | None = SQLField(default=None, description="Region ID from world subpackage")
+    region_fk: int | None = SQLField(default=None, foreign_key="mapregions.id", index=True, description="FK to MapRegions table")
     world_level_min: int = SQLField(default=1, description="Minimum level for this hex")
     world_level_max: int = SQLField(default=180, description="Maximum level for this hex")
-    
+
     # Entity placement
     has_settlement: bool = SQLField(default=False, description="Has settlement from entities")
     has_dungeon: bool = SQLField(default=False, description="Has dungeon from entities")
     has_npc: bool = SQLField(default=False, description="Has NPC from entities")
     entity_count: int = SQLField(default=0, description="Total entities on this hex")
-    
+
     # Travel and accessibility
-    travel_routes: str = SQLField(default="[]", sa_column=Column(JSON), description="List of TravelRoute enum values")
+    travel_routes: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="List of TravelRoute enum values")
     travel_difficulty: float = SQLField(default=1.0, description="Travel difficulty multiplier")
     companion_safety: float = SQLField(default=0.5, description="Safety for companions from psychology")
-    
+
     # Godot integration
     tilemap_tile_id: int | None = SQLField(default=None, description="Godot tilemap tile ID")
     tileset_reference: str | None = SQLField(default=None, description="Reference to Godot tileset")
-    layer_data: str = SQLField(default="{}", sa_column=Column(JSON), description="MapLayer -> tile data")
+    layer_data: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="MapLayer -> tile data")
+    godot_synced: bool = SQLField(default=False, description="Exported to Godot SQLite")
+    godot_synced_at: datetime | None = SQLField(default=None, description="Last sync to Godot SQLite")
     
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
+
     # Relationships
     adjacent_hexes: list["HexAdjacencyTable"] = Relationship(back_populates="source_hex")
 
@@ -186,7 +192,7 @@ class HexAdjacencyTable(MapsTimestampedModel, table=True):
     
     # Travel properties
     travel_cost: float = SQLField(default=1.0, description="Movement cost multiplier")
-    route_type: str = SQLField(default="NATURAL_PASS", description="TravelRoute enum value")
+    route_type: str = SQLField(default="natural_pass", description="TravelRoute enum value")
     passable: bool = SQLField(default=True, description="Whether path is passable")
     
     # Cross-system modifiers
@@ -210,7 +216,7 @@ class MapRegions(MapsTimestampedModel, table=True):
     max_hex_x: int = SQLField(description="Maximum X coordinate")
     min_hex_y: int = SQLField(description="Minimum Y coordinate")
     max_hex_y: int = SQLField(description="Maximum Y coordinate")
-    center_coordinate: str = SQLField(description="Central hex coordinate")
+    center_coordinate: str = SQLField(index=True, description="Central hex coordinate")
     
     # Region properties
     region_type: str = SQLField(description="RegionType from world subpackage")
@@ -243,9 +249,9 @@ class TileSets(MapsTimestampedModel, table=True):
     tile_size: int = SQLField(default=64, description="Tile size in pixels")
     
     # Cross-system tile mapping
-    biome_tile_mapping: str = SQLField(default="{}", sa_column=Column(JSON), description="BiomeType -> tile IDs")
-    corruption_tile_mapping: str = SQLField(default="{}", sa_column=Column(JSON), description="CorruptionLevel -> tile IDs")
-    entity_tile_mapping: str = SQLField(default="{}", sa_column=Column(JSON), description="Entity types -> tile IDs")
+    biome_tile_mapping: dict[str, list[int]] = SQLField(default_factory=dict, sa_column=Column(JSON), description="BiomeType -> tile IDs")
+    corruption_tile_mapping: dict[str, list[int]] = SQLField(default_factory=dict, sa_column=Column(JSON), description="CorruptionLevel -> tile IDs")
+    entity_tile_mapping: dict[str, list[int]] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Entity types -> tile IDs")
     
     # Tileset properties
     total_tiles: int = SQLField(default=0, description="Total tiles in tileset")

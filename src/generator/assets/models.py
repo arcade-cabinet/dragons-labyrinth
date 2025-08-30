@@ -105,9 +105,9 @@ RegionContext = str
 class AssetsTimestampedModel(SQLModel):
     """Base model with assets-specific tracking."""
     
-    created_at: datetime = SQLField(default_factory=datetime.utcnow, sa_column=Column(DateTime), index=True)
-    updated_at: datetime | None = SQLField(default=None, sa_column=Column(DateTime))
-    generation_metadata: str = SQLField(default="{}", sa_column=Column(JSON), description="Generation process metadata")
+    created_at: datetime = SQLField(default_factory=datetime.utcnow, index=True)
+    updated_at: datetime | None = SQLField(default=None)
+    generation_metadata: str = SQLField(default="{}", description="Generation process metadata")
 
 
 class AssetRecord(AssetsTimestampedModel, table=True):
@@ -136,6 +136,9 @@ class AssetRecord(AssetsTimestampedModel, table=True):
     maps_context: str = SQLField(default="{}", sa_column=Column(JSON), description="Maps context data")
     encounters_context: str = SQLField(default="{}", sa_column=Column(JSON), description="Encounters context data")
     sprites_context: str = SQLField(default="{}", sa_column=Column(JSON), description="Sprites context data")
+    
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
     
     # Horror progression context
     dread_level: int = SQLField(description="Associated dread level")

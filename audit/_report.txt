@@ -1,0 +1,1008 @@
+# Dragons' Labyrinth — Repo Audit
+generated: 2025-08-30T01:49:20Z
+root: /Users/jbogaty/src/dragons-labyrinth
+
+## 1) Tree (top level)
+.
+├── addons
+│   ├── beehave
+│   ├── dialogic
+│   ├── gd-plug
+│   ├── gdUnit4
+│   ├── godot-sqlite
+│   ├── health_hitbox_hurtbox
+│   ├── hexagon_tilemaplayer
+│   ├── quest_resource_translation_parser
+│   ├── quest_system
+│   ├── questify
+│   └── rubonnek.quest_manager
+├── asset-curation-prompts
+│   ├── 01-horror-characters.md
+│   ├── 02-hex-tiles-biomes.md
+│   ├── 03-dungeons-boss-rooms.md
+│   ├── 04-audio-horror.md
+│   └── README.md
+├── assets
+│   ├── audio
+│   ├── dialogue
+│   ├── editor
+│   ├── fonts
+│   ├── gui
+│   ├── items
+│   ├── models
+│   ├── music
+│   ├── sfx
+│   └── videos
+├── audit
+│   └── _report.txt
+├── CHANGELOG.md
+├── cliff.toml
+├── combat
+│   ├── arenas
+│   └── battlers
+├── config
+│   └── atlas_layout.json
+├── CREDITS.md
+├── DALL-E_ASSET_GENERATION_LIST.md
+├── data
+├── DATABASE_REPLACEMENT_STRATEGY.md
+├── default_bus_layout.tres
+├── demo
+│   └── addons
+├── docs
+│   ├── Architecture.md
+│   ├── book
+│   ├── GENERATOR_ARCHITECTURE.md
+│   ├── MANAGER_PATTERNS.md
+│   ├── Regional-Scripts.md
+│   └── Themes.md
+├── game
+│   ├── art
+│   └── data
+├── generation_manifest.json
+├── hbf_analysis
+│   ├── clusters_visualization.png
+│   ├── clusters_visualization.png.import
+│   ├── complete_analysis.json
+│   ├── entities.anomaly.translation
+│   ├── entities.cluster.translation
+│   ├── entities.csv
+│   ├── entities.csv.import
+│   ├── entities.text.translation
+│   ├── hex_tiles_full.coordinate.translation
+│   ├── hex_tiles_full.csv
+│   ├── hex_tiles_full.csv.import
+│   ├── hex_tiles_full.description.translation
+│   ├── hex_tiles_full.feature.translation
+│   ├── hex_tiles_full.region.translation
+│   ├── hex_tiles_full.text.translation
+│   ├── hex_tiles_full.uuid.translation
+│   ├── hex_tiles_full.world.translation
+│   ├── hex_tiles.coordinate.translation
+│   ├── hex_tiles.csv
+│   ├── hex_tiles.csv.import
+│   ├── hex_tiles.description.translation
+│   ├── hex_tiles.feature.translation
+│   ├── hex_tiles.region.translation
+│   ├── hex_tiles.world.translation
+│   ├── nTR8nJOW_clean.hbf
+│   ├── pattern_analysis.json
+│   ├── REPORT.md
+│   ├── schema.csv
+│   ├── schema.csv.import
+│   ├── schema.sql.translation
+│   ├── suggested_links.csv
+│   ├── suggested_links.csv.import
+│   ├── suggested_links.destination.translation
+│   ├── suggested_links.rank.translation
+│   ├── suggested_links.similarity.translation
+│   ├── suggested_links.source.translation
+│   ├── target_hits.json
+│   └── target_samples.json
+├── icon.svg
+├── icon.svg.import
+├── inputs
+│   ├── asset-prompts
+│   ├── GLOBAL_STYLE_GUIDE.toml
+│   └── raw_game.hbf
+├── LICENSE
+├── media
+│   └── Open-RPG.png
+├── memory-bank
+│   ├── activeContext.md
+│   ├── architecture-pivot-to-godot.md
+│   ├── architecture-simplification-plan.md
+│   ├── archived
+│   ├── comprehensive-database-architecture-complete.md
+│   ├── comprehensive-database-architecture-progress.md
+│   ├── database-unification-progress.md
+│   ├── game-asset-prompts
+│   ├── game-database-elimination
+│   ├── game-design-bible
+│   ├── game-foundation-integration-plan.md
+│   ├── generator-completion-architecture-plan.md
+│   ├── generator-subpackage-review-process.md
+│   ├── godot-plugins.md
+│   ├── hbf-worldbuilding-breakthrough.md
+│   ├── productContext.md
+│   ├── production-setup-complete.md
+│   ├── progress.md
+│   ├── projectbrief.md
+│   ├── projectDesign.md
+│   ├── seeds-refactoring-complete.md
+│   ├── sonnet-1m-handoff.md
+│   ├── systemPatterns.md
+│   ├── techContext.md
+│   ├── world-building
+│   ├── world-building-handoff.md
+│   ├── world-foundation.md
+│   ├── world-mapping
+│   ├── world-output
+│   ├── worldbuilder-handoff.md
+│   └── worldbuilder-integration-complete.md
+├── metadata
+│   ├── assets_inventory.json
+│   ├── biome_assets.json
+│   ├── biome_generation_summary.json
+│   ├── books
+│   ├── code_manifest.json
+│   ├── code_materialized.json
+│   ├── game.db
+│   ├── generation_tracking.db
+│   ├── joined_templates.json
+│   ├── manifest.json
+│   ├── maps
+│   ├── quests
+│   ├── style_guide.snapshot.md
+│   ├── technical_architecture.snapshot.md
+│   ├── template_audit.json
+│   └── world_foundation.snapshot.md
+├── NPCs.txt
+├── OPENRPG_ADAPTATION_PLAN.md
+├── overworld
+│   ├── characters
+│   └── maps
+├── plug.gd
+├── plug.gd.uid
+├── project.godot
+├── prompts
+│   ├── assets
+│   ├── GLOBAL_STYLE_GUIDE.toml
+│   ├── README.md
+│   ├── regions
+│   └── variants-system-design.md
+├── pyproject.toml
+├── README.md
+├── resources
+│   ├── audio
+│   ├── hex_tiles
+│   ├── sprites
+│   └── tiles
+├── scenes
+│   ├── labyrinth
+│   ├── overworld
+│   ├── ui
+│   └── World.tscn
+├── scripts
+│   ├── AssetCatalog.gd.uid
+│   ├── BiomeRules.gd.uid
+│   ├── CompanionPsychology.gd.uid
+│   ├── door_scene.gd.uid
+│   ├── DoorScene.gd.uid
+│   ├── DreadProgression.gd.uid
+│   ├── extract_hbf_worldbuilding.sh
+│   ├── hex_exploration.gd.uid
+│   ├── HexTileData.gd.uid
+│   ├── inventory_crafting_system.gd.uid
+│   ├── npc_town_system.gd.uid
+│   ├── project_setup.gd
+│   ├── project_setup.gd.uid
+│   ├── project_structure.gd
+│   ├── project_structure.gd.uid
+│   ├── quest_system.gd.uid
+│   ├── TileSetBuilder.gd.uid
+│   ├── TransitionLoader.gd.uid
+│   ├── ui_system.gd.uid
+│   ├── update_hex_plugin.sh
+│   └── World.gd.uid
+├── source
+│   └── guides
+├── specs
+│   └── biomes.yaml
+├── src
+│   ├── combat
+│   ├── common
+│   ├── data
+│   ├── field
+│   ├── generator
+│   ├── main.tscn
+│   ├── resources
+│   ├── scenes
+│   └── systems
+├── systems
+│   ├── audio
+│   ├── combat
+│   ├── companions
+│   ├── core
+│   ├── database
+│   ├── horror
+│   ├── ui
+│   └── world
+├── templates
+│   ├── _joined
+│   ├── biome_rules.gd.j2
+│   ├── legacy-bak
+│   ├── meta_prompts
+│   ├── orchestrator
+│   └── transitions
+├── test_entity_extraction.py
+├── test_output
+│   ├── audio
+│   ├── audio_configs
+│   ├── decay
+│   └── ui
+├── test_psychology_direct.py
+├── test_psychology_final.py
+├── test_psychology_integration.py
+├── test_psychology_isolated.py
+├── tools
+│   ├── hex_bootstrap.gd
+│   └── repo_audit.sh
+├── training
+│   ├── meta
+│   └── regions
+├── vendor
+│   ├── godot-hexagon-tile-map-layer
+│   ├── godot-sqlite
+│   └── Makefile
+├── venv
+│   ├── bin
+│   ├── include
+│   ├── lib
+│   ├── pyvenv.cfg
+│   └── share
+├── world_handoff_check
+└── worldbuilder
+    ├── data
+    ├── editor
+    ├── examples
+    ├── LICENSE
+    ├── plugin.cfg
+    ├── plugin.gd
+    ├── plugin.gd.uid
+    ├── README.md
+    ├── services
+    ├── Worldbuilder.gd
+    └── Worldbuilder.gd.uid
+
+119 directories, 152 files
+
+## 2) Python version & env
+Python 3.13.3
+
+## 3) Coding standards checks
+- Disallowed generics (Optional, List, Dict):
+src/generator/entities/README.md:4421:    value: Dict[str, Any]
+src/generator/entities/README.md:4455:def pick(d: Dict[str, Any], *keys: str) -> Dict[str, Any]:
+src/generator/entities/README.md:4473:    biomes: List[Dict[str, Any]],
+src/generator/entities/README.md:4474:    regions: List[Dict[str, Any]],
+src/generator/entities/README.md:4475:    settlements: List[Dict[str, Any]],
+src/generator/entities/README.md:4476:    dungeons: List[Dict[str, Any]],
+src/generator/entities/README.md:4477:    hex_cells: List[Dict[str, Any]],
+src/generator/entities/README.md:4478:    rivers: List[Dict[str, Any]],
+src/generator/entities/README.md:4479:    trails: List[Dict[str, Any]],
+src/generator/entities/README.md:4480:    tokens: List[Dict[str, Any]],
+src/generator/entities/README.md:4481:    extras: Dict[str, Any] | None = None
+src/generator/entities/README.md:4527:    biomes: List[Dict[str, Any]],
+src/generator/entities/README.md:4528:    rivers: List[Dict[str, Any]],
+src/generator/entities/README.md:4529:    trails: List[Dict[str, Any]],
+src/generator/entities/README.md:4530:    settlements: List[Dict[str, Any]],
+src/generator/entities/README.md:4531:    dungeons: List[Dict[str, Any]],
+src/generator/entities/README.md:4586:def _maybe_training_enrich() -> Dict[str, Any]:
+src/generator/entities/README.md:4589:        out: Dict[str, Any] = {}
+src/generator/entities/README.md:4603:def is_hex_cell(v: Dict[str, Any]) -> bool:
+src/generator/entities/README.md:4607:def classify_feature(v: Dict[str, Any]) -> str | None:
+src/generator/entities/README.md:4620:def edge_list(v: Dict[str, Any], key: str) -> List[int]:
+src/generator/entities/README.md:4624:def main(argv: List[str] | None = None) -> int:
+src/generator/entities/README.md:4636:    biomes_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4637:    rivers_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4638:    trails_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4639:    settlements_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4640:    dungeons_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4643:    biomes_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4644:    regions_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4645:    settlements_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4646:    dungeons_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4647:    hexcells_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4648:    rivers_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4649:    trails_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4650:    tokens_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4952:load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]
+src/generator/entities/README.md:4954:build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]
+src/generator/entities/README.md:4994:If you want me to also wire a small utility that writes these outputs to ./world/*.json and ./pandora/collections/*.json right from this module (so your code-agent just calls one function), I can add a write_world_and_collections(out_root: str, outputs: Dict[str, Any]) helper next.
+src/generator/entities/README.md:5044:def build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+src/generator/entities/processor.py:808:def load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]:
+src/generator/entities/processor.py:812:    rows: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:830:def _is_hex_cell(v: Dict[str, Any]) -> bool:
+src/generator/entities/processor.py:835:def _biome_of(v: Dict[str, Any]) -> str:
+src/generator/entities/processor.py:842:def _edge_list(v: Dict[str, Any], key: str) -> List[int]:
+src/generator/entities/processor.py:845:        out: List[int] = []
+src/generator/entities/processor.py:855:def _classify_feature(v: Dict[str, Any]) -> str:
+src/generator/entities/processor.py:868:    raw_json_entities: List[Dict[str, Any]] = None,
+src/generator/entities/processor.py:869:) -> Dict[str, Any]:
+src/generator/entities/processor.py:878:    entities: List[Dict[str, Any]] = raw_json_entities if raw_json_entities is not None else ([] if not db_path else load_entities_from_sqlite(db_path))
+src/generator/entities/processor.py:881:    biomes_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:882:    rivers_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:883:    trails_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:884:    settlements_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:885:    dungeons_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:887:    biomes_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:888:    regions_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:889:    settlements_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:890:    dungeons_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:891:    hexcells_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:892:    rivers_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:893:    trails_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:894:    tokens_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:978:        pairs: List[Tuple[str, str]] = []
+test_psychology_direct.py:201:        assert "Dict[" not in source
+test_psychology_direct.py:202:        assert "List[" not in source
+docs/GENERATOR_ARCHITECTURE.md:140:    def load_cross_system_data(self, session: Session) -> Dict[str, Any]:
+docs/Architecture.md:1858:- `Type | None` instead of `Optional[Type]`
+docs/Architecture.md:1859:- `list[Type]` instead of `List[Type]`
+docs/Architecture.md:1860:- `dict[K, V]` instead of `Dict[K, V]`
+docs/Architecture.md:2092:    name: Optional[str] = None           # Old Optional syntax
+docs/Architecture.md:2093:    items: List[str] = Field(default=[]) # Uppercase types, mutable default
+docs/Architecture.md:2100:1. Replace all `Optional[Type]` with `Type | None`
+docs/Architecture.md:2101:2. Replace all `List[Type]` with `list[Type]` 
+docs/Architecture.md:2102:3. Replace all `Dict[K, V]` with `dict[K, V]`
+docs/MANAGER_PATTERNS.md:20:value: Optional[str] = None
+docs/MANAGER_PATTERNS.md:30:data: Dict[str, List[Any]] = {}
+audit/_report.txt:285:src/generator/entities/README.md:4421:    value: Dict[str, Any]
+audit/_report.txt:286:src/generator/entities/README.md:4455:def pick(d: Dict[str, Any], *keys: str) -> Dict[str, Any]:
+audit/_report.txt:287:src/generator/entities/README.md:4473:    biomes: List[Dict[str, Any]],
+audit/_report.txt:288:src/generator/entities/README.md:4474:    regions: List[Dict[str, Any]],
+audit/_report.txt:289:src/generator/entities/README.md:4475:    settlements: List[Dict[str, Any]],
+audit/_report.txt:290:src/generator/entities/README.md:4476:    dungeons: List[Dict[str, Any]],
+audit/_report.txt:291:src/generator/entities/README.md:4477:    hex_cells: List[Dict[str, Any]],
+audit/_report.txt:292:src/generator/entities/README.md:4478:    rivers: List[Dict[str, Any]],
+audit/_report.txt:293:src/generator/entities/README.md:4479:    trails: List[Dict[str, Any]],
+audit/_report.txt:294:src/generator/entities/README.md:4480:    tokens: List[Dict[str, Any]],
+audit/_report.txt:295:src/generator/entities/README.md:4481:    extras: Dict[str, Any] | None = None
+audit/_report.txt:296:src/generator/entities/README.md:4527:    biomes: List[Dict[str, Any]],
+audit/_report.txt:297:src/generator/entities/README.md:4528:    rivers: List[Dict[str, Any]],
+audit/_report.txt:298:src/generator/entities/README.md:4529:    trails: List[Dict[str, Any]],
+audit/_report.txt:299:src/generator/entities/README.md:4530:    settlements: List[Dict[str, Any]],
+audit/_report.txt:300:src/generator/entities/README.md:4531:    dungeons: List[Dict[str, Any]],
+audit/_report.txt:301:src/generator/entities/README.md:4586:def _maybe_training_enrich() -> Dict[str, Any]:
+audit/_report.txt:302:src/generator/entities/README.md:4589:        out: Dict[str, Any] = {}
+audit/_report.txt:303:src/generator/entities/README.md:4603:def is_hex_cell(v: Dict[str, Any]) -> bool:
+audit/_report.txt:304:src/generator/entities/README.md:4607:def classify_feature(v: Dict[str, Any]) -> str | None:
+audit/_report.txt:305:src/generator/entities/README.md:4620:def edge_list(v: Dict[str, Any], key: str) -> List[int]:
+audit/_report.txt:306:src/generator/entities/README.md:4624:def main(argv: List[str] | None = None) -> int:
+audit/_report.txt:307:src/generator/entities/README.md:4636:    biomes_layer: List[Dict[str, Any]] = []
+audit/_report.txt:308:src/generator/entities/README.md:4637:    rivers_layer: List[Dict[str, Any]] = []
+audit/_report.txt:309:src/generator/entities/README.md:4638:    trails_layer: List[Dict[str, Any]] = []
+audit/_report.txt:310:src/generator/entities/README.md:4639:    settlements_layer: List[Dict[str, Any]] = []
+audit/_report.txt:311:src/generator/entities/README.md:4640:    dungeons_layer: List[Dict[str, Any]] = []
+audit/_report.txt:312:src/generator/entities/README.md:4643:    biomes_coll: List[Dict[str, Any]] = []
+audit/_report.txt:313:src/generator/entities/README.md:4644:    regions_coll: List[Dict[str, Any]] = []
+audit/_report.txt:314:src/generator/entities/README.md:4645:    settlements_coll: List[Dict[str, Any]] = []
+audit/_report.txt:315:src/generator/entities/README.md:4646:    dungeons_coll: List[Dict[str, Any]] = []
+audit/_report.txt:316:src/generator/entities/README.md:4647:    hexcells_coll: List[Dict[str, Any]] = []
+audit/_report.txt:317:src/generator/entities/README.md:4648:    rivers_coll: List[Dict[str, Any]] = []
+audit/_report.txt:318:src/generator/entities/README.md:4649:    trails_coll: List[Dict[str, Any]] = []
+audit/_report.txt:319:src/generator/entities/README.md:4650:    tokens_coll: List[Dict[str, Any]] = []
+audit/_report.txt:320:src/generator/entities/README.md:4952:load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]
+audit/_report.txt:321:src/generator/entities/README.md:4954:build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]
+audit/_report.txt:322:src/generator/entities/README.md:4994:If you want me to also wire a small utility that writes these outputs to ./world/*.json and ./pandora/collections/*.json right from this module (so your code-agent just calls one function), I can add a write_world_and_collections(out_root: str, outputs: Dict[str, Any]) helper next.
+audit/_report.txt:323:src/generator/entities/README.md:5044:def build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+audit/_report.txt:324:src/generator/entities/processor.py:808:def load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]:
+audit/_report.txt:325:src/generator/entities/processor.py:812:    rows: List[Dict[str, Any]] = []
+audit/_report.txt:326:src/generator/entities/processor.py:830:def _is_hex_cell(v: Dict[str, Any]) -> bool:
+audit/_report.txt:327:src/generator/entities/processor.py:835:def _biome_of(v: Dict[str, Any]) -> str:
+audit/_report.txt:328:src/generator/entities/processor.py:842:def _edge_list(v: Dict[str, Any], key: str) -> List[int]:
+audit/_report.txt:329:src/generator/entities/processor.py:845:        out: List[int] = []
+audit/_report.txt:330:src/generator/entities/processor.py:855:def _classify_feature(v: Dict[str, Any]) -> str:
+audit/_report.txt:331:src/generator/entities/processor.py:868:    raw_json_entities: List[Dict[str, Any]] = None,
+audit/_report.txt:332:src/generator/entities/processor.py:869:) -> Dict[str, Any]:
+audit/_report.txt:333:src/generator/entities/processor.py:878:    entities: List[Dict[str, Any]] = raw_json_entities if raw_json_entities is not None else ([] if not db_path else load_entities_from_sqlite(db_path))
+audit/_report.txt:334:src/generator/entities/processor.py:881:    biomes_layer: List[Dict[str, Any]] = []
+audit/_report.txt:335:src/generator/entities/processor.py:882:    rivers_layer: List[Dict[str, Any]] = []
+audit/_report.txt:336:src/generator/entities/processor.py:883:    trails_layer: List[Dict[str, Any]] = []
+audit/_report.txt:337:src/generator/entities/processor.py:884:    settlements_layer: List[Dict[str, Any]] = []
+audit/_report.txt:338:src/generator/entities/processor.py:885:    dungeons_layer: List[Dict[str, Any]] = []
+audit/_report.txt:339:src/generator/entities/processor.py:887:    biomes_coll: List[Dict[str, Any]] = []
+audit/_report.txt:340:src/generator/entities/processor.py:888:    regions_coll: List[Dict[str, Any]] = []
+audit/_report.txt:341:src/generator/entities/processor.py:889:    settlements_coll: List[Dict[str, Any]] = []
+audit/_report.txt:342:src/generator/entities/processor.py:890:    dungeons_coll: List[Dict[str, Any]] = []
+audit/_report.txt:343:src/generator/entities/processor.py:891:    hexcells_coll: List[Dict[str, Any]] = []
+audit/_report.txt:344:src/generator/entities/processor.py:892:    rivers_coll: List[Dict[str, Any]] = []
+audit/_report.txt:345:src/generator/entities/processor.py:893:    trails_coll: List[Dict[str, Any]] = []
+audit/_report.txt:346:src/generator/entities/processor.py:894:    tokens_coll: List[Dict[str, Any]] = []
+audit/_report.txt:347:src/generator/entities/processor.py:978:        pairs: List[Tuple[str, str]] = []
+audit/_report.txt:348:test_psychology_direct.py:201:        assert "Dict[" not in source
+audit/_report.txt:349:test_psychology_direct.py:202:        assert "List[" not in source
+audit/_report.txt:350:docs/GENERATOR_ARCHITECTURE.md:140:    def load_cross_system_data(self, session: Session) -> Dict[str, Any]:
+audit/_report.txt:351:docs/Architecture.md:1858:- `Type | None` instead of `Optional[Type]`
+audit/_report.txt:352:docs/Architecture.md:1859:- `list[Type]` instead of `List[Type]`
+audit/_report.txt:353:docs/Architecture.md:1860:- `dict[K, V]` instead of `Dict[K, V]`
+audit/_report.txt:354:docs/Architecture.md:2092:    name: Optional[str] = None           # Old Optional syntax
+audit/_report.txt:355:docs/Architecture.md:2093:    items: List[str] = Field(default=[]) # Uppercase types, mutable default
+audit/_report.txt:356:docs/Architecture.md:2100:1. Replace all `Optional[Type]` with `Type | None`
+audit/_report.txt:357:docs/Architecture.md:2101:2. Replace all `List[Type]` with `list[Type]` 
+audit/_report.txt:358:docs/Architecture.md:2102:3. Replace all `Dict[K, V]` with `dict[K, V]`
+audit/_report.txt:359:docs/MANAGER_PATTERNS.md:20:value: Optional[str] = None
+audit/_report.txt:360:docs/MANAGER_PATTERNS.md:30:data: Dict[str, List[Any]] = {}
+memory-bank/generator-subpackage-review-process.md:110:- **Modern Type Syntax**: `dict[str, any]` NOT `Dict[str, Any]`
+memory-bank/generator-subpackage-review-process.md:111:- **Union Types**: `str | None` NOT `Optional[str]`  
+memory-bank/generator-subpackage-review-process.md:311:- **Modern Type Syntax**: `dict[str, any]` NOT `Dict[str, Any]`
+memory-bank/generator-subpackage-review-process.md:312:- **Union Types**: `str | None` NOT `Optional[str]`
+memory-bank/game-design-bible/Architecture.md:1858:- `Type | None` instead of `Optional[Type]`
+memory-bank/game-design-bible/Architecture.md:1859:- `list[Type]` instead of `List[Type]`
+memory-bank/game-design-bible/Architecture.md:1860:- `dict[K, V]` instead of `Dict[K, V]`
+memory-bank/game-design-bible/Architecture.md:2092:    name: Optional[str] = None           # Old Optional syntax
+memory-bank/game-design-bible/Architecture.md:2093:    items: List[str] = Field(default=[]) # Uppercase types, mutable default
+memory-bank/game-design-bible/Architecture.md:2100:1. Replace all `Optional[Type]` with `Type | None`
+memory-bank/game-design-bible/Architecture.md:2101:2. Replace all `List[Type]` with `list[Type]` 
+memory-bank/game-design-bible/Architecture.md:2102:3. Replace all `Dict[K, V]` with `dict[K, V]`
+memory-bank/systemPatterns.md:159:# Not: Optional[List[str]], Dict[str, Any], Optional[str]
+memory-bank/progress.md:309:    def load_cross_system_data(self, session: Session) -> Dict[str, Any]:
+memory-bank/progress.md:330:        entities_data: Dict[str, Any],
+memory-bank/progress.md:331:        psychology_data: Dict[str, Any], 
+memory-bank/progress.md:332:        world_data: Dict[str, Any],
+memory-bank/progress.md:358:    source_entities: List[str] = Field(sa_column=Column(JSON))
+memory-bank/progress.md:359:    psychology_data: Dict[str, Any] = Field(sa_column=Column(JSON))
+memory-bank/progress.md:360:    world_context: Dict[str, Any] = Field(sa_column=Column(JSON))
+memory-bank/progress.md:364:    validation_notes: List[str] = Field(sa_column=Column(JSON))
+memory-bank/progress.md:367:    generation_metadata: Dict[str, Any] = Field(sa_column=Column(JSON))
+memory-bank/progress.md:482:    def __init__(self, message: str, context: Optional[Dict[str, Any]] = None):
+memory-bank/progress.md:488:    def __init__(self, coherence_score: float, min_required: float, failing_systems: List[str]):
+memory-bank/techContext.md:77:    source_entities: List[str] = Field(sa_column=Column(JSON))
+memory-bank/techContext.md:78:    psychology_context: Dict[str, Any] = Field(sa_column=Column(JSON))
+memory-bank/techContext.md:79:    world_context: Dict[str, Any] = Field(sa_column=Column(JSON))
+memory-bank/techContext.md:83:    validation_notes: List[str] = Field(sa_column=Column(JSON))
+memory-bank/techContext.md:99:        entities_data: Dict[str, Any],
+memory-bank/techContext.md:100:        psychology_data: Dict[str, Any],
+memory-bank/techContext.md:101:        world_data: Dict[str, Any],
+memory-bank/game-database-elimination/hbf-integration-strategy.md:75:# Replace all Optional[Type] → Type | None
+memory-bank/game-database-elimination/hbf-integration-strategy.md:76:# Replace all List[Type] → list[Type]
+memory-bank/projectbrief.md:82:- **Modern Type System**: `dict[str, any]` not `Dict[str, Any]`, `str | None` not `Optional[str]`
+memory-bank/worldbuilder-integration-complete.md:22:- Modern type hints, no Optional[], comprehensive validation
+memory-bank/worldbuilder-integration-complete.md:100:- Type hints throughout (no Optional[], lowercase types)
+memory-bank/activeContext.md:74:**✅ Modern Type System**: `dict[str, Any]` not `Dict[str, Any]`, `str | None` not `Optional[str]`
+test_psychology_isolated.py:113:        assert "Dict[" not in source
+test_psychology_isolated.py:114:        assert "List[" not in source
+test_psychology_isolated.py:195:        assert "Dict[" not in source
+test_psychology_isolated.py:196:        assert "List[" not in source
+
+- Relative imports (should be avoided):
+src/generator/entities/README.md:4581:from .sqlite_loader import SQLiteEntities, pick
+src/generator/entities/README.md:4582:from .godot_layers import write_layers
+src/generator/entities/README.md:4583:from .pandora_adapter import write_collections
+src/generator/entities/training/factions.py:16:from .meta import load_organized_examples
+src/generator/entities/training/factions.py:17:from .patterns import extract_faction_data, create_ml_training_vector, validate_extraction_quality
+src/generator/entities/training/__init__.py:14:from .meta import get_training_metadata
+src/generator/entities/training/__init__.py:15:from .regions import run as run_regions
+src/generator/entities/training/__init__.py:16:from .settlements import run as run_settlements  
+src/generator/entities/training/__init__.py:17:from .factions import run as run_factions
+src/generator/entities/training/__init__.py:18:from .dungeons import run as run_dungeons
+src/generator/entities/training/regions.py:16:from .meta import load_organized_examples, get_training_metadata
+src/generator/entities/training/regions.py:17:from .patterns import extract_biome_features, create_ml_training_vector, validate_extraction_quality
+src/generator/entities/training/settlements.py:16:from .meta import load_organized_examples
+src/generator/entities/training/settlements.py:17:from .patterns import extract_settlement_data, create_ml_training_vector, validate_extraction_quality
+src/generator/__init__.py:9:from .seeds import run as seeds_run
+src/generator/__init__.py:10:from .psychology import run as psychology_run
+src/generator/__init__.py:11:from .world import run as world_run
+src/generator/__init__.py:12:from .maps import run as maps_run
+src/generator/__init__.py:13:from .encounters import run as encounters_run
+src/generator/__init__.py:14:from .sprites import run as sprites_run
+src/generator/__init__.py:15:from .assets import run as assets_run
+src/generator/__init__.py:18:from .seeds import get_emotional_seeds_data, get_horror_progression_data
+src/generator/__init__.py:19:from .psychology import get_all_companion_profiles
+src/generator/__init__.py:20:from .world import get_all_regions, get_campaign_state, get_world_state
+src/generator/__init__.py:21:from .maps import get_all_hex_tiles, get_map_regions, calculate_hex_distance
+src/generator/__init__.py:22:from .encounters import get_all_encounters, get_encounters_by_region, get_encounters_by_dread_level
+src/generator/__init__.py:23:from .sprites import get_all_characters, get_companions, get_character_roster
+src/generator/__init__.py:24:from .assets import get_all_assets, get_assets_by_category, get_openai_generation_metrics
+src/generator/assets/__init__.py:15:from .models import (
+src/generator/encounters/__init__.py:15:from .models import (
+src/generator/seeds/extractors.py:13:from .models import (
+src/generator/seeds/__init__.py:16:from .models import (
+src/generator/world/__init__.py:15:from .models import (
+src/generator/sprites/__init__.py:15:from .models import (
+src/generator/maps/__init__.py:15:from .models import (
+src/generator/psychology/__init__.py:15:from .models import (
+
+- Heavy Any usage (heads-up review):
+src/generator/entities/image_generator.py:18:from typing import Any
+src/generator/entities/manager.py:15:from typing import Any
+src/generator/entities/manager.py:109:    def extract_entities_from_hbf(self, session: Session) -> dict[str, Any]:
+src/generator/entities/manager.py:176:    def _store_processed_entities(self, session: Session, results: dict[str, Any]) -> dict[str, int]:
+src/generator/entities/manager.py:279:    def extract_entities_with_hbf_integration(self, session: Session, hbf_path: str) -> dict[str, Any]:
+src/generator/entities/manager.py:295:    def extract_entities_from_database(self, session: Session) -> dict[str, Any]:
+src/generator/entities/manager.py:311:    def get_all_npcs(self, session: Session) -> list[dict[str, Any]]:
+src/generator/entities/manager.py:316:    def get_all_monsters(self, session: Session) -> list[dict[str, Any]]:
+src/generator/entities/manager.py:321:    def get_all_biomes(self, session: Session) -> list[dict[str, Any]]:
+src/generator/entities/manager.py:326:    def get_all_locations(self, session: Session) -> list[dict[str, Any]]:
+src/generator/entities/manager.py:331:    def run_complete_extraction(self, session: Session) -> dict[str, Any]:
+src/generator/entities/manager.py:376:    def run(self) -> dict[str, Any]:
+src/generator/entities/json_entities.py:13:from typing import Any
+src/generator/entities/json_entities.py:28:    def classify_json(cls, json_data: dict[str, Any]) -> "JSONEntityType":
+src/generator/entities/json_entities.py:57:    json_data: dict[str, Any] = Field(..., sa_column=Column(JSON))
+src/generator/entities/json_entities.py:160:    def _analyze_structure(self, json_data: dict[str, Any]) -> str:
+src/generator/entities/json_entities.py:168:    def _calculate_depth(self, obj: Any, current_depth: int = 0) -> int:
+src/generator/entities/json_entities.py:182:    def _calculate_horror_relevance(self, json_data: dict[str, Any]) -> float:
+src/generator/entities/json_entities.py:195:    def _detect_philosophy_alignment(self, json_data: dict[str, Any]) -> str | None:
+src/generator/entities/json_entities.py:211:    def _detect_companion_relevance(self, json_data: dict[str, Any]) -> bool:
+src/generator/entities/json_entities.py:219:    def _detect_forge_relevance(self, json_data: dict[str, Any]) -> bool:
+src/generator/entities/json_entities.py:227:    def _determine_routing(self, entity_type: JSONEntityType, json_data: dict[str, Any]) -> str | None:
+src/generator/entities/json_entities.py:242:    def get_extraction_stats(self) -> dict[str, Any]:
+src/generator/entities/html_entities.py:13:from typing import Any
+src/generator/entities/html_entities.py:62:    pattern_matches: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+src/generator/entities/html_entities.py:63:    extracted_entities: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+src/generator/entities/html_entities.py:64:    horror_classification: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+src/generator/entities/training_legacy.py:15:from typing import Any
+src/generator/entities/training_legacy.py:56:    def _load_anchors(self) -> dict[str, Any]:
+src/generator/entities/training_legacy.py:96:    def discover_patterns_from_entities(self, entities: list[tuple[str, str]]) -> dict[str, Any]:
+src/generator/entities/training_legacy.py:186:    def _discover_clusters(self, X: np.ndarray, texts: list[str], uuids: list[str]) -> dict[str, Any]:
+src/generator/entities/training_legacy.py:225:    def _analyze_clustering_result(self, labels: np.ndarray, texts: list[str], uuids: list[str], method: str) -> dict[str, Any]:
+src/generator/entities/training_legacy.py:358:    def _analyze_clusters_for_tables(self, clusters: dict[str, Any], texts: list[str]) -> dict[str, Any]:
+src/generator/entities/README.md:2257:from typing import Dict, Any
+src/generator/entities/README.md:2890:from typing import Dict, Any, Optional, List
+src/generator/entities/README.md:4416:from typing import Iterable, Iterator, Dict, Any, Optional
+src/generator/entities/README.md:4421:    value: Dict[str, Any]
+src/generator/entities/README.md:4449:def _str(x: Any) -> str:
+src/generator/entities/README.md:4455:def pick(d: Dict[str, Any], *keys: str) -> Dict[str, Any]:
+src/generator/entities/README.md:4461:from typing import Dict, Any, Iterable, List, Tuple
+src/generator/entities/README.md:4473:    biomes: List[Dict[str, Any]],
+src/generator/entities/README.md:4474:    regions: List[Dict[str, Any]],
+src/generator/entities/README.md:4475:    settlements: List[Dict[str, Any]],
+src/generator/entities/README.md:4476:    dungeons: List[Dict[str, Any]],
+src/generator/entities/README.md:4477:    hex_cells: List[Dict[str, Any]],
+src/generator/entities/README.md:4478:    rivers: List[Dict[str, Any]],
+src/generator/entities/README.md:4479:    trails: List[Dict[str, Any]],
+src/generator/entities/README.md:4480:    tokens: List[Dict[str, Any]],
+src/generator/entities/README.md:4481:    extras: Dict[str, Any] | None = None
+src/generator/entities/README.md:4485:    def dump(name: str, arr: Any):
+src/generator/entities/README.md:4515:from typing import Dict, Any, Iterable, List
+src/generator/entities/README.md:4527:    biomes: List[Dict[str, Any]],
+src/generator/entities/README.md:4528:    rivers: List[Dict[str, Any]],
+src/generator/entities/README.md:4529:    trails: List[Dict[str, Any]],
+src/generator/entities/README.md:4530:    settlements: List[Dict[str, Any]],
+src/generator/entities/README.md:4531:    dungeons: List[Dict[str, Any]],
+src/generator/entities/README.md:4535:    def dump(name: str, arr: Any):
+src/generator/entities/README.md:4579:from typing import Dict, Any, List, Tuple
+src/generator/entities/README.md:4586:def _maybe_training_enrich() -> Dict[str, Any]:
+src/generator/entities/README.md:4589:        out: Dict[str, Any] = {}
+src/generator/entities/README.md:4603:def is_hex_cell(v: Dict[str, Any]) -> bool:
+src/generator/entities/README.md:4607:def classify_feature(v: Dict[str, Any]) -> str | None:
+src/generator/entities/README.md:4620:def edge_list(v: Dict[str, Any], key: str) -> List[int]:
+src/generator/entities/README.md:4636:    biomes_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4637:    rivers_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4638:    trails_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4639:    settlements_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4640:    dungeons_layer: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4643:    biomes_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4644:    regions_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4645:    settlements_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4646:    dungeons_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4647:    hexcells_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4648:    rivers_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4649:    trails_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4650:    tokens_coll: List[Dict[str, Any]] = []
+src/generator/entities/README.md:4944:from typing import Any, List, Dict, Tuple (no Optional)
+src/generator/entities/README.md:4952:load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]
+src/generator/entities/README.md:4954:build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]
+src/generator/entities/README.md:4994:If you want me to also wire a small utility that writes these outputs to ./world/*.json and ./pandora/collections/*.json right from this module (so your code-agent just calls one function), I can add a write_world_and_collections(out_root: str, outputs: Dict[str, Any]) helper next.
+src/generator/entities/README.md:5044:def build_world_outputs(db_path: str = "", raw_json_entities: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+src/generator/entities/README.md:5102:Shout if you want me to apply that processor.py glue next (I’ll keep your Python 3.13+ typing style: list[dict[str, Any]], absolute imports, no Optional).
+src/generator/entities/README.md:5109:Awesome—here’s a focused audit of training/dungeons.py with gaps I spotted and concrete, low-friction upgrades you can fold in. I’m keeping to your Python 3.13+ style (built-ins list[dict[str, Any]], absolute imports, no Optional).
+src/generator/entities/README.md:5170:def _extract_spatial_hooks(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5226:def _infer_room_graph_signals(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5284:def _fallback_encounters_plaintext(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5310:def _normalize_treasure_details(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5413:def _extract_spatial_hooks(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5468:def _infer_room_graph_signals(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5496:def _fallback_encounters_plaintext(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5499:    data: dict[str, Any] = {"cr_values": [], "names": []}
+src/generator/entities/README.md:5520:def _normalize_treasure_details(content: str) -> dict[str, Any]:
+src/generator/entities/README.md:5742:from typing import Any
+src/generator/entities/README.md:5759:def _dump_json(out_dir: Path, kind: str, name: str, payload: dict[str, Any]) -> None:
+src/generator/entities/README.md:5766:def _extract_one(kind: str, content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/README.md:5776:def _minimal_schema(kind: str, name: str, data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/README.md:5779:    base: dict[str, Any] = {
+src/generator/entities/README.md:6255:-from typing import Any
+src/generator/entities/README.md:6256:+from typing import Any
+src/generator/entities/README.md:6423:from typing import Any
+src/generator/entities/README.md:6441:    def run(self) -> dict[str, Any]:
+src/generator/entities/README.md:6715:- Built‑in generics & unions (e.g., `dict[str, Any]`, `list[str]`, `Path | None`)
+src/generator/entities/processor.py:21:from typing import Any, List, Dict, Tuple
+src/generator/entities/processor.py:344:    def process_entity_batch(self, entities: list[tuple[str, str]]) -> dict[str, Any]:
+src/generator/entities/processor.py:436:        short_vector: Any,
+src/generator/entities/processor.py:437:        long_vector: Any, 
+src/generator/entities/processor.py:438:        semantic_vector: Any,
+src/generator/entities/processor.py:444:    ) -> dict[str, Any]:
+src/generator/entities/processor.py:499:    def _extract_comprehensive_ml_features(self, content: str) -> dict[str, Any]:
+src/generator/entities/processor.py:558:        ml_features: dict[str, Any], 
+src/generator/entities/processor.py:628:    def _deep_extraction_by_type(self, content: str, target_table: str, subtype: str | None) -> dict[str, Any]:
+src/generator/entities/processor.py:639:    def _basic_extraction_fallback(self, content: str, target_table: str) -> dict[str, Any]:
+src/generator/entities/processor.py:669:    def _update_entity_memory(self, result: dict[str, Any]) -> None:
+src/generator/entities/processor.py:808:def load_entities_from_sqlite(db_path: str) -> List[Dict[str, Any]]:
+src/generator/entities/processor.py:812:    rows: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:830:def _is_hex_cell(v: Dict[str, Any]) -> bool:
+src/generator/entities/processor.py:835:def _biome_of(v: Dict[str, Any]) -> str:
+src/generator/entities/processor.py:842:def _edge_list(v: Dict[str, Any], key: str) -> List[int]:
+src/generator/entities/processor.py:855:def _classify_feature(v: Dict[str, Any]) -> str:
+src/generator/entities/processor.py:868:    raw_json_entities: List[Dict[str, Any]] = None,
+src/generator/entities/processor.py:869:) -> Dict[str, Any]:
+src/generator/entities/processor.py:878:    entities: List[Dict[str, Any]] = raw_json_entities if raw_json_entities is not None else ([] if not db_path else load_entities_from_sqlite(db_path))
+src/generator/entities/processor.py:881:    biomes_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:882:    rivers_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:883:    trails_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:884:    settlements_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:885:    dungeons_layer: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:887:    biomes_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:888:    regions_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:889:    settlements_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:890:    dungeons_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:891:    hexcells_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:892:    rivers_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:893:    trails_coll: List[Dict[str, Any]] = []
+src/generator/entities/processor.py:894:    tokens_coll: List[Dict[str, Any]] = []
+src/generator/entities/training/meta.py:14:from typing import Any
+src/generator/entities/training/meta.py:17:def load_training_anchors() -> dict[str, Any]:
+src/generator/entities/training/meta.py:103:def load_organized_examples(category: str) -> list[dict[str, Any]]:
+src/generator/entities/training/meta.py:155:def _parse_region_content(name: str, content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:192:def _parse_settlement_content(name: str, content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:209:def _parse_faction_content(name: str, content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:226:def _parse_dungeon_content(name: str, content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:243:def _extract_region_features(data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/meta.py:257:def _extract_html_features(content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:334:def _analyze_connectivity(map_tiles: list[dict]) -> dict[str, Any]:
+src/generator/entities/training/meta.py:352:def _map_political_control(map_tiles: list[dict], regions: dict[str, str]) -> dict[str, Any]:
+src/generator/entities/training/meta.py:374:def _extract_settlement_features(content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:429:def _extract_faction_features(content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:444:def _analyze_leadership(content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:463:def _extract_dungeon_features(content: str) -> dict[str, Any]:
+src/generator/entities/training/meta.py:498:def get_training_metadata() -> dict[str, Any]:
+src/generator/entities/training/meta.py:575:def _analyze_org_structure(content: str) -> dict[str, Any]:
+src/generator/entities/training/factions.py:14:from typing import Any
+src/generator/entities/training/factions.py:22:def _extract_world_hooks(content: str) -> dict[str, Any]:
+src/generator/entities/training/factions.py:77:def _infer_influence_score(training_signals: dict[str, Any]) -> int:
+src/generator/entities/training/factions.py:95:def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/factions.py:179:def _analyze_faction_patterns(faction_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/factions.py:239:def _assess_faction_sophistication(training_signals: dict[str, Any]) -> int:
+src/generator/entities/training/factions.py:266:def _classify_faction_activity(content_features: dict[str, Any]) -> str:
+src/generator/entities/training/factions.py:293:def _create_faction_training_vectors(faction_examples: list[dict[str, Any]], logger: logging.Logger, console) -> list[dict[str, Any]]:
+src/generator/entities/training/factions.py:315:def _generate_faction_extraction_rules(analysis_results: dict[str, Any], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/factions.py:352:def _create_organizational_rules(org_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:383:def _create_leadership_rules(leadership_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:415:def _create_membership_rules(membership_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:448:def _create_territorial_rules(territorial_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:484:def _create_political_rules(political_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:524:def _summarize_faction_patterns(patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:578:def _save_faction_patterns(extraction_rules: dict[str, Any], analysis_results: dict[str, Any]) -> bool:
+src/generator/entities/training/factions.py:605:def _create_faction_training_guide(patterns_dir: Path, analysis_results: dict[str, Any]) -> None:
+src/generator/entities/training/factions.py:680:def _format_organizational_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/factions.py:693:def _format_territorial_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/factions.py:706:def _format_political_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/factions.py:719:def extract_faction_content(entity_content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/training/factions.py:773:def _apply_organizational_analysis(content: str, org_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:817:def _apply_territorial_analysis(content: str, territorial_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/factions.py:859:def _apply_political_classification(content: str, political_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:17:from typing import Any
+src/generator/entities/training/dungeons.py:44:def _extract_spatial_hooks(content: str) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:100:def _infer_room_graph_signals(content: str) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:128:def _fallback_encounters_plaintext(content: str) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:130:    data: dict[str, Any] = {"cr_values": [], "names": []}
+src/generator/entities/training/dungeons.py:154:def _normalize_treasure_details(content: str) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:168:def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:235:def _analyze_dungeon_patterns(dungeon_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:302:def _assess_dungeon_complexity(content_features: dict[str, Any]) -> int:
+src/generator/entities/training/dungeons.py:330:def _extract_wealth_indicators(content_features: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:377:def _create_dungeon_training_vectors(dungeon_examples: list[dict[str, Any]], logger: logging.Logger, console) -> list[dict[str, Any]]:
+src/generator/entities/training/dungeons.py:402:def _generate_dungeon_extraction_rules(analysis_results: dict[str, Any], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:438:def _create_type_rules(type_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:483:def _create_encounter_rules(encounter_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:515:def _create_treasure_rules(treasure_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:555:def _create_horror_rules(horror_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:601:def _create_challenge_rules(challenge_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:635:def _summarize_dungeon_patterns(patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:638:    summary: dict[str, Any] = {}
+src/generator/entities/training/dungeons.py:707:def _save_dungeon_patterns(extraction_rules: dict[str, Any], analysis_results: dict[str, Any]) -> bool:
+src/generator/entities/training/dungeons.py:732:def _create_dungeon_training_guide(patterns_dir: Path, analysis_results: dict[str, Any]) -> None:
+src/generator/entities/training/dungeons.py:810:def _format_type_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/dungeons.py:823:def _format_encounter_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/dungeons.py:835:def _format_treasure_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/dungeons.py:848:def _format_horror_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/dungeons.py:862:def extract_dungeon_content(entity_content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:915:def _apply_type_classification(content: str, type_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:930:    type_scores: dict[str, dict[str, Any]] = {}
+src/generator/entities/training/dungeons.py:960:def _apply_encounter_analysis(content: str, encounter_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:1013:def _apply_treasure_analysis(content: str, treasure_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/dungeons.py:1065:def _apply_horror_analysis(content: str, horror_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/__init__.py:12:from typing import Any
+src/generator/entities/training/__init__.py:21:def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/__init__.py:180:def extract_entity_content(entity_content: str, entity_category: str | None = None) -> dict[str, Any]:
+src/generator/entities/training/__init__.py:262:def get_category_statistics() -> dict[str, Any]:
+src/generator/entities/training/__init__.py:296:def validate_training_system() -> dict[str, Any]:
+src/generator/entities/training/regions.py:14:from typing import Any
+src/generator/entities/training/regions.py:21:def _derive_world_hooks_from_region(biomes: list[str], geo: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:53:def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/regions.py:142:def _analyze_region_patterns(region_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/regions.py:174:def _analyze_structured_region(example: dict[str, Any], patterns: dict[str, Any], logger: logging.Logger) -> None:
+src/generator/entities/training/regions.py:215:def _analyze_html_region(example: dict[str, Any], patterns: dict[str, Any], logger: logging.Logger) -> None:
+src/generator/entities/training/regions.py:233:def _create_region_training_vectors(region_examples: list[dict[str, Any]], logger: logging.Logger, console) -> list[dict[str, Any]]:
+src/generator/entities/training/regions.py:255:def _generate_region_extraction_rules(analysis_results: dict[str, Any], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/regions.py:290:def _create_biome_rules(biome_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:319:def _create_settlement_rules(settlement_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:352:def _create_geographic_rules(geographic_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:372:def _create_content_rules(content_complexity: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:410:def _create_political_rules(political_structures: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:433:def _summarize_regional_patterns(patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:487:def _save_region_patterns(extraction_rules: dict[str, Any], analysis_results: dict[str, Any]) -> bool:
+src/generator/entities/training/regions.py:514:def _update_training_guide(patterns_dir: Path, analysis_results: dict[str, Any]) -> None:
+src/generator/entities/training/regions.py:554:def _format_biome_summary(analysis_results: dict[str, Any]) -> str:
+src/generator/entities/training/regions.py:570:def _format_settlement_summary(analysis_results: dict[str, Any]) -> str:
+src/generator/entities/training/regions.py:586:def _format_geographic_summary(analysis_results: dict[str, Any]) -> str:
+src/generator/entities/training/regions.py:601:def extract_region_content(entity_content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/training/regions.py:664:def _apply_biome_extraction(content: str, biome_rules: dict[str, Any]) -> list[str]:
+src/generator/entities/training/regions.py:683:def _apply_settlement_extraction(content: str, settlement_rules: dict[str, Any]) -> list[dict[str, Any]]:
+src/generator/entities/training/regions.py:701:def _apply_geographic_extraction(content: str, geo_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/regions.py:713:    features: dict[str, Any] = {
+src/generator/entities/training/regions.py:756:def _apply_npc_extraction(content: str, content_rules: dict[str, Any]) -> list[str]:
+src/generator/entities/training/patterns.py:12:from typing import Any
+src/generator/entities/training/patterns.py:19:    extracted_content: dict[str, Any]
+src/generator/entities/training/patterns.py:25:def extract_npc_data(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:79:def extract_settlement_data(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:121:def extract_faction_data(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:162:def extract_dungeon_data(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:201:def extract_biome_features(hex_data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:231:def _extract_stat_block(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:300:def _extract_establishments(content: str) -> list[dict[str, Any]]:
+src/generator/entities/training/patterns.py:325:def _extract_services(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:401:def _extract_economic_data(content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:433:def _extract_faction_leader(content: str) -> dict[str, Any] | None:
+src/generator/entities/training/patterns.py:452:def _extract_faction_members(content: str, section: str) -> list[dict[str, Any]]:
+src/generator/entities/training/patterns.py:549:def _extract_encounters(content: str) -> list[dict[str, Any]]:
+src/generator/entities/training/patterns.py:566:def _extract_treasure_hoards(content: str) -> list[dict[str, Any]]:
+src/generator/entities/training/patterns.py:684:def _parse_monster_block(block_content: str) -> dict[str, Any] | None:
+src/generator/entities/training/patterns.py:700:def _parse_hoard_contents(hoard_content: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:733:def validate_extraction_quality(extracted_data: dict[str, Any]) -> float:
+src/generator/entities/training/patterns.py:764:def create_ml_training_vector(extracted_data: dict[str, Any], category: str) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:788:def _create_region_vector(data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:802:def _create_settlement_vector(data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:816:def _create_faction_vector(data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:830:def _create_dungeon_vector(data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/patterns.py:863:def _assess_org_sophistication(faction_data: dict[str, Any]) -> int:
+src/generator/entities/training/settlements.py:14:from typing import Any
+src/generator/entities/training/settlements.py:22:def _extract_world_hooks(content: str) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:98:def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:201:def _analyze_settlement_patterns(settlement_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:248:def _analyze_settlement_content_features(name: str, content_features: dict[str, Any], patterns: dict[str, Any], logger: logging.Logger) -> None:
+src/generator/entities/training/settlements.py:278:def _create_settlement_training_vectors(settlement_examples: list[dict[str, Any]], logger: logging.Logger, console) -> list[dict[str, Any]]:
+src/generator/entities/training/settlements.py:300:def _generate_settlement_extraction_rules(analysis_results: dict[str, Any], logger: logging.Logger, console) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:338:def _create_scale_rules(scale_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:367:def _create_establishment_rules(establishment_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:398:def _create_economic_rules(economic_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:424:def _create_npc_rules(npc_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:455:def _create_service_rules(service_patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:479:def _summarize_settlement_patterns(patterns: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:535:def _save_settlement_patterns(extraction_rules: dict[str, Any], analysis_results: dict[str, Any]) -> bool:
+src/generator/entities/training/settlements.py:562:def _create_settlement_training_guide(patterns_dir: Path, analysis_results: dict[str, Any]) -> None:
+src/generator/entities/training/settlements.py:622:def _format_scale_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/settlements.py:635:def _format_economic_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/settlements.py:647:def _format_establishment_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/settlements.py:659:def _format_npc_summary(summary: dict[str, Any]) -> str:
+src/generator/entities/training/settlements.py:672:def extract_settlement_content(entity_content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:721:def _assess_scale_confidence(content: str, scale_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/training/settlements.py:759:def _apply_economic_analysis(content: str, economic_rules: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/godot_generator.py:17:from typing import Any
+src/generator/entities/godot_generator.py:28:def _dump_json(out_dir: Path, kind: str, name: str, payload: dict[str, Any]) -> None:
+src/generator/entities/godot_generator.py:55:def _extract_one(kind: str, content: str, learned_rules: dict[str, Any] | None = None) -> dict[str, Any]:
+src/generator/entities/godot_generator.py:65:def _minimal_schema(kind: str, name: str, data: dict[str, Any]) -> dict[str, Any]:
+src/generator/entities/godot_generator.py:67:    base: dict[str, Any] = {
+src/generator/entities/extractors.py:12:from typing import Any
+src/generator/entities/extractors.py:75:    def extract_batch(self, entities: list[tuple[str, str]]) -> dict[str, Any]:
+src/generator/entities/extractors.py:150:        ml_results: dict[str, Any],
+src/generator/entities/extractors.py:152:        training_discoveries: dict[str, Any]
+src/generator/entities/extractors.py:153:    ) -> dict[str, Any]:
+src/generator/entities/extractors.py:207:    def _validate_extraction_quality(self, results: dict[str, Any]) -> None:
+src/generator/entities/extractors.py:264:    def extract(self, content: str) -> dict[str, Any]:
+src/generator/entities/extractors.py:306:    def _extract_biome(self, content: str, vector: Any) -> dict[str, Any]:
+src/generator/entities/extractors.py:333:    def _extract_monster(self, content: str, vector: Any) -> dict[str, Any]:
+src/generator/entities/extractors.py:364:    def _extract_inn(self, content: str, vector: Any) -> dict[str, Any]:
+src/generator/entities/extractors.py:380:    def _extract_dungeon(self, content: str, vector: Any, dungeon_type: str) -> dict[str, Any]:
+src/generator/entities/extractors.py:390:    def _extract_settlement(self, content: str, vector: Any, settlement_type: str) -> dict[str, Any]:
+src/generator/entities/extractors.py:400:    def _extract_dwelling(self, content: str, vector: Any, dwelling_type: str) -> dict[str, Any]:
+src/generator/entities/extractors.py:410:    def _extract_faction(self, content: str, vector: Any, faction_type: str) -> dict[str, Any]:
+src/generator/entities/extractors.py:480:def extract_entities(entities: list[tuple[str, str]]) -> dict[str, Any]:
+src/generator/entities/models.py:11:from typing import Any
+src/generator/entities/INTEGRATION.md:41:# Typing Any where avoidable (summary only)
+src/generator/entities/INTEGRATION.md:42:say "\n- Heavy Any usage (heads-up review):"
+src/generator/entities/patterns.py:13:from typing import Any
+src/generator/entities/patterns.py:285:    def route_entity(self, hbf_uuid: str, content: str) -> tuple[str, dict[str, Any], float]:
+src/generator/entities/patterns.py:357:    def _extract_hex_tile_data(self, match: re.Match, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:394:    def _extract_creature_data(self, match: re.Match, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:430:    def _extract_npc_data(self, match: re.Match, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:460:    def _extract_treasure_data(self, match: re.Match, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:480:    def _extract_settlement_data(self, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:516:    def _extract_faction_data(self, content: str) -> dict[str, Any]:
+src/generator/entities/patterns.py:785:def generate_analysis_csv(entities: list[dict[str, Any]], target_table: str) -> str:
+src/generator/assets/__init__.py:9:from typing import Any
+src/generator/assets/__init__.py:32:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/assets/__init__.py:354:def get_all_assets(engine) -> list[dict[str, Any]]:
+src/generator/assets/__init__.py:375:def get_assets_by_category(engine, category: str) -> list[dict[str, Any]]:
+src/generator/assets/__init__.py:392:def get_openai_generation_metrics(engine) -> dict[str, Any]:
+src/generator/assets/__init__.py:412:    entities_context: dict[str, Any],
+src/generator/assets/__init__.py:413:    psychology_context: dict[str, Any],
+src/generator/assets/__init__.py:414:    world_context: dict[str, Any],
+src/generator/assets/__init__.py:415:    maps_context: dict[str, Any],
+src/generator/assets/__init__.py:416:    encounters_context: dict[str, Any],
+src/generator/assets/__init__.py:417:    sprites_context: dict[str, Any]
+src/generator/assets/models.py:10:from typing import Any
+src/generator/assets/models.py:359:    psychology_context: dict[str, Any]
+src/generator/assets/models.py:360:    world_context: dict[str, Any]
+src/generator/assets/models.py:361:    maps_context: dict[str, Any]
+src/generator/assets/models.py:362:    encounters_context: dict[str, Any]
+src/generator/assets/models.py:363:    sprites_context: dict[str, Any]
+src/generator/assets/models.py:440:    entities_context: dict[str, Any] = Field(default_factory=dict, description="Context from entities")
+src/generator/assets/models.py:441:    psychology_context: dict[str, Any] = Field(default_factory=dict, description="Context from psychology")
+src/generator/assets/models.py:442:    world_context: dict[str, Any] = Field(default_factory=dict, description="Context from world")
+src/generator/assets/models.py:443:    maps_context: dict[str, Any] = Field(default_factory=dict, description="Context from maps")
+src/generator/assets/models.py:444:    encounters_context: dict[str, Any] = Field(default_factory=dict, description="Context from encounters")
+src/generator/assets/models.py:445:    sprites_context: dict[str, Any] = Field(default_factory=dict, description="Context from sprites")
+src/generator/statistics.py:8:from typing import Any
+src/generator/statistics.py:27:    metrics: dict[str, Any] = Field(default_factory=dict)
+src/generator/statistics.py:51:    def add_metric(self, key: str, value: Any):
+src/generator/statistics.py:64:    def to_dict(self) -> dict[str, Any]:
+src/generator/files/models.py:12:from typing import Any
+src/generator/files/manager.py:14:from typing import Any
+src/generator/files/manager.py:183:        data: dict[str, Any],
+src/generator/files/manager.py:358:    def get_file_stats(self) -> dict[str, Any]:
+src/generator/maps/__init__.py:9:from typing import Any
+src/generator/maps/__init__.py:32:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/maps/__init__.py:475:def get_all_hex_tiles(engine) -> list[dict[str, Any]]:
+src/generator/maps/__init__.py:497:def get_map_regions(engine) -> list[dict[str, Any]]:
+src/generator/files/__init__.py:9:from typing import Any
+src/generator/files/__init__.py:38:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/sprites/models.py:10:from typing import Any
+src/generator/sprites/models.py:440:    emotional_profile: dict[str, Any]
+src/generator/sprites/models.py:452:    psychology_data: dict[str, Any]
+src/generator/sprites/models.py:453:    world_context: dict[str, Any]
+src/generator/sprites/models.py:502:    cultural_background: dict[str, Any]
+src/generator/maps/models.py:10:from typing import Any
+src/generator/psychology/models.py:10:from typing import Any
+src/generator/sprites/__init__.py:9:from typing import Any
+src/generator/sprites/__init__.py:35:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/sprites/__init__.py:414:def get_all_characters(engine) -> list[dict[str, Any]]:
+src/generator/sprites/__init__.py:434:def get_companions(engine) -> list[dict[str, Any]]:
+src/generator/sprites/__init__.py:452:def get_character_roster(engine) -> dict[str, Any]:
+src/field/gameboard/gameboard.gd:108:	# Compare the changed cells with those already in the pathfinder. Any changes will cause the
+src/generator/encounters/models.py:10:from typing import Any
+src/generator/encounters/models.py:393:    psychology_data: dict[str, Any]
+src/generator/encounters/models.py:394:    world_context: dict[str, Any]
+src/generator/encounters/models.py:431:    psychology_tension: dict[str, Any]
+src/generator/encounters/models.py:449:    world_story_context: dict[str, Any]
+src/generator/encounters/models.py:450:    psychology_character_development: dict[str, Any]
+src/generator/encounters/models.py:454:    philosophy_choice_modifiers: dict[str, Any]
+src/generator/encounters/models.py:500:    psychology_profile: dict[str, Any]
+src/generator/psychology/__init__.py:9:from typing import Any
+src/generator/psychology/__init__.py:28:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/psychology/__init__.py:288:def get_emotional_seeds_data(engine) -> list[dict[str, Any]]:
+src/generator/psychology/__init__.py:309:def get_horror_progression_data() -> dict[str, Any]:
+src/generator/psychology/__init__.py:322:def get_all_companion_profiles(engine) -> list[dict[str, Any]]:
+src/generator/seeds/extractors.py:8:from typing import Any
+src/generator/seeds/extractors.py:58:    def __init__(self, ml_processor: Any | None = None):
+src/generator/seeds/extractors.py:145:    def process_text(self, text: str, seed_type: str) -> Any:
+src/generator/seeds/extractors.py:158:    def __init__(self, ml_processor: Any):
+src/generator/seeds/extractors.py:225:    def __init__(self, ml_processor: Any):
+src/generator/seeds/extractors.py:293:    def __init__(self, ml_processor: Any):
+src/generator/seeds/extractors.py:312:    def __init__(self, ml_processor: Any):
+src/generator/seeds/extractors.py:331:    def __init__(self, ml_processor: Any):
+src/generator/encounters/__init__.py:9:from typing import Any
+src/generator/encounters/__init__.py:33:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/encounters/__init__.py:360:def get_all_encounters(engine) -> list[dict[str, Any]]:
+src/generator/encounters/__init__.py:379:def get_encounters_by_region(engine, region_id: str) -> list[dict[str, Any]]:
+src/generator/encounters/__init__.py:398:def get_encounters_by_dread_level(engine, dread_level: int) -> list[dict[str, Any]]:
+src/generator/seeds/__init__.py:10:from typing import Any
+src/generator/seeds/__init__.py:28:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/seeds/__init__.py:348:def get_emotional_seeds_data(engine) -> list[dict[str, Any]]:
+src/generator/seeds/__init__.py:364:def get_horror_progression_data() -> dict[str, Any]:
+src/generator/seeds/models.py:10:from typing import Any
+src/generator/seeds/models.py:433:    statistics: dict[str, Any] = Field(default_factory=dict, description="Validation statistics")
+src/generator/world/models.py:10:from typing import Any
+src/generator/world/models.py:382:    player_psychology: dict[str, Any]
+src/generator/world/__init__.py:9:from typing import Any
+src/generator/world/__init__.py:31:def run(engine, logger, console: Console) -> dict[str, Any]:
+src/generator/world/__init__.py:369:def get_all_regions(engine) -> list[dict[str, Any]]:
+src/generator/world/__init__.py:392:def get_campaign_state(engine) -> dict[str, Any]:
+src/generator/world/__init__.py:411:def get_world_state(engine) -> dict[str, Any]:
+
+## 4) Entities subpackage wiring
+- manager.py commands:
+409:@app.command("extract")
+421:@app.command("export-hooks")
+425:@app.command("gen-images")
+443:@app.command("godot-build")
+
+- manager.py generation imports:
+42:from generator.image_generator import (
+47:from generator.godot_generator import export_world_hooks_json
+
+- image generator functions present:
+
+- godot exporter present:
+
+## 5) Training coverage (world_hooks expected keys)
+- training/regions.py hooks coverage:
+21:def _derive_world_hooks_from_region(biomes: list[str], geo: dict[str, Any]) -> dict[str, Any]:
+24:      - dominant_biome: str|None
+25:      - has_rivers: bool
+26:      - has_trails: bool
+32:    dominant_biome = biomes[0] if biomes else None
+35:    has_rivers = len(rivers_dirs) > 0 or geo.get("rivers", 0) > 0
+36:    has_trails = len(trails_dirs) > 0 or geo.get("trails", 0) > 0
+43:        "dominant_biome": dominant_biome,
+44:        "has_rivers": has_rivers,
+45:        "has_trails": has_trails,
+98:        dom = data.get("dominant_biome")
+185:        "dominant_biome": max(biome_dist.items(), key=lambda x: x[1])[0] if biome_dist else "unknown",
+270:    rules["world_hooks"] = {
+272:        "dominant_biome_hist": ws.get("dominant_hist", {}),
+656:    extracted_data["world_hooks"] = _derive_world_hooks_from_region(
+
+- training/settlements.py hooks coverage:
+22:def _extract_world_hooks(content: str) -> dict[str, Any]:
+25:      - scale_hint: 'village'|'town'|'city'|'unknown'
+39:        scale_hint = "city"
+41:        scale_hint = "town"
+43:        scale_hint = "village"
+45:        scale_hint = "unknown"
+87:        "scale_hint": scale_hint,
+137:        "scale_hints": {"village": 0, "town": 0, "city": 0, "unknown": 0},
+143:        hooks = _extract_world_hooks(raw)
+160:        sh = hooks.get("scale_hint", "unknown")
+161:        if sh in world_rollup["scale_hints"]:
+162:            world_rollup["scale_hints"][sh] += 1
+174:        "scale_hints": world_rollup["scale_hints"],
+323:    rules["world_hooks"] = {
+329:        "scale_hint_distribution": ws.get("scale_hints", {}),
+716:    extracted_data["world_hooks"] = _extract_world_hooks(entity_content)
+
+- training/dungeons.py hooks coverage:
+425:    rules["world_hooks"] = {
+910:    extracted_data["world_hooks"] = {**spatial, **graph}
+
+- training/factions.py hooks coverage:
+22:def _extract_world_hooks(content: str) -> dict[str, Any]:
+135:        hooks = _extract_world_hooks(raw)
+330:    rules["world_hooks"] = {
+763:    extracted_data["world_hooks"] = _extract_world_hooks(entity_content)
+
+
+## 6) SQLite/HBF presence
+- Found HBF file(s):
+-rw-r--r-- 1 jbogaty staff 23M Aug 27 16:21 memory-bank/world-output/nTR8nJOW.hbf
+
+## 7) Art & data target folders
+- ensured: game/art
+- ensured: game/data/world_hooks
+
+## 8) Suggested next commands
+# help
+hatch run python -m generator.entities.manager --help
+
+# extract (edit the path if different)
+hatch run python -m generator.entities.manager extract --hbf inputs/raw_game.hbf
+
+# export hooks
+hatch run python -m generator.entities.manager export-hooks --out game/data/world_hooks
+
+# generate images
+hatch run python -m generator.entities.manager gen-images biomes --out game/art --size 1024x1024
+hatch run python -m generator.entities.manager gen-images tokens --out game/art --size 1024x1024
+hatch run python -m generator.entities.manager gen-images body-bases --out game/art --size 1024x1024
+
+✅ Audit complete. Report written to: /Users/jbogaty/src/dragons-labyrinth/audit/_report.txt

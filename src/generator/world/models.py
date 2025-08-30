@@ -105,16 +105,16 @@ DreadLevel = int  # 0-4
 
 class WorldTimestampedModel(SQLModel):
     """Base model with world-specific tracking."""
-    
-    created_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    updated_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    
+
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
     # Cross-system integration tracking
     entities_integrated: bool = SQLField(default=False, description="Entities data integrated")
     seeds_integrated: bool = SQLField(default=False, description="Seeds data integrated")
     psychology_integrated: bool = SQLField(default=False, description="Psychology data integrated")
     maps_integrated: bool = SQLField(default=False, description="Maps data integrated")
-    
+
     # World generation metadata
     generation_complexity: int = SQLField(default=2, description="WorldComplexity enum value")
     validation_score: float = SQLField(default=0.0, description="World validation score")
@@ -166,6 +166,9 @@ class Regions(WorldTimestampedModel, table=True):
     godot_scene_path: str | None = SQLField(default=None, description="Path to generated .tscn")
     godot_resource_path: str | None = SQLField(default=None, description="Path to generated .tres")
     tileset_reference: str | None = SQLField(default=None, description="Reference to map tileset")
+    
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
     
     # Relationships
     campaigns: list["Campaigns"] = Relationship(back_populates="regions")

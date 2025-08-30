@@ -1,0 +1,183 @@
+diff --git a/tools/repo_diffs.patch b/tools/repo_diffs.patch
+index 1111111..2222222 100644
+--- a/tools/repo_diffs.patch
++++ b/tools/repo_diffs.patch
+@@ -112,6 +112,147 @@
++diff --git a/src/generator/entities/godot_generator.py b/src/generator/entities/godot_generator.py
++new file mode 100644
++index 0000000..e1f7abc
++--- /dev/null
+++++ b/src/generator/entities/godot_generator.py
++@@ -0,0 +1,139 @@
++ +"""Godot exporter utilities for world hook JSONs.
++ +
++ +Writes compact JSON blobs that Godot can load directly into
++ +`game/data/world_hooks`.
++ +
++ +Design goals:
++ +  - Pure-Python, no engine deps.
++ +  - Safe defaults: if training stats are unavailable, we still write
++ +    well-formed empty structures so the Godot side never crashes.
++ +  - Minimal, explicit schema.
++ +"""
++ +
++ +from __future__ import annotations
++ +
++ +from pathlib import Path
++ +from typing import Any
++ +import json
++ +import logging
++ +
++ +logger = logging.getLogger(__name__)
++ +
++ +
++ +def _safe_get(d: dict[str, Any], *path: str, default: Any = None) -> Any:
++ +    cur: Any = d
++ +    for key in path:
++ +        if not isinstance(cur, dict) or key not in cur:
++ +            return default
++ +        cur = cur[key]
++ +    return cur
++ +
++ +
++ +def export_world_hooks_json(out_dir: str | Path, stats: dict[str, Any] | None = None) -> dict[str, Path]:
++ +    """Export world-hooks JSON for Godot.
++ +
++ +    If *stats* is not provided, attempts to pull them from the training
++ +    package via `get_category_statistics()`.
++ +
++ +    Files written:
++ +      - regions.json
++ +      - settlements.json
++ +      - dungeons.json
++ +      - factions.json
++ +
++ +    Returns a mapping of category->path written.
++ +    """
++ +
++ +    out_root = Path(out_dir)
++ +    out_root.mkdir(parents=True, exist_ok=True)
++ +
++ +    if stats is None:
++ +        try:
++ +            # Lazy import to avoid heavy deps unless needed
++ +            from .training import get_category_statistics  # type: ignore
++ +
++ +            stats = get_category_statistics()
++ +            logger.info("Loaded training category statistics for world-hooks export")
++ +        except Exception as e:  # pragma: no cover - defensive
++ +            logger.warning("Could not load training stats; exporting empty hooks: %s", e)
++ +            stats = {}
++ +
++ +    # Build compact per-category payloads with safe defaults
++ +    payloads: dict[str, dict[str, Any]] = {
++ +        "regions": {
++ +            "dominant_biome_hist": _safe_get(stats, "regions", "world_hooks", "dominant_biome_hist", default={}),
++ +        },
++ +        "settlements": {
++ +            "scale_hint_distribution": _safe_get(stats, "settlements", "world_hooks", "scale_hint_distribution", default={}),
++ +        },
++ +        "dungeons": {
++ +            # Keep room for future expansions (types, horror signals, etc.)
++ +            "signals": _safe_get(stats, "dungeons", "world_hooks", "signals", default={}),
++ +        },
++ +        "factions": {
++ +            "influence_distribution": _safe_get(stats, "factions", "world_hooks", "influence_distribution", default={}),
++ +        },
++ +    }
++ +
++ +    written: dict[str, Path] = {}
++ +    for category, payload in payloads.items():
++ +        path = out_root / f"{category}.json"
++ +        with path.open("w", encoding="utf-8") as f:
++ +            json.dump(payload, f, indent=2, ensure_ascii=False)
++ +        written[category] = path
++ +        logger.info("Wrote world-hooks: %s", path)
++ +
++ +    return written
++ +
++ +
++ +__all__ = ["export_world_hooks_json"]
++
++diff --git a/src/generator/entities/image_generator.py b/src/generator/entities/image_generator.py
++new file mode 100644
++index 0000000..8b3a2d1
++--- /dev/null
+++++ b/src/generator/entities/image_generator.py
++@@ -0,0 +1,159 @@
++ +"""Image generation stubs for assets.
++ +
++ +These are intentionally minimal so the CLI can run end-to-end without
++ +requiring external image services. They create JSON manifests and
++ +placeholder files in the requested output directory.
++ +"""
++ +
++ +from __future__ import annotations
++ +
++ +from pathlib import Path
++ +from typing import Any
++ +import json
++ +
++ +
++ +def _ensure_out_dir(out_dir: str | Path) -> Path:
++ +    p = Path(out_dir)
++ +    p.mkdir(parents=True, exist_ok=True)
++ +    return p
++ +
++ +
++ +def _write_manifest(out: Path, name: str, items: list[dict[str, Any]]) -> Path:
++ +    manifest = out / f"{name}_manifest.json"
++ +    with manifest.open("w", encoding="utf-8") as f:
++ +        json.dump({"items": items}, f, indent=2, ensure_ascii=False)
++ +    return manifest
++ +
++ +
++ +def _touch_placeholder(path: Path) -> None:
++ +    # Create a tiny placeholder so pipelines expecting files won't break
++ +    if not path.exists():
++ +        path.write_bytes(b"")
++ +
++ +
++ +def generate_biome_images(out_dir: str | Path, size: str = "1024x1024") -> dict[str, Any]:
++ +    out = _ensure_out_dir(out_dir)
++ +    # Seed with a couple of deterministic placeholders; real pipeline can replace later
++ +    items = [
++ +        {"biome": "forest", "file": "biome_forest.png", "size": size},
++ +        {"biome": "desert", "file": "biome_desert.png", "size": size},
++ +    ]
++ +    for it in items:
++ +        _touch_placeholder(out / it["file"])
++ +    manifest = _write_manifest(out, "biomes", items)
++ +    return {"manifest": str(manifest), "count": len(items)}
++ +
++ +
++ +def generate_token_images(out_dir: str | Path, size: str = "1024x1024") -> dict[str, Any]:
++ +    out = _ensure_out_dir(out_dir)
++ +    items = [
++ +        {"token": "campfire", "file": "token_campfire.png", "size": size},
++ +        {"token": "ruins", "file": "token_ruins.png", "size": size},
++ +    ]
++ +    for it in items:
++ +        _touch_placeholder(out / it["file"])
++ +    manifest = _write_manifest(out, "tokens", items)
++ +    return {"manifest": str(manifest), "count": len(items)}
++ +
++ +
++ +def generate_body_base_images(out_dir: str | Path, size: str = "1024x1024") -> dict[str, Any]:
++ +    out = _ensure_out_dir(out_dir)
++ +    items = [
++ +        {"base": "humanoid", "file": "base_humanoid.png", "size": size},
++ +        {"base": "beast", "file": "base_beast.png", "size": size},
++ +    ]
++ +    for it in items:
++ +        _touch_placeholder(out / it["file"])
++ +    manifest = _write_manifest(out, "body_bases", items)
++ +    return {"manifest": str(manifest), "count": len(items)}
++ +
++ +
++ +__all__ = [
++ +    "generate_biome_images",
++ +    "generate_token_images",
++ +    "generate_body_base_images",
++ +]
++ +

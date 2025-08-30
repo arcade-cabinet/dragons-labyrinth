@@ -1,72 +1,65 @@
 """
-Region ML Training - Extract region content from organized HBF examples.
+Region Processor - Process region entity clusters using base ML foundation.
 
-Uses organized regional data from memory-bank/world-building/regions/ to train
-ML models for region content extraction. Focuses on environmental descriptions,
-political context, biome distributions, and settlement patterns.
+Uses the DragonLabyrinthMLProcessor from base.py to process region clusters
+from the transformer. Extracts environmental descriptions, political context,
+biome distributions, and settlement patterns with world_hooks for Godot integration.
 """
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import re
 from typing import Any
 
-from .meta import load_organized_examples, get_training_metadata
-from .patterns import extract_biome_features, create_ml_training_vector, validate_extraction_quality
+from generator.entities.processors.base import DragonLabyrinthMLProcessor
 
 
-def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+def process_region_cluster(cluster) -> dict[str, Any]:
     """
-    Run region ML training using organized HBF examples.
+    Process region entity cluster using base ML foundation.
     
     Args:
-        engine: Database engine (passed but not used - we use organized files)
-        logger: Logger instance
-        console: Rich console for output
+        cluster: EntityCluster containing region entities from transformer
         
     Returns:
-        Training results with learned patterns
+        Processed region data with world_hooks for Godot integration
     """
     
-    logger.info("Starting region ML training from organized examples")
-    console.print("🏔️ [bold blue]Region ML Training[/bold blue] - Learning from 27 organized examples")
+    print(f"🏔️ Processing region cluster: {cluster.name} ({cluster.get_entity_count()} entities)")
     
-    # Load organized region examples
-    region_examples = load_organized_examples("regions")
+    # Initialize ML processor
+    processor = DragonLabyrinthMLProcessor()
     
-    if not region_examples:
-        logger.error("No organized region examples found")
-        return {"error": "No training data available"}
+    # Convert cluster entities to format expected by base processor
+    entity_pairs = []
+    for i, entity in enumerate(cluster.entities):
+        entity_id = f"{cluster.name}_{i}"
+        entity_content = _serialize_entity_for_processing(entity)
+        entity_pairs.append((entity_id, entity_content))
     
-    logger.info(f"Loaded {len(region_examples)} region examples")
-    console.print(f"📊 Loaded {len(region_examples)} organized region examples")
+    # Process entities with base ML
+    ml_results = processor.process_entity_batch(entity_pairs)
     
-    # Analyze region patterns
-    analysis_results = _analyze_region_patterns(region_examples, logger, console)
+    # Extract region-specific data
+    region_data = _extract_region_specific_data(cluster, ml_results)
     
-    # Create ML training vectors
-    training_vectors = _create_region_training_vectors(region_examples, logger, console)
+    # Generate world_hooks for Godot integration
+    world_hooks = _generate_region_world_hooks(cluster, region_data)
     
-    # Generate region extraction rules
-    extraction_rules = _generate_region_extraction_rules(analysis_results, logger, console)
-    
-    # Save learned patterns
-    patterns_saved = _save_region_patterns(extraction_rules, analysis_results)
-    
-    results = {
-        "examples_analyzed": len(region_examples),
-        "pattern_analysis": analysis_results,
-        "training_vectors": training_vectors,
-        "extraction_rules": extraction_rules,
-        "patterns_saved": patterns_saved,
-        "training_quality": "organized_breakthrough_data"
+    result = {
+        "cluster_name": cluster.name,
+        "cluster_category": cluster.category,
+        "entity_count": cluster.get_entity_count(),
+        "region_data": region_data,
+        "world_hooks": world_hooks,
+        "ml_processing_results": ml_results,
+        "processor_type": "regions"
     }
     
-    console.print("✅ [bold green]Region training complete[/bold green] - Patterns learned from organized data")
-    logger.info(f"Region training complete: {len(region_examples)} examples processed")
+    print(f"✅ Region processing complete: {cluster.name}")
     
-    return results
+    return result
 
 
 def _analyze_region_patterns(region_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:
@@ -651,3 +644,166 @@ def _apply_npc_extraction(content: str, content_rules: dict[str, Any]) -> list[s
                 npcs.append(npc_name)
     
     return list(set(npcs))  # Remove duplicates
+
+
+def _serialize_entity_for_processing(entity: dict[str, Any]) -> str:
+    """Serialize entity dict to string for base ML processor."""
+    
+    import json
+    return json.dumps(entity, indent=2)
+
+
+def _extract_region_specific_data(cluster, ml_results: dict[str, Any]) -> dict[str, Any]:
+    """Extract region-specific data from ML processing results."""
+    
+    entities = ml_results.get("entities", [])
+    
+    # Aggregate region characteristics
+    biome_distribution = {}
+    settlement_locations = []
+    npc_count = 0
+    total_area = 0
+    
+    for entity_result in entities:
+        extracted = entity_result.get("extracted_data", {})
+        
+        # Count biomes
+        if extracted.get("biome_type"):
+            biome = extracted["biome_type"]
+            biome_distribution[biome] = biome_distribution.get(biome, 0) + 1
+        
+        # Track settlements
+        if extracted.get("settlement_name"):
+            settlement_locations.append({
+                "name": extracted["settlement_name"],
+                "type": extracted.get("settlement_type", "unknown")
+            })
+        
+        # Count NPCs
+        if extracted.get("hit_points"):  # Has stats = NPC/Monster
+            npc_count += 1
+        
+        # Estimate area
+        if extracted.get("coordinate"):
+            total_area += 1
+    
+    # Determine dominant biome
+    dominant_biome = "unknown"
+    if biome_distribution:
+        dominant_biome = max(biome_distribution.items(), key=lambda x: x[1])[0]
+    
+    return {
+        "name": cluster.name,
+        "dominant_biome": dominant_biome,
+        "biome_distribution": biome_distribution,
+        "settlement_locations": settlement_locations,
+        "npc_count": npc_count,
+        "total_area": total_area,
+        "settlement_density": len(settlement_locations) / max(total_area, 1),
+        "processing_confidence": _calculate_region_confidence(ml_results)
+    }
+
+
+def _generate_region_world_hooks(cluster, region_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate world_hooks for Pandora addon integration."""
+    
+    return {
+        "region_name": cluster.name,
+        "dominant_biome": region_data.get("dominant_biome", "unknown"),
+        "biome_distribution": region_data.get("biome_distribution", {}),
+        "settlement_count": len(region_data.get("settlement_locations", [])),
+        "npc_density": region_data.get("npc_count", 0) / max(region_data.get("total_area", 1), 1),
+        "has_rivers": _check_for_rivers(cluster),
+        "has_trails": _check_for_trails(cluster),
+        "political_control": _extract_political_control(cluster),
+        "border_regions": _extract_border_regions(cluster),
+        "godot_integration": {
+            "biome_sprite_path": f"res://art/biomes/{region_data.get('dominant_biome', 'unknown').lower()}.png",
+            "settlement_spawn_points": len(region_data.get("settlement_locations", [])),
+            "npc_spawn_density": min(10, max(1, region_data.get("npc_count", 0))),
+            "corruption_base_level": _calculate_corruption_level(cluster.name)
+        }
+    }
+
+
+def _calculate_region_confidence(ml_results: dict[str, Any]) -> float:
+    """Calculate confidence score for region processing."""
+    
+    entities = ml_results.get("entities", [])
+    if not entities:
+        return 0.0
+    
+    # Average confidence across all entities
+    confidences = [entity.get("confidence", 0.0) for entity in entities]
+    return sum(confidences) / len(confidences)
+
+
+def _check_for_rivers(cluster) -> bool:
+    """Check if region has rivers."""
+    
+    for entity in cluster.entities:
+        if entity.get("rivers") or "river" in str(entity).lower():
+            return True
+    return False
+
+
+def _check_for_trails(cluster) -> bool:
+    """Check if region has trails."""
+    
+    for entity in cluster.entities:
+        if entity.get("trails") or "trail" in str(entity).lower():
+            return True
+    return False
+
+
+def _extract_political_control(cluster) -> list[str]:
+    """Extract political control information from region."""
+    
+    factions = []
+    for entity in cluster.entities:
+        entity_str = str(entity)
+        # Check for known faction references
+        if "Defiled Wolves" in entity_str:
+            factions.append("The Defiled Wolves")
+        if "Fists Of Justice" in entity_str:
+            factions.append("The Fists Of Justice")
+        if "Swords Of Justice" in entity_str:
+            factions.append("The Swords Of Justice")
+        if "Red Snakes" in entity_str:
+            factions.append("The Red Snakes")
+        if "White Wyverns" in entity_str:
+            factions.append("The White Wyverns")
+    
+    return list(set(factions))
+
+
+def _extract_border_regions(cluster) -> list[str]:
+    """Extract border information for region."""
+    
+    borders = []
+    for entity in cluster.entities:
+        if entity.get("borderline") or "border" in str(entity).lower():
+            borders.append("has_borders")
+    
+    return borders
+
+
+def _calculate_corruption_level(region_name: str) -> int:
+    """Calculate base corruption level for region based on name themes."""
+    
+    name_lower = region_name.lower()
+    
+    # High corruption themes
+    if any(word in name_lower for word in ["dark", "blood", "bone", "nightmare", "hell", "vicious"]):
+        return 3
+    
+    # Medium corruption themes  
+    if any(word in name_lower for word in ["fallen", "grey", "shadow", "fear"]):
+        return 2
+    
+    # Low corruption themes
+    if any(word in name_lower for word in ["heart", "moon", "gold", "thunder"]):
+        return 1
+    
+    # Neutral themes
+    return 0

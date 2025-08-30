@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, ConfigDict
-from sqlmodel import SQLModel, Field as SQLField, Relationship, Column, JSON, DateTime, Text
+from sqlmodel import SQLModel, Field as SQLField, Column, JSON, Text
 
 
 # ======================================
@@ -121,9 +121,9 @@ DreadLevel = int  # 0-4
 class SpritesTimestampedModel(SQLModel):
     """Base model with sprites-specific tracking."""
     
-    created_at: datetime = SQLField(default_factory=datetime.utcnow, sa_column=Column(DateTime), index=True)
-    updated_at: datetime | None = SQLField(default=None, sa_column=Column(DateTime))
-    generation_metadata: str = SQLField(default="{}", sa_column=Column(JSON), description="Generation process metadata")
+    created_at: datetime = SQLField(default_factory=datetime.utcnow, index=True)
+    updated_at: datetime | None = SQLField(default=None)
+    generation_metadata: str = SQLField(default="{}", description="Generation process metadata (JSON string)")
 
 
 class CharacterRecord(SpritesTimestampedModel, table=True):
@@ -134,35 +134,38 @@ class CharacterRecord(SpritesTimestampedModel, table=True):
     character_id: str = SQLField(primary_key=True, description="Unique character identifier")
     
     # Basic properties
-    character_name: str = SQLField(description="Character name")
-    character_type: str = SQLField(description="CharacterType enum value")
+    character_name: str = SQLField(description="Character name", index=True)
+    character_type: str = SQLField(description="CharacterType enum value", index=True)
     age: int = SQLField(description="Character age")
     
     # Cross-system references
-    base_entity_id: str | None = SQLField(default=None, description="Entity from entities subpackage")
-    psychology_data: str = SQLField(default="{}", sa_column=Column(JSON), description="Psychology integration data")
-    world_context: str = SQLField(default="{}", sa_column=Column(JSON), description="World subpackage context")
-    regional_data: str = SQLField(default="{}", sa_column=Column(JSON), description="Regional context data")
+    base_entity_id: str | None = SQLField(default=None, description="Entity from entities subpackage", index=True)
+    psychology_data: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Psychology integration data")
+    world_context: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="World subpackage context")
+    regional_data: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Regional context data")
     
     # Physical description
     physical_description: str = SQLField(sa_column=Column(Text), description="Physical appearance")
     clothing_style: str = SQLField(description="Clothing and fashion")
-    distinguishing_features: str = SQLField(default="[]", sa_column=Column(JSON), description="Notable features")
+    distinguishing_features: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Notable features")
     
     # Psychology integration
-    emotional_profile: str = SQLField(default="{}", sa_column=Column(JSON), description="Emotional profile data")
-    personality_traits: str = SQLField(default="[]", sa_column=Column(JSON), description="Personality characteristics")
-    goals_and_motivations: str = SQLField(default="[]", sa_column=Column(JSON), description="Character motivations")
+    emotional_profile: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Emotional profile data")
+    personality_traits: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Personality characteristics")
+    goals_and_motivations: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Character motivations")
     
     # World integration
     home_region: str | None = SQLField(default=None, description="Home region")
     philosophy_alignment: str | None = SQLField(default=None, description="Philosophy path")
     dread_tolerance: int | None = SQLField(default=None, description="Dread tolerance level")
-    corruption_stage: str = SQLField(default="CLEAN", description="Corruption level")
+    corruption_stage: str = SQLField(default="clean", description="Corruption level", index=True)
+    
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
     
     # Cross-system coherence
     coherence_score: float = SQLField(default=0.0, description="Cross-system data coherence (0-1)")
-    validation_notes: str = SQLField(default="[]", sa_column=Column(JSON), description="Cross-system validation results")
+    validation_notes: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Cross-system validation results")
 
 
 class NPCRecord(SpritesTimestampedModel, table=True):
@@ -174,23 +177,23 @@ class NPCRecord(SpritesTimestampedModel, table=True):
     
     # NPC specifics
     npc_id: str = SQLField(unique=True, description="Unique NPC identifier")
-    occupation: str = SQLField(description="Character's job or role")
-    social_class: str = SQLField(description="Social standing")
+    occupation: str = SQLField(description="Character's job or role", index=True)
+    social_class: str = SQLField(description="Social standing", index=True)
     
     # Cultural integration
-    cultural_background: str = SQLField(default="{}", sa_column=Column(JSON), description="Regional culture data")
-    relationships: str = SQLField(default="{}", sa_column=Column(JSON), description="Relationships with other NPCs")
-    reputation: str = SQLField(default="{}", sa_column=Column(JSON), description="Reputation with groups")
+    cultural_background: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Regional culture data")
+    relationships: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Relationships with other NPCs")
+    reputation: dict[str, float] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Reputation with groups")
     
     # Social interaction
-    dialogue_themes: str = SQLField(default="[]", sa_column=Column(JSON), description="Conversation topics")
-    quest_potential: str = SQLField(default="[]", sa_column=Column(JSON), description="Potential quests")
-    services_offered: str = SQLField(default="[]", sa_column=Column(JSON), description="Services provided")
+    dialogue_themes: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Conversation topics")
+    quest_potential: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Potential quests")
+    services_offered: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Services provided")
     
     # Psychology integration
-    fears_and_anxieties: str = SQLField(default="[]", sa_column=Column(JSON), description="Character fears")
-    emotional_triggers: str = SQLField(default="[]", sa_column=Column(JSON), description="Emotional triggers")
-    coping_mechanisms: str = SQLField(default="[]", sa_column=Column(JSON), description="Stress coping methods")
+    fears_and_anxieties: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Character fears")
+    emotional_triggers: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Emotional triggers")
+    coping_mechanisms: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Stress coping methods")
     
     # Gameplay integration
     interaction_complexity: float = SQLField(default=0.5, description="Complexity of interactions (0-1)")
@@ -207,35 +210,35 @@ class CompanionRecord(SpritesTimestampedModel, table=True):
     
     # Companion specifics
     companion_id: str = SQLField(unique=True, description="Unique companion identifier")
-    companion_role: str = SQLField(description="CompanionRole enum value")
-    origin_region: str = SQLField(description="Origin region")
+    companion_role: str = SQLField(description="CompanionRole enum value", index=True)
+    origin_region: str = SQLField(description="Origin region", index=True)
     
     # Combat and abilities
     combat_specialization: str = SQLField(description="Combat focus")
-    equipment_preferences: str = SQLField(default="[]", sa_column=Column(JSON), description="Preferred equipment")
-    special_abilities: str = SQLField(default="[]", sa_column=Column(JSON), description="Unique abilities")
+    equipment_preferences: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Preferred equipment")
+    special_abilities: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Unique abilities")
     
     # Trauma and therapy system
-    trauma_vulnerabilities: str = SQLField(default="[]", sa_column=Column(JSON), description="Trauma susceptibilities")
-    current_traumas: str = SQLField(default="[]", sa_column=Column(JSON), description="Active traumas")
-    therapy_progress: str = SQLField(default="{}", sa_column=Column(JSON), description="Healing progress")
+    trauma_vulnerabilities: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Trauma susceptibilities")
+    current_traumas: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Active traumas")
+    therapy_progress: dict[str, float] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Healing progress")
     therapy_responsiveness: float = SQLField(default=0.7, description="Response to therapy (0-1)")
     
     # Character development
-    character_arc_milestones: str = SQLField(default="[]", sa_column=Column(JSON), description="Growth milestones")
-    loyalty_factors: str = SQLField(default="[]", sa_column=Column(JSON), description="Loyalty influences")
+    character_arc_milestones: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Growth milestones")
+    loyalty_factors: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Loyalty influences")
     loyalty_level: float = SQLField(default=0.5, description="Current loyalty to player (0-1)")
     
     # Relationships
-    therapeutic_relationships: str = SQLField(default="{}", sa_column=Column(JSON), description="Therapy effectiveness with others")
-    relationship_dynamics: str = SQLField(default="{}", sa_column=Column(JSON), description="Relationships with other companions")
+    therapeutic_relationships: dict[str, float] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Therapy effectiveness with others")
+    relationship_dynamics: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Relationships with other companions")
     
     # Horror progression
     corruption_resistance: float = SQLField(default=0.6, description="Resistance to corruption (0-1)")
-    dread_adaptation: str = SQLField(default="{}", sa_column=Column(JSON), description="Adaptation to dread levels")
+    dread_adaptation: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Adaptation to dread levels")
     
     # Story integration
-    story_integration: str = SQLField(default="{}", sa_column=Column(JSON), description="World story integration data")
+    story_integration: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="World story integration data")
     character_arc_completion: float = SQLField(default=0.0, description="Character arc progress (0-1)")
 
 
@@ -248,38 +251,38 @@ class MonsterRecord(SpritesTimestampedModel, table=True):
     
     # Monster specifics
     monster_id: str = SQLField(unique=True, description="Unique monster identifier")
-    monster_name: str = SQLField(description="Monster name")
-    monster_category: str = SQLField(description="MonsterCategory enum value")
-    size_category: str = SQLField(description="Physical size category")
-    threat_level: float = SQLField(default=1.0, description="Threat level (0-10)")
+    monster_name: str = SQLField(description="Monster name", index=True)
+    monster_category: str = SQLField(description="MonsterCategory enum value", index=True)
+    size_category: str = SQLField(description="Physical size category", index=True)
+    threat_level: float = SQLField(default=1.0, description="Threat level (0-10)", index=True)
     
     # Horror and corruption
     horror_theme: str = SQLField(description="Primary horror theme")
-    corruption_variants: str = SQLField(default="{}", sa_column=Column(JSON), description="Corruption stage appearances")
-    horror_escalation: str = SQLField(default="{}", sa_column=Column(JSON), description="Dread level behaviors")
+    corruption_variants: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Corruption stage appearances")
+    horror_escalation: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Dread level behaviors")
     
     # Behavior and ecology
-    behavior_patterns: str = SQLField(default="[]", sa_column=Column(JSON), description="Behavioral characteristics")
-    environmental_preferences: str = SQLField(default="[]", sa_column=Column(JSON), description="Habitat preferences")
+    behavior_patterns: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Behavioral characteristics")
+    environmental_preferences: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Habitat preferences")
     social_structure: str = SQLField(default="solitary", description="Pack behavior type")
     
     # Combat characteristics
-    combat_tactics: str = SQLField(default="[]", sa_column=Column(JSON), description="Combat behavior")
-    weaknesses: str = SQLField(default="[]", sa_column=Column(JSON), description="Monster weaknesses")
-    special_abilities: str = SQLField(default="[]", sa_column=Column(JSON), description="Unique abilities")
+    combat_tactics: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Combat behavior")
+    weaknesses: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Monster weaknesses")
+    special_abilities: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Unique abilities")
     
     # Cross-system integration
-    habitat_regions: str = SQLField(default="[]", sa_column=Column(JSON), description="Regions where found")
-    corruption_psychology: str = SQLField(default="{}", sa_column=Column(JSON), description="Corruption psychology data")
-    horror_theme_integration: str = SQLField(default="{}", sa_column=Column(JSON), description="Horror theme integration")
+    habitat_regions: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Regions where found")
+    corruption_psychology: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Corruption psychology data")
+    horror_theme_integration: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Horror theme integration")
     
     # Philosophy interaction
-    philosophy_responses: str = SQLField(default="{}", sa_column=Column(JSON), description="Philosophy-based responses")
+    philosophy_responses: dict[str, str] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Philosophy-based responses")
     moral_complexity: str | None = SQLField(default=None, description="Moral aspects")
     
     # Encounter design
     encounter_frequency: float = SQLField(default=0.3, description="How often encountered (0-1)")
-    scaling_difficulty: str = SQLField(default="{}", sa_column=Column(JSON), description="Difficulty scaling by level")
+    scaling_difficulty: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Difficulty scaling by level")
 
 
 class MercenaryRecord(SpritesTimestampedModel, table=True):
@@ -291,20 +294,20 @@ class MercenaryRecord(SpritesTimestampedModel, table=True):
     
     # Mercenary specifics
     mercenary_id: str = SQLField(unique=True, description="Unique mercenary identifier")
-    specialization: str = SQLField(description="Professional specialization")
+    specialization: str = SQLField(description="Professional specialization", index=True)
     experience_level: float = SQLField(default=0.5, description="Experience level (0-1)")
-    regional_background: str = SQLField(description="Home region")
+    regional_background: str = SQLField(description="Home region", index=True)
     
     # Skills and equipment
-    equipment: str = SQLField(default="[]", sa_column=Column(JSON), description="Standard equipment")
-    special_skills: str = SQLField(default="[]", sa_column=Column(JSON), description="Specialized abilities")
-    utility_skills: str = SQLField(default="[]", sa_column=Column(JSON), description="Non-combat skills")
+    equipment: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Standard equipment")
+    special_skills: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Specialized abilities")
+    utility_skills: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Non-combat skills")
     
     # Hiring mechanics
     hire_cost: int = SQLField(default=100, description="Base hiring cost")
-    loyalty_requirements: str = SQLField(default="[]", sa_column=Column(JSON), description="Loyalty requirements")
-    contract_preferences: str = SQLField(default="[]", sa_column=Column(JSON), description="Contract preferences")
-    deal_breakers: str = SQLField(default="[]", sa_column=Column(JSON), description="Things that make them leave")
+    loyalty_requirements: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Loyalty requirements")
+    contract_preferences: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Contract preferences")
+    deal_breakers: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Things that make them leave")
     
     # Performance metrics
     combat_effectiveness: float = SQLField(default=0.6, description="Combat skill (0-1)")
@@ -313,11 +316,11 @@ class MercenaryRecord(SpritesTimestampedModel, table=True):
     
     # Psychology
     personality_overview: str = SQLField(sa_column=Column(Text), description="Personality description")
-    motivations: str = SQLField(default="[]", sa_column=Column(JSON), description="What drives them")
+    motivations: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="What drives them")
     corruption_resistance: float = SQLField(default=0.5, description="Corruption resistance (0-1)")
     
     # Regional context
-    specialization_context: str = SQLField(default="{}", sa_column=Column(JSON), description="Regional specialization context")
+    specialization_context: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Regional specialization context")
     local_reputation: float = SQLField(default=0.5, description="Local reputation (0-1)")
 
 
@@ -329,9 +332,9 @@ class CharacterRosterRecord(SpritesTimestampedModel, table=True):
     roster_id: str = SQLField(primary_key=True, description="Unique roster identifier")
     
     # Roster properties
-    roster_name: str = SQLField(description="Character roster name")
+    roster_name: str = SQLField(description="Character roster name", index=True)
     generation_method: str = SQLField(description="Generation approach used")
-    generation_timestamp: datetime = SQLField(default_factory=datetime.utcnow, sa_column=Column(DateTime))
+    generation_timestamp: datetime = SQLField(default_factory=datetime.utcnow, index=True)
     
     # Character counts
     total_npcs: int = SQLField(default=0, description="Count of NPCs")
@@ -341,14 +344,14 @@ class CharacterRosterRecord(SpritesTimestampedModel, table=True):
     total_characters: int = SQLField(default=0, description="Total character count")
     
     # Organization data
-    characters_by_region: str = SQLField(default="{}", sa_column=Column(JSON), description="Regional organization")
-    characters_by_dread_level: str = SQLField(default="{}", sa_column=Column(JSON), description="Dread level organization")
-    characters_by_philosophy: str = SQLField(default="{}", sa_column=Column(JSON), description="Philosophy organization")
-    characters_by_corruption: str = SQLField(default="{}", sa_column=Column(JSON), description="Corruption organization")
+    characters_by_region: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Regional organization")
+    characters_by_dread_level: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Dread level organization")
+    characters_by_philosophy: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Philosophy organization")
+    characters_by_corruption: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Corruption organization")
     
     # Relationship tracking
-    therapeutic_relationships: str = SQLField(default="{}", sa_column=Column(JSON), description="Therapy relationships")
-    social_networks: str = SQLField(default="{}", sa_column=Column(JSON), description="Social connections")
+    therapeutic_relationships: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Therapy relationships")
+    social_networks: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Social connections")
     
     # Cross-system metrics
     entities_integration_score: float = SQLField(default=0.0, description="Entities integration quality (0-1)")
@@ -363,8 +366,8 @@ class CharacterRosterRecord(SpritesTimestampedModel, table=True):
     trauma_system_completeness: float = SQLField(default=0.0, description="Trauma system completeness (0-1)")
     
     # Source tracking
-    source_subpackages: str = SQLField(default="[]", sa_column=Column(JSON), description="Source subpackages")
-    cross_system_dependencies: str = SQLField(default="{}", sa_column=Column(JSON), description="Cross-system dependencies")
+    source_subpackages: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Source subpackages")
+    cross_system_dependencies: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Cross-system dependencies")
 
 
 class SpriteExtractionMetrics(SpritesTimestampedModel, table=True):
@@ -375,8 +378,8 @@ class SpriteExtractionMetrics(SpritesTimestampedModel, table=True):
     extraction_id: str = SQLField(primary_key=True, description="Unique extraction run identifier")
     
     # Extraction metadata
-    extraction_timestamp: datetime = SQLField(default_factory=datetime.utcnow, sa_column=Column(DateTime))
-    extraction_type: str = SQLField(description="Type of extraction (full, incremental, specific)")
+    extraction_timestamp: datetime = SQLField(default_factory=datetime.utcnow, index=True)
+    extraction_type: str = SQLField(description="Type of extraction (full, incremental, specific)", index=True)
     
     # Cross-system integration metrics
     entities_integration_score: float = SQLField(default=0.0, description="Entities subpackage integration quality (0-1)")
@@ -408,13 +411,13 @@ class SpriteExtractionMetrics(SpritesTimestampedModel, table=True):
     cross_system_queries: int = SQLField(default=0, description="Number of cross-system data queries")
     
     # Error tracking
-    extraction_errors: str = SQLField(default="[]", sa_column=Column(JSON), description="Errors encountered during extraction")
-    validation_failures: str = SQLField(default="[]", sa_column=Column(JSON), description="Validation failures")
-    coherence_warnings: str = SQLField(default="[]", sa_column=Column(JSON), description="Cross-system coherence warnings")
+    extraction_errors: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Errors encountered during extraction")
+    validation_failures: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Validation failures")
+    coherence_warnings: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Cross-system coherence warnings")
     
     # Source data tracking
-    source_subpackages: str = SQLField(default="[]", sa_column=Column(JSON), description="Subpackages used in generation")
-    cross_system_dependencies: str = SQLField(default="{}", sa_column=Column(JSON), description="Inter-subpackage dependencies")
+    source_subpackages: list[str] = SQLField(default_factory=list, sa_column=Column(JSON), description="Subpackages used in generation")
+    cross_system_dependencies: dict[str, Any] = SQLField(default_factory=dict, sa_column=Column(JSON), description="Inter-subpackage dependencies")
     entities_data_version: str | None = SQLField(default=None, description="Version of entities data used")
     psychology_data_version: str | None = SQLField(default=None, description="Version of psychology data used")
     world_data_version: str | None = SQLField(default=None, description="Version of world data used")

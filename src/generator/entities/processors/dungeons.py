@@ -1,72 +1,301 @@
 """
-Dungeon ML Training - Extract dungeon content from organized HBF examples.
+Dungeon Processor - Process dungeon entity clusters using base ML foundation.
 
-Uses organized dungeon data from memory-bank/world-building/dungeons/ to train
-ML models for dungeon content extraction. Focuses on encounter analysis,
-treasure assessment, challenge rating estimation, and horror theme extraction.
+Uses the DragonLabyrinthMLProcessor from base.py to process dungeon clusters
+from the transformer. Extracts encounter analysis, treasure assessment, challenge
+rating estimation, and horror theme extraction with world_hooks for Godot integration.
 """
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import re
 from typing import Any
 
-from .meta import load_organized_examples
-from .patterns import extract_dungeon_data, create_ml_training_vector, validate_extraction_quality
+from generator.entities.processors.base import DragonLabyrinthMLProcessor
 
 
-def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+def process_dungeon_cluster(cluster) -> dict[str, Any]:
     """
-    Run dungeon ML training using organized HBF examples.
+    Process dungeon entity cluster using base ML foundation.
     
     Args:
-        engine: Database engine (passed but not used - we use organized files)
-        logger: Logger instance
-        console: Rich console for output
+        cluster: EntityCluster containing dungeon entities from transformer
         
     Returns:
-        Training results with learned patterns
+        Processed dungeon data with world_hooks for Godot integration
     """
     
-    logger.info("Starting dungeon ML training from organized examples")
-    console.print("🏰 [bold blue]Dungeon ML Training[/bold blue] - Learning from 18 organized examples")
+    print(f"🏰 Processing dungeon cluster: {cluster.name} ({cluster.get_entity_count()} entities)")
     
-    # Load organized dungeon examples
-    dungeon_examples = load_organized_examples("dungeons")
+    # Initialize ML processor
+    processor = DragonLabyrinthMLProcessor()
     
-    if not dungeon_examples:
-        logger.error("No organized dungeon examples found")
-        return {"error": "No training data available"}
+    # Convert cluster entities to format expected by base processor
+    entity_pairs = []
+    for i, entity in enumerate(cluster.entities):
+        entity_id = f"{cluster.name}_{i}"
+        entity_content = _serialize_entity_for_processing(entity)
+        entity_pairs.append((entity_id, entity_content))
     
-    logger.info(f"Loaded {len(dungeon_examples)} dungeon examples")
-    console.print(f"📊 Loaded {len(dungeon_examples)} organized dungeon examples")
+    # Process entities with base ML
+    ml_results = processor.process_entity_batch(entity_pairs)
     
-    # Analyze dungeon patterns
-    analysis_results = _analyze_dungeon_patterns(dungeon_examples, logger, console)
+    # Extract dungeon-specific data
+    dungeon_data = _extract_dungeon_specific_data(cluster, ml_results)
     
-    # Create ML training vectors
-    training_vectors = _create_dungeon_training_vectors(dungeon_examples, logger, console)
+    # Generate world_hooks for Godot integration
+    world_hooks = _generate_dungeon_world_hooks(cluster, dungeon_data)
     
-    # Generate dungeon extraction rules
-    extraction_rules = _generate_dungeon_extraction_rules(analysis_results, logger, console)
-    
-    # Save learned patterns
-    patterns_saved = _save_dungeon_patterns(extraction_rules, analysis_results)
-    
-    results = {
-        "examples_analyzed": len(dungeon_examples),
-        "pattern_analysis": analysis_results,
-        "training_vectors": training_vectors,
-        "extraction_rules": extraction_rules,
-        "patterns_saved": patterns_saved,
-        "training_quality": "organized_breakthrough_data"
+    result = {
+        "cluster_name": cluster.name,
+        "cluster_category": cluster.category,
+        "entity_count": cluster.get_entity_count(),
+        "dungeon_data": dungeon_data,
+        "world_hooks": world_hooks,
+        "ml_processing_results": ml_results,
+        "processor_type": "dungeons"
     }
     
-    console.print("✅ [bold green]Dungeon training complete[/bold green] - Patterns learned from organized data")
-    logger.info(f"Dungeon training complete: {len(dungeon_examples)} examples processed")
+    print(f"✅ Dungeon processing complete: {cluster.name}")
     
-    return results
+    return result
+
+
+def _serialize_entity_for_processing(entity: dict[str, Any]) -> str:
+    """Serialize entity dict to string for base ML processor."""
+    
+    import json
+    return json.dumps(entity, indent=2)
+
+
+def _extract_dungeon_specific_data(cluster, ml_results: dict[str, Any]) -> dict[str, Any]:
+    """Extract dungeon-specific data from ML processing results."""
+    
+    entities = ml_results.get("entities", [])
+    
+    # Determine dungeon type from name
+    dungeon_type = _determine_dungeon_type(cluster.name)
+    
+    # Aggregate dungeon characteristics
+    encounter_count = 0
+    max_challenge_rating = 0
+    total_treasure_value = 0
+    horror_themes = []
+    boss_encounters = []
+    
+    for entity_result in entities:
+        extracted = entity_result.get("extracted_data", {})
+        
+        # Count encounters (entities with combat stats)
+        if extracted.get("hit_points") or extracted.get("challenge_rating"):
+            encounter_count += 1
+            
+            # Track challenge ratings
+            cr = extracted.get("challenge_rating", 0)
+            if isinstance(cr, str) and cr.isdigit():
+                cr = int(cr)
+            max_challenge_rating = max(max_challenge_rating, cr)
+            
+            # Identify boss encounters (high CR)
+            if cr >= 5:
+                boss_encounters.append({
+                    "name": extracted.get("name", "Unknown Boss"),
+                    "challenge_rating": cr
+                })
+        
+        # Extract treasure information
+        if extracted.get("description"):
+            desc = extracted["description"].lower()
+            if "gp" in desc or "gold" in desc:
+                # Try to extract gold amounts
+                gold_matches = re.findall(r'(\d+)\s*(?:gp|gold)', desc)
+                for match in gold_matches:
+                    total_treasure_value += int(match)
+    
+    # Extract horror themes from name
+    horror_themes = _extract_horror_themes_from_name(cluster.name)
+    
+    return {
+        "name": cluster.name,
+        "dungeon_type": dungeon_type,
+        "encounter_count": encounter_count,
+        "max_challenge_rating": max_challenge_rating,
+        "boss_encounters": boss_encounters,
+        "treasure_value_estimate": total_treasure_value,
+        "horror_themes": horror_themes,
+        "horror_intensity": _assess_horror_intensity_from_themes(horror_themes),
+        "difficulty_level": _classify_difficulty_level(max_challenge_rating),
+        "processing_confidence": _calculate_dungeon_confidence(ml_results)
+    }
+
+
+def _generate_dungeon_world_hooks(cluster, dungeon_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate world_hooks for Pandora addon integration."""
+    
+    return {
+        "dungeon_name": cluster.name,
+        "dungeon_type": dungeon_data.get("dungeon_type", "unknown"),
+        "entrance_type": _determine_entrance_type(dungeon_data.get("dungeon_type", "unknown")),
+        "encounter_count": dungeon_data.get("encounter_count", 0),
+        "max_challenge_rating": dungeon_data.get("max_challenge_rating", 0),
+        "has_boss": len(dungeon_data.get("boss_encounters", [])) > 0,
+        "boss_power_level": max([boss.get("challenge_rating", 0) for boss in dungeon_data.get("boss_encounters", [])], default=0),
+        "treasure_level": _classify_treasure_level(dungeon_data.get("treasure_value_estimate", 0)),
+        "horror_intensity": dungeon_data.get("horror_intensity", "none"),
+        "horror_themes": dungeon_data.get("horror_themes", []),
+        "difficulty_level": dungeon_data.get("difficulty_level", "unknown"),
+        "godot_integration": {
+            "entrance_sprite": f"res://art/dungeons/{dungeon_data.get('dungeon_type', 'crypt')}_entrance.png",
+            "interior_tileset": f"res://art/tilesets/{dungeon_data.get('dungeon_type', 'crypt')}_interior.tres",
+            "encounter_spawn_points": min(10, max(3, dungeon_data.get("encounter_count", 0))),
+            "boss_arena_required": len(dungeon_data.get("boss_encounters", [])) > 0,
+            "treasure_spawn_points": max(1, dungeon_data.get("treasure_value_estimate", 0) // 1000),
+            "corruption_amplification": _calculate_dungeon_corruption(cluster.name)
+        }
+    }
+
+
+def _determine_dungeon_type(dungeon_name: str) -> str:
+    """Determine dungeon type from name."""
+    
+    name_lower = dungeon_name.lower()
+    
+    if "crypt" in name_lower:
+        return "crypt"
+    elif "lair" in name_lower:
+        return "lair"
+    elif "temple" in name_lower or "shrine" in name_lower:
+        return "temple"
+    elif "tomb" in name_lower:
+        return "tomb"
+    elif "hideout" in name_lower:
+        return "hideout"
+    elif "cave" in name_lower or "cavern" in name_lower:
+        return "cavern"
+    elif "bowel" in name_lower:
+        return "bowel"
+    else:
+        return "unknown"
+
+
+def _determine_entrance_type(dungeon_type: str) -> str:
+    """Determine entrance type based on dungeon type."""
+    
+    entrance_mapping = {
+        "crypt": "crypt-portal",
+        "lair": "lair-entrance", 
+        "temple": "temple-entrance",
+        "tomb": "tomb-entrance",
+        "hideout": "hidden-entrance",
+        "cavern": "cave-mouth",
+        "bowel": "pit-entrance"
+    }
+    
+    return entrance_mapping.get(dungeon_type, "unknown-entrance")
+
+
+def _extract_horror_themes_from_name(dungeon_name: str) -> list[str]:
+    """Extract horror themes from dungeon name."""
+    
+    name_lower = dungeon_name.lower()
+    themes = []
+    
+    # Extract horror descriptors
+    horror_words = [
+        "corrupted", "infernal", "cursed", "mourning", "violent",
+        "unholy", "burning", "bleeding", "foresaken", "unspoken",
+        "raging", "grey", "defiled"
+    ]
+    
+    for word in horror_words:
+        if word in name_lower:
+            themes.append(word)
+    
+    return themes
+
+
+def _assess_horror_intensity_from_themes(horror_themes: list[str]) -> str:
+    """Assess horror intensity from theme list."""
+    
+    if not horror_themes:
+        return "none"
+    
+    high_intensity = ["infernal", "cursed", "violent", "corrupted", "unholy", "defiled"]
+    medium_intensity = ["mourning", "grey", "foresaken", "unspoken", "burning", "bleeding"]
+    
+    high_count = sum(1 for theme in horror_themes if theme in high_intensity)
+    medium_count = sum(1 for theme in horror_themes if theme in medium_intensity)
+    
+    if high_count >= 2:
+        return "extreme"
+    elif high_count >= 1 or medium_count >= 3:
+        return "high"
+    elif medium_count >= 1:
+        return "moderate"
+    else:
+        return "low"
+
+
+def _classify_difficulty_level(max_cr: int) -> str:
+    """Classify difficulty level based on max challenge rating."""
+    
+    if max_cr >= 10:
+        return "expert"
+    elif max_cr >= 6:
+        return "advanced"
+    elif max_cr >= 3:
+        return "intermediate"
+    elif max_cr >= 1:
+        return "beginner"
+    else:
+        return "unknown"
+
+
+def _calculate_dungeon_confidence(ml_results: dict[str, Any]) -> float:
+    """Calculate confidence score for dungeon processing."""
+    
+    entities = ml_results.get("entities", [])
+    if not entities:
+        return 0.0
+    
+    # Average confidence across all entities
+    confidences = [entity.get("confidence", 0.0) for entity in entities]
+    return sum(confidences) / len(confidences)
+
+
+def _classify_treasure_level(treasure_value: int) -> str:
+    """Classify treasure level based on estimated value."""
+    
+    if treasure_value >= 10000:
+        return "rich"
+    elif treasure_value >= 2000:
+        return "moderate"
+    elif treasure_value >= 500:
+        return "basic"
+    else:
+        return "none"
+
+
+def _calculate_dungeon_corruption(dungeon_name: str) -> int:
+    """Calculate corruption amplification based on dungeon themes."""
+    
+    name_lower = dungeon_name.lower()
+    
+    # High corruption dungeons
+    if any(word in name_lower for word in ["infernal", "cursed", "defiled", "unholy"]):
+        return 3
+    
+    # Medium corruption dungeons
+    if any(word in name_lower for word in ["corrupted", "violent", "raging", "bleeding"]):
+        return 2
+    
+    # Low corruption dungeons
+    if any(word in name_lower for word in ["mourning", "grey", "foresaken"]):
+        return 1
+    
+    # Neutral dungeons
+    return 0
 
 
 def _analyze_dungeon_patterns(dungeon_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:

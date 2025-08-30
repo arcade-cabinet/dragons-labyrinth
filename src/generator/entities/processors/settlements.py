@@ -1,72 +1,214 @@
 """
-Settlement ML Training - Extract settlement content from organized HBF examples.
+Settlement Processor - Process settlement entity clusters using base ML foundation.
 
-Uses organized settlement data from memory-bank/world-building/settlements/ to train
-ML models for settlement content extraction. Focuses on scale detection, economic
-analysis, establishment categorization, and NPC relationship mapping.
+Uses the DragonLabyrinthMLProcessor from base.py to process settlement clusters
+from the transformer. Extracts scale detection, economic analysis, establishment
+categorization, and NPC relationship mapping with world_hooks for Godot integration.
 """
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import re
 from typing import Any
 
-from .meta import load_organized_examples
-from .patterns import extract_settlement_data, create_ml_training_vector, validate_extraction_quality
+from generator.entities.processors.base import DragonLabyrinthMLProcessor
 
 
-def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+def process_settlement_cluster(cluster) -> dict[str, Any]:
     """
-    Run settlement ML training using organized HBF examples.
+    Process settlement entity cluster using base ML foundation.
     
     Args:
-        engine: Database engine (passed but not used - we use organized files)
-        logger: Logger instance
-        console: Rich console for output
+        cluster: EntityCluster containing settlement entities from transformer
         
     Returns:
-        Training results with learned patterns
+        Processed settlement data with world_hooks for Godot integration
     """
     
-    logger.info("Starting settlement ML training from organized examples")
-    console.print("🏘️ [bold blue]Settlement ML Training[/bold blue] - Learning from 10 organized examples")
+    print(f"🏘️ Processing settlement cluster: {cluster.name} ({cluster.get_entity_count()} entities)")
     
-    # Load organized settlement examples
-    settlement_examples = load_organized_examples("settlements")
+    # Initialize ML processor
+    processor = DragonLabyrinthMLProcessor()
     
-    if not settlement_examples:
-        logger.error("No organized settlement examples found")
-        return {"error": "No training data available"}
+    # Convert cluster entities to format expected by base processor
+    entity_pairs = []
+    for i, entity in enumerate(cluster.entities):
+        entity_id = f"{cluster.name}_{i}"
+        entity_content = _serialize_entity_for_processing(entity)
+        entity_pairs.append((entity_id, entity_content))
     
-    logger.info(f"Loaded {len(settlement_examples)} settlement examples")
-    console.print(f"📊 Loaded {len(settlement_examples)} organized settlement examples")
+    # Process entities with base ML
+    ml_results = processor.process_entity_batch(entity_pairs)
     
-    # Analyze settlement patterns
-    analysis_results = _analyze_settlement_patterns(settlement_examples, logger, console)
+    # Extract settlement-specific data
+    settlement_data = _extract_settlement_specific_data(cluster, ml_results)
     
-    # Create ML training vectors
-    training_vectors = _create_settlement_training_vectors(settlement_examples, logger, console)
+    # Generate world_hooks for Godot integration
+    world_hooks = _generate_settlement_world_hooks(cluster, settlement_data)
     
-    # Generate settlement extraction rules
-    extraction_rules = _generate_settlement_extraction_rules(analysis_results, logger, console)
-    
-    # Save learned patterns
-    patterns_saved = _save_settlement_patterns(extraction_rules, analysis_results)
-    
-    results = {
-        "examples_analyzed": len(settlement_examples),
-        "pattern_analysis": analysis_results,
-        "training_vectors": training_vectors,
-        "extraction_rules": extraction_rules,
-        "patterns_saved": patterns_saved,
-        "training_quality": "organized_breakthrough_data"
+    result = {
+        "cluster_name": cluster.name,
+        "cluster_category": cluster.category,
+        "entity_count": cluster.get_entity_count(),
+        "settlement_data": settlement_data,
+        "world_hooks": world_hooks,
+        "ml_processing_results": ml_results,
+        "processor_type": "settlements"
     }
     
-    console.print("✅ [bold green]Settlement training complete[/bold green] - Patterns learned from organized data")
-    logger.info(f"Settlement training complete: {len(settlement_examples)} examples processed")
+    print(f"✅ Settlement processing complete: {cluster.name}")
     
-    return results
+    return result
+
+
+def _serialize_entity_for_processing(entity: dict[str, Any]) -> str:
+    """Serialize entity dict to string for base ML processor."""
+    
+    import json
+    return json.dumps(entity, indent=2)
+
+
+def _extract_settlement_specific_data(cluster, ml_results: dict[str, Any]) -> dict[str, Any]:
+    """Extract settlement-specific data from ML processing results."""
+    
+    entities = ml_results.get("entities", [])
+    
+    # Determine settlement scale from name
+    scale_hint = _determine_scale_from_name(cluster.name)
+    
+    # Aggregate settlement characteristics
+    establishment_count = 0
+    npc_count = 0
+    service_types = set()
+    economic_activity = 0
+    
+    for entity_result in entities:
+        extracted = entity_result.get("extracted_data", {})
+        
+        # Count establishments (any named building/service)
+        if extracted.get("name") and any(word in str(extracted).lower() for word in ["tavern", "inn", "shop", "market", "temple"]):
+            establishment_count += 1
+        
+        # Count NPCs
+        if extracted.get("hit_points") or extracted.get("challenge_rating"):
+            npc_count += 1
+        
+        # Track service types
+        content = str(extracted).lower()
+        if "tavern" in content or "inn" in content:
+            service_types.add("lodging")
+        if "shop" in content or "market" in content:
+            service_types.add("commerce")
+        if "smith" in content or "forge" in content:
+            service_types.add("crafting")
+        if "temple" in content or "shrine" in content:
+            service_types.add("religious")
+        
+        # Economic activity indicators
+        if any(currency in content for currency in ["gp", "sp", "cp", "gold", "silver", "copper"]):
+            economic_activity += 1
+    
+    return {
+        "name": cluster.name,
+        "scale_hint": scale_hint,
+        "establishment_count": establishment_count,
+        "npc_count": npc_count,
+        "service_types": list(service_types),
+        "economic_activity_level": economic_activity,
+        "service_diversity": len(service_types),
+        "processing_confidence": _calculate_settlement_confidence(ml_results)
+    }
+
+
+def _generate_settlement_world_hooks(cluster, settlement_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate world_hooks for Pandora addon integration."""
+    
+    return {
+        "settlement_name": cluster.name,
+        "scale_hint": settlement_data.get("scale_hint", "unknown"),
+        "establishment_count": settlement_data.get("establishment_count", 0),
+        "service_types": settlement_data.get("service_types", []),
+        "economic_activity": settlement_data.get("economic_activity_level", 0),
+        "npc_density": settlement_data.get("npc_count", 0),
+        "has_tavern": "lodging" in settlement_data.get("service_types", []),
+        "has_shops": "commerce" in settlement_data.get("service_types", []),
+        "has_crafting": "crafting" in settlement_data.get("service_types", []),
+        "has_temple": "religious" in settlement_data.get("service_types", []),
+        "godot_integration": {
+            "settlement_sprite": f"res://art/settlements/{settlement_data.get('scale_hint', 'village')}.png",
+            "npc_spawn_count": min(20, max(5, settlement_data.get("npc_count", 0))),
+            "service_spawn_points": settlement_data.get("establishment_count", 0),
+            "economic_level": _classify_economic_level(settlement_data.get("economic_activity_level", 0)),
+            "corruption_resistance": _calculate_settlement_corruption_resistance(settlement_data)
+        }
+    }
+
+
+def _determine_scale_from_name(settlement_name: str) -> str:
+    """Determine settlement scale from name."""
+    
+    if settlement_name.startswith("City of"):
+        return "city"
+    elif settlement_name.startswith("Town of"):
+        return "town"
+    elif settlement_name.startswith("Village of"):
+        return "village"
+    else:
+        return "unknown"
+
+
+def _calculate_settlement_confidence(ml_results: dict[str, Any]) -> float:
+    """Calculate confidence score for settlement processing."""
+    
+    entities = ml_results.get("entities", [])
+    if not entities:
+        return 0.0
+    
+    # Average confidence across all entities
+    confidences = [entity.get("confidence", 0.0) for entity in entities]
+    return sum(confidences) / len(confidences)
+
+
+def _classify_economic_level(activity_level: int) -> str:
+    """Classify economic activity level."""
+    
+    if activity_level >= 10:
+        return "high"
+    elif activity_level >= 5:
+        return "moderate"
+    elif activity_level >= 1:
+        return "low"
+    else:
+        return "none"
+
+
+def _calculate_settlement_corruption_resistance(settlement_data: dict[str, Any]) -> int:
+    """Calculate corruption resistance based on settlement characteristics."""
+    
+    resistance = 0
+    
+    # Religious presence provides resistance
+    if "religious" in settlement_data.get("service_types", []):
+        resistance += 2
+    
+    # Economic activity provides resistance
+    economic_level = settlement_data.get("economic_activity_level", 0)
+    if economic_level >= 5:
+        resistance += 2
+    elif economic_level >= 1:
+        resistance += 1
+    
+    # Population provides resistance
+    scale = settlement_data.get("scale_hint", "unknown")
+    if scale == "city":
+        resistance += 3
+    elif scale == "town":
+        resistance += 2
+    elif scale == "village":
+        resistance += 1
+    
+    return min(resistance, 5)  # Cap at 5
 
 
 def _analyze_settlement_patterns(settlement_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:

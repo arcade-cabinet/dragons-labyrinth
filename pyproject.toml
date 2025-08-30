@@ -57,10 +57,12 @@ dependencies = [
   # Database dependencies
   "sqlalchemy>=2.0.0",
   "sqlmodel>=0.0.24",
+  "fastmcp>=2.11.3",
 ]
 
 [project.scripts]
 dl_cli = "generator.manager:app"
+dl_mcp = "generator.mcp_server:main"
 
 [project.urls]
 Documentation = "https://github.com/jbcom/dragons-labyrinth#readme"

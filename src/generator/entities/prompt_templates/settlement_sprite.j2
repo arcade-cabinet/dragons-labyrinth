@@ -1,0 +1,14 @@
+A {{ size }} transparent sprite for {{ settlement_name }} in Dragon's Labyrinth.
+
+Settlement: {{ scale_description }} featuring {{ services_description }}.{% if protection_description %} {{ protection_description }}{% endif %}
+
+{% if world_hooks.has_tavern %}Prominent tavern with distinctive signage and welcoming atmosphere.{% endif %}
+{% if world_hooks.has_shops %}Market stalls and merchant buildings with visible goods and activity.{% endif %}
+{% if world_hooks.has_crafting %}Forge with smoking chimney and metalworking tools visible.{% endif %}
+{% if world_hooks.has_temple %}Temple or shrine with distinctive religious architecture.{% endif %}
+
+Economic Activity: {{ world_hooks.economic_level }} - {% if world_hooks.economic_level == "high" %}bustling trade, many merchants, crowded streets{% elif world_hooks.economic_level == "moderate" %}steady commerce, regular visitors, maintained buildings{% elif world_hooks.economic_level == "low" %}quiet activity, occasional travelers, simple buildings{% else %}minimal activity, mostly self-sufficient, basic structures{% endif %}.
+
+Style: 2.5D top-down view for hex tile placement, medieval dark fantasy aesthetic.
+Clear architectural details visible at medium zoom, soft lighting, no borders, no text.
+Designed for placement on hex tiles in Godot. Transparent background.

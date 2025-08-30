@@ -1,72 +1,289 @@
 """
-Faction ML Training - Extract faction content from organized HBF examples.
+Faction Processor - Process faction entity clusters using base ML foundation.
 
-Uses organized faction data from memory-bank/world-building/factions/ to train
-ML models for faction content extraction. Focuses on leadership analysis,
-membership mapping, political alignment detection, and territorial control.
+Uses the DragonLabyrinthMLProcessor from base.py to process faction clusters
+from the transformer. Extracts leadership analysis, membership mapping, political
+alignment detection, and territorial control with world_hooks for Godot integration.
 """
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import re
 from typing import Any
 
-from .meta import load_organized_examples
-from .patterns import extract_faction_data, create_ml_training_vector, validate_extraction_quality
+from generator.entities.processors.base import DragonLabyrinthMLProcessor
 
 
-def run(engine, logger: logging.Logger, console) -> dict[str, Any]:
+def process_faction_cluster(cluster) -> dict[str, Any]:
     """
-    Run faction ML training using organized HBF examples.
+    Process faction entity cluster using base ML foundation.
     
     Args:
-        engine: Database engine (passed but not used - we use organized files)
-        logger: Logger instance
-        console: Rich console for output
+        cluster: EntityCluster containing faction entities from transformer
         
     Returns:
-        Training results with learned patterns
+        Processed faction data with world_hooks for Godot integration
     """
     
-    logger.info("Starting faction ML training from organized examples")
-    console.print("⚔️ [bold blue]Faction ML Training[/bold blue] - Learning from 5 organized examples")
+    print(f"⚔️ Processing faction cluster: {cluster.name} ({cluster.get_entity_count()} entities)")
     
-    # Load organized faction examples
-    faction_examples = load_organized_examples("factions")
+    # Initialize ML processor
+    processor = DragonLabyrinthMLProcessor()
     
-    if not faction_examples:
-        logger.error("No organized faction examples found")
-        return {"error": "No training data available"}
+    # Convert cluster entities to format expected by base processor
+    entity_pairs = []
+    for i, entity in enumerate(cluster.entities):
+        entity_id = f"{cluster.name}_{i}"
+        entity_content = _serialize_entity_for_processing(entity)
+        entity_pairs.append((entity_id, entity_content))
     
-    logger.info(f"Loaded {len(faction_examples)} faction examples")
-    console.print(f"📊 Loaded {len(faction_examples)} organized faction examples")
+    # Process entities with base ML
+    ml_results = processor.process_entity_batch(entity_pairs)
     
-    # Analyze faction patterns
-    analysis_results = _analyze_faction_patterns(faction_examples, logger, console)
+    # Extract faction-specific data
+    faction_data = _extract_faction_specific_data(cluster, ml_results)
     
-    # Create ML training vectors
-    training_vectors = _create_faction_training_vectors(faction_examples, logger, console)
+    # Generate world_hooks for Godot integration
+    world_hooks = _generate_faction_world_hooks(cluster, faction_data)
     
-    # Generate faction extraction rules
-    extraction_rules = _generate_faction_extraction_rules(analysis_results, logger, console)
-    
-    # Save learned patterns
-    patterns_saved = _save_faction_patterns(extraction_rules, analysis_results)
-    
-    results = {
-        "examples_analyzed": len(faction_examples),
-        "pattern_analysis": analysis_results,
-        "training_vectors": training_vectors,
-        "extraction_rules": extraction_rules,
-        "patterns_saved": patterns_saved,
-        "training_quality": "organized_breakthrough_data"
+    result = {
+        "cluster_name": cluster.name,
+        "cluster_category": cluster.category,
+        "entity_count": cluster.get_entity_count(),
+        "faction_data": faction_data,
+        "world_hooks": world_hooks,
+        "ml_processing_results": ml_results,
+        "processor_type": "factions"
     }
     
-    console.print("✅ [bold green]Faction training complete[/bold green] - Patterns learned from organized data")
-    logger.info(f"Faction training complete: {len(faction_examples)} examples processed")
+    print(f"✅ Faction processing complete: {cluster.name}")
     
-    return results
+    return result
+
+
+def _serialize_entity_for_processing(entity: dict[str, Any]) -> str:
+    """Serialize entity dict to string for base ML processor."""
+    
+    import json
+    return json.dumps(entity, indent=2)
+
+
+def _extract_faction_specific_data(cluster, ml_results: dict[str, Any]) -> dict[str, Any]:
+    """Extract faction-specific data from ML processing results."""
+    
+    entities = ml_results.get("entities", [])
+    
+    # Aggregate faction characteristics
+    member_count = 0
+    leader_info = None
+    operating_locations = set()
+    alignment = "neutral"
+    member_roles = []
+    
+    for entity_result in entities:
+        extracted = entity_result.get("extracted_data", {})
+        content = str(extracted).lower()
+        
+        # Count members (entities with character stats)
+        if extracted.get("hit_points") or extracted.get("challenge_rating"):
+            member_count += 1
+            
+            # Extract role information
+            if extracted.get("name"):
+                member_roles.append(extracted["name"])
+        
+        # Check for leader indicators
+        if "leader" in content and extracted.get("challenge_rating"):
+            cr = extracted.get("challenge_rating", 0)
+            if isinstance(cr, str) and cr.isdigit():
+                cr = int(cr)
+            if cr > 5:  # High-level leader
+                leader_info = {
+                    "name": extracted.get("name", "Unknown Leader"),
+                    "challenge_rating": cr,
+                    "description": extracted.get("description", "")
+                }
+        
+        # Extract operating locations
+        entity_str = str(entity_result)
+        for location in ["Headsmen", "Palemoon", "Devilville", "Harad", "Kothian", "Ashamar", "Balaal", "Dorith", "Headbone", "Dokar"]:
+            if location in entity_str:
+                operating_locations.add(location)
+    
+    # Determine faction alignment from name
+    alignment = _determine_faction_alignment(cluster.name)
+    
+    return {
+        "name": cluster.name,
+        "member_count": member_count,
+        "leader_info": leader_info,
+        "operating_locations": list(operating_locations),
+        "political_alignment": alignment,
+        "member_roles": member_roles[:10],  # Limit to first 10
+        "territorial_reach": _assess_territorial_reach(operating_locations),
+        "processing_confidence": _calculate_faction_confidence(ml_results)
+    }
+
+
+def _generate_faction_world_hooks(cluster, faction_data: dict[str, Any]) -> dict[str, Any]:
+    """Generate world_hooks for Pandora addon integration."""
+    
+    return {
+        "faction_name": cluster.name,
+        "member_count": faction_data.get("member_count", 0),
+        "has_leader": faction_data.get("leader_info") is not None,
+        "leader_power": faction_data.get("leader_info", {}).get("challenge_rating", 0) if faction_data.get("leader_info") else 0,
+        "territorial_reach": faction_data.get("territorial_reach", "local"),
+        "operating_locations": faction_data.get("operating_locations", []),
+        "political_alignment": faction_data.get("political_alignment", "neutral"),
+        "hostility_level": _determine_hostility_level(cluster.name),
+        "influence_level": _calculate_influence_level(faction_data),
+        "godot_integration": {
+            "faction_banner_sprite": f"res://art/factions/{_safe_faction_name(cluster.name)}.png",
+            "member_spawn_rate": min(0.3, faction_data.get("member_count", 0) / 100.0),
+            "territory_control_strength": len(faction_data.get("operating_locations", [])),
+            "faction_encounter_chance": _calculate_encounter_chance(faction_data),
+            "corruption_influence": _calculate_corruption_influence(cluster.name)
+        }
+    }
+
+
+def _determine_faction_alignment(faction_name: str) -> str:
+    """Determine political alignment from faction name."""
+    
+    name_lower = faction_name.lower()
+    
+    if "justice" in name_lower:
+        return "lawful"
+    elif "defiled" in name_lower or "cult" in name_lower:
+        return "chaotic"
+    elif "wolves" in name_lower or "snakes" in name_lower:
+        return "neutral"
+    else:
+        return "unknown"
+
+
+def _assess_territorial_reach(operating_locations: set) -> str:
+    """Assess territorial reach based on operating locations."""
+    
+    location_count = len(operating_locations)
+    
+    if location_count >= 5:
+        return "widespread"
+    elif location_count >= 3:
+        return "regional"
+    elif location_count >= 1:
+        return "local"
+    else:
+        return "unknown"
+
+
+def _calculate_faction_confidence(ml_results: dict[str, Any]) -> float:
+    """Calculate confidence score for faction processing."""
+    
+    entities = ml_results.get("entities", [])
+    if not entities:
+        return 0.0
+    
+    # Average confidence across all entities
+    confidences = [entity.get("confidence", 0.0) for entity in entities]
+    return sum(confidences) / len(confidences)
+
+
+def _determine_hostility_level(faction_name: str) -> str:
+    """Determine hostility level from faction name and characteristics."""
+    
+    name_lower = faction_name.lower()
+    
+    if "defiled" in name_lower or "cult" in name_lower:
+        return "hostile"
+    elif "wolves" in name_lower or "snakes" in name_lower:
+        return "aggressive"
+    elif "justice" in name_lower:
+        return "lawful"
+    else:
+        return "neutral"
+
+
+def _calculate_influence_level(faction_data: dict[str, Any]) -> str:
+    """Calculate faction influence level."""
+    
+    member_count = faction_data.get("member_count", 0)
+    territorial_reach = faction_data.get("territorial_reach", "local")
+    has_leader = faction_data.get("leader_info") is not None
+    
+    influence_score = 0
+    
+    # Member count influence
+    if member_count >= 20:
+        influence_score += 3
+    elif member_count >= 10:
+        influence_score += 2
+    elif member_count >= 5:
+        influence_score += 1
+    
+    # Territorial influence
+    if territorial_reach == "widespread":
+        influence_score += 3
+    elif territorial_reach == "regional":
+        influence_score += 2
+    elif territorial_reach == "local":
+        influence_score += 1
+    
+    # Leadership influence
+    if has_leader:
+        influence_score += 1
+    
+    # Classify influence
+    if influence_score >= 6:
+        return "major"
+    elif influence_score >= 4:
+        return "moderate"
+    elif influence_score >= 2:
+        return "minor"
+    else:
+        return "minimal"
+
+
+def _safe_faction_name(faction_name: str) -> str:
+    """Convert faction name to safe file name."""
+    
+    return faction_name.lower().replace(" ", "_").replace("'", "")
+
+
+def _calculate_encounter_chance(faction_data: dict[str, Any]) -> float:
+    """Calculate chance of encountering faction members."""
+    
+    member_count = faction_data.get("member_count", 0)
+    territorial_reach = faction_data.get("territorial_reach", "local")
+    
+    base_chance = member_count / 100.0  # Base on member count
+    
+    # Modify by territorial reach
+    if territorial_reach == "widespread":
+        base_chance *= 1.5
+    elif territorial_reach == "regional":
+        base_chance *= 1.2
+    
+    return min(base_chance, 0.8)  # Cap at 80%
+
+
+def _calculate_corruption_influence(faction_name: str) -> int:
+    """Calculate corruption influence of faction."""
+    
+    name_lower = faction_name.lower()
+    
+    # High corruption factions
+    if "defiled" in name_lower:
+        return 3
+    
+    # Neutral/lawful factions may resist corruption
+    if "justice" in name_lower:
+        return -2  # Negative = resistance
+    
+    # Most factions are neutral
+    return 0
 
 
 def _analyze_faction_patterns(faction_examples: list[dict[str, Any]], logger: logging.Logger, console) -> dict[str, Any]:

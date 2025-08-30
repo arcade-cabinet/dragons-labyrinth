@@ -23,6 +23,8 @@ from .encounters import get_all_encounters, get_encounters_by_region, get_encoun
 from .sprites import get_all_characters, get_companions, get_character_roster
 from .assets import get_all_assets, get_assets_by_category, get_openai_generation_metrics
 
+__VERSION__ = "0.1.0"
+
 __all__ = [
     # Subpackage run functions
     "seeds_run",

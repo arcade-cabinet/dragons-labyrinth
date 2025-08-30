@@ -102,9 +102,9 @@ DreadLevel = int  # 0-4
 class EncountersTimestampedModel(SQLModel):
     """Base model with encounters-specific tracking."""
     
-    created_at: datetime = SQLField(default_factory=datetime.utcnow, sa_column=Column(DateTime), index=True)
-    updated_at: datetime | None = SQLField(default=None, sa_column=Column(DateTime))
-    generation_metadata: str = SQLField(default="{}", sa_column=Column(JSON), description="Generation process metadata")
+    created_at: datetime = SQLField(default_factory=datetime.utcnow, index=True)
+    updated_at: datetime | None = SQLField(default=None)
+    generation_metadata: str = SQLField(default="{}", description="Generation process metadata (JSON string)")
 
 
 class EncounterRecord(EncountersTimestampedModel, table=True):
@@ -133,6 +133,9 @@ class EncounterRecord(EncountersTimestampedModel, table=True):
     # Philosophy integration
     philosophy_approaches: str = SQLField(default="{}", sa_column=Column(JSON), description="Philosophy-specific approaches")
     moral_choices: str = SQLField(default="[]", sa_column=Column(JSON), description="Moral decision points")
+    
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
     
     # Cross-system coherence
     coherence_score: float = SQLField(default=0.0, description="Cross-system data coherence (0-1)")

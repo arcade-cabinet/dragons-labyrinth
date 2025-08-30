@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, ConfigDict
-from sqlmodel import SQLModel, Field as SQLField, Relationship, Column, JSON, DateTime
+from sqlmodel import SQLModel, Field as SQLField, Relationship, Column, JSON
 
 
 # ======================================
@@ -125,20 +125,17 @@ DreadLevel = int  # 0-4
 # SQLModel ORM Tables
 # ======================================
 
-class PsychologyTimestampedModel(SQLModel):
-    """Base model with psychology-specific tracking."""
-    
-    created_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    updated_at: datetime = SQLField(default_factory=datetime.now, sa_column=Column(DateTime), index=True)
-    
+class CompanionProfiles(SQLModel, table=True):
+    """Psychological profiles for companion NPCs using entities + seeds data."""
+
+    # Common tracking fields (were previously in mixin)
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
     # ML tracking for psychology extraction
     extraction_confidence: float = SQLField(default=0.0, description="ML psychology extraction confidence")
     ml_model_version: str = SQLField(default="1.0", description="ML model version used")
     cross_system_validated: bool = SQLField(default=False, description="Validated against entities/seeds")
-
-
-class CompanionProfiles(PsychologyTimestampedModel, table=True):
-    """Psychological profiles for companion NPCs using entities + seeds data."""
     
     id: int | None = SQLField(default=None, primary_key=True)
     
@@ -173,8 +170,17 @@ class CompanionProfiles(PsychologyTimestampedModel, table=True):
     therapy_requirements: str = SQLField(default="[]", sa_column=Column(JSON), description="JSON list of therapy needs")
 
 
-class HorrorProgression(PsychologyTimestampedModel, table=True):
+class HorrorProgression(SQLModel, table=True):
     """World-level dread escalation and horror progression tracking."""
+
+    # Common tracking fields (were previously in mixin)
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
+    # ML tracking for psychology extraction
+    extraction_confidence: float = SQLField(default=0.0, description="ML psychology extraction confidence")
+    ml_model_version: str = SQLField(default="1.0", description="ML model version used")
+    cross_system_validated: bool = SQLField(default=False, description="Validated against entities/seeds")
     
     id: int | None = SQLField(default=None, primary_key=True)
     
@@ -207,8 +213,17 @@ class HorrorProgression(PsychologyTimestampedModel, table=True):
     seed_pattern_count: int = SQLField(default=0, description="Number of seed patterns matching location")
 
 
-class PlayerPsychology(PsychologyTimestampedModel, table=True):
+class PlayerPsychology(SQLModel, table=True):
     """Player choice psychology and moral path tracking."""
+
+    # Common tracking fields (were previously in mixin)
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
+    # ML tracking for psychology extraction
+    extraction_confidence: float = SQLField(default=0.0, description="ML psychology extraction confidence")
+    ml_model_version: str = SQLField(default="1.0", description="ML model version used")
+    cross_system_validated: bool = SQLField(default=False, description="Validated against entities/seeds")
     
     id: int | None = SQLField(default=None, primary_key=True)
     
@@ -240,10 +255,22 @@ class PlayerPsychology(PsychologyTimestampedModel, table=True):
     companions_active: int = SQLField(default=0)
     companions_traumatized: int = SQLField(default=0)
     companions_in_therapy: int = SQLField(default=0)
+    
+    # World hooks for Godot integration
+    world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
 
 
-class PsychologyExtractionMetrics(PsychologyTimestampedModel, table=True):
+class PsychologyExtractionMetrics(SQLModel, table=True):
     """Metrics for psychology ML extraction and cross-system integration."""
+
+    # Common tracking fields (were previously in mixin)
+    created_at: datetime = SQLField(default_factory=datetime.now, index=True)
+    updated_at: datetime = SQLField(default_factory=datetime.now, index=True)
+
+    # ML tracking for psychology extraction
+    extraction_confidence: float = SQLField(default=0.0, description="ML psychology extraction confidence")
+    ml_model_version: str = SQLField(default="1.0", description="ML model version used")
+    cross_system_validated: bool = SQLField(default=False, description="Validated against entities/seeds")
     
     id: int | None = SQLField(default=None, primary_key=True)
     
