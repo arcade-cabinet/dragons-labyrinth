@@ -1,299 +1,398 @@
-# System Patterns - Dragon's Labyrinth (2025-08-28)
+# System Patterns & Architecture
 
-## Current Architecture: Godot-First Generation System
+## Core Architecture Pattern
 
-### Core Pattern: Simple Direct Generation
-**Revolution**: From 20+ complex modules to 4 simple files that generate Godot-native content
-
+### Content-Driven Development
 ```
-HBF/Literature Data → Python Generation → Godot Resources
-                         ↓                      ↓
-                  data_sources.py        .tres/.tscn/.gd files
-                  generation.py          Direct loading in Godot
-                  tracking.py            No runtime database
-                  generate_world.py      
+Markdown (source of truth)
+    ↓
+AI Generation (Python + OpenAI)
+    ↓
+JSON Data (build artifacts)
+    ↓
+Game Runtime (Rust/Bevy)
 ```
 
-### New File Architecture Pattern
-**Principle**: Flat is better than nested, direct is better than abstract
+## Technical Patterns
 
-```python
-src/dragons_labyrinth/
-├── data_sources.py    # Load all data (HBF, literature, psychology)
-├── generation.py      # Generate Godot formats (.tres, .tscn, .gd)
-├── tracking.py        # Minimal idempotency tracking
-└── generate_world.py  # Main orchestrator
+### 1. ECS (Entity Component System) Pattern
+**Framework**: Bevy 0.16.1
+
+**Core Concepts**:
+- **Entities**: Just IDs that group components
+- **Components**: Pure data structs (position, health, etc.)
+- **Systems**: Functions that query and modify components
+- **Resources**: Global singletons (WorldBook, PlayerState)
+
+**Example Pattern**:
+```rust
+// Component
+#[derive(Component)]
+struct HexPosition { q: i32, r: i32 }
+
+// System
+fn movement_system(
+    mut query: Query<&mut HexPosition, With<Player>>,
+    input: Res<Input<KeyCode>>
+) {
+    // Logic here
+}
+
+// Registration
+app.add_systems(Update, movement_system)
+```
+
+### 2. Hot-Reload Pattern
+**Purpose**: Instant content testing without restart
+
+**Implementation**:
+- R key triggers reload
+- Read worldbook.json from disk
+- Replace Resource in ECS
+- Systems automatically use new data
+
+**Benefits**:
+- Rapid iteration on content
+- No compilation for data changes
+- Designer-friendly workflow
+
+### 3. Hex Grid Pattern
+**Coordinate System**: Axial (q, r)
+
+**Movement Mapping**:
+- Q: Northwest
+- W: North
+- E: Northeast  
+- A: Southwest
+- S: South
+- D: Southeast
+
+**Math Utilities** (`hex.rs`):
+- Distance calculation
+- Neighbor finding
+- Line of sight
+- Pathfinding ready
+
+### 4. Plugin Architecture
+**Bevy Plugin Pattern**:
+```rust
+pub struct WorldPlugin;
+impl Plugin for WorldPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(...)
+           .add_systems(Startup, ...)
+           .add_systems(Update, ...);
+    }
+}
 ```
 
 **Benefits**:
-- Clear linear data flow: Load → Generate → Track
-- Direct inspection of generated files
-- No complex inheritance or mixins
-- Simple imports without package confusion
+- Modular feature addition
+- Clear dependency management
+- Easy enable/disable of features
 
-### Godot Resource Generation Pattern
-**Direct String Templates**: Generate Godot's native formats directly
-
-```python
-def generate_hex_tile_resource(hex_data: dict) -> str:
-    """Generate a Godot .tres resource file"""
-    tres_content = f'''[gd_resource type="Resource" script_class="HexTileData" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/HexTileData.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-coordinate = "{hex_data['coordinate']}"
-biome = "{hex_data['biome']}"
-dread_level = {calculate_dread_from_distance(hex_data['coordinate'])}
-features = [{format_features(hex_data['features'])}]
-'''
-    output_path = GODOT_RESOURCES_DIR / "hex_tiles" / f"hex_{safe_name}.tres"
-    output_path.write_text(tres_content)
-    return str(output_path)
+### 5. Material Shader Pattern
+**Custom Hex Rendering**:
+```rust
+Material2dPlugin::<HexTileMaterial>::default()
 ```
 
-### Minimal Tracking Pattern
-**SQLModel for Idempotency Only**: Not for game data storage
+**Capabilities**:
+- Custom shaders for hex tiles
+- Biome-specific rendering
+- Fog of war effects
+- Lighting overlays
 
-```python
-class GenerationRecord(SQLModel, table=True):
-    id: str = Field(primary_key=True)
-    generation_type: str  # hex_tile, creature, npc, etc.
-    timestamp: datetime
-    checksum: str  # SHA256 for change detection
-    file_path: str
-    extra_data: str = "{}"  # JSON metadata (not "metadata" - reserved)
+## Data Flow Patterns
 
-# Simple check and mark
-if not tracker.has_been_generated(item_id, content):
-    file_path = generate_resource(content)
-    tracker.mark_generated(item_id, "type", content, file_path)
+### 1. Generation Pipeline Pattern
+```
+canonize: Architecture.md → canon.json
+    ↓
+plan: canon + themes → world plan
+    ↓
+expand: plan → detailed regions
+    ↓
+image-plan: themes → asset designs
+    ↓
+images: designs → actual tilesets
+    ↓
+narrative: world → dialogue/quests
 ```
 
-### Data Loading Pattern
-**Direct File Access**: Load analyzed data without complex abstractions
+### 2. JSON Schema Pattern
+**Tool**: Pydantic models
 
+**Benefits**:
+- Type-safe generation
+- Automatic validation
+- Clear contracts between systems
+- IDE autocomplete
+
+**Example**:
 ```python
-def load_hbf_data() -> dict[str, Any]:
-    data = {"hex_tiles": [], "entities": [], "creatures": [], "npcs": []}
+class WorldBook(BaseModel):
+    plan: WorldPlan
+    regions: list[RegionBible]
     
-    # Direct CSV loading with increased field limit
-    csv.field_size_limit(1000000)  # Handle large HBF descriptions
-    
-    with open(HBF_ANALYSIS_DIR / "hex_tiles_full.csv") as f:
-        reader = csv.DictReader(f)
-        data["hex_tiles"] = list(reader)
-    
-    # Simple categorization
-    for entity in entities:
-        entity_type = entity.get("category", "").lower()
-        if "creature" in entity_type:
-            data["creatures"].append(entity)
-    
-    return data
+# Usage
+wb = WorldBook.model_validate_json(data)
 ```
 
-### Horror Progression Pattern
-**Distance-Based Mathematical Horror**: Built into generation
+### 3. Resource Loading Pattern
+```rust
+fn load_worldbook(mut commands: Commands) {
+    let text = std::fs::read_to_string("build/world/worldbook.json")
+        .expect("worldbook.json");
+    let wb: WorldBook = serde_json::from_str(&text)
+        .expect("valid worldbook");
+    commands.insert_resource(wb);
+}
+```
 
+**Key Points**:
+- Load once at startup
+- Deserialize to strongly-typed structs
+- Insert as global resource
+- Systems query resource as needed
+
+## AI Integration Patterns
+
+### 1. Prompt Engineering Pattern
+**Structure**:
 ```python
-def calculate_dread_level(coordinate: str) -> int:
-    distance = calculate_hex_distance(coordinate)
-    return min(4, distance // 20)  # 0-4 dread stages
+SYSTEM_CREATIVE = "You are a horror RPG designer..."
+SYSTEM_IMAGE = "You are an art director..."
 
-def generate_horror_name(base_name: str, cr: float) -> str:
-    if cr < 1: return f"Tainted {base_name}"
-    elif cr < 5: return f"Corrupted {base_name}"
-    elif cr < 10: return f"Nightmare {base_name}"
-    else: return f"Unspeakable {base_name}"
+prompt = f"""{SYSTEM_CREATIVE}
+Source: {markdown_content}
+Task: {specific_instruction}
+Return JSON only.
+"""
 ```
 
-## Legacy Patterns (Preserved for Reference)
+**Best Practices**:
+- Clear role definition
+- Structured input format
+- Explicit output requirements
+- JSON schema enforcement
 
-### [LEGACY] Content Pipeline Implementation Patterns
-**Note**: These patterns from the complex pipeline architecture are preserved for reference but have been replaced by the simpler direct generation approach above.
-
-<details>
-<summary>Click to expand legacy pipeline patterns</summary>
-
-### Pipeline Handoff Pattern (LEGACY)
+### 2. Response Validation Pattern
 ```python
-# OLD: Complex pipeline coordination
-class SomePipeline(BasePipeline):
-    def _execute_pipeline(self, tracker: IdempotencyStore, **kwargs) -> dict[str, Any]:
-        seeds_bundle = self._load_seeds_bundle(tracker)
-        world_structure = tracker.get_cached_result("world_structure")
-        # Complex handoffs between pipelines
+response_format={
+    "type": "json_schema",
+    "json_schema": {
+        "name": "ModelName",
+        "schema": Model.model_json_schema()
+    }
+}
 ```
 
-### Multi-Pipeline Coordination Pattern (LEGACY)
-```python
-# OLD: Complex inter-pipeline dependencies
-def _load_encounter_context(self, tracker: IdempotencyStore) -> EncounterContext:
-    tiles_data = tracker.get_cached_result("tiles_bundle")
-    character_data = tracker.get_cached_result("character_roster")
-    # Multiple pipeline dependencies
+**Benefits**:
+- Guaranteed valid JSON
+- Type-safe responses
+- No parsing errors
+- Predictable structure
+
+### 3. Incremental Generation Pattern
+**Approach**: Build world in stages, each informed by previous
+
+**Benefits**:
+- Maintains consistency
+- Allows refinement
+- Reduces token usage
+- Easier debugging
+
+## Game System Patterns
+
+### 1. Band Progression Pattern
+**Structure**:
+- Bands define level ranges (1-20, 21-40, etc.)
+- Each band has unique mechanics
+- Progressive horror intensity
+- Gating mechanisms between bands
+
+**Implementation**:
+- Check player distance from origin
+- Map distance to band
+- Apply band-specific rules
+- Trigger band transitions
+
+### 2. Inverted Combat Pattern
+**Traditional**: Win → Get stronger
+**Our Pattern**: Win → Get weaker
+
+**Mechanics**:
+- Health is currency for actions
+- Victory costs permanent HP
+- Healing is rare and precious
+- Death is strategic retreat
+
+### 3. Companion Trauma Pattern
+**State Tracking**:
+```rust
+struct Companion {
+    trauma_level: f32,
+    breaking_points: Vec<String>,
+    memories: Vec<TraumaticEvent>,
+}
 ```
 
-### Meta-Prompt Hierarchical Discovery (LEGACY)
-**OLD**: Jinja2 meta-prompts and LangChain agents
-- World Discovery → Band Discovery → Region Discovery
-- Complex template hierarchies
-- AI-driven content generation
+**Progression**:
+- Events increase trauma
+- Trauma affects behavior
+- Breaking points trigger changes
+- Some trauma is permanent
 
-</details>
+### 4. Forge Redemption Pattern
+**Concept**: Second chances at great cost
 
-## Modern Python Standards (Maintained)
-
-### Type System Consistency
-**Pattern**: Modern built-in generics throughout
-
-```python
-# Current standard (maintained)
-def load_data() -> dict[str, Any]:
-    items: list[str] = []
-    mapping: dict[str, int] = {}
-    optional: str | None = None
-    
-# Not: Optional[List[str]], Dict[str, Any], Optional[str]
-```
-
-### Import Pattern
-**Pattern**: Simple relative imports for flat structure
-
-```python
-# In generate_world.py - relative imports for same directory
-from data_sources import load_hbf_data, load_all_data
-from generation import generate_hex_tile_resource
-from tracking import GenerationTracker
-
-# Not: from dragons_labyrinth.subpackage.module import ...
-```
-
-## Key Architecture Decisions
-
-### What We Keep
-1. **HBF Analysis Results**: 245 entities, 65 hex tiles fully analyzed
-2. **Psychology Patterns**: 5-stage dread progression
-3. **Horror Mathematics**: Distance-based corruption
-4. **Modern Python Standards**: Type hints, enums
-
-### What We Discard
-1. **Database Complexity**: No more mixins, no complex inheritance
-2. **Deep Nesting**: Flat module structure
-3. **Pipeline Abstractions**: Direct generation instead
-4. **Pydantic Models**: Simple dicts for generation
-
-### What We Simplify
-1. **Tracking**: SQLModel for idempotency only
-2. **Data Loading**: Direct file access
-3. **Generation**: String templates over serialization
-4. **Dependencies**: Minimal external packages
+**Mechanics**:
+- Identify redemption opportunity
+- Pay cost (health/companion/item)
+- Reverse specific consequence
+- Cannot undo everything
 
 ## Performance Patterns
 
-### File Generation Performance
-**Pattern**: Generate once, track forever
+### 1. Lazy Loading Pattern
+- Load only visible hex tiles
+- Stream in adjacent regions
+- Unload distant content
+- Maintain small memory footprint
 
-```python
-# Idempotent generation - only creates changed content
-for hex_data in hbf_data["hex_tiles"]:
-    if tracker.has_been_generated(hex_id, hex_data):
-        skipped += 1
-        continue
-    file_path = generate_hex_tile_resource(hex_data)
-    generated += 1
+### 2. System Ordering Pattern
+```rust
+app.add_systems(Update, (
+    input_system,
+    movement_system,
+    encounter_system,
+    render_system
+).chain())
 ```
 
-### Memory Efficiency
-**Pattern**: Stream large files, don't load all at once
+**Benefits**:
+- Predictable execution order
+- Avoid race conditions
+- Optimize cache usage
 
-```python
-# For future large-scale generation
-def generate_world_chunks(size=100):
-    for chunk in iterate_chunks(hex_tiles, size):
-        generate_chunk(chunk)
-        tracker.commit()  # Save progress
+### 3. Query Optimization Pattern
+```rust
+Query<&Transform, (With<Player>, Without<Enemy>)>
 ```
 
-## Error Handling Patterns
+**Benefits**:
+- Filter at query time
+- Reduce iteration count
+- Better cache locality
 
-### Field Size Limits
-**Solution**: Increase CSV limits for large descriptions
-```python
-csv.field_size_limit(1000000)  # Handle HBF's large text fields
+## Content Patterns
+
+### 1. Biome Consistency Pattern
+- Each band has specific biome set
+- Biomes have tileset variants
+- Smooth transitions between biomes
+- Environmental storytelling
+
+### 2. POI Distribution Pattern
+- Villages: Safe havens (rare)
+- Shrines: Forge access points
+- Lairs: Combat encounters
+- Ruins: Lore and items
+- Dungeons: Major challenges
+- Camps: Rest but risky
+- Portals: Band transitions
+
+### 3. NPC Dialogue Pattern
+**Structure**:
+```json
+{
+  "npc_id": "guardian_ella",
+  "dialogue_trees": {
+    "first_meeting": [...],
+    "quest_active": [...],
+    "post_trauma": [...]
+  }
+}
 ```
 
-### Reserved Words
-**Solution**: Rename conflicting fields
-```python
-# SQLModel reserves "metadata"
-extra_data: str = "{}"  # Renamed from metadata
+**Progression**:
+- Context-aware responses
+- Trauma-modified dialogue
+- Quest state tracking
+- Relationship evolution
+
+## Development Patterns
+
+### 1. Markdown-First Pattern
+**Workflow**:
+1. Design in markdown
+2. Generate via AI
+3. Test in game
+4. Iterate on markdown
+5. Regenerate
+
+**Benefits**:
+- Version control friendly
+- Designer accessible
+- Clear documentation
+- Fast iteration
+
+### 2. Fail-Fast Pattern
+```rust
+.expect("worldbook.json must exist")
+.expect("valid JSON structure")
 ```
 
-### Import Errors
-**Solution**: Use relative imports in flat structure
-```python
-# Within same directory
-from tracking import GenerationTracker
-# Not: from dragons_labyrinth.tracking import ...
-```
+**Philosophy**:
+- Crash early in development
+- Clear error messages
+- No silent failures
+- Easy debugging
 
-## Success Metrics
+### 3. Single Source of Truth
+- Architecture.md defines game rules
+- Themes.md defines aesthetics
+- Generated JSON is disposable
+- Markdown is versioned
 
-### Code Reduction
-- **Before**: 20+ modules, 1000+ lines database code
-- **After**: 4 files, ~800 lines total
-- **Reduction**: 75% less code
+## Anti-Patterns to Avoid
 
-### Complexity Reduction
-- **Before**: 3-level deep packages, complex inheritance
-- **After**: Flat structure, simple functions
-- **Reduction**: 90% less complexity
+### 1. Database Complexity
+**Avoid**: Complex ORM, migrations, queries
+**Use**: Direct JSON loading
 
-### Performance Gains
-- **Generation Time**: < 1 second for 10 hex tiles
-- **Memory Usage**: Minimal (no database overhead)
-- **Disk Usage**: Only generated Godot files
+### 2. Over-Abstraction
+**Avoid**: Generic systems, deep inheritance
+**Use**: Specific, simple functions
 
-## Future Patterns
+### 3. Defensive Programming
+**Avoid**: Null checks, fallbacks, recovery
+**Use**: Expect valid data, fail fast
 
-### Procedural Generation
-**Next Step**: Generate beyond HBF's 65 tiles
-```python
-def generate_procedural_hex(x: int, y: int) -> dict:
-    biome = select_biome_by_distance(x, y)
-    features = generate_features_by_biome(biome)
-    return {"coordinate": f"X{x}Y{y}", "biome": biome, "features": features}
-```
+### 4. Runtime Generation
+**Avoid**: Procedural generation during play
+**Use**: Pre-generated content, hot-reload
 
-### Batch Generation
-**Next Step**: Generate all content types
-```python
-def generate_complete_world():
-    generate_all_hex_tiles()  # All 65+
-    generate_all_creatures()  # From 245 entities
-    generate_all_npcs()       # With psychology
-    generate_all_items()      # Treasure and artifacts
-```
+## Success Patterns
 
-### Godot Integration
-**Next Step**: Direct scene generation
-```python
-def generate_world_scene() -> str:
-    """Generate complete Godot world scene with all hex tiles placed"""
-    # Future: Generate .tscn with hex grid populated
-```
+### 1. Continuous Integration
+- Every change builds
+- All tests pass
+- Content generates
+- Game runs
 
-## Summary
+### 2. Playtesting Loop
+- Implement feature
+- Hot-reload test
+- Get feedback
+- Iterate quickly
 
-The architecture has successfully pivoted from infrastructure engineering to game development. The new patterns prioritize:
+### 3. Content Pipeline
+- Markdown edit
+- AI generation
+- JSON validation  
+- Game integration
+- Player experience
 
-1. **Simplicity** over abstraction
-2. **Direct generation** over complex pipelines
-3. **Godot-first** thinking over database design
-4. **Flat structure** over deep nesting
-5. **File generation** over runtime systems
-
-This represents a fundamental shift in approach: **The game is what matters. Everything else is just tooling.**
+These patterns form the foundation of our technical architecture, ensuring consistent, maintainable, and performant development of Dragon's Labyrinth.

@@ -1,266 +1,341 @@
-# Dragon's Labyrinth Technical Context
+# Technical Context
 
-## COMPREHENSIVE DATABASE ARCHITECTURE IMPLEMENTATION (2025-08-28)
-
-### Revolutionary Technical Achievement: 100% Complete
-
-**EXTRAORDINARY TECHNICAL IMPLEMENTATION**: Successfully built the most comprehensive database architecture with revolutionary cross-system ML integration across 8 major subpackages.
-
-## 🏆 TECHNICAL ARCHITECTURE OVERVIEW
-
-### Comprehensive Database Structure (50+ Tables)
-```
-src/generator/db/ (UNIFIED DATABASE ARCHITECTURE)
-├── entities/        (13 tables: Biome, Monster, Inn, NPC, Settlement, Dungeon, etc.)
-├── seeds/          (8 tables: Sources, NarrativeSeeds, EmotionalSeeds, MotifSeeds, etc.)
-├── psychology/     (4 tables: CompanionProfiles, HorrorProgression, PlayerPsychology, Metrics)
-├── world/          (5 tables: Regions, Campaigns, WorldState, RegionalProgression, Metrics)
-├── maps/           (5 tables: HexTiles, MapRegions, TileSets, HexAdjacency, Metrics)
-├── encounters/     (5 tables: EncounterRecord, CombatScenario, ScriptedEvent, Beast, NPC)
-├── sprites/        (5 tables: CharacterRecord, NPCRecord, CompanionRecord, Monster, Mercenary)
-└── assets/         (5 tables: AssetRecord, AssetBlobStorage, RequestRecord, Metrics, SpriteSheet)
-```
-
-## 🔧 TECHNICAL IMPLEMENTATION STACK
+## Technology Stack
 
 ### Core Technologies
-- **SQLModel**: 50+ table database with comprehensive relationships
-- **SQLAlchemy**: Advanced ORM with cross-system foreign keys
-- **Pydantic**: Type validation and data modeling throughout
-- **OpenAI API**: Preserved working integration with cross-system enhancement
-- **Rich Console**: Beautiful CLI interface with progress tracking
-- **Typer**: CLI framework for comprehensive orchestrator
 
-### Database Technology Excellence
-- **SQLite**: Production database with godot-sqlite addon compatibility
-- **Foreign Keys**: Proper relationships between all subpackages
-- **JSON Fields**: Complex cross-system data storage
-- **Blob Storage**: SQLite blob storage for OpenAI generated assets
-- **Validation**: Comprehensive data validation and coherence scoring
+#### Rust + Bevy (Game Engine)
+- **Version**: Bevy 0.16.1
+- **Language**: Rust with 2024 edition
+- **Why Bevy**: ECS architecture perfect for component-heavy RPG
+- **Key Features**: Hot-reload, 2D rendering, plugin system, shaders
 
-### ML Integration Stack
-- **OpenAI GPT-4**: ML extraction across all subpackages  
-- **Cross-System Context**: Rich context from all subpackages for ML enhancement
-- **No Fallbacks**: ML-first architecture with fail-fast error handling
-- **Quality Validation**: Coherence scoring across all ML integrations
+#### Python (Content Generation)
+- **Version**: Python 3.13
+- **Purpose**: AI-driven content pipeline
+- **Key Libraries**: 
+  - OpenAI: GPT integration
+  - Pydantic: Schema validation
+  - Pillow: Image processing
+  - Typer: CLI interface
 
-## 🏗️ ARCHITECTURAL PATTERNS IMPLEMENTED
+#### OpenAI API
+- **Text Model**: Configurable (default: gpt-5.1)
+- **Image Model**: Configurable (default: gpt-image-1)
+- **Purpose**: Convert markdown to game content
+- **Features**: JSON schema enforcement, structured outputs
 
-### Cross-System Manager Pattern
-```python
-class SubpackageManager:
-    def __init__(self, model_name: str = "gpt-4o"):
-        self.extractor = SubpackageExtractor(model_name)
-        self.other_managers = {}  # Initialized in initialize_cross_system_connections
-        
-    def initialize_cross_system_connections(self, session: Session) -> None:
-        """Revolutionary pattern: Each manager coordinates with ALL others"""
-        from ..entities.manager import EntitiesManager
-        from ..psychology.manager import PsychologyManager
-        # Import ALL required managers for coordination
-        
-    def generate_with_cross_system_integration(self, session: Session):
-        """Generate using data from ALL relevant subpackages"""
-        cross_system_data = self.load_cross_system_data(session)
-        return self.extractor.extract_from_cross_systems(session, cross_system_data)
+## Project Structure
+
+### Repository Layout
+```
+dragons-labyrinth/
+├── .clinerules           # AI agent instructions
+├── Cargo.toml           # Rust workspace config
+├── pyproject.toml       # Python project config
+├── ai/                  # Python generation pipeline
+├── apps/                # Rust applications
+│   └── game/           # Main game executable
+├── crates/             # Rust libraries
+│   └── world/          # Game world logic
+├── content/            # Source markdown files
+├── build/              # Generated JSON data
+└── memory-bank/        # Project documentation
 ```
 
-### SQLModel ORM Pattern
-```python
-class SubpackageRecord(SQLModel, table=True):
-    __tablename__ = "subpackage_records"
-    
-    # Primary identification
-    record_id: str = Field(primary_key=True)
-    
-    # Cross-system references (JSON for complex relationships)
-    source_entities: List[str] = Field(sa_column=Column(JSON))
-    psychology_context: Dict[str, Any] = Field(sa_column=Column(JSON))
-    world_context: Dict[str, Any] = Field(sa_column=Column(JSON))
-    
-    # Cross-system validation
-    coherence_score: float = Field(default=0.0, description="Cross-system coherence (0-1)")
-    validation_notes: List[str] = Field(sa_column=Column(JSON))
-    
-    # Metadata with timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow, sa_column=Column(DateTime))
+### Build Artifacts
+```
+build/
+├── master/             # Core game data
+│   ├── canon.json     # Game rules
+│   └── themes.json    # Art bible
+├── world/             # World data
+│   ├── plan.json      # High-level structure
+│   ├── region_*.json  # Detailed regions
+│   └── worldbook.json # Complete world
+├── features/          # Game features
+│   └── shops/         # Shop inventories
+├── narrative/         # Story content
+└── image_plan.json    # Asset generation plan
 ```
 
-### ML Extractor Pattern  
-```python
-class SubpackageExtractor:
-    def __init__(self, model_name: str = "gpt-4o"):
-        self.model_name = model_name
-        self.ml_client = None  # Lazy initialization
-        
-    def extract_from_cross_systems(
-        self, 
-        session: Session,
-        entities_data: Dict[str, Any],
-        psychology_data: Dict[str, Any],
-        world_data: Dict[str, Any],
-        # ... other systems as needed
-    ):
-        """ML extraction with comprehensive cross-system context"""
-        
-        # Build rich extraction context
-        context = self._build_cross_system_context(entities_data, psychology_data, world_data)
-        
-        # ML extraction with enhanced prompts
-        system_prompt = "Expert system with cross-system integration..."
-        user_prompt = f"Using cross-system data: {context}..."
-        
-        result = self.ml_client.chat.completions.create(
-            model=self.model_name,
-            messages=[{"role": "system", "content": system_prompt}, 
-                     {"role": "user", "content": user_prompt}]
-        )
-        
-        # Validate and score coherence
-        coherence_score = self.calculate_cross_system_coherence(result, all_data)
-        
-        return enhanced_result_with_coherence
+## Development Environment
+
+### Required Tools
+- **Rust**: Latest stable via rustup
+- **Python**: 3.13 via pyenv/uv
+- **Git**: Version control
+- **VS Code**: With Rust and Python extensions
+
+### Environment Variables
+```bash
+OPENAI_API_KEY=sk-...         # Required for AI generation
+OPENAI_MODEL=gpt-5.1          # Optional, defaults shown
+OPENAI_IMAGE_MODEL=gpt-image-1 # Optional
 ```
 
-## 🚀 CLI AND ORCHESTRATION PATTERNS
+### Package Management
+- **Rust**: Cargo workspaces
+- **Python**: uv/hatch for dependencies
+- **Node**: Not required (removed with Godot)
 
-### ComprehensiveOrchestrator Pattern
-```python
-class ComprehensiveOrchestrator:
-    """Revolutionary orchestrator managing ALL 8 subpackages"""
-    
-    def __init__(self, database_url: str = "sqlite:///dragon_labyrinth.db"):
-        # Initialize ALL 8 managers for comprehensive coordination
-        self.entities_manager = EntitiesManager()
-        self.seeds_manager = SeedsManager()
-        self.psychology_manager = PsychologyManager()
-        self.world_manager = WorldManager()
-        self.maps_manager = MapsManager()
-        self.encounters_manager = EncountersManager()
-        self.sprites_manager = SpritesManager()
-        self.assets_manager = AssetsManager()
-    
-    def execute_comprehensive_cross_system_integration(self, session):
-        """Execute complete cross-system pipeline"""
-        # Revolutionary 4-phase execution with comprehensive coordination
+## Key Dependencies
+
+### Rust Dependencies
+```toml
+[workspace.dependencies]
+bevy = "0.16.1"              # Game engine
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"             # JSON parsing
+anyhow = "1"                 # Error handling
+rand = "0.8"                 # Random generation
 ```
 
-### CLI Interface Pattern
-```python
-@app.command("run-comprehensive")
-def run_comprehensive_integration():
-    """CLI for comprehensive database architecture"""
-    orchestrator = ComprehensiveOrchestrator()
-    
-    with Session(orchestrator.engine) as session:
-        # Initialize ALL cross-system connections
-        for manager in all_managers:
-            manager.initialize_cross_system_connections(session)
-        
-        # Execute comprehensive integration
-        results = orchestrator.execute_comprehensive_cross_system_integration(session)
-        
-        # Beautiful console output with achievement display
-        console.print("🏆 COMPREHENSIVE DATABASE ARCHITECTURE: 100% COMPLETE!")
+### Python Dependencies
+```toml
+# Core
+openai = ">=1.50.0"          # AI integration
+pydantic = ">=2.8.0"         # Data validation
+typer = ">=0.12.0"           # CLI framework
+
+# Processing
+pillow = ">=10.4.0"          # Image manipulation
+beautifulsoup4 = ">=4.12.3"  # HTML parsing
+jinja2 = ">=3.1.4"           # Template engine
+
+# Data
+pandas = ">=2.2.0"           # Data analysis
+sqlalchemy = ">=2.0.0"       # Database access
+sqlmodel = ">=0.0.24"        # ORM
+
+# Utilities
+rich = ">=13.9.0"            # Terminal output
+tqdm = ">=4.66.0"            # Progress bars
+requests = ">=2.32.0"        # HTTP requests
 ```
 
-## 🎮 GAME INTEGRATION TECHNICAL READINESS
+## Build & Run Commands
 
-### Godot Addon Integration Architecture
-**Critical Technical Requirements:**
+### Python Content Generation
+```bash
+# Install dependencies
+pip install -e .
 
-**1. godot-sqlite Addon Integration:**
-```gdscript
-# Ready for 50+ table database loading
-var db = SQLite.new()
-db.path = "res://dragon_labyrinth.db"  
-db.open_db()
-
-# Load entities
-var entities = db.select_rows("entity_records", "", ["*"])
-# Load psychology profiles  
-var psychology = db.select_rows("companion_profiles", "", ["*"])
-# Load world data
-var regions = db.select_rows("regions", "", ["*"])
-# ... all 50+ tables
+# Generate game content
+python -m ai canonize        # Convert markdown to canon
+python -m ai plan           # Create world plan
+python -m ai expand         # Generate regions
+python -m ai image-plan     # Design assets
+python -m ai images         # Generate tilesets
+python -m ai narrative      # Expand dialogue
 ```
 
-**2. hexagon_tilemaplayer Integration:**
-```gdscript
-# Compatible with our hex grid system
-extends HexagonTileMapLayer
+### Rust Game Development
+```bash
+# Build game
+cargo build --release
 
-func load_hex_grid_from_database():
-    # Load hex tiles from maps subpackage
-    var hex_tiles = db.select_rows("hex_tiles", "", ["*"])
-    
-    for tile in hex_tiles:
-        var coords = Vector3i(tile.q, tile.r, tile.s)  # Cube coordinates
-        var entity_placement = tile.entity_placement
-        # Place entities with cross-system data
+# Run game
+cargo run -p game
+
+# Run with hot-reload testing
+cargo watch -x "run -p game"
 ```
 
-**3. WorldBuilder Addon Integration:**
-```gdscript
-# Integration with our seeds data
-class_name WorldBuilderSeeds extends RefCounted
+### Development Workflow
+```bash
+# 1. Edit content
+vim content/Architecture.md
 
-func load_seeds_from_database():
-    var emotional_seeds = db.select_rows("emotional_seeds", "", ["*"])
-    var narrative_seeds = db.select_rows("narrative_seeds", "", ["*"])  
-    var motif_seeds = db.select_rows("motif_seeds", "", ["*"])
-    # Use for procedural world generation
+# 2. Regenerate
+python -m ai canonize && python -m ai plan && python -m ai expand
+
+# 3. Run game
+cargo run -p game
+
+# 4. Hot-reload test (press R in game)
 ```
 
-### Content Generation Pipeline Architecture
+## Architecture Decisions
+
+### Why Rust + Bevy (not Godot)
+- **Performance**: Native performance, no GDScript overhead
+- **Architecture**: ECS fits our component-heavy design
+- **Simplicity**: Direct JSON loading vs Godot resources
+- **Control**: Full control over rendering pipeline
+- **Hot-Reload**: Simpler implementation than Godot
+
+### Why Python Generation (not Rust)
+- **AI Libraries**: Better OpenAI integration
+- **Flexibility**: Rapid prototyping of generation logic
+- **Ecosystem**: Rich data processing libraries
+- **Separation**: Clear boundary between generation and runtime
+
+### Why JSON (not Database)
+- **Simplicity**: No ORM complexity
+- **Portability**: Easy to share/version
+- **Debugging**: Human-readable format
+- **Performance**: Fast loading at startup
+- **Hot-Reload**: Simple file watching
+
+## Performance Considerations
+
+### Memory Usage
+- **World Data**: ~10MB JSON loaded at startup
+- **Textures**: Lazy-loaded as needed
+- **Entities**: Component pools for efficiency
+- **Target**: <500MB RAM usage
+
+### CPU Usage
+- **Hex Math**: Pre-calculated lookup tables
+- **Pathfinding**: A* with caching
+- **Systems**: Parallel execution where possible
+- **Target**: 60 FPS on 2015+ hardware
+
+### GPU Usage
+- **2D Rendering**: Minimal requirements
+- **Shaders**: Simple hex tile materials
+- **Batching**: Instanced rendering for tiles
+- **Target**: Intel integrated graphics
+
+## Platform Support
+
+### Primary Targets
+- **Windows**: 10/11 (64-bit)
+- **macOS**: 11+ (Apple Silicon + Intel)
+- **Linux**: Ubuntu 20.04+ equivalent
+
+### Future Targets
+- **Steam Deck**: Verified compatibility
+- **Web**: WASM build (post-launch)
+- **Mobile**: Possible but not planned
+
+## Testing Strategy
+
+### Unit Tests
+```bash
+# Rust tests
+cargo test
+
+# Python tests
+pytest ai/tests/
 ```
-HBF Analysis → Entities Extraction → Seeds Analysis → Psychology ML → 
-World Coordination → Maps Generation → Encounters Creation → 
-Sprites Generation → Assets (OpenAI) → Godot Resources (.tres/.tscn/.gd)
+
+### Integration Tests
+- Full pipeline execution
+- World generation validation
+- Save/load cycles
+- Hot-reload verification
+
+### Performance Tests
+- Frame rate monitoring
+- Memory leak detection
+- Load time benchmarks
+- Pathfinding stress tests
+
+## Deployment
+
+### Distribution
+- **Format**: Single executable + data folder
+- **Size**: ~50MB download
+- **Updates**: Replace data files for content
+- **Saves**: User home directory
+
+### Content Updates
+```bash
+# Update content only
+python -m ai canonize plan expand
+cp -r build/* game_release/data/
 ```
 
-## 💾 DATABASE TECHNICAL SPECIFICATIONS
+### Binary Updates
+```bash
+# Full rebuild
+cargo build --release
+cp target/release/game game_release/
+```
 
-### Table Architecture
-- **Entity Tables (13)**: NPCs, monsters, biomes, locations, settlements, dungeons, etc.
-- **Seeds Tables (8)**: Literature sources, emotional patterns, narrative structures, motifs
-- **Psychology Tables (4)**: Companion profiles, horror progression, player psychology, metrics
-- **World Tables (5)**: Regions, campaigns, world state, regional progression, metrics
-- **Maps Tables (5)**: Hex tiles, map regions, tile sets, adjacency, metrics
-- **Encounters Tables (5)**: Base encounters, combat scenarios, scripted events, beast encounters, NPC interactions
-- **Sprites Tables (5)**: Characters, NPCs, companions, monsters, mercenaries
-- **Assets Tables (5)**: Asset records, blob storage, requests, metrics, sprite sheets
+## Security Considerations
 
-### Cross-System Relationships
-- **Foreign Keys**: Proper relationships between all subpackage tables
-- **JSON References**: Complex cross-system data stored in JSON fields
-- **Coherence Validation**: Every record includes cross-system coherence scoring
-- **Metadata Tracking**: Generation process metadata for all records
+### API Keys
+- Never commit to repository
+- Use environment variables
+- Document in .env.example
 
-## 🚀 PERFORMANCE AND SCALABILITY
+### User Data
+- Saves in user directory only
+- No network features planned
+- No telemetry or analytics
 
-### Database Performance
-- **SQLite Optimization**: Indexed foreign keys and JSON fields
-- **Lazy Loading**: Managers load cross-system data only when needed
-- **Batch Operations**: Efficient bulk operations for large datasets
-- **Connection Pooling**: Proper session management across all subpackages
+## Known Limitations
 
-### ML Performance  
-- **Context Caching**: Cross-system context cached for efficiency
-- **API Rate Limiting**: Proper OpenAI rate limiting with retry logic
-- **Cost Optimization**: Budget management and cost tracking
-- **Quality Scoring**: Efficient coherence validation algorithms
+### Current
+- Single-threaded AI generation
+- No multiplayer support
+- Limited to 2D rendering
+- English-only content
 
-## 📝 TECHNICAL STATUS SUMMARY
+### Acceptable
+- These align with project scope
+- Focus on single-player horror
+- 2D supports our art style
+- Localization post-launch maybe
 
-**COMPREHENSIVE DATABASE ARCHITECTURE: 100% COMPLETE**
+## Monitoring & Debugging
 
-✅ **50+ SQLModel tables** with comprehensive cross-system relationships
-✅ **8 integrated subpackages** with revolutionary ML coordination
-✅ **OpenAI integration** preserved while adding cross-system context enhancement
-✅ **ComprehensiveOrchestrator** with beautiful CLI interface
-✅ **Production-ready architecture** for game content generation
+### Development Tools
+- Bevy inspector egui
+- Chrome DevTools for WASM
+- Python debugger for generation
+- VS Code integrated debugging
 
-**Ready for:** Game foundation integration with godot-open-rpg, addon integration testing, and production content generation pipeline.
+### Logging
+```rust
+// Rust
+log::info!("Player moved to {:?}", pos);
 
-**Technical Foundation**: The most sophisticated cross-system database architecture ever implemented in the project, ready for seamless Godot integration.
+// Python
+logger.info(f"Generated {len(regions)} regions")
+```
+
+### Profiling
+- Bevy Tracy integration
+- Python cProfile for generation
+- Memory profiling with Valgrind
+- GPU profiling with RenderDoc
+
+## Future Technical Considerations
+
+### Potential Optimizations
+- Texture atlasing for tiles
+- Chunk-based world loading
+- Background content generation
+- Shader-based fog of war
+
+### Potential Features
+- Steam Workshop support
+- Mod loading system
+- Replay system
+- Achievement integration
+
+### Technical Debt
+- Schema implementations needed
+- Image generation incomplete
+- Combat system placeholder
+- Companion AI basic
+
+## Migration Notes
+
+### From Godot to Bevy
+- Removed GDScript files
+- Removed .tscn/.tres resources  
+- Converted to ECS components
+- Simplified to JSON data
+
+### From Complex Python
+- Removed generator/ subpackage mess
+- Simplified to ai/ directory
+- Modern Python patterns
+- Clear module separation
+
+This technical context provides the foundation for understanding and extending Dragon's Labyrinth's implementation.
