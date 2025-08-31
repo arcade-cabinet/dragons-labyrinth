@@ -1,0 +1,272 @@
+{
+  "band": "121-180",
+  "name": "Cataclysm's Edge",
+  "mood_board": [
+    "unraveling",
+    "final dread"
+  ],
+  "biomes": [
+    "dragon_scar",
+    "abyssal_chasm"
+  ],
+  "hex_points": [
+    {
+      "axial": "1,0",
+      "kind": "village",
+      "blurb": "A settlement of survivors, clinging to both hope and despair."
+    },
+    {
+      "axial": "0,1",
+      "kind": "shrine",
+      "blurb": "A dilapidated shrine, where prayers for restoration echo."
+    },
+    {
+      "axial": "-1,1",
+      "kind": "lair",
+      "blurb": "The lair of a worldbreaker, claiming echoes of the past."
+    },
+    {
+      "axial": "-1,0",
+      "kind": "ruin",
+      "blurb": "Remnants of a once-grand forge, now haunted by lost souls."
+    },
+    {
+      "axial": "0,0",
+      "kind": "dungeon",
+      "blurb": "A labyrinth of despair, where fears manifest."
+    },
+    {
+      "axial": "1,1",
+      "kind": "camp",
+      "blurb": "A makeshift camp of survivors, holding onto second chances."
+    },
+    {
+      "axial": "1,-1",
+      "kind": "forge",
+      "blurb": "The Last Forge, sparking with the remnants of draconic fire."
+    },
+    {
+      "axial": "0,-1",
+      "kind": "portal",
+      "blurb": "An unstable portal, leading to fractured realms."
+    },
+    {
+      "axial": "-2,1",
+      "kind": "village",
+      "blurb": "A village of oddly resilient spirits, blending joy with sorrow."
+    },
+    {
+      "axial": "2,0",
+      "kind": "shrine",
+      "blurb": "A shrine devoted to mending the broken hearts of the world."
+    },
+    {
+      "axial": "-2,0",
+      "kind": "lair",
+      "blurb": "An ancient lair, housing a lingering draconic presence."
+    },
+    {
+      "axial": "-1,-1",
+      "kind": "ruin",
+      "blurb": "A ruin, whispering stories of betrayal and loss."
+    },
+    {
+      "axial": "1,2",
+      "kind": "dungeon",
+      "blurb": "A twisted dungeon, echoing the cries of the lost."
+    },
+    {
+      "axial": "0,2",
+      "kind": "camp",
+      "blurb": "A camp where stories of betrayal and trauma intertwine."
+    },
+    {
+      "axial": "2,1",
+      "kind": "forge",
+      "blurb": "An ethereal forge, channeling the essence of past dragons."
+    },
+    {
+      "axial": "-2,-1",
+      "kind": "portal",
+      "blurb": "A portal glowing with fractal energies of time."
+    },
+    {
+      "axial": "-1,2",
+      "kind": "village",
+      "blurb": "A village carved from stone, echoing despair."
+    },
+    {
+      "axial": "1,2",
+      "kind": "shrine",
+      "blurb": "A shrine of fractured souls, offering fleeting glimpses of hope."
+    },
+    {
+      "axial": "0,3",
+      "kind": "lair",
+      "blurb": "A lair filled with specters of fallen warriors."
+    }
+  ],
+  "quests": [
+    {
+      "id": "quest1",
+      "title": "Echoes of the Fallen",
+      "summary": "Find remnants of the past and confront the myths of the dragon's fall.",
+      "type": "main",
+      "steps": [
+        "Investigate the Last Forge.",
+        "Collect the shards of ancient weapons.",
+        "Face the specter of the worldbreaker."
+      ],
+      "success_outcome": "You restore a piece of history, gaining power and knowledge.",
+      "failure_outcome": "You unleash horrors that haunt your mind."
+    },
+    {
+      "id": "quest2",
+      "title": "Second Chances",
+      "summary": "Assist survivors in rebuilding their shattered lives.",
+      "type": "side",
+      "steps": [
+        "Help the villagers clear rubble.",
+        "Transport supplies from the camp.",
+        "Rekindle the forge's fire."
+      ],
+      "success_outcome": "The village thrives and rewards you kindly.",
+      "failure_outcome": "The village suffers, and trust diminishes."
+    },
+    {
+      "id": "quest3",
+      "title": "Whispers of Betrayal",
+      "summary": "Unravel hidden secrets among companions and ghosts.",
+      "type": "side",
+      "steps": [
+        "Discover hidden truths in the dungeon.",
+        "Confront a traitor.",
+        "Seek forgiveness."
+      ],
+      "success_outcome": "United, the companions grow stronger.",
+      "failure_outcome": "Distrust spreads, fracturing your group."
+    },
+    {
+      "id": "quest4",
+      "title": "The Last Forge’s Heart",
+      "summary": "Restore the heart of the Last Forge to reignite hope.",
+      "type": "forge",
+      "steps": [
+        "Find the heart's location in the lair.",
+        "Defeat the guardian specter.",
+        "Repair the forge."
+      ],
+      "success_outcome": "The forge blazes anew, granting powerful enhancements.",
+      "failure_outcome": "The heart breaks, dooming the forge."
+    },
+    {
+      "id": "quest5",
+      "title": "Moral Fractures",
+      "summary": "Make a choice affecting the lives of survivors.",
+      "type": "moral",
+      "steps": [
+        "Select who receives aid amidst scarcity.",
+        "Explore the ruins for resources.",
+        "Confront the consequences of your choice."
+      ],
+      "success_outcome": "Your choice strengthens bonds.",
+      "failure_outcome": "Discontent grows among survivors."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc1",
+      "name": "Raelith the Unbroken",
+      "role": "Guide",
+      "personality": "Haunted yet hopeful",
+      "secrets": [
+        "Carries the weight of betrayal from a lost friend.",
+        "Hides a map to the heart of the Last Forge."
+      ],
+      "hooks": [
+        "Knows of a way to bridge tragic past and present."
+      ]
+    },
+    {
+      "id": "npc2",
+      "name": "Taran the Fragmented",
+      "role": "Villager",
+      "personality": "Distrusting and wary",
+      "secrets": [
+        "Believes the dragon's spirit still lingers.",
+        "Once betrayed a friend for survival."
+      ],
+      "hooks": [
+        "Sees visions that may lead to the truth."
+      ]
+    },
+    {
+      "id": "npc3",
+      "name": "Elaris the Spirit Keeper",
+      "role": "Seer",
+      "personality": "Mysterious and calm",
+      "secrets": [
+        "Hides memories of a past life as a dragon.",
+        "Can speak to lingering spirits."
+      ],
+      "hooks": [
+        "Offers insights that challenge allies' motivations."
+      ]
+    },
+    {
+      "id": "npc4",
+      "name": "Thron the Forgemaster",
+      "role": "Smith",
+      "personality": "Gruff but passionate about his craft",
+      "secrets": [
+        "Once forged weapons for the dragon.",
+        "Believes in second chances."
+      ],
+      "hooks": [
+        "Can teach companions the ways of rekindling their skills."
+      ]
+    }
+  ],
+  "creatures": [
+    {
+      "id": "creature1",
+      "name": "Worldbreaker",
+      "tags": [
+        "spectral",
+        "giant"
+      ],
+      "behavior": "Roams the remnants of destruction, seeking to unravel reality.",
+      "cr_hint": "Beware the void it casts upon allies."
+    },
+    {
+      "id": "creature2",
+      "name": "Fractured Dragon",
+      "tags": [
+        "mythical",
+        "traitorous"
+      ],
+      "behavior": "A twisted entity born from betrayal, lurking in the abyss.",
+      "cr_hint": "Susceptible to the emotions of those nearby."
+    },
+    {
+      "id": "creature3",
+      "name": "Spectral Guardian",
+      "tags": [
+        "haunting",
+        "defensive"
+      ],
+      "behavior": "Defends the Last Forge with relentless determination.",
+      "cr_hint": "Its grief amplifies its strength."
+    },
+    {
+      "id": "creature4",
+      "name": "Wraith of Trauma",
+      "tags": [
+        "undead",
+        "tormented"
+      ],
+      "behavior": "Wanders the ruins, seeking to avenge a broken past.",
+      "cr_hint": "Vulnerable to light yet feeds on sorrow."
+    }
+  ]
+}

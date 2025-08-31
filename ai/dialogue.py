@@ -1,7 +1,7 @@
 from __future__ import annotations
 from openai import OpenAI
-from schemas import DialoguePack, QuestlinePack, WorldBook
-from util import write_if_changed
+from ai.schemas import DialoguePack, QuestlinePack, WorldBook
+from ai.util import write_if_changed, call_json_schema
 from pathlib import Path
 import json, os
 
@@ -16,15 +16,8 @@ def expand_npc_dialogue(wb: WorldBook, model: str, temperature: float = 0.8) -> 
 
 Write DialoguePack JSON for npc_id={npc.id} with short lines that fit the band's tone.
 """
-            res = client.responses.create(
-                model=model,
-                input=prompt,
-                temperature=temperature,
-                response_format={"type":"json_schema","json_schema":{
-                    "name":"DialoguePack","schema":DialoguePack.model_json_schema()
-                }},
-            )
-            dp = DialoguePack.model_validate_json(res.output_text)
+            text = call_json_schema(client, model, prompt, DialoguePack, temperature)
+            dp = DialoguePack.model_validate_json(text)
             results[npc.id] = dp
     return results
 
@@ -39,15 +32,8 @@ Keep consistent with quest summary and steps.
 Quest:
 {json.dumps(q.model_dump(), indent=2)}
 """
-            res = client.responses.create(
-                model=model,
-                input=prompt,
-                temperature=temperature,
-                response_format={"type":"json_schema","json_schema":{
-                    "name":"QuestlinePack","schema":QuestlinePack.model_json_schema()
-                }},
-            )
-            pack = QuestlinePack.model_validate_json(res.output_text)
+            text = call_json_schema(client, model, prompt, QuestlinePack, temperature)
+            pack = QuestlinePack.model_validate_json(text)
             qmap[q.id] = pack
     return qmap
 

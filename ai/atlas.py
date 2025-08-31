@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image
 import json, io
 
-from util import write_if_changed, ROOT
+from ai.util import write_if_changed, ROOT
 
 def pack_uniform_grid(src_dir: Path, out_png: Path, out_json: Path, tile_size: int = 512, cols: int = 8) -> None:
     tiles: list[tuple[str, Path]] = []

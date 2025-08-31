@@ -1,0 +1,299 @@
+{
+  "band": "61-120",
+  "name": "Wastelands of Despair",
+  "mood_board": [],
+  "biomes": [
+    "famine_fields",
+    "bone_forest"
+  ],
+  "hex_points": [
+    {
+      "axial": "-1,-3",
+      "kind": "village",
+      "blurb": "A settlement struggling to survive amidst barren fields."
+    },
+    {
+      "axial": "0,-2",
+      "kind": "ruin",
+      "blurb": "The remnants of a once-grand cathedral, now a grim site of decay."
+    },
+    {
+      "axial": "1,-1",
+      "kind": "lair",
+      "blurb": "Caves that echo with the cries of famished beasts."
+    },
+    {
+      "axial": "2,0",
+      "kind": "shrine",
+      "blurb": "A relic shrine to forgotten gods, now desecrated."
+    },
+    {
+      "axial": "3,1",
+      "kind": "dungeon",
+      "blurb": "An underground maze once used for worship, now infested with horrors."
+    },
+    {
+      "axial": "-2,-2",
+      "kind": "camp",
+      "blurb": "A small group of survivors, wary of outsiders."
+    },
+    {
+      "axial": "-3,-1",
+      "kind": "forge",
+      "blurb": "An old forge, its fires dimmed but still capable of revival."
+    },
+    {
+      "axial": "-1,1",
+      "kind": "portal",
+      "blurb": "A flickering portal, unstable and dangerous, leading to unknown realms."
+    },
+    {
+      "axial": "0,1",
+      "kind": "village",
+      "blurb": "A village that scavenges the bones of the land for survival."
+    },
+    {
+      "axial": "1,2",
+      "kind": "ruin",
+      "blurb": "The remains of a market square, haunted by memories."
+    },
+    {
+      "axial": "2,1",
+      "kind": "lair",
+      "blurb": "A den of famine beasts that lurk beneath."
+    },
+    {
+      "axial": "3,0",
+      "kind": "shrine",
+      "blurb": "A shrine half-buried, promising hope to the desperate."
+    },
+    {
+      "axial": "-2,0",
+      "kind": "dungeon",
+      "blurb": "Dark catacombs that extend under the remnants of ancient structures."
+    },
+    {
+      "axial": "-3,2",
+      "kind": "camp",
+      "blurb": "A place of rest for weary travelers, filled with tension."
+    },
+    {
+      "axial": "-1,2",
+      "kind": "forge",
+      "blurb": "A forge where the last cinders of hope are reignited."
+    },
+    {
+      "axial": "0,-3",
+      "kind": "portal",
+      "blurb": "A portal that whispers lost dreams."
+    },
+    {
+      "axial": "1,-3",
+      "kind": "village",
+      "blurb": "A cluster of homes made from scavenged materials."
+    },
+    {
+      "axial": "2,-2",
+      "kind": "ruin",
+      "blurb": "The bones of a once-majestic tower that has succumbed to time."
+    },
+    {
+      "axial": "3,-2",
+      "kind": "lair",
+      "blurb": "A cave system filled with gluttonous shadows."
+    },
+    {
+      "axial": "-2,1",
+      "kind": "shrine",
+      "blurb": "An altar dedicated to survival at all costs."
+    },
+    {
+      "axial": "-3,0",
+      "kind": "dungeon",
+      "blurb": "An abandoned crypt among the fields of bones."
+    },
+    {
+      "axial": "1,0",
+      "kind": "village",
+      "blurb": "A desperate village surrounded by fields of famine."
+    },
+    {
+      "axial": "0,2",
+      "kind": "ruin",
+      "blurb": "Remnants of a granary now turned to dust."
+    },
+    {
+      "axial": "-2,-1",
+      "kind": "lair",
+      "blurb": "A pit where the famished beasts gather."
+    },
+    {
+      "axial": "-1,-2",
+      "kind": "shrine",
+      "blurb": "A twisted shrine to forgotten deities of hunger."
+    },
+    {
+      "axial": "1,1",
+      "kind": "portal",
+      "blurb": "A shimmering portal that flickers with ominous energy."
+    }
+  ],
+  "quests": [
+    {
+      "id": "quest-001",
+      "title": "The Last Grain of Hope",
+      "summary": "Find and deliver the last grain of food to a starving village.",
+      "type": "main",
+      "steps": [
+        "Travel to the famine fields.",
+        "Defend against famine beasts.",
+        "Retrieve the grain from a hidden cache."
+      ],
+      "success_outcome": "The village receives the grain and offers their gratitude and home.",
+      "failure_outcome": "The village succumbs to starvation, the last voices lost."
+    },
+    {
+      "id": "quest-002",
+      "title": "Whispers in the Ruins",
+      "summary": "Investigate the old cathedral for signs of life.",
+      "type": "side",
+      "steps": [
+        "Explore the cathedral ruins.",
+        "Confront lingering spirits.",
+        "Uncover the fate of its last inhabitants."
+      ],
+      "success_outcome": "You cleanse the spirits, bringing peace to the ruins.",
+      "failure_outcome": "The spirits wreak havoc on the nearby village."
+    },
+    {
+      "id": "quest-003",
+      "title": "The Hunger Within",
+      "summary": "Help a companion facing their inner fears of starvation.",
+      "type": "companion",
+      "steps": [
+        "Talk with the companion about their fears.",
+        "Gather ingredients to cook a meal together.",
+        "Share the meal during a vulnerable moment."
+      ],
+      "success_outcome": "The companion finds solace and strength in your bond.",
+      "failure_outcome": "The trauma resurfaces, straining your relationship."
+    },
+    {
+      "id": "quest-004",
+      "title": "The Shattered Shrine",
+      "summary": "Rebuild a shrine for the forgotten gods to gain their favor.",
+      "type": "moral",
+      "steps": [
+        "Collect rare materials from the land.",
+        "Convince others to donate out of desperation.",
+        "Face the consequences of reviving hope."
+      ],
+      "success_outcome": "The shrine is restored, and you receive a blessing.",
+      "failure_outcome": "The attempted restoration only brings more despair."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc-001",
+      "name": "Edrin the Scavenger",
+      "role": "Trader",
+      "personality": "Skeptical and cunning, always weighing options.",
+      "secrets": [
+        "Hoarding supplies in secret",
+        "Allied with famine beasts for profit."
+      ],
+      "hooks": [
+        "Knows of an ancient blade hidden in the ruins.",
+        "Can provide rare items if helped."
+      ]
+    },
+    {
+      "id": "npc-002",
+      "name": "Mira the Broken",
+      "role": "Companion",
+      "personality": "Haunted by visions, struggles with trust.",
+      "secrets": [
+        "Fears becoming a monster herself.",
+        "Once betrayed a friend for food."
+      ],
+      "hooks": [
+        "Could aid in the quest if reassured.",
+        "Holds knowledge of the ruined cathedral."
+      ]
+    },
+    {
+      "id": "npc-003",
+      "name": "Dalos the Forgotten",
+      "role": "Relic Keeper",
+      "personality": "Sad and resigned, speaks in riddles.",
+      "secrets": [
+        "Guarding ancient texts about survival practices.",
+        "Knows the truth of the land's decay."
+      ],
+      "hooks": [
+        "Can lead to hidden relics.",
+        "May help heal a lost spirit at a cost."
+      ]
+    },
+    {
+      "id": "npc-004",
+      "name": "Selene of the Ashes",
+      "role": "Seer",
+      "personality": "Mysterious and cryptic, speaks of dreams.",
+      "secrets": [
+        "Knows the outcomes of fate but won't share easily.",
+        "Has seen visions of the companions' deaths."
+      ],
+      "hooks": [
+        "Can predict dangers ahead if sought.",
+        "Holds a fragment of the last grain of hope."
+      ]
+    }
+  ],
+  "creatures": [
+    {
+      "id": "creature-001",
+      "name": "Famine Beast",
+      "tags": [
+        "hunger",
+        "predator",
+        "shadow"
+      ],
+      "behavior": "Ambush predator, prowling the dark fields and ruins.",
+      "cr_hint": "A gaunt form with feral eyes, hunger drives its madness."
+    },
+    {
+      "id": "creature-002",
+      "name": "Bone Colossus",
+      "tags": [
+        "giant",
+        "undead",
+        "guardian"
+      ],
+      "behavior": "Silent guardian of the ancient ruins, moves only to protect.",
+      "cr_hint": "A massive figure made of twisted bones, emanating dread."
+    },
+    {
+      "id": "creature-003",
+      "name": "Hollow Wraith",
+      "tags": [
+        "spirit",
+        "haunt",
+        "despair"
+      ],
+      "behavior": "Wanders in ruins, seeking solace in lost memories.",
+      "cr_hint": "An echo of despair, its whispers chill the air."
+    },
+    {
+      "id": "creature-004",
+      "name": "Scavenger Swarm",
+      "tags": [
+        "insect",
+        "horde",
+        "devourer"
+      ],
+      "behavior": "Flocks together, overwhelming and consuming resources.",
+      "cr_hint": "A mass of chitinous bodies moving as one, hungry."
+    }
+  ]
+}

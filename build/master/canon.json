@@ -1,0 +1,83 @@
+{
+  "title": "Dragon’s Labyrinth",
+  "pillars": [
+    "dread_escalation",
+    "inverted_combat_economy",
+    "companion_trauma",
+    "post_dragon_collapse",
+    "forge_second_chances"
+  ],
+  "world_rules": [
+    "The world is infinite hex-based.",
+    "Each band of levels (1–20, 21–40, 41–60, 61–120, 121–180) introduces stronger dread.",
+    "Combat weakens the player: health is scarce, victory creates vulnerability.",
+    "Companions accumulate trauma and psychological scars.",
+    "The dragon’s fall destabilizes society; later bands worsen conditions.",
+    "“The Forge” system allows redemption or second chances.",
+    "Each band includes new biomes, NPCs, and moral choices."
+  ],
+  "starting_hex": "0,0",
+  "progression": [
+    {
+      "band": "1-20",
+      "statement": "Introduce fog, pastoral decay, and hidden dread.",
+      "goals": [
+        "orient_player",
+        "establish_forge_mechanic",
+        "companion_bonds"
+      ],
+      "gating_mechanics": [
+        "fog_barriers",
+        "bell_shrines"
+      ]
+    },
+    {
+      "band": "21-40",
+      "statement": "The world darkens; trust begins to fracture.",
+      "goals": [
+        "escalate_creature_difficulty",
+        "moral_dilemmas"
+      ],
+      "gating_mechanics": [
+        "corrupted_bridges",
+        "collapsed_roads"
+      ]
+    },
+    {
+      "band": "41-60",
+      "statement": "Trauma defines play; companions may turn on the party.",
+      "goals": [
+        "increase_internal_conflict",
+        "introduce_corruption"
+      ],
+      "gating_mechanics": [
+        "cursed_gates",
+        "blighted_hexes"
+      ]
+    },
+    {
+      "band": "61-120",
+      "statement": "Regions are warped ecosystems; survival feels pyrrhic.",
+      "goals": [
+        "emphasize_resource_collapse",
+        "major_npc_betrayals"
+      ],
+      "gating_mechanics": [
+        "famine_hexes",
+        "sealed_cathedrals"
+      ]
+    },
+    {
+      "band": "121-180",
+      "statement": "The dragon’s fall unravels the world.",
+      "goals": [
+        "show_total_collapse",
+        "final_dread_realization"
+      ],
+      "gating_mechanics": [
+        "dragon_scar_hex",
+        "fractured_companions"
+      ]
+    }
+  ]
+}

@@ -1,71 +1,1451 @@
 {
   "plan": {
-    "title": "Dragon's Labyrinth",
+    "title": "Dragon\u2019s Labyrinth",
     "starting_hex": "0,0",
     "region_bands": [
       {
         "band": "1-20",
-        "name": "Fogbound Vale",
-        "theme_summary": "Pastoral rot masks deeper wrongness.",
+        "name": "Veil of Mourning",
+        "theme_summary": "Introduce fog, pastoral decay, and hidden dread.",
         "biome_palette": [
           "wet_meadow",
-          "ashen_forest"
+          "ashen_forest",
+          "flooded_village"
         ],
         "tone": "wistful, uneasy"
+      },
+      {
+        "band": "21-40",
+        "name": "Shadows of the Untrustworthy",
+        "theme_summary": "The world darkens; trust begins to fracture.",
+        "biome_palette": [
+          "black_swamp",
+          "fungal_cathedral"
+        ],
+        "tone": "distrust, shadowed"
+      },
+      {
+        "band": "41-60",
+        "name": "Fields of Betrayal",
+        "theme_summary": "Trauma defines play; companions may turn on the party.",
+        "biome_palette": [
+          "rust_plains",
+          "hollow_hills"
+        ],
+        "tone": "betrayal, corrosion"
+      },
+      {
+        "band": "61-120",
+        "name": "Wastelands of Despair",
+        "theme_summary": "Regions are warped ecosystems; survival feels pyrrhic.",
+        "biome_palette": [
+          "famine_fields",
+          "bone_forest"
+        ],
+        "tone": "collapse, hunger"
+      },
+      {
+        "band": "121-180",
+        "name": "Cataclysm's Edge",
+        "theme_summary": "The dragon\u2019s fall unravels the world.",
+        "biome_palette": [
+          "dragon_scar",
+          "abyssal_chasm"
+        ],
+        "tone": "unraveling, final dread"
       }
     ],
     "global_pillars": [
-      "dread escalation",
-      "companion trauma",
-      "post-dragon collapse"
+      "dread_escalation",
+      "inverted_combat_economy",
+      "companion_trauma",
+      "post_dragon_collapse",
+      "forge_second_chances"
     ]
   },
   "regions": [
     {
       "band": "1-20",
-      "name": "Fogbound Vale",
+      "name": "Veil of Mourning",
       "mood_board": [
-        "mist, church-bells, moths"
+        "wistful",
+        "uneasy"
       ],
       "biomes": [
         "wet_meadow",
-        "ashen_forest"
+        "ashen_forest",
+        "flooded_village"
       ],
       "hex_points": [
         {
-          "axial": "0,0",
+          "axial": "0,1",
           "kind": "village",
-          "blurb": "Little Brink, your home."
+          "blurb": "A fog-laden village where whispers of lost souls linger."
         },
         {
           "axial": "1,0",
           "kind": "shrine",
-          "blurb": "A lean stone with mossy carvings."
+          "blurb": "An ancient shrine, its bell broken, echoing the past."
         },
         {
-          "axial": "0,1",
+          "axial": "1,1",
           "kind": "lair",
-          "blurb": "Mirewolves den under fallen oak."
+          "blurb": "A hidden lair beneath twisted roots; a lurking presence."
+        },
+        {
+          "axial": "0,0",
+          "kind": "camp",
+          "blurb": "A temporary camp where travelers share their dark tales."
+        },
+        {
+          "axial": "2,0",
+          "kind": "dungeon",
+          "blurb": "A sunken dungeon filled with waterlogged despair and shadow."
         },
         {
           "axial": "-1,1",
+          "kind": "forge",
+          "blurb": "A forgotten forge, the anvil rusted, yet imbued with memories."
+        },
+        {
+          "axial": "1,-1",
+          "kind": "portal",
+          "blurb": "A shimmering portal to unknown realms, crackling with latent energy."
+        },
+        {
+          "axial": "2,1",
           "kind": "ruin",
-          "blurb": "Collapsed culvert hums at dusk."
+          "blurb": "Ruins of an old manor, where grief lingers in every crevice."
+        },
+        {
+          "axial": "-1,-1",
+          "kind": "village",
+          "blurb": "A village overtaken by nature, its past inhabitants long gone."
         },
         {
           "axial": "-1,0",
-          "kind": "camp",
-          "blurb": "Tinker firelight, anxious songs."
+          "kind": "shrine",
+          "blurb": "A shrine swallowed by vines, a forgotten prayer echoes softly."
         },
         {
           "axial": "0,-1",
+          "kind": "camp",
+          "blurb": "A campfire shared by wary travelers, the mood heavy with sorrow."
+        },
+        {
+          "axial": "-2,0",
           "kind": "dungeon",
-          "blurb": "Under-vicar\u2019s stairs into brass vaults."
+          "blurb": "A submerged dungeon, its water filled with sorrowful echoes."
+        },
+        {
+          "axial": "-1,2",
+          "kind": "lair",
+          "blurb": "A lair of despair where the creatures are fuelled by sadness."
+        },
+        {
+          "axial": "1,2",
+          "kind": "forge",
+          "blurb": "An ancient forge nestled in the fog, offering second chances."
+        },
+        {
+          "axial": "0,2",
+          "kind": "portal",
+          "blurb": "A portal hidden within the marsh, radiating an ominous glow."
         }
       ],
-      "quests": [],
-      "npcs": [],
-      "creatures": []
+      "quests": [
+        {
+          "id": "quest1",
+          "title": "The Bell's Last Toll",
+          "summary": "Restore the ancient shrine bell to lift the village's curse.",
+          "type": "main",
+          "steps": [
+            "Investigate the shrine's history",
+            "Gather materials for restoration",
+            "Confront the spirit guarding the bell"
+          ],
+          "success_outcome": "The village is freed from despair, bell tolls joyfully.",
+          "failure_outcome": "The curse deepens, whispers grow louder."
+        },
+        {
+          "id": "quest2",
+          "title": "Echoes of the Past",
+          "summary": "Assist a villager in remembering their lost loved ones.",
+          "type": "side",
+          "steps": [
+            "Speak to the grieving villager",
+            "Collect mementos of their lost ones",
+            "Hold a memorial at the village].",
+            "Keep the villagers safe from lurking threats."
+          ],
+          "success_outcome": "The villager finds closure, and peace returns briefly.",
+          "failure_outcome": "The grief manifests as a haunting spirit."
+        },
+        {
+          "id": "quest3",
+          "title": "Trauma's Companion",
+          "summary": "Help a companion confront their past trauma within the lair.",
+          "type": "companion",
+          "steps": [
+            "Enter the lair together",
+            "Face the creature of their fears",
+            "Encourage them to confront their trauma directly."
+          ],
+          "success_outcome": "The companion emerges stronger, with a new perspective.",
+          "failure_outcome": "The trauma manifests, causing a fracture in the group."
+        },
+        {
+          "id": "quest4",
+          "title": "The Weaving of Fates",
+          "summary": "A moral dilemma pits the needs of the many against the few.",
+          "type": "moral",
+          "steps": [
+            "Observe the villagers struggling",
+            "Choose who to aid in a time of scarce resources",
+            "Confront the leader's decision."
+          ],
+          "success_outcome": "Balance is restored, but at a cost; friendships strained.",
+          "failure_outcome": "Conflicts rise between factions, escalating distrust."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "npc1",
+          "name": "Elyra",
+          "role": "Village oracle",
+          "personality": "Mournful but wise",
+          "secrets": [
+            "Knows the truth behind the village's curse",
+            "Hides past decisions that haunt her"
+          ],
+          "hooks": [
+            "Her prophecies often beget more pain than comfort.",
+            "Seeking to learn the fate of her loved ones."
+          ]
+        },
+        {
+          "id": "npc2",
+          "name": "Tomas",
+          "role": "Grieving villager",
+          "personality": "Sullen and withdrawn",
+          "secrets": [
+            "Bears guilt for a past decision that led to tragedy",
+            "Hides an item of great sentimental value"
+          ],
+          "hooks": [
+            "Longing for closure that the bell might provide.",
+            "On the verge of madness from memories of loss."
+          ]
+        },
+        {
+          "id": "npc3",
+          "name": "Kara",
+          "role": "Companion",
+          "personality": "Resilient yet haunted",
+          "secrets": [
+            "Has a Dark Past that suggests betrayal",
+            "Fears her own potential for darkness"
+          ],
+          "hooks": [
+            "Her trauma affects the party\u2019s dynamics",
+            "She seeks redemption from her past actions."
+          ]
+        },
+        {
+          "id": "npc4",
+          "name": "Alaric",
+          "role": "Blacksmith",
+          "personality": "Bitter yet skilled",
+          "secrets": [
+            "Once was a wielder of lost magic",
+            "Desires to create again, despite feeling lost"
+          ],
+          "hooks": [
+            "Holds the key to restoring a powerful weapon.",
+            "A former hero now trapped in his own despair."
+          ]
+        }
+      ],
+      "creatures": [
+        {
+          "id": "creature1",
+          "name": "Wraith of the Hallowed",
+          "tags": [
+            "undead",
+            "mournful",
+            "shadow"
+          ],
+          "behavior": "Stalks the living, feeding on sorrow.",
+          "cr_hint": "It avoids direct confrontation, preferring terror."
+        },
+        {
+          "id": "creature2",
+          "name": "Carrion Crow",
+          "tags": [
+            "avian",
+            "scavenger",
+            "ominous"
+          ],
+          "behavior": "Gathers ominously, hinting at decay nearby.",
+          "cr_hint": "Its caw invokes an unsettling feeling of loss."
+        },
+        {
+          "id": "creature3",
+          "name": "Mirewolf",
+          "tags": [
+            "beast",
+            "predatory",
+            "trickster"
+          ],
+          "behavior": "Lurks in the shadows, attacks at emotional vulnerabilities.",
+          "cr_hint": "Known to mimic the cries of loved ones."
+        },
+        {
+          "id": "creature4",
+          "name": "Shade Wisp",
+          "tags": [
+            "spectral",
+            "mysterious",
+            "boundary"
+          ],
+          "behavior": "Drifts through the fog, leading travelers to their doom.",
+          "cr_hint": "Whispers promises, hiding deceptive truths."
+        }
+      ]
+    },
+    {
+      "band": "21-40",
+      "name": "Shadows of the Untrustworthy",
+      "mood_board": [
+        "distrust",
+        "shadowed"
+      ],
+      "biomes": [
+        "black_swamp",
+        "fungal_cathedral"
+      ],
+      "hex_points": [
+        {
+          "axial": "1,1",
+          "kind": "village",
+          "blurb": "A community struggling with paranoia and betrayal."
+        },
+        {
+          "axial": "1,2",
+          "kind": "shrine",
+          "blurb": "A dilapidated shrine, the stone coated in sinister fungi."
+        },
+        {
+          "axial": "1,3",
+          "kind": "lair",
+          "blurb": "The lair of a shadow bandit leader, hidden in twisted roots."
+        },
+        {
+          "axial": "2,1",
+          "kind": "portal",
+          "blurb": "An ominous portal that flickers with whispers of betrayal."
+        },
+        {
+          "axial": "2,2",
+          "kind": "dungeon",
+          "blurb": "A dungeon filled with remnants of trust turned to despair."
+        },
+        {
+          "axial": "2,3",
+          "kind": "ruin",
+          "blurb": "Ruins of an old village, where secrets lurk amidst the decay."
+        },
+        {
+          "axial": "3,1",
+          "kind": "camp",
+          "blurb": "A camp set up by desperate travelers, mistrust hangs in the air."
+        },
+        {
+          "axial": "3,2",
+          "kind": "forge",
+          "blurb": "A forge run by a bitter smith, crafting weapons of distrust."
+        },
+        {
+          "axial": "3,3",
+          "kind": "village",
+          "blurb": "A village split by distrust, where neighbors eye each other warily."
+        },
+        {
+          "axial": "4,1",
+          "kind": "shrine",
+          "blurb": "A shrine corrupted by darkness, once a beacon of hope."
+        },
+        {
+          "axial": "4,2",
+          "kind": "lair",
+          "blurb": "Home to a fungal thrall nest, feeding on lost souls."
+        },
+        {
+          "axial": "4,3",
+          "kind": "dungeon",
+          "blurb": "A dungeon echoing with the cries of those who betrayed and were betrayed."
+        },
+        {
+          "axial": "5,1",
+          "kind": "portal",
+          "blurb": "A portal buzzing with unease, tempting the brave to enter."
+        },
+        {
+          "axial": "5,2",
+          "kind": "ruin",
+          "blurb": "Decaying temple stands as a reminder of lost faith and trust."
+        },
+        {
+          "axial": "5,3",
+          "kind": "camp",
+          "blurb": "A makeshift camp for those fleeing the shadows."
+        },
+        {
+          "axial": "6,1",
+          "kind": "forge",
+          "blurb": "A secret forge hidden from prying eyes, known for crafting dark deeds."
+        },
+        {
+          "axial": "6,2",
+          "kind": "village",
+          "blurb": "A village divided by mistrust, dealings done in whispers."
+        },
+        {
+          "axial": "6,3",
+          "kind": "lair",
+          "blurb": "A lair where treacherous plots are hatched in the dark."
+        }
+      ],
+      "quests": [
+        {
+          "id": "main_001",
+          "title": "Whispers of the Shadow",
+          "summary": "Investigate the rise of shadow bandits plaguing the land.",
+          "type": "main",
+          "steps": [
+            "Gather information from locals",
+            "Track down the bandit hideout",
+            "Confront the shadow bandits"
+          ],
+          "success_outcome": "Discover the bandit's motives and return home with new allies.",
+          "failure_outcome": "The bandits escape, and mistrust festers among the villagers."
+        },
+        {
+          "id": "side_001",
+          "title": "Corrupted Trust",
+          "summary": "Repair the bridge that connects two distrustful villages.",
+          "type": "side",
+          "steps": [
+            "Collect resources to repair the bridge",
+            "Navigate the treacherous swamp",
+            "Convince the villagers to work together"
+          ],
+          "success_outcome": "The bridge is restored, fostering a new sense of trust.",
+          "failure_outcome": "The distrust escalates, leading to further isolation."
+        },
+        {
+          "id": "side_002",
+          "title": "The Fungal Threat",
+          "summary": "Investigate the mysterious corruption spreading in the fungal cathedral.",
+          "type": "side",
+          "steps": [
+            "Enter the fungal cathedral",
+            "Combat the thralls and find the source of corruption",
+            "Escape before the cathedral collapses"
+          ],
+          "success_outcome": "Eliminate the source of corruption, saving the cathedral.",
+          "failure_outcome": "The corruption spreads, affecting nearby villages."
+        },
+        {
+          "id": "companion_001",
+          "title": "Broken Bonds",
+          "summary": "Help a companion come to terms with their past betrayal.",
+          "type": "companion",
+          "steps": [
+            "Discuss past events with the companion",
+            "Assist them in confronting their betrayer",
+            "Reach an understanding"
+          ],
+          "success_outcome": "The companion finds closure and trust in the party.",
+          "failure_outcome": "The companion withdraws further, causing rifts."
+        },
+        {
+          "id": "moral_001",
+          "title": "A Choice of Shadows",
+          "summary": "Decide the fate of a captured shadow bandit who begs for mercy.",
+          "type": "moral",
+          "steps": [
+            "Debate whether to execute or spare the bandit",
+            "Consider the consequences of your choice",
+            "Choose a path forward"
+          ],
+          "success_outcome": "Your decision shapes the future of the bandit group.",
+          "failure_outcome": "The choice haunts the party, trust among companions diminishes."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "npc_001",
+          "name": "Merrick the Untrusting",
+          "role": "Town Guard",
+          "personality": "Paranoid and tense, often second-guessing moves.",
+          "secrets": [
+            "He once betrayed a friend for survival.",
+            "He believes the shadows are watching him."
+          ],
+          "hooks": [
+            "He hints at a hidden plot in the village.",
+            "He fears a traitor in the ranks of the guard."
+          ]
+        },
+        {
+          "id": "npc_002",
+          "name": "Elysia the Gloomwalker",
+          "role": "Rogue Merchant",
+          "personality": "Cunning and sly, always with a hidden agenda.",
+          "secrets": [
+            "She secretly sells information to the highest bidder.",
+            "Her past is filled with betrayal and escape."
+          ],
+          "hooks": [
+            "She offers a dangerous but lucrative deal.",
+            "She claims to know the truth behind the shadow bandits."
+          ]
+        },
+        {
+          "id": "npc_003",
+          "name": "Father Yorin",
+          "role": "Shrine Keeper",
+          "personality": "Despondent and haunted, filled with regrets.",
+          "secrets": [
+            "He once abandoned his temple in fear.",
+            "He has visions of the coming darkness."
+          ],
+          "hooks": [
+            "He seeks the party\u2019s aid to cleanse the shrine.",
+            "He believes the shadows can be negotiated with."
+          ]
+        }
+      ],
+      "creatures": [
+        {
+          "id": "creature_001",
+          "name": "Shadow Bandit",
+          "tags": [
+            "humanoid",
+            "stealth",
+            "betrayal"
+          ],
+          "behavior": "Ambush and disorient travelers before robbing them.",
+          "cr_hint": "Watch your back; they strike from the shadows."
+        },
+        {
+          "id": "creature_002",
+          "name": "Fungal Thrall",
+          "tags": [
+            "undead",
+            "mindless",
+            "corrupted"
+          ],
+          "behavior": "Attack any intruders, driven by a hive mind.",
+          "cr_hint": "Their spores linger in the air, suffocating the unwary."
+        },
+        {
+          "id": "creature_003",
+          "name": "Wretched Beast",
+          "tags": [
+            "mutated",
+            "feral",
+            "untrustworthy"
+          ],
+          "behavior": "Both predator and prey, feeding on fear and doubt.",
+          "cr_hint": "They thrive on the fear of betrayal, hard to spot at first."
+        }
+      ]
+    },
+    {
+      "band": "41-60",
+      "name": "Fields of Betrayal",
+      "mood_board": [
+        "betrayal",
+        "corrosion"
+      ],
+      "biomes": [
+        "rust_plains",
+        "hollow_hills"
+      ],
+      "hex_points": [
+        {
+          "axial": "0,1",
+          "kind": "village",
+          "blurb": "A settlement of whispering distrust, where neighbors suspect each other of betrayal."
+        },
+        {
+          "axial": "1,0",
+          "kind": "shrine",
+          "blurb": "An ancient shrine corrupted by dark rituals, where worship has turned to dread."
+        },
+        {
+          "axial": "1,1",
+          "kind": "lair",
+          "blurb": "The lair of a monstrous creature that thrives on despair and strife."
+        },
+        {
+          "axial": "0,2",
+          "kind": "ruin",
+          "blurb": "The remnants of a once-great fortress now crumbling under secrets."
+        },
+        {
+          "axial": "2,0",
+          "kind": "dungeon",
+          "blurb": "A labyrinth of horrors where companions may become foes."
+        },
+        {
+          "axial": "2,1",
+          "kind": "camp",
+          "blurb": "A temporary camp filled with weary travelers, each harboring tragic tales."
+        },
+        {
+          "axial": "1,2",
+          "kind": "forge",
+          "blurb": "A forge where lost souls attempt to make amends for past betrayals."
+        },
+        {
+          "axial": "0,-1",
+          "kind": "portal",
+          "blurb": "A gateway to unsettling worlds, whispered to be twisted reflections of this one."
+        },
+        {
+          "axial": "-1,0",
+          "kind": "village",
+          "blurb": "An isolated village, its inhabitants aware of the treachery brewing among them."
+        },
+        {
+          "axial": "-2,2",
+          "kind": "shrine",
+          "blurb": "A desecrated shrine, long forsaken, and awash in the metallic scent of blood."
+        },
+        {
+          "axial": "-2,1",
+          "kind": "lair",
+          "blurb": "The lair of a traitorous beast that feeds on the fears of the living."
+        },
+        {
+          "axial": "-1,-1",
+          "kind": "ruin",
+          "blurb": "Wreckage of an old citadel, echoing with the screams of the fallen."
+        },
+        {
+          "axial": "-1,1",
+          "kind": "dungeon",
+          "blurb": "A dungeon where alliances dissolve and mistrust reigns."
+        },
+        {
+          "axial": "-1,2",
+          "kind": "camp",
+          "blurb": "A camp where companions are pitted against each other in trials of loyalty."
+        },
+        {
+          "axial": "-2,-2",
+          "kind": "forge",
+          "blurb": "A forgotten forge where the metal of betrayal is reshaped into weapons."
+        },
+        {
+          "axial": "-2,0",
+          "kind": "portal",
+          "blurb": "An unstable portal that reflects the darkest fears of those who look into it."
+        },
+        {
+          "axial": "2,-1",
+          "kind": "village",
+          "blurb": "A village engulfed in rumors that haunt the corners of every home."
+        },
+        {
+          "axial": "2,2",
+          "kind": "shrine",
+          "blurb": "A shrine adorned with the tokens of lost trust and broken vows."
+        },
+        {
+          "axial": "-2,2",
+          "kind": "lair",
+          "blurb": "A lair that amplifies the despair of intruders, ensnaring their minds."
+        },
+        {
+          "axial": "0,-2",
+          "kind": "ruin",
+          "blurb": "Ruins where the echoes of betrayal linger in the air."
+        },
+        {
+          "axial": "1,-1",
+          "kind": "dungeon",
+          "blurb": "A labyrinthine dungeon forged not only from stone but also from deceit."
+        },
+        {
+          "axial": "0,-1",
+          "kind": "camp",
+          "blurb": "A weary camp where friendships are forged in flames of mistrust."
+        },
+        {
+          "axial": "0,0",
+          "kind": "forge",
+          "blurb": "A forge where past traumas can be remade into instruments of redemption."
+        },
+        {
+          "axial": "2,0",
+          "kind": "portal",
+          "blurb": "A mysterious portal that leads to the heart of betrayal itself."
+        },
+        {
+          "axial": "0,3",
+          "kind": "village",
+          "blurb": "A village gripped by paranoia, each person questioning the other."
+        },
+        {
+          "axial": "3,0",
+          "kind": "shrine",
+          "blurb": "A shrine that once brought together allies but now sows discord."
+        },
+        {
+          "axial": "-2,-1",
+          "kind": "lair",
+          "blurb": "The lair of a creature that thrives on the betrayal between friends."
+        },
+        {
+          "axial": "1,-2",
+          "kind": "ruin",
+          "blurb": "The ruins of a knightly order fallen into disarray through treachery."
+        },
+        {
+          "axial": "3,1",
+          "kind": "dungeon",
+          "blurb": "A dungeon reeking of betrayal, where trust was shattered forever."
+        }
+      ],
+      "quests": [
+        {
+          "id": "quest1",
+          "title": "Echoes of Trust",
+          "summary": "Unravel the mystery behind a series of betrayals that have torn the party apart.",
+          "type": "main",
+          "steps": [
+            "Investigate the roots of discord in the nearby village.",
+            "Confront a former ally believed to be behind the betrayals.",
+            "Restore trust among the party members."
+          ],
+          "success_outcome": "The party unites, overcoming their past traumas.",
+          "failure_outcome": "The party fractures irreparably, leading to devastating consequences."
+        },
+        {
+          "id": "quest2",
+          "title": "Trial of Loyalty",
+          "summary": "A test of loyalty where each companion\u2019s true nature is revealed.",
+          "type": "side",
+          "steps": [
+            "Gather clues about each companion's hidden past.",
+            "Face a test that pits companions against each other.",
+            "Decide who can be trusted or must be cast aside."
+          ],
+          "success_outcome": "The party emerges stronger and more united than before.",
+          "failure_outcome": "Bonds are broken, and new alliances form in the chaos."
+        },
+        {
+          "id": "quest3",
+          "title": "The Corrupted Forge",
+          "summary": "Purify a forge tainted by betrayal to create a weapon of second chances.",
+          "type": "forge",
+          "steps": [
+            "Discover the source of corruption at the forge.",
+            "Cleanse the forge of its dark influence.",
+            "Craft a weapon imbued with the power of redemption."
+          ],
+          "success_outcome": "The weapon provides a second chance against impending threats.",
+          "failure_outcome": "The corruption spreads, warping the very nature of the weapon."
+        },
+        {
+          "id": "quest4",
+          "title": "Ghosts of Regret",
+          "summary": "Confront the past pains of a companion and seek their redemption.",
+          "type": "companion",
+          "steps": [
+            "Uncover the companion\u2019s dark history.",
+            "Facilitates a confrontation with their ghosts.",
+            "Aid in achieving redemption."
+          ],
+          "success_outcome": "The companion finds peace and strength in their past.",
+          "failure_outcome": "The companion succumbs to despair, leaving the party weakened."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "npc1",
+          "name": "Alyssa",
+          "role": "The Betrayed",
+          "personality": "Haunted and distrustful",
+          "secrets": [
+            "Fears her companions are plotting against her.",
+            "Hides a dark connection to the shrine."
+          ],
+          "hooks": [
+            "Claim to have seen visions of betrayal.",
+            "Knows a secret about a past companion."
+          ]
+        },
+        {
+          "id": "npc2",
+          "name": "Galen the Corrupted",
+          "role": "Former Knight turned Traitor",
+          "personality": "Cold and regretful",
+          "secrets": [
+            "Was once a trusted hero but gave in to darkness.",
+            "May turn on the party under duress."
+          ],
+          "hooks": [
+            "Offers insight into the corruption at the ruins.",
+            "Seeks revenge on those who betrayed him."
+          ]
+        },
+        {
+          "id": "npc3",
+          "name": "Brynna",
+          "role": "The Forge Master",
+          "personality": "Stalwart and resentful",
+          "secrets": [
+            "Holds memories of a broken alliance.",
+            "Believes the forge holds the key to redemption."
+          ],
+          "hooks": [
+            "Can teach players about forging with corrupted metals.",
+            "Yearns for the return of a lost companion."
+          ]
+        },
+        {
+          "id": "npc4",
+          "name": "Daron",
+          "role": "The Whisperer",
+          "personality": "Cunning and manipulative",
+          "secrets": [
+            "Sows discord among the camp's inhabitants.",
+            "Knows the truth behind many betrayals."
+          ],
+          "hooks": [
+            "Claims to have insight into others' betrayals.",
+            "Offers to share secrets for a price."
+          ]
+        }
+      ],
+      "creatures": [
+        {
+          "id": "creature1",
+          "name": "Corrupted Companion",
+          "tags": [
+            "traitor",
+            "shadow"
+          ],
+          "behavior": "Deceitful and manipulative, often steering others into traps.",
+          "cr_hint": "This creature was once a trusted ally."
+        },
+        {
+          "id": "creature2",
+          "name": "Iron Golem of Betrayal",
+          "tags": [
+            "mechanical",
+            "crimson"
+          ],
+          "behavior": "Immovable until provoked, reacts violently to perceived threats.",
+          "cr_hint": "Crafted from the broken trust of allies."
+        },
+        {
+          "id": "creature3",
+          "name": "Wraith of Regret",
+          "tags": [
+            "spectral",
+            "vengeful"
+          ],
+          "behavior": "Lurks in shadows, feeding on sorrow and betrayal.",
+          "cr_hint": "An echo of past wrongs, growing stronger with every betrayal."
+        },
+        {
+          "id": "creature4",
+          "name": "Nightmare Beast",
+          "tags": [
+            "beast",
+            "chaotic"
+          ],
+          "behavior": "Preys on fear, exhibits unpredictable behavior driven by malice.",
+          "cr_hint": "A manifestation of the party\u2019s darkest fears."
+        }
+      ]
+    },
+    {
+      "band": "61-120",
+      "name": "Wastelands of Despair",
+      "mood_board": [],
+      "biomes": [
+        "famine_fields",
+        "bone_forest"
+      ],
+      "hex_points": [
+        {
+          "axial": "-1,-3",
+          "kind": "village",
+          "blurb": "A settlement struggling to survive amidst barren fields."
+        },
+        {
+          "axial": "0,-2",
+          "kind": "ruin",
+          "blurb": "The remnants of a once-grand cathedral, now a grim site of decay."
+        },
+        {
+          "axial": "1,-1",
+          "kind": "lair",
+          "blurb": "Caves that echo with the cries of famished beasts."
+        },
+        {
+          "axial": "2,0",
+          "kind": "shrine",
+          "blurb": "A relic shrine to forgotten gods, now desecrated."
+        },
+        {
+          "axial": "3,1",
+          "kind": "dungeon",
+          "blurb": "An underground maze once used for worship, now infested with horrors."
+        },
+        {
+          "axial": "-2,-2",
+          "kind": "camp",
+          "blurb": "A small group of survivors, wary of outsiders."
+        },
+        {
+          "axial": "-3,-1",
+          "kind": "forge",
+          "blurb": "An old forge, its fires dimmed but still capable of revival."
+        },
+        {
+          "axial": "-1,1",
+          "kind": "portal",
+          "blurb": "A flickering portal, unstable and dangerous, leading to unknown realms."
+        },
+        {
+          "axial": "0,1",
+          "kind": "village",
+          "blurb": "A village that scavenges the bones of the land for survival."
+        },
+        {
+          "axial": "1,2",
+          "kind": "ruin",
+          "blurb": "The remains of a market square, haunted by memories."
+        },
+        {
+          "axial": "2,1",
+          "kind": "lair",
+          "blurb": "A den of famine beasts that lurk beneath."
+        },
+        {
+          "axial": "3,0",
+          "kind": "shrine",
+          "blurb": "A shrine half-buried, promising hope to the desperate."
+        },
+        {
+          "axial": "-2,0",
+          "kind": "dungeon",
+          "blurb": "Dark catacombs that extend under the remnants of ancient structures."
+        },
+        {
+          "axial": "-3,2",
+          "kind": "camp",
+          "blurb": "A place of rest for weary travelers, filled with tension."
+        },
+        {
+          "axial": "-1,2",
+          "kind": "forge",
+          "blurb": "A forge where the last cinders of hope are reignited."
+        },
+        {
+          "axial": "0,-3",
+          "kind": "portal",
+          "blurb": "A portal that whispers lost dreams."
+        },
+        {
+          "axial": "1,-3",
+          "kind": "village",
+          "blurb": "A cluster of homes made from scavenged materials."
+        },
+        {
+          "axial": "2,-2",
+          "kind": "ruin",
+          "blurb": "The bones of a once-majestic tower that has succumbed to time."
+        },
+        {
+          "axial": "3,-2",
+          "kind": "lair",
+          "blurb": "A cave system filled with gluttonous shadows."
+        },
+        {
+          "axial": "-2,1",
+          "kind": "shrine",
+          "blurb": "An altar dedicated to survival at all costs."
+        },
+        {
+          "axial": "-3,0",
+          "kind": "dungeon",
+          "blurb": "An abandoned crypt among the fields of bones."
+        },
+        {
+          "axial": "1,0",
+          "kind": "village",
+          "blurb": "A desperate village surrounded by fields of famine."
+        },
+        {
+          "axial": "0,2",
+          "kind": "ruin",
+          "blurb": "Remnants of a granary now turned to dust."
+        },
+        {
+          "axial": "-2,-1",
+          "kind": "lair",
+          "blurb": "A pit where the famished beasts gather."
+        },
+        {
+          "axial": "-1,-2",
+          "kind": "shrine",
+          "blurb": "A twisted shrine to forgotten deities of hunger."
+        },
+        {
+          "axial": "1,1",
+          "kind": "portal",
+          "blurb": "A shimmering portal that flickers with ominous energy."
+        }
+      ],
+      "quests": [
+        {
+          "id": "quest-001",
+          "title": "The Last Grain of Hope",
+          "summary": "Find and deliver the last grain of food to a starving village.",
+          "type": "main",
+          "steps": [
+            "Travel to the famine fields.",
+            "Defend against famine beasts.",
+            "Retrieve the grain from a hidden cache."
+          ],
+          "success_outcome": "The village receives the grain and offers their gratitude and home.",
+          "failure_outcome": "The village succumbs to starvation, the last voices lost."
+        },
+        {
+          "id": "quest-002",
+          "title": "Whispers in the Ruins",
+          "summary": "Investigate the old cathedral for signs of life.",
+          "type": "side",
+          "steps": [
+            "Explore the cathedral ruins.",
+            "Confront lingering spirits.",
+            "Uncover the fate of its last inhabitants."
+          ],
+          "success_outcome": "You cleanse the spirits, bringing peace to the ruins.",
+          "failure_outcome": "The spirits wreak havoc on the nearby village."
+        },
+        {
+          "id": "quest-003",
+          "title": "The Hunger Within",
+          "summary": "Help a companion facing their inner fears of starvation.",
+          "type": "companion",
+          "steps": [
+            "Talk with the companion about their fears.",
+            "Gather ingredients to cook a meal together.",
+            "Share the meal during a vulnerable moment."
+          ],
+          "success_outcome": "The companion finds solace and strength in your bond.",
+          "failure_outcome": "The trauma resurfaces, straining your relationship."
+        },
+        {
+          "id": "quest-004",
+          "title": "The Shattered Shrine",
+          "summary": "Rebuild a shrine for the forgotten gods to gain their favor.",
+          "type": "moral",
+          "steps": [
+            "Collect rare materials from the land.",
+            "Convince others to donate out of desperation.",
+            "Face the consequences of reviving hope."
+          ],
+          "success_outcome": "The shrine is restored, and you receive a blessing.",
+          "failure_outcome": "The attempted restoration only brings more despair."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "npc-001",
+          "name": "Edrin the Scavenger",
+          "role": "Trader",
+          "personality": "Skeptical and cunning, always weighing options.",
+          "secrets": [
+            "Hoarding supplies in secret",
+            "Allied with famine beasts for profit."
+          ],
+          "hooks": [
+            "Knows of an ancient blade hidden in the ruins.",
+            "Can provide rare items if helped."
+          ]
+        },
+        {
+          "id": "npc-002",
+          "name": "Mira the Broken",
+          "role": "Companion",
+          "personality": "Haunted by visions, struggles with trust.",
+          "secrets": [
+            "Fears becoming a monster herself.",
+            "Once betrayed a friend for food."
+          ],
+          "hooks": [
+            "Could aid in the quest if reassured.",
+            "Holds knowledge of the ruined cathedral."
+          ]
+        },
+        {
+          "id": "npc-003",
+          "name": "Dalos the Forgotten",
+          "role": "Relic Keeper",
+          "personality": "Sad and resigned, speaks in riddles.",
+          "secrets": [
+            "Guarding ancient texts about survival practices.",
+            "Knows the truth of the land's decay."
+          ],
+          "hooks": [
+            "Can lead to hidden relics.",
+            "May help heal a lost spirit at a cost."
+          ]
+        },
+        {
+          "id": "npc-004",
+          "name": "Selene of the Ashes",
+          "role": "Seer",
+          "personality": "Mysterious and cryptic, speaks of dreams.",
+          "secrets": [
+            "Knows the outcomes of fate but won't share easily.",
+            "Has seen visions of the companions' deaths."
+          ],
+          "hooks": [
+            "Can predict dangers ahead if sought.",
+            "Holds a fragment of the last grain of hope."
+          ]
+        }
+      ],
+      "creatures": [
+        {
+          "id": "creature-001",
+          "name": "Famine Beast",
+          "tags": [
+            "hunger",
+            "predator",
+            "shadow"
+          ],
+          "behavior": "Ambush predator, prowling the dark fields and ruins.",
+          "cr_hint": "A gaunt form with feral eyes, hunger drives its madness."
+        },
+        {
+          "id": "creature-002",
+          "name": "Bone Colossus",
+          "tags": [
+            "giant",
+            "undead",
+            "guardian"
+          ],
+          "behavior": "Silent guardian of the ancient ruins, moves only to protect.",
+          "cr_hint": "A massive figure made of twisted bones, emanating dread."
+        },
+        {
+          "id": "creature-003",
+          "name": "Hollow Wraith",
+          "tags": [
+            "spirit",
+            "haunt",
+            "despair"
+          ],
+          "behavior": "Wanders in ruins, seeking solace in lost memories.",
+          "cr_hint": "An echo of despair, its whispers chill the air."
+        },
+        {
+          "id": "creature-004",
+          "name": "Scavenger Swarm",
+          "tags": [
+            "insect",
+            "horde",
+            "devourer"
+          ],
+          "behavior": "Flocks together, overwhelming and consuming resources.",
+          "cr_hint": "A mass of chitinous bodies moving as one, hungry."
+        }
+      ]
+    },
+    {
+      "band": "121-180",
+      "name": "Cataclysm's Edge",
+      "mood_board": [
+        "unraveling",
+        "final dread"
+      ],
+      "biomes": [
+        "dragon_scar",
+        "abyssal_chasm"
+      ],
+      "hex_points": [
+        {
+          "axial": "1,0",
+          "kind": "village",
+          "blurb": "A settlement of survivors, clinging to both hope and despair."
+        },
+        {
+          "axial": "0,1",
+          "kind": "shrine",
+          "blurb": "A dilapidated shrine, where prayers for restoration echo."
+        },
+        {
+          "axial": "-1,1",
+          "kind": "lair",
+          "blurb": "The lair of a worldbreaker, claiming echoes of the past."
+        },
+        {
+          "axial": "-1,0",
+          "kind": "ruin",
+          "blurb": "Remnants of a once-grand forge, now haunted by lost souls."
+        },
+        {
+          "axial": "0,0",
+          "kind": "dungeon",
+          "blurb": "A labyrinth of despair, where fears manifest."
+        },
+        {
+          "axial": "1,1",
+          "kind": "camp",
+          "blurb": "A makeshift camp of survivors, holding onto second chances."
+        },
+        {
+          "axial": "1,-1",
+          "kind": "forge",
+          "blurb": "The Last Forge, sparking with the remnants of draconic fire."
+        },
+        {
+          "axial": "0,-1",
+          "kind": "portal",
+          "blurb": "An unstable portal, leading to fractured realms."
+        },
+        {
+          "axial": "-2,1",
+          "kind": "village",
+          "blurb": "A village of oddly resilient spirits, blending joy with sorrow."
+        },
+        {
+          "axial": "2,0",
+          "kind": "shrine",
+          "blurb": "A shrine devoted to mending the broken hearts of the world."
+        },
+        {
+          "axial": "-2,0",
+          "kind": "lair",
+          "blurb": "An ancient lair, housing a lingering draconic presence."
+        },
+        {
+          "axial": "-1,-1",
+          "kind": "ruin",
+          "blurb": "A ruin, whispering stories of betrayal and loss."
+        },
+        {
+          "axial": "1,2",
+          "kind": "dungeon",
+          "blurb": "A twisted dungeon, echoing the cries of the lost."
+        },
+        {
+          "axial": "0,2",
+          "kind": "camp",
+          "blurb": "A camp where stories of betrayal and trauma intertwine."
+        },
+        {
+          "axial": "2,1",
+          "kind": "forge",
+          "blurb": "An ethereal forge, channeling the essence of past dragons."
+        },
+        {
+          "axial": "-2,-1",
+          "kind": "portal",
+          "blurb": "A portal glowing with fractal energies of time."
+        },
+        {
+          "axial": "-1,2",
+          "kind": "village",
+          "blurb": "A village carved from stone, echoing despair."
+        },
+        {
+          "axial": "1,2",
+          "kind": "shrine",
+          "blurb": "A shrine of fractured souls, offering fleeting glimpses of hope."
+        },
+        {
+          "axial": "0,3",
+          "kind": "lair",
+          "blurb": "A lair filled with specters of fallen warriors."
+        }
+      ],
+      "quests": [
+        {
+          "id": "quest1",
+          "title": "Echoes of the Fallen",
+          "summary": "Find remnants of the past and confront the myths of the dragon's fall.",
+          "type": "main",
+          "steps": [
+            "Investigate the Last Forge.",
+            "Collect the shards of ancient weapons.",
+            "Face the specter of the worldbreaker."
+          ],
+          "success_outcome": "You restore a piece of history, gaining power and knowledge.",
+          "failure_outcome": "You unleash horrors that haunt your mind."
+        },
+        {
+          "id": "quest2",
+          "title": "Second Chances",
+          "summary": "Assist survivors in rebuilding their shattered lives.",
+          "type": "side",
+          "steps": [
+            "Help the villagers clear rubble.",
+            "Transport supplies from the camp.",
+            "Rekindle the forge's fire."
+          ],
+          "success_outcome": "The village thrives and rewards you kindly.",
+          "failure_outcome": "The village suffers, and trust diminishes."
+        },
+        {
+          "id": "quest3",
+          "title": "Whispers of Betrayal",
+          "summary": "Unravel hidden secrets among companions and ghosts.",
+          "type": "side",
+          "steps": [
+            "Discover hidden truths in the dungeon.",
+            "Confront a traitor.",
+            "Seek forgiveness."
+          ],
+          "success_outcome": "United, the companions grow stronger.",
+          "failure_outcome": "Distrust spreads, fracturing your group."
+        },
+        {
+          "id": "quest4",
+          "title": "The Last Forge\u2019s Heart",
+          "summary": "Restore the heart of the Last Forge to reignite hope.",
+          "type": "forge",
+          "steps": [
+            "Find the heart's location in the lair.",
+            "Defeat the guardian specter.",
+            "Repair the forge."
+          ],
+          "success_outcome": "The forge blazes anew, granting powerful enhancements.",
+          "failure_outcome": "The heart breaks, dooming the forge."
+        },
+        {
+          "id": "quest5",
+          "title": "Moral Fractures",
+          "summary": "Make a choice affecting the lives of survivors.",
+          "type": "moral",
+          "steps": [
+            "Select who receives aid amidst scarcity.",
+            "Explore the ruins for resources.",
+            "Confront the consequences of your choice."
+          ],
+          "success_outcome": "Your choice strengthens bonds.",
+          "failure_outcome": "Discontent grows among survivors."
+        }
+      ],
+      "npcs": [
+        {
+          "id": "npc1",
+          "name": "Raelith the Unbroken",
+          "role": "Guide",
+          "personality": "Haunted yet hopeful",
+          "secrets": [
+            "Carries the weight of betrayal from a lost friend.",
+            "Hides a map to the heart of the Last Forge."
+          ],
+          "hooks": [
+            "Knows of a way to bridge tragic past and present."
+          ]
+        },
+        {
+          "id": "npc2",
+          "name": "Taran the Fragmented",
+          "role": "Villager",
+          "personality": "Distrusting and wary",
+          "secrets": [
+            "Believes the dragon's spirit still lingers.",
+            "Once betrayed a friend for survival."
+          ],
+          "hooks": [
+            "Sees visions that may lead to the truth."
+          ]
+        },
+        {
+          "id": "npc3",
+          "name": "Elaris the Spirit Keeper",
+          "role": "Seer",
+          "personality": "Mysterious and calm",
+          "secrets": [
+            "Hides memories of a past life as a dragon.",
+            "Can speak to lingering spirits."
+          ],
+          "hooks": [
+            "Offers insights that challenge allies' motivations."
+          ]
+        },
+        {
+          "id": "npc4",
+          "name": "Thron the Forgemaster",
+          "role": "Smith",
+          "personality": "Gruff but passionate about his craft",
+          "secrets": [
+            "Once forged weapons for the dragon.",
+            "Believes in second chances."
+          ],
+          "hooks": [
+            "Can teach companions the ways of rekindling their skills."
+          ]
+        }
+      ],
+      "creatures": [
+        {
+          "id": "creature1",
+          "name": "Worldbreaker",
+          "tags": [
+            "spectral",
+            "giant"
+          ],
+          "behavior": "Roams the remnants of destruction, seeking to unravel reality.",
+          "cr_hint": "Beware the void it casts upon allies."
+        },
+        {
+          "id": "creature2",
+          "name": "Fractured Dragon",
+          "tags": [
+            "mythical",
+            "traitorous"
+          ],
+          "behavior": "A twisted entity born from betrayal, lurking in the abyss.",
+          "cr_hint": "Susceptible to the emotions of those nearby."
+        },
+        {
+          "id": "creature3",
+          "name": "Spectral Guardian",
+          "tags": [
+            "haunting",
+            "defensive"
+          ],
+          "behavior": "Defends the Last Forge with relentless determination.",
+          "cr_hint": "Its grief amplifies its strength."
+        },
+        {
+          "id": "creature4",
+          "name": "Wraith of Trauma",
+          "tags": [
+            "undead",
+            "tormented"
+          ],
+          "behavior": "Wanders the ruins, seeking to avenge a broken past.",
+          "cr_hint": "Vulnerable to light yet feeds on sorrow."
+        }
+      ]
     }
   ]
 }

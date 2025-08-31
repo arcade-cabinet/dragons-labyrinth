@@ -1,0 +1,249 @@
+{
+  "band": "1-20",
+  "name": "Veil of Mourning",
+  "mood_board": [
+    "wistful",
+    "uneasy"
+  ],
+  "biomes": [
+    "wet_meadow",
+    "ashen_forest",
+    "flooded_village"
+  ],
+  "hex_points": [
+    {
+      "axial": "0,1",
+      "kind": "village",
+      "blurb": "A fog-laden village where whispers of lost souls linger."
+    },
+    {
+      "axial": "1,0",
+      "kind": "shrine",
+      "blurb": "An ancient shrine, its bell broken, echoing the past."
+    },
+    {
+      "axial": "1,1",
+      "kind": "lair",
+      "blurb": "A hidden lair beneath twisted roots; a lurking presence."
+    },
+    {
+      "axial": "0,0",
+      "kind": "camp",
+      "blurb": "A temporary camp where travelers share their dark tales."
+    },
+    {
+      "axial": "2,0",
+      "kind": "dungeon",
+      "blurb": "A sunken dungeon filled with waterlogged despair and shadow."
+    },
+    {
+      "axial": "-1,1",
+      "kind": "forge",
+      "blurb": "A forgotten forge, the anvil rusted, yet imbued with memories."
+    },
+    {
+      "axial": "1,-1",
+      "kind": "portal",
+      "blurb": "A shimmering portal to unknown realms, crackling with latent energy."
+    },
+    {
+      "axial": "2,1",
+      "kind": "ruin",
+      "blurb": "Ruins of an old manor, where grief lingers in every crevice."
+    },
+    {
+      "axial": "-1,-1",
+      "kind": "village",
+      "blurb": "A village overtaken by nature, its past inhabitants long gone."
+    },
+    {
+      "axial": "-1,0",
+      "kind": "shrine",
+      "blurb": "A shrine swallowed by vines, a forgotten prayer echoes softly."
+    },
+    {
+      "axial": "0,-1",
+      "kind": "camp",
+      "blurb": "A campfire shared by wary travelers, the mood heavy with sorrow."
+    },
+    {
+      "axial": "-2,0",
+      "kind": "dungeon",
+      "blurb": "A submerged dungeon, its water filled with sorrowful echoes."
+    },
+    {
+      "axial": "-1,2",
+      "kind": "lair",
+      "blurb": "A lair of despair where the creatures are fuelled by sadness."
+    },
+    {
+      "axial": "1,2",
+      "kind": "forge",
+      "blurb": "An ancient forge nestled in the fog, offering second chances."
+    },
+    {
+      "axial": "0,2",
+      "kind": "portal",
+      "blurb": "A portal hidden within the marsh, radiating an ominous glow."
+    }
+  ],
+  "quests": [
+    {
+      "id": "quest1",
+      "title": "The Bell's Last Toll",
+      "summary": "Restore the ancient shrine bell to lift the village's curse.",
+      "type": "main",
+      "steps": [
+        "Investigate the shrine's history",
+        "Gather materials for restoration",
+        "Confront the spirit guarding the bell"
+      ],
+      "success_outcome": "The village is freed from despair, bell tolls joyfully.",
+      "failure_outcome": "The curse deepens, whispers grow louder."
+    },
+    {
+      "id": "quest2",
+      "title": "Echoes of the Past",
+      "summary": "Assist a villager in remembering their lost loved ones.",
+      "type": "side",
+      "steps": [
+        "Speak to the grieving villager",
+        "Collect mementos of their lost ones",
+        "Hold a memorial at the village].",
+        "Keep the villagers safe from lurking threats."
+      ],
+      "success_outcome": "The villager finds closure, and peace returns briefly.",
+      "failure_outcome": "The grief manifests as a haunting spirit."
+    },
+    {
+      "id": "quest3",
+      "title": "Trauma's Companion",
+      "summary": "Help a companion confront their past trauma within the lair.",
+      "type": "companion",
+      "steps": [
+        "Enter the lair together",
+        "Face the creature of their fears",
+        "Encourage them to confront their trauma directly."
+      ],
+      "success_outcome": "The companion emerges stronger, with a new perspective.",
+      "failure_outcome": "The trauma manifests, causing a fracture in the group."
+    },
+    {
+      "id": "quest4",
+      "title": "The Weaving of Fates",
+      "summary": "A moral dilemma pits the needs of the many against the few.",
+      "type": "moral",
+      "steps": [
+        "Observe the villagers struggling",
+        "Choose who to aid in a time of scarce resources",
+        "Confront the leader's decision."
+      ],
+      "success_outcome": "Balance is restored, but at a cost; friendships strained.",
+      "failure_outcome": "Conflicts rise between factions, escalating distrust."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc1",
+      "name": "Elyra",
+      "role": "Village oracle",
+      "personality": "Mournful but wise",
+      "secrets": [
+        "Knows the truth behind the village's curse",
+        "Hides past decisions that haunt her"
+      ],
+      "hooks": [
+        "Her prophecies often beget more pain than comfort.",
+        "Seeking to learn the fate of her loved ones."
+      ]
+    },
+    {
+      "id": "npc2",
+      "name": "Tomas",
+      "role": "Grieving villager",
+      "personality": "Sullen and withdrawn",
+      "secrets": [
+        "Bears guilt for a past decision that led to tragedy",
+        "Hides an item of great sentimental value"
+      ],
+      "hooks": [
+        "Longing for closure that the bell might provide.",
+        "On the verge of madness from memories of loss."
+      ]
+    },
+    {
+      "id": "npc3",
+      "name": "Kara",
+      "role": "Companion",
+      "personality": "Resilient yet haunted",
+      "secrets": [
+        "Has a Dark Past that suggests betrayal",
+        "Fears her own potential for darkness"
+      ],
+      "hooks": [
+        "Her trauma affects the party’s dynamics",
+        "She seeks redemption from her past actions."
+      ]
+    },
+    {
+      "id": "npc4",
+      "name": "Alaric",
+      "role": "Blacksmith",
+      "personality": "Bitter yet skilled",
+      "secrets": [
+        "Once was a wielder of lost magic",
+        "Desires to create again, despite feeling lost"
+      ],
+      "hooks": [
+        "Holds the key to restoring a powerful weapon.",
+        "A former hero now trapped in his own despair."
+      ]
+    }
+  ],
+  "creatures": [
+    {
+      "id": "creature1",
+      "name": "Wraith of the Hallowed",
+      "tags": [
+        "undead",
+        "mournful",
+        "shadow"
+      ],
+      "behavior": "Stalks the living, feeding on sorrow.",
+      "cr_hint": "It avoids direct confrontation, preferring terror."
+    },
+    {
+      "id": "creature2",
+      "name": "Carrion Crow",
+      "tags": [
+        "avian",
+        "scavenger",
+        "ominous"
+      ],
+      "behavior": "Gathers ominously, hinting at decay nearby.",
+      "cr_hint": "Its caw invokes an unsettling feeling of loss."
+    },
+    {
+      "id": "creature3",
+      "name": "Mirewolf",
+      "tags": [
+        "beast",
+        "predatory",
+        "trickster"
+      ],
+      "behavior": "Lurks in the shadows, attacks at emotional vulnerabilities.",
+      "cr_hint": "Known to mimic the cries of loved ones."
+    },
+    {
+      "id": "creature4",
+      "name": "Shade Wisp",
+      "tags": [
+        "spectral",
+        "mysterious",
+        "boundary"
+      ],
+      "behavior": "Drifts through the fog, leading travelers to their doom.",
+      "cr_hint": "Whispers promises, hiding deceptive truths."
+    }
+  ]
+}

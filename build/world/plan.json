@@ -1,0 +1,64 @@
+{
+  "title": "Dragon’s Labyrinth",
+  "starting_hex": "0,0",
+  "region_bands": [
+    {
+      "band": "1-20",
+      "name": "Veil of Mourning",
+      "theme_summary": "Introduce fog, pastoral decay, and hidden dread.",
+      "biome_palette": [
+        "wet_meadow",
+        "ashen_forest",
+        "flooded_village"
+      ],
+      "tone": "wistful, uneasy"
+    },
+    {
+      "band": "21-40",
+      "name": "Shadows of the Untrustworthy",
+      "theme_summary": "The world darkens; trust begins to fracture.",
+      "biome_palette": [
+        "black_swamp",
+        "fungal_cathedral"
+      ],
+      "tone": "distrust, shadowed"
+    },
+    {
+      "band": "41-60",
+      "name": "Fields of Betrayal",
+      "theme_summary": "Trauma defines play; companions may turn on the party.",
+      "biome_palette": [
+        "rust_plains",
+        "hollow_hills"
+      ],
+      "tone": "betrayal, corrosion"
+    },
+    {
+      "band": "61-120",
+      "name": "Wastelands of Despair",
+      "theme_summary": "Regions are warped ecosystems; survival feels pyrrhic.",
+      "biome_palette": [
+        "famine_fields",
+        "bone_forest"
+      ],
+      "tone": "collapse, hunger"
+    },
+    {
+      "band": "121-180",
+      "name": "Cataclysm's Edge",
+      "theme_summary": "The dragon’s fall unravels the world.",
+      "biome_palette": [
+        "dragon_scar",
+        "abyssal_chasm"
+      ],
+      "tone": "unraveling, final dread"
+    }
+  ],
+  "global_pillars": [
+    "dread_escalation",
+    "inverted_combat_economy",
+    "companion_trauma",
+    "post_dragon_collapse",
+    "forge_second_chances"
+  ]
+}

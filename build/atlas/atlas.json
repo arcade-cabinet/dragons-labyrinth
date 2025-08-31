@@ -1,0 +1,99 @@
+{
+  "tiles": {
+    "black_swamp/Black Swamp": {
+      "u": 0,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "black_swamp/Fungal Cathedral": {
+      "u": 512,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "black_swamp/Shadowed Fen": {
+      "u": 1024,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "dragon_scar/Abyssal Chasm": {
+      "u": 1536,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "dragon_scar/Dragon Scar": {
+      "u": 2048,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "dragon_scar/Final Dread Terrain": {
+      "u": 2560,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "famine_fields/Bone Forest": {
+      "u": 3072,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "famine_fields/Desolate Expanse": {
+      "u": 3584,
+      "v": 0,
+      "w": 512,
+      "h": 512
+    },
+    "famine_fields/Famine Fields": {
+      "u": 0,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "rust_plains/Corroded Battleground": {
+      "u": 512,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "rust_plains/Hollow Hills": {
+      "u": 1024,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "rust_plains/Rust Plains": {
+      "u": 1536,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "wet_meadow/Ashen Forest": {
+      "u": 2048,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "wet_meadow/Flooded Village": {
+      "u": 2560,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    },
+    "wet_meadow/Wet Meadow": {
+      "u": 3072,
+      "v": 512,
+      "w": 512,
+      "h": 512
+    }
+  },
+  "tile_size": 512,
+  "atlas_w": 4096,
+  "atlas_h": 1024,
+  "cols": 8,
+  "rows": 2
+}

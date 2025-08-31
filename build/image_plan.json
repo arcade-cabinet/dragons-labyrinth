@@ -1,0 +1,184 @@
+{
+  "tilesets": [
+    {
+      "biome": "wet_meadow",
+      "variants": [
+        {
+          "name": "Wet Meadow",
+          "prompt": "seamless hex tile of wet meadow with fog and scattered reeds, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Ashen Forest",
+          "prompt": "seamless hex tile of ashen forest, skeletal trees, pale light, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Flooded Village",
+          "prompt": "seamless hex tile of flooded village, decaying structures, misty atmosphere, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        }
+      ]
+    },
+    {
+      "biome": "black_swamp",
+      "variants": [
+        {
+          "name": "Black Swamp",
+          "prompt": "seamless hex tile of swamp with dark water and fungal growth, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Fungal Cathedral",
+          "prompt": "seamless hex tile of fungal cathedral, eerie light filtering through, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Shadowed Fen",
+          "prompt": "seamless hex tile of shadowed fen, silhouettes of twisted trees, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        }
+      ]
+    },
+    {
+      "biome": "rust_plains",
+      "variants": [
+        {
+          "name": "Rust Plains",
+          "prompt": "seamless hex tile of rusted plains, reddish soil, broken armor, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Hollow Hills",
+          "prompt": "seamless hex tile of hollow hills, worn pathways, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Corroded Battleground",
+          "prompt": "seamless hex tile of corroded battleground, remnants of past conflict, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        }
+      ]
+    },
+    {
+      "biome": "famine_fields",
+      "variants": [
+        {
+          "name": "Famine Fields",
+          "prompt": "seamless hex tile of cracked fields, sparse crops, bones scattered, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Bone Forest",
+          "prompt": "seamless hex tile of bone forest, skeletal remains interspersed with trees, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Desolate Expanse",
+          "prompt": "seamless hex tile of desolate expanse, devoid of life, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        }
+      ]
+    },
+    {
+      "biome": "dragon_scar",
+      "variants": [
+        {
+          "name": "Dragon Scar",
+          "prompt": "seamless hex tile of scorched land with glowing fractures, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Abyssal Chasm",
+          "prompt": "seamless hex tile of abyssal chasm, dark crevices with hints of light, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        },
+        {
+          "name": "Final Dread Terrain",
+          "prompt": "seamless hex tile of final dread terrain, signs of decay and destruction, muted colors, painterly style, neutral lighting",
+          "size": 512,
+          "tileable": true,
+          "transparent": false
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "name": "Village",
+      "prompt": "icon of a simple village silhouette with vague outlines of huts, neutral lighting, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Shrine",
+      "prompt": "icon of a cracked shrine bell on stone base, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Lair",
+      "prompt": "icon of a dark cave entrance, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Ruin",
+      "prompt": "icon of a crumbling stone structure, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Camp",
+      "prompt": "icon of a simple campfire and tent silhouette, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Dungeon",
+      "prompt": "icon of a barred dungeon door, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Forge",
+      "prompt": "icon of an anvil silhouette, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    },
+    {
+      "name": "Portal",
+      "prompt": "icon of a mysterious archway with faint glowing edges, symbolic, no text, muted colors, painterly style",
+      "size": 128,
+      "transparent": true
+    }
+  ]
+}

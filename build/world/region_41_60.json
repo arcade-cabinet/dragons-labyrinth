@@ -1,0 +1,313 @@
+{
+  "band": "41-60",
+  "name": "Fields of Betrayal",
+  "mood_board": [
+    "betrayal",
+    "corrosion"
+  ],
+  "biomes": [
+    "rust_plains",
+    "hollow_hills"
+  ],
+  "hex_points": [
+    {
+      "axial": "0,1",
+      "kind": "village",
+      "blurb": "A settlement of whispering distrust, where neighbors suspect each other of betrayal."
+    },
+    {
+      "axial": "1,0",
+      "kind": "shrine",
+      "blurb": "An ancient shrine corrupted by dark rituals, where worship has turned to dread."
+    },
+    {
+      "axial": "1,1",
+      "kind": "lair",
+      "blurb": "The lair of a monstrous creature that thrives on despair and strife."
+    },
+    {
+      "axial": "0,2",
+      "kind": "ruin",
+      "blurb": "The remnants of a once-great fortress now crumbling under secrets."
+    },
+    {
+      "axial": "2,0",
+      "kind": "dungeon",
+      "blurb": "A labyrinth of horrors where companions may become foes."
+    },
+    {
+      "axial": "2,1",
+      "kind": "camp",
+      "blurb": "A temporary camp filled with weary travelers, each harboring tragic tales."
+    },
+    {
+      "axial": "1,2",
+      "kind": "forge",
+      "blurb": "A forge where lost souls attempt to make amends for past betrayals."
+    },
+    {
+      "axial": "0,-1",
+      "kind": "portal",
+      "blurb": "A gateway to unsettling worlds, whispered to be twisted reflections of this one."
+    },
+    {
+      "axial": "-1,0",
+      "kind": "village",
+      "blurb": "An isolated village, its inhabitants aware of the treachery brewing among them."
+    },
+    {
+      "axial": "-2,2",
+      "kind": "shrine",
+      "blurb": "A desecrated shrine, long forsaken, and awash in the metallic scent of blood."
+    },
+    {
+      "axial": "-2,1",
+      "kind": "lair",
+      "blurb": "The lair of a traitorous beast that feeds on the fears of the living."
+    },
+    {
+      "axial": "-1,-1",
+      "kind": "ruin",
+      "blurb": "Wreckage of an old citadel, echoing with the screams of the fallen."
+    },
+    {
+      "axial": "-1,1",
+      "kind": "dungeon",
+      "blurb": "A dungeon where alliances dissolve and mistrust reigns."
+    },
+    {
+      "axial": "-1,2",
+      "kind": "camp",
+      "blurb": "A camp where companions are pitted against each other in trials of loyalty."
+    },
+    {
+      "axial": "-2,-2",
+      "kind": "forge",
+      "blurb": "A forgotten forge where the metal of betrayal is reshaped into weapons."
+    },
+    {
+      "axial": "-2,0",
+      "kind": "portal",
+      "blurb": "An unstable portal that reflects the darkest fears of those who look into it."
+    },
+    {
+      "axial": "2,-1",
+      "kind": "village",
+      "blurb": "A village engulfed in rumors that haunt the corners of every home."
+    },
+    {
+      "axial": "2,2",
+      "kind": "shrine",
+      "blurb": "A shrine adorned with the tokens of lost trust and broken vows."
+    },
+    {
+      "axial": "-2,2",
+      "kind": "lair",
+      "blurb": "A lair that amplifies the despair of intruders, ensnaring their minds."
+    },
+    {
+      "axial": "0,-2",
+      "kind": "ruin",
+      "blurb": "Ruins where the echoes of betrayal linger in the air."
+    },
+    {
+      "axial": "1,-1",
+      "kind": "dungeon",
+      "blurb": "A labyrinthine dungeon forged not only from stone but also from deceit."
+    },
+    {
+      "axial": "0,-1",
+      "kind": "camp",
+      "blurb": "A weary camp where friendships are forged in flames of mistrust."
+    },
+    {
+      "axial": "0,0",
+      "kind": "forge",
+      "blurb": "A forge where past traumas can be remade into instruments of redemption."
+    },
+    {
+      "axial": "2,0",
+      "kind": "portal",
+      "blurb": "A mysterious portal that leads to the heart of betrayal itself."
+    },
+    {
+      "axial": "0,3",
+      "kind": "village",
+      "blurb": "A village gripped by paranoia, each person questioning the other."
+    },
+    {
+      "axial": "3,0",
+      "kind": "shrine",
+      "blurb": "A shrine that once brought together allies but now sows discord."
+    },
+    {
+      "axial": "-2,-1",
+      "kind": "lair",
+      "blurb": "The lair of a creature that thrives on the betrayal between friends."
+    },
+    {
+      "axial": "1,-2",
+      "kind": "ruin",
+      "blurb": "The ruins of a knightly order fallen into disarray through treachery."
+    },
+    {
+      "axial": "3,1",
+      "kind": "dungeon",
+      "blurb": "A dungeon reeking of betrayal, where trust was shattered forever."
+    }
+  ],
+  "quests": [
+    {
+      "id": "quest1",
+      "title": "Echoes of Trust",
+      "summary": "Unravel the mystery behind a series of betrayals that have torn the party apart.",
+      "type": "main",
+      "steps": [
+        "Investigate the roots of discord in the nearby village.",
+        "Confront a former ally believed to be behind the betrayals.",
+        "Restore trust among the party members."
+      ],
+      "success_outcome": "The party unites, overcoming their past traumas.",
+      "failure_outcome": "The party fractures irreparably, leading to devastating consequences."
+    },
+    {
+      "id": "quest2",
+      "title": "Trial of Loyalty",
+      "summary": "A test of loyalty where each companion’s true nature is revealed.",
+      "type": "side",
+      "steps": [
+        "Gather clues about each companion's hidden past.",
+        "Face a test that pits companions against each other.",
+        "Decide who can be trusted or must be cast aside."
+      ],
+      "success_outcome": "The party emerges stronger and more united than before.",
+      "failure_outcome": "Bonds are broken, and new alliances form in the chaos."
+    },
+    {
+      "id": "quest3",
+      "title": "The Corrupted Forge",
+      "summary": "Purify a forge tainted by betrayal to create a weapon of second chances.",
+      "type": "forge",
+      "steps": [
+        "Discover the source of corruption at the forge.",
+        "Cleanse the forge of its dark influence.",
+        "Craft a weapon imbued with the power of redemption."
+      ],
+      "success_outcome": "The weapon provides a second chance against impending threats.",
+      "failure_outcome": "The corruption spreads, warping the very nature of the weapon."
+    },
+    {
+      "id": "quest4",
+      "title": "Ghosts of Regret",
+      "summary": "Confront the past pains of a companion and seek their redemption.",
+      "type": "companion",
+      "steps": [
+        "Uncover the companion’s dark history.",
+        "Facilitates a confrontation with their ghosts.",
+        "Aid in achieving redemption."
+      ],
+      "success_outcome": "The companion finds peace and strength in their past.",
+      "failure_outcome": "The companion succumbs to despair, leaving the party weakened."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc1",
+      "name": "Alyssa",
+      "role": "The Betrayed",
+      "personality": "Haunted and distrustful",
+      "secrets": [
+        "Fears her companions are plotting against her.",
+        "Hides a dark connection to the shrine."
+      ],
+      "hooks": [
+        "Claim to have seen visions of betrayal.",
+        "Knows a secret about a past companion."
+      ]
+    },
+    {
+      "id": "npc2",
+      "name": "Galen the Corrupted",
+      "role": "Former Knight turned Traitor",
+      "personality": "Cold and regretful",
+      "secrets": [
+        "Was once a trusted hero but gave in to darkness.",
+        "May turn on the party under duress."
+      ],
+      "hooks": [
+        "Offers insight into the corruption at the ruins.",
+        "Seeks revenge on those who betrayed him."
+      ]
+    },
+    {
+      "id": "npc3",
+      "name": "Brynna",
+      "role": "The Forge Master",
+      "personality": "Stalwart and resentful",
+      "secrets": [
+        "Holds memories of a broken alliance.",
+        "Believes the forge holds the key to redemption."
+      ],
+      "hooks": [
+        "Can teach players about forging with corrupted metals.",
+        "Yearns for the return of a lost companion."
+      ]
+    },
+    {
+      "id": "npc4",
+      "name": "Daron",
+      "role": "The Whisperer",
+      "personality": "Cunning and manipulative",
+      "secrets": [
+        "Sows discord among the camp's inhabitants.",
+        "Knows the truth behind many betrayals."
+      ],
+      "hooks": [
+        "Claims to have insight into others' betrayals.",
+        "Offers to share secrets for a price."
+      ]
+    }
+  ],
+  "creatures": [
+    {
+      "id": "creature1",
+      "name": "Corrupted Companion",
+      "tags": [
+        "traitor",
+        "shadow"
+      ],
+      "behavior": "Deceitful and manipulative, often steering others into traps.",
+      "cr_hint": "This creature was once a trusted ally."
+    },
+    {
+      "id": "creature2",
+      "name": "Iron Golem of Betrayal",
+      "tags": [
+        "mechanical",
+        "crimson"
+      ],
+      "behavior": "Immovable until provoked, reacts violently to perceived threats.",
+      "cr_hint": "Crafted from the broken trust of allies."
+    },
+    {
+      "id": "creature3",
+      "name": "Wraith of Regret",
+      "tags": [
+        "spectral",
+        "vengeful"
+      ],
+      "behavior": "Lurks in shadows, feeding on sorrow and betrayal.",
+      "cr_hint": "An echo of past wrongs, growing stronger with every betrayal."
+    },
+    {
+      "id": "creature4",
+      "name": "Nightmare Beast",
+      "tags": [
+        "beast",
+        "chaotic"
+      ],
+      "behavior": "Preys on fear, exhibits unpredictable behavior driven by malice.",
+      "cr_hint": "A manifestation of the party’s darkest fears."
+    }
+  ]
+}

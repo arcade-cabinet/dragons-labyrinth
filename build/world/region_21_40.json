@@ -1,0 +1,250 @@
+{
+  "band": "21-40",
+  "name": "Shadows of the Untrustworthy",
+  "mood_board": [
+    "distrust",
+    "shadowed"
+  ],
+  "biomes": [
+    "black_swamp",
+    "fungal_cathedral"
+  ],
+  "hex_points": [
+    {
+      "axial": "1,1",
+      "kind": "village",
+      "blurb": "A community struggling with paranoia and betrayal."
+    },
+    {
+      "axial": "1,2",
+      "kind": "shrine",
+      "blurb": "A dilapidated shrine, the stone coated in sinister fungi."
+    },
+    {
+      "axial": "1,3",
+      "kind": "lair",
+      "blurb": "The lair of a shadow bandit leader, hidden in twisted roots."
+    },
+    {
+      "axial": "2,1",
+      "kind": "portal",
+      "blurb": "An ominous portal that flickers with whispers of betrayal."
+    },
+    {
+      "axial": "2,2",
+      "kind": "dungeon",
+      "blurb": "A dungeon filled with remnants of trust turned to despair."
+    },
+    {
+      "axial": "2,3",
+      "kind": "ruin",
+      "blurb": "Ruins of an old village, where secrets lurk amidst the decay."
+    },
+    {
+      "axial": "3,1",
+      "kind": "camp",
+      "blurb": "A camp set up by desperate travelers, mistrust hangs in the air."
+    },
+    {
+      "axial": "3,2",
+      "kind": "forge",
+      "blurb": "A forge run by a bitter smith, crafting weapons of distrust."
+    },
+    {
+      "axial": "3,3",
+      "kind": "village",
+      "blurb": "A village split by distrust, where neighbors eye each other warily."
+    },
+    {
+      "axial": "4,1",
+      "kind": "shrine",
+      "blurb": "A shrine corrupted by darkness, once a beacon of hope."
+    },
+    {
+      "axial": "4,2",
+      "kind": "lair",
+      "blurb": "Home to a fungal thrall nest, feeding on lost souls."
+    },
+    {
+      "axial": "4,3",
+      "kind": "dungeon",
+      "blurb": "A dungeon echoing with the cries of those who betrayed and were betrayed."
+    },
+    {
+      "axial": "5,1",
+      "kind": "portal",
+      "blurb": "A portal buzzing with unease, tempting the brave to enter."
+    },
+    {
+      "axial": "5,2",
+      "kind": "ruin",
+      "blurb": "Decaying temple stands as a reminder of lost faith and trust."
+    },
+    {
+      "axial": "5,3",
+      "kind": "camp",
+      "blurb": "A makeshift camp for those fleeing the shadows."
+    },
+    {
+      "axial": "6,1",
+      "kind": "forge",
+      "blurb": "A secret forge hidden from prying eyes, known for crafting dark deeds."
+    },
+    {
+      "axial": "6,2",
+      "kind": "village",
+      "blurb": "A village divided by mistrust, dealings done in whispers."
+    },
+    {
+      "axial": "6,3",
+      "kind": "lair",
+      "blurb": "A lair where treacherous plots are hatched in the dark."
+    }
+  ],
+  "quests": [
+    {
+      "id": "main_001",
+      "title": "Whispers of the Shadow",
+      "summary": "Investigate the rise of shadow bandits plaguing the land.",
+      "type": "main",
+      "steps": [
+        "Gather information from locals",
+        "Track down the bandit hideout",
+        "Confront the shadow bandits"
+      ],
+      "success_outcome": "Discover the bandit's motives and return home with new allies.",
+      "failure_outcome": "The bandits escape, and mistrust festers among the villagers."
+    },
+    {
+      "id": "side_001",
+      "title": "Corrupted Trust",
+      "summary": "Repair the bridge that connects two distrustful villages.",
+      "type": "side",
+      "steps": [
+        "Collect resources to repair the bridge",
+        "Navigate the treacherous swamp",
+        "Convince the villagers to work together"
+      ],
+      "success_outcome": "The bridge is restored, fostering a new sense of trust.",
+      "failure_outcome": "The distrust escalates, leading to further isolation."
+    },
+    {
+      "id": "side_002",
+      "title": "The Fungal Threat",
+      "summary": "Investigate the mysterious corruption spreading in the fungal cathedral.",
+      "type": "side",
+      "steps": [
+        "Enter the fungal cathedral",
+        "Combat the thralls and find the source of corruption",
+        "Escape before the cathedral collapses"
+      ],
+      "success_outcome": "Eliminate the source of corruption, saving the cathedral.",
+      "failure_outcome": "The corruption spreads, affecting nearby villages."
+    },
+    {
+      "id": "companion_001",
+      "title": "Broken Bonds",
+      "summary": "Help a companion come to terms with their past betrayal.",
+      "type": "companion",
+      "steps": [
+        "Discuss past events with the companion",
+        "Assist them in confronting their betrayer",
+        "Reach an understanding"
+      ],
+      "success_outcome": "The companion finds closure and trust in the party.",
+      "failure_outcome": "The companion withdraws further, causing rifts."
+    },
+    {
+      "id": "moral_001",
+      "title": "A Choice of Shadows",
+      "summary": "Decide the fate of a captured shadow bandit who begs for mercy.",
+      "type": "moral",
+      "steps": [
+        "Debate whether to execute or spare the bandit",
+        "Consider the consequences of your choice",
+        "Choose a path forward"
+      ],
+      "success_outcome": "Your decision shapes the future of the bandit group.",
+      "failure_outcome": "The choice haunts the party, trust among companions diminishes."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_001",
+      "name": "Merrick the Untrusting",
+      "role": "Town Guard",
+      "personality": "Paranoid and tense, often second-guessing moves.",
+      "secrets": [
+        "He once betrayed a friend for survival.",
+        "He believes the shadows are watching him."
+      ],
+      "hooks": [
+        "He hints at a hidden plot in the village.",
+        "He fears a traitor in the ranks of the guard."
+      ]
+    },
+    {
+      "id": "npc_002",
+      "name": "Elysia the Gloomwalker",
+      "role": "Rogue Merchant",
+      "personality": "Cunning and sly, always with a hidden agenda.",
+      "secrets": [
+        "She secretly sells information to the highest bidder.",
+        "Her past is filled with betrayal and escape."
+      ],
+      "hooks": [
+        "She offers a dangerous but lucrative deal.",
+        "She claims to know the truth behind the shadow bandits."
+      ]
+    },
+    {
+      "id": "npc_003",
+      "name": "Father Yorin",
+      "role": "Shrine Keeper",
+      "personality": "Despondent and haunted, filled with regrets.",
+      "secrets": [
+        "He once abandoned his temple in fear.",
+        "He has visions of the coming darkness."
+      ],
+      "hooks": [
+        "He seeks the party’s aid to cleanse the shrine.",
+        "He believes the shadows can be negotiated with."
+      ]
+    }
+  ],
+  "creatures": [
+    {
+      "id": "creature_001",
+      "name": "Shadow Bandit",
+      "tags": [
+        "humanoid",
+        "stealth",
+        "betrayal"
+      ],
+      "behavior": "Ambush and disorient travelers before robbing them.",
+      "cr_hint": "Watch your back; they strike from the shadows."
+    },
+    {
+      "id": "creature_002",
+      "name": "Fungal Thrall",
+      "tags": [
+        "undead",
+        "mindless",
+        "corrupted"
+      ],
+      "behavior": "Attack any intruders, driven by a hive mind.",
+      "cr_hint": "Their spores linger in the air, suffocating the unwary."
+    },
+    {
+      "id": "creature_003",
+      "name": "Wretched Beast",
+      "tags": [
+        "mutated",
+        "feral",
+        "untrustworthy"
+      ],
+      "behavior": "Both predator and prey, feeding on fear and doubt.",
+      "cr_hint": "They thrive on the fear of betrayal, hard to spot at first."
+    }
+  ]
+}

@@ -1,11 +1,12 @@
 from __future__ import annotations
 import argparse, json, pathlib, os
 from openai import OpenAI
-from schemas import GameCanon, ThemeBible, WorldPlan, RegionBible, WorldBook, ImagePlan, BiomeTileset, TileVariant, IconJob
-from util import write_if_changed, ROOT
-from prompts import SYSTEM_CREATIVE, SYSTEM_IMAGE
-from images import generate_images
-from dialogue import expand_npc_dialogue, expand_questlines, write_dialogue_bundle
+from ai.schemas import GameCanon, ThemeBible, WorldPlan, RegionBible, WorldBook, ImagePlan, BiomeTileset, TileVariant, IconJob
+from ai.util import write_if_changed, ROOT, call_json_schema, normalize_json_for_model
+from ai.prompts import SYSTEM_CREATIVE, SYSTEM_IMAGE
+from ai.images import generate_images
+from ai.dialogue import expand_npc_dialogue, expand_questlines, write_dialogue_bundle
+from ai.atlas import pack_uniform_grid
 
 MODEL_DEFAULT = os.getenv("OPENAI_MODEL", "gpt-5.1")
 IMAGE_MODEL_DEFAULT = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
@@ -29,14 +30,8 @@ Task: Convert into GameCanon JSON with:
 - progression: five bands with band, statement, goals[], gating_mechanics[]
 Return JSON only.
 """
-    canon_res = client.responses.create(
-        model=model,
-        input=canon_prompt,
-        response_format={"type":"json_schema","json_schema":{
-            "name":"GameCanon","schema":GameCanon.model_json_schema()
-        }},
-    )
-    canon = GameCanon.model_validate_json(canon_res.output_text)
+    canon_text = call_json_schema(client, model, canon_prompt, GameCanon)
+    canon = GameCanon.model_validate_json(json.dumps(normalize_json_for_model(GameCanon, canon_text)))
     write_if_changed(MASTER/"canon.json", canon.model_dump_json(indent=2).encode())
 
     theme_prompt = f"""{SYSTEM_CREATIVE}
@@ -48,14 +43,8 @@ Task: Convert into ThemeBible JSON with:
 - bands[]: tone, biome_palette, enemy_archetypes, quest_archetypes, art_prompts
 Return JSON only.
 """
-    theme_res = client.responses.create(
-        model=model,
-        input=theme_prompt,
-        response_format={"type":"json_schema","json_schema":{
-            "name":"ThemeBible","schema":ThemeBible.model_json_schema()
-        }},
-    )
-    tb = ThemeBible.model_validate_json(theme_res.output_text)
+    theme_text = call_json_schema(client, model, theme_prompt, ThemeBible)
+    tb = ThemeBible.model_validate_json(json.dumps(normalize_json_for_model(ThemeBible, theme_text)))
     write_if_changed(MASTER/"themes.json", tb.model_dump_json(indent=2).encode())
     print("Wrote master/canon.json and master/themes.json")
 
@@ -74,14 +63,8 @@ GameCanon:
 ThemeBible:
 {json.dumps(themes, indent=2)}
 """
-    res = client.responses.create(
-        model=model,
-        input=prompt,
-        response_format={"type":"json_schema","json_schema":{
-            "name":"WorldPlan","schema":WorldPlan.model_json_schema()
-        }},
-    )
-    plan_obj = WorldPlan.model_validate_json(res.output_text)
+    plan_text = call_json_schema(client, model, prompt, WorldPlan)
+    plan_obj = WorldPlan.model_validate_json(json.dumps(normalize_json_for_model(WorldPlan, plan_text)))
     write_if_changed(WORLD/"plan.json", plan_obj.model_dump_json(indent=2).encode())
     print("Wrote world/plan.json")
 
@@ -105,14 +88,8 @@ WorldPlan:
 ThemeBible:
 {json.dumps(themes, indent=2)}
 """
-        res = client.responses.create(
-            model=model,
-            input=prompt,
-            response_format={"type":"json_schema","json_schema":{
-                "name":"RegionBible","schema":RegionBible.model_json_schema()
-            }},
-        )
-        region = RegionBible.model_validate_json(res.output_text)
+        region_text = call_json_schema(client, model, prompt, RegionBible)
+        region = RegionBible.model_validate_json(json.dumps(normalize_json_for_model(RegionBible, region_text)))
         regions.append(json.loads(region.model_dump_json()))
         write_if_changed(WORLD/f"region_{rb['band'].replace('-','_')}.json", region.model_dump_json(indent=2).encode())
     worldbook = {"plan": plan, "regions": regions}
@@ -130,21 +107,19 @@ Return JSON only.
 ThemeBible:
 {json.dumps(themes, indent=2)}
 """
-    res = client.responses.create(
-        model=model,
-        input=prompt,
-        response_format={"type":"json_schema","json_schema":{
-            "name":"ImagePlan","schema":ImagePlan.model_json_schema()
-        }},
-    )
-    plan_obj = ImagePlan.model_validate_json(res.output_text)
+    res_text = call_json_schema(client, model, prompt, ImagePlan)
+    plan_obj = ImagePlan.model_validate_json(json.dumps(normalize_json_for_model(ImagePlan, res_text)))
     write_if_changed(BUILD/"image_plan.json", plan_obj.model_dump_json(indent=2).encode())
     print("Wrote build/image_plan.json")
 
 def images(model: str, image_model: str) -> None:
     plan = ImagePlan.model_validate_json((BUILD/"image_plan.json").read_text())
     generate_images(plan, ASSETS, image_model)
-    print("Generated images to apps/game/assets")
+    # Build a texture atlas for efficient runtime usage
+    atlas_dir = BUILD / "atlas"
+    atlas_dir.mkdir(parents=True, exist_ok=True)
+    pack_uniform_grid(ASSETS, atlas_dir / "atlas.png", atlas_dir / "atlas.json")
+    print("Generated images to apps/game/assets and built atlas to build/atlas")
 
 def narrative(model: str) -> None:
     wb = WorldBook.model_validate_json((WORLD/"worldbook.json").read_text())
