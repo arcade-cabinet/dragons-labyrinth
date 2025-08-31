@@ -1,3 +1,0 @@
-name,sql
-Entities,"CREATE TABLE Entities (uuid TEXT PRIMARY KEY, value TEXT)"
-Refs,"CREATE TABLE Refs (value TEXT , details TEXT, uuid TEXT, type TEXT, icon TEXT, anchor TEXT)"
