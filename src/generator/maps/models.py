@@ -120,8 +120,9 @@ class MapsTimestampedModel(SQLModel):
     adjacency_calculated: bool = SQLField(default=False, description="Adjacency relationships calculated")
 
 
-class HexTiles(MapsTimestampedModel, table=True):
-    """Individual hex tiles with cross-system coordination."""
+class HexTilesLegacy(MapsTimestampedModel, table=True):
+    """Individual hex tiles with cross-system coordination. [LEGACY - REPLACED BY SIMPLE 5-TABLE ARCHITECTURE]"""
+    __tablename__ = "legacy_hex_tiles"
 
     id: int | None = SQLField(default=None, primary_key=True)
 
@@ -170,8 +171,8 @@ class HexTiles(MapsTimestampedModel, table=True):
     # World hooks for Godot integration
     world_hooks: str = SQLField(default="{}", sa_column=Column(JSON), description="Spatial data and integration hooks for Godot")
 
-    # Relationships
-    adjacent_hexes: list["HexAdjacencyTable"] = Relationship(back_populates="source_hex")
+    # Note: Relationships removed for simple 5-table architecture
+    # Legacy complex relationships are no longer needed
 
 
 class HexAdjacencyTable(MapsTimestampedModel, table=True):
@@ -181,9 +182,9 @@ class HexAdjacencyTable(MapsTimestampedModel, table=True):
     id: int | None = SQLField(default=None, primary_key=True)
     
     # Adjacency relationship
-    source_hex_id: int = SQLField(foreign_key="hextiles.id")
-    target_hex_id: int = SQLField(foreign_key="hextiles.id")
-    source_hex: HexTiles = Relationship(back_populates="adjacent_hexes")
+    source_hex_id: int = SQLField(foreign_key="legacy_hex_tiles.id")
+    target_hex_id: int = SQLField(foreign_key="legacy_hex_tiles.id")
+    # Note: Relationships removed for simple 5-table architecture
     
     # Relationship properties
     adjacency_type: str = SQLField(description="HexAdjacency enum value")

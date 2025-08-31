@@ -5,7 +5,7 @@ Simple orchestration of all subpackages to build game.db.
 """
 
 # DEVELOPMENT SAFETY: Set to True to test imports without running pipeline
-HEALTH_CHECK_ONLY = True
+HEALTH_CHECK_ONLY = False
 
 import logging
 from pathlib import Path

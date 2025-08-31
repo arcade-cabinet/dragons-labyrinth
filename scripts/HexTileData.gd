@@ -13,12 +13,12 @@ var hex_data_cache = {}
 func _ready():
 	# Initialize database connection
 	db = SQLite.new()
-	db.path = "res://dragon_labyrinth.db"
+	db.path = "metadata/game.db"
 	if not db.open_db():
 		push_error("Failed to open hex tile database")
 		return
 	
-	print("HexTileData initialized - ready for hex grid operations")
+	print("HexTileData initialized - ready for hex grid operations with simple 5-table schema")
 
 ## Get hex tile data using cube coordinates
 func get_hex_data(cube_pos: Vector3i) -> Dictionary:
@@ -27,8 +27,8 @@ func get_hex_data(cube_pos: Vector3i) -> Dictionary:
 	if hex_data_cache.has(coord_key):
 		return hex_data_cache[coord_key]
 	
-	# Query database for hex data
-	var query = "SELECT * FROM hex_tiles WHERE cube_x = ? AND cube_y = ? AND cube_z = ?"
+	# Query game_hex_tiles table
+	var query = "SELECT * FROM game_hex_tiles WHERE cube_x = ? AND cube_y = ? AND cube_z = ?"
 	var result = db.query_with_bindings(query, [cube_pos.x, cube_pos.y, cube_pos.z])
 	
 	if result.size() > 0:
@@ -40,7 +40,7 @@ func get_hex_data(cube_pos: Vector3i) -> Dictionary:
 
 ## Get all entities on a hex tile
 func get_hex_entities(cube_pos: Vector3i) -> Array:
-	var query = "SELECT * FROM entities WHERE hex_x = ? AND hex_y = ? AND hex_z = ?"
+	var query = "SELECT * FROM game_entities WHERE hex_x = ? AND hex_y = ? AND hex_z = ?"
 	var result = db.query_with_bindings(query, [cube_pos.x, cube_pos.y, cube_pos.z])
 	return result
 
@@ -73,15 +73,16 @@ func update_hex_data(cube_pos: Vector3i, data: Dictionary):
 	var coord_key = "%d,%d,%d" % [cube_pos.x, cube_pos.y, cube_pos.z]
 	hex_data_cache[coord_key] = data
 	
-	# Update database
+	# Update game_hex_tiles table
 	var query = """
-	UPDATE hex_tiles 
-	SET biome_type = ?, corruption_level = ?, dread_level = ?
+	UPDATE game_hex_tiles 
+	SET biome_type = ?, has_settlement = ?, has_dungeon = ?, data = ?
 	WHERE cube_x = ? AND cube_y = ? AND cube_z = ?
 	"""
 	db.query_with_bindings(query, [
 		data.get("biome_type", "unknown"),
-		data.get("corruption_level", 0),
-		data.get("dread_level", 0),
+		data.get("has_settlement", false),
+		data.get("has_dungeon", false),
+		JSON.stringify(data),
 		cube_pos.x, cube_pos.y, cube_pos.z
 	])

@@ -28,7 +28,7 @@ const TRAUMA_TYPES = {
 func _ready():
 	# Initialize database connection
 	db = SQLite.new()
-	db.path = "res://dragon_labyrinth.db"
+	db.path = "metadata/game.db"
 	if not db.open_db():
 		push_error("Failed to open companion psychology database")
 		return
@@ -37,11 +37,11 @@ func _ready():
 	DreadProgression.dread_level_changed.connect(_on_dread_level_changed)
 	DreadProgression.horror_event_triggered.connect(_on_horror_event)
 	
-	print("CompanionPsychology initialized - companion system active")
+	print("CompanionPsychology initialized - companion system active with simple schema")
 
 ## Load companion from database
 func load_companion(companion_id: String) -> Dictionary:
-	var query = "SELECT * FROM companions WHERE companion_id = ?"
+	var query = "SELECT * FROM game_companions WHERE companion_id = ?"
 	var result = db.query_with_bindings(query, [companion_id])
 	
 	if result.size() > 0:

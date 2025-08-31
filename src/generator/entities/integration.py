@@ -11,7 +11,7 @@ from __future__ import annotations
 import hashlib
 from typing import Any
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 from generator.entities.models import HexTiles, Entities, Companions, Encounters, Assets
 from generator.statistics import RunStatistics
 
@@ -150,7 +150,7 @@ def _create_hex_tile_if_needed(session: Session, coords: tuple[int, int, int], p
     tile_id = f"hex_{x}_{y}_{z}"
     
     # Check if tile already exists
-    existing = session.query(HexTiles).filter(HexTiles.tile_id == tile_id).first()
+    existing = session.exec(select(HexTiles).where(HexTiles.tile_id == tile_id)).first()
     if existing:
         return False
     
@@ -388,11 +388,11 @@ def get_simple_statistics(session: Session) -> dict[str, Any]:
     table_stats = get_table_stats(session)
     
     # Add some basic relationship stats
-    entities_with_coords = session.query(Entities).filter(
-        Entities.hex_x.isnot(None),
-        Entities.hex_y.isnot(None), 
-        Entities.hex_z.isnot(None)
-    ).count()
+    entities_with_coords = len(session.exec(select(Entities).where(
+        Entities.hex_x.is_not(None),
+        Entities.hex_y.is_not(None), 
+        Entities.hex_z.is_not(None)
+    )).all())
     
     return {
         **table_stats,

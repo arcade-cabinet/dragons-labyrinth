@@ -19,7 +19,7 @@ class HexTiles(SQLModel, table=True):
     Uses cube coordinates (x+y+z=0) as expected by Godot hex addon.
     Simple spatial data without complex relationships.
     """
-    __tablename__ = "simple_hex_tiles"
+    __tablename__ = "game_hex_tiles"
     
     # Primary identification with cube coordinates
     tile_id: str = Field(primary_key=True, description="Unique tile identifier")
@@ -44,7 +44,7 @@ class Entities(SQLModel, table=True):
     Stores all entities (NPCs, monsters, settlements, dungeons, etc.) in single table.
     Simple structure for direct godot-sqlite queries.
     """
-    __tablename__ = "simple_entities"
+    __tablename__ = "game_entities"
     
     # Primary identification
     entity_id: str = Field(primary_key=True, description="Unique entity identifier")
@@ -68,7 +68,7 @@ class Companions(SQLModel, table=True):
     Simple companion data for psychology autoload script.
     No complex relationships, just direct data access.
     """
-    __tablename__ = "simple_companions"
+    __tablename__ = "game_companions"
     
     # Primary identification
     companion_id: str = Field(primary_key=True, description="Unique companion identifier")
@@ -90,7 +90,7 @@ class Encounters(SQLModel, table=True):
     Simple encounter definitions for direct Godot loading.
     Spatial coordinates for hex-based encounters.
     """
-    __tablename__ = "simple_encounters"
+    __tablename__ = "game_encounters"
     
     # Primary identification
     encounter_id: str = Field(primary_key=True, description="Unique encounter identifier")
@@ -114,7 +114,7 @@ class Assets(SQLModel, table=True):
     Simple asset references with entity associations.
     Direct asset loading for Godot scenes.
     """
-    __tablename__ = "simple_assets"
+    __tablename__ = "game_assets"
     
     # Primary identification
     asset_id: str = Field(primary_key=True, description="Unique asset identifier")
@@ -135,13 +135,15 @@ def create_all_tables(engine):
     SQLModel.metadata.create_all(engine)
 
 
-# Simple function to get table counts
+# Simple function to get table counts (using modern SQLModel syntax)
 def get_table_stats(session):
     """Get simple statistics about table contents."""
+    from sqlmodel import select
+    
     return {
-        "hex_tiles": session.query(HexTiles).count(),
-        "entities": session.query(Entities).count(), 
-        "companions": session.query(Companions).count(),
-        "encounters": session.query(Encounters).count(),
-        "assets": session.query(Assets).count()
+        "hex_tiles": len(session.exec(select(HexTiles)).all()),
+        "entities": len(session.exec(select(Entities)).all()), 
+        "companions": len(session.exec(select(Companions)).all()),
+        "encounters": len(session.exec(select(Encounters)).all()),
+        "assets": len(session.exec(select(Assets)).all())
     }

@@ -13,7 +13,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from sqlmodel import Session, SQLModel, select
 
 from .models import (
-    HexTiles,
+    HexTilesLegacy,
     HexAdjacencyTable,
     MapRegions,
     TileSets,
@@ -263,7 +263,7 @@ def _generate_hex_tiles(session: Session, logger) -> int:
     # Add hex tiles
     count = 0
     for hex_data in sample_hexes:
-        hex_tile = HexTiles(**hex_data)
+        hex_tile = HexTilesLegacy(**hex_data)
         session.add(hex_tile)
         count += 1
     
@@ -274,7 +274,7 @@ def _generate_hex_tiles(session: Session, logger) -> int:
 def _generate_hex_adjacency(session: Session, logger) -> int:
     """Generate hex adjacency relationships"""
     # Get hex tiles to create adjacency relationships
-    hexes = session.exec(select(HexTiles)).all()
+    hexes = session.exec(select(HexTilesLegacy)).all()
     hex_map = {hex_tile.hex_coordinate: hex_tile for hex_tile in hexes}
     
     # Create sample adjacency relationships
@@ -475,7 +475,7 @@ def _generate_tilesets(session: Session, logger) -> int:
 def get_all_hex_tiles(engine) -> list[dict[str, Any]]:
     """Get all hex tiles for cross-system integration"""
     with Session(engine) as session:
-        hexes = session.exec(select(HexTiles)).all()
+        hexes = session.exec(select(HexTilesLegacy)).all()
         return [
             {
                 "coordinate": hex_tile.hex_coordinate,
