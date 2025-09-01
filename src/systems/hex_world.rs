@@ -82,7 +82,8 @@ fn generate_chunk(
             
             // Create tile entity with proper tilemap integration
             let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
-            let texture_index = TileTextureIndex(get_texture_index_for_biome(&biome_type));
+            let (atlas_index, tile_index) = get_texture_index_for_biome(&biome_type);
+            let texture_index = TileTextureIndex(tile_index);
             
             if let Ok(mut tilemap_storage) = tilemap_query.get_single_mut() {
                 let tile_entity = commands.spawn((
@@ -162,17 +163,21 @@ fn get_biome_from_position(
     }
 }
 
-fn get_texture_index_for_biome(biome_type: &BiomeType) -> u32 {
+fn get_texture_index_for_biome(biome_type: &BiomeType) -> (u32, u32) {
+    // Returns (texture_atlas_index, tile_index_in_atlas)
     match biome_type {
-        BiomeType::Desert => 0,     // Top left of sprite sheet
-        BiomeType::Forest => 1,     // Top middle of sprite sheet  
-        BiomeType::Swamp => 2,      // Top right of sprite sheet
-        BiomeType::Mountain => 3,   // Bottom left of sprite sheet
-        BiomeType::Water => 4,      // Bottom right of sprite sheet
-        BiomeType::Grassland => 1,  // Use forest texture for grassland for now
-        BiomeType::Lava => 0,       // Use desert texture for lava (similar sandy/rocky look)
-        BiomeType::Void => 3,       // Use mountain texture for void (dark rocky)
-        BiomeType::Corrupted(_) => 2, // Use swamp texture for corrupted (dark/ominous)
+        // First sprite sheet (user provided)
+        BiomeType::Desert => (0, 0),     // Top left of first sprite sheet
+        BiomeType::Forest => (0, 1),     // Top middle of first sprite sheet  
+        BiomeType::Swamp => (0, 2),      // Top right of first sprite sheet
+        BiomeType::Mountain => (0, 3),   // Bottom left of first sprite sheet
+        BiomeType::Water => (0, 4),      // Bottom right of first sprite sheet
+        
+        // Second sprite sheet (generated)
+        BiomeType::Grassland => (1, 4),  // Bright grassland from generated sheet
+        BiomeType::Lava => (1, 0),       // Lava terrain from generated sheet
+        BiomeType::Void => (1, 1),       // Void terrain from generated sheet
+        BiomeType::Corrupted(_) => (1, 2), // Corrupted terrain from generated sheet
     }
 }
 

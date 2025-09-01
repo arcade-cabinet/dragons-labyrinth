@@ -4,6 +4,9 @@ pub mod companions;
 pub mod dread;
 pub mod assets;
 pub mod ui;
+pub mod regional_progression;
+pub mod pathfinding;
+pub mod rest_fatigue;
 
 pub use hex_world::*;
 pub use player::*;
@@ -11,3 +14,6 @@ pub use companions::*;
 pub use dread::*;
 pub use assets::*;
 pub use ui::*;
+pub use regional_progression::*;
+pub use pathfinding::*;
+pub use rest_fatigue::*;

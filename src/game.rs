@@ -40,7 +40,11 @@ impl Plugin for HorrorRpgPlugin {
         app.init_resource::<WorldState>()
             .init_resource::<GameState>()
             .init_resource::<DreadLevel>()
-            .init_resource::<AssetHandles>();
+            .init_resource::<AssetHandles>()
+            .init_resource::<RegionalProgression>()
+            .init_resource::<MovementPreview>()
+            .init_resource::<DayNightCycle>()
+            .init_resource::<WeatherSystem>();
 
         // Game components registration
         app.register_component_hooks::<Tile>()
@@ -62,6 +66,10 @@ impl Plugin for HorrorRpgPlugin {
             dread_progression_system,
             asset_loading_system,
             ui_update_system,
+            update_day_night_cycle,
+            update_movement_preview,
+            check_forced_rest,
+            update_regional_progression,
         ).run_if(in_state(GameStateEnum::Playing)))
         .add_systems(OnEnter(GameStateEnum::MainMenu), setup_main_menu)
         .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_main_menu);
@@ -121,7 +129,8 @@ fn setup_world(
             size: TilemapSize { x: 128, y: 128 },
             storage: TilemapStorage::new(16, TileEntity::default()),
             texture: TilemapTexture::Vector(vec![
-                asset_server.load("textures/tilemap.png")
+                asset_server.load("textures/tilemap.png"),
+                asset_server.load("textures/tilemap_extended.png")
             ]),
             tile_size: TilemapTileSize { x: 64.0, y: 64.0 },
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
