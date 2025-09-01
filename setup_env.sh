@@ -8,8 +8,10 @@ export PATH="$HOME/.cargo/bin:$PATH"
 export RUSTUP_HOME="$HOME/.rustup"
 export CARGO_HOME="$HOME/.cargo"
 
-# Ensure stable toolchain is default
-rustup default stable 2>/dev/null || echo "Rustup already configured"
+# Ensure stable toolchain is default and configure properly
+rustup default stable
+rustup update stable
+rustup component add rust-src
 
 # Add WASM target if not already installed
 rustup target add wasm32-unknown-unknown 2>/dev/null || echo "WASM target already installed"
