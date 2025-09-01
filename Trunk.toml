@@ -1,0 +1,24 @@
+[build]
+target = "index.html"
+dist = "dist"
+
+[watch]
+ignore = [
+    "dist",
+    ".git",
+]
+
+[serve]
+address = "0.0.0.0"
+port = 5000
+open = false
+
+[[hooks]]
+stage = "pre_build"
+command = "echo"
+command_arguments = ["Building Horror RPG..."]
+
+[[hooks]]
+stage = "post_build" 
+command = "echo"
+command_arguments = ["Build complete. The horror awaits..."]

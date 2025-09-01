@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horror RPG</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #game-canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: none;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: #333;
+            border: 1px solid #666;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff9999);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .horror-subtitle {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #999;
+            font-style: italic;
+        }
+        
+        #error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(139, 0, 0, 0.9);
+            color: #fff;
+            padding: 20px;
+            border: 2px solid #ff0000;
+            border-radius: 5px;
+            display: none;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="loading-text">Initializing Horror...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+        <div class="horror-subtitle">The void stirs... reality bends...</div>
+    </div>
+    
+    <div id="error-message">
+        <h3>Reality Fracture Detected</h3>
+        <p id="error-text">Something has gone terribly wrong...</p>
+        <button onclick="location.reload()">Attempt Restoration</button>
+    </div>
+    
+    <canvas id="game-canvas"></canvas>
+
+    <script type="module">
+        import init, { run_app } from './pkg/horror_rpg.js';
+        
+        let loadingProgress = 0;
+        const progressBar = document.getElementById('loading-progress');
+        const loadingDiv = document.getElementById('loading');
+        const errorDiv = document.getElementById('error-message');
+        
+        function updateProgress(progress) {
+            loadingProgress = progress;
+            progressBar.style.width = progress + '%';
+        }
+        
+        function showError(message) {
+            document.getElementById('error-text').textContent = message;
+            errorDiv.style.display = 'block';
+            loadingDiv.style.display = 'none';
+        }
+        
+        async function startGame() {
+            try {
+                updateProgress(10);
+                
+                // Initialize WASM module
+                await init('./pkg/horror_rpg_bg.wasm');
+                updateProgress(30);
+                
+                // Set up error handling
+                window.addEventListener('error', (e) => {
+                    showError('The horror has manifested an error: ' + e.message);
+                });
+                
+                window.addEventListener('unhandledrejection', (e) => {
+                    showError('A promise was broken in the void: ' + e.reason);
+                });
+                
+                updateProgress(60);
+                
+                // Small delay for atmosphere
+                await new Promise(resolve => setTimeout(resolve, 500));
+                updateProgress(90);
+                
+                // Hide loading screen
+                loadingDiv.style.display = 'none';
+                updateProgress(100);
+                
+                // Start the game
+                run_app();
+                
+            } catch (error) {
+                console.error('Failed to initialize game:', error);
+                showError('Failed to breach the veil between worlds: ' + error.message);
+            }
+        }
+        
+        // Handle visibility changes (pause when tab is not active)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Game will handle this internally
+                console.log('Reality fades...');
+            } else {
+                console.log('Reality returns...');
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Canvas will automatically resize due to CSS
+        });
+        
+        // Start loading
+        startGame();
+    </script>
+</body>
+</html>
