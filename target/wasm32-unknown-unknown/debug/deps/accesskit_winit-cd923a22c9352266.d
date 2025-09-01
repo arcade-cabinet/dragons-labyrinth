@@ -1,9 +1,0 @@
-/home/runner/workspace/target/wasm32-unknown-unknown/debug/deps/accesskit_winit-cd923a22c9352266.d: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
-
-/home/runner/workspace/target/wasm32-unknown-unknown/debug/deps/libaccesskit_winit-cd923a22c9352266.rlib: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
-
-/home/runner/workspace/target/wasm32-unknown-unknown/debug/deps/libaccesskit_winit-cd923a22c9352266.rmeta: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs
-
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/lib.rs:
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/mod.rs:
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.25.0/src/platform_impl/null.rs:

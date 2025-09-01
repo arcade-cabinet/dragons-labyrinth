@@ -1,8 +1,0 @@
-/home/runner/workspace/target/debug/deps/bevy_dev_tools-29e679b5e1610ed0.d: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/fps_overlay.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/picking_debug.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/states.rs
-
-/home/runner/workspace/target/debug/deps/libbevy_dev_tools-29e679b5e1610ed0.rmeta: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/fps_overlay.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/picking_debug.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/states.rs
-
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/lib.rs:
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/fps_overlay.rs:
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/picking_debug.rs:
-/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_dev_tools-0.16.1/src/states.rs:
