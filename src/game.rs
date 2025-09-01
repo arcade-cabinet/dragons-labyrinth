@@ -107,6 +107,7 @@ fn setup_camera(mut commands: Commands) {
 fn setup_world(
     mut commands: Commands,
     mut world_state: ResMut<WorldState>,
+    asset_server: Res<AssetServer>,
 ) {
     // Initialize world generation seed
     world_state.seed = rand::random();
@@ -119,7 +120,9 @@ fn setup_world(
             map_type: TilemapType::Hexagon(HexCoordSystem::Row),
             size: TilemapSize { x: 128, y: 128 },
             storage: TilemapStorage::new(16, TileEntity::default()),
-            texture: TilemapTexture::Single(Handle::default()), // Will be set when assets load
+            texture: TilemapTexture::Vector(vec![
+                asset_server.load("textures/tilemap.png")
+            ]),
             tile_size: TilemapTileSize { x: 64.0, y: 64.0 },
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
             ..default()
@@ -199,4 +202,4 @@ fn cleanup_main_menu(
 struct MainMenuMarker;
 
 #[derive(Component)]
-struct StartGameButton;
+pub struct StartGameButton;

@@ -1,0 +1,8 @@
+/home/runner/workspace/target/debug/deps/offset_allocator-f47e4d1c75f6431b.d: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/ext.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/small_float.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/../README.md
+
+/home/runner/workspace/target/debug/deps/liboffset_allocator-f47e4d1c75f6431b.rmeta: /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/lib.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/ext.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/small_float.rs /home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/../README.md
+
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/lib.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/ext.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/small_float.rs:
+/home/runner/workspace/.local/share/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/offset-allocator-0.2.0/src/../README.md:

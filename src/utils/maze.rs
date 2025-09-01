@@ -1,5 +1,8 @@
+use bevy::prelude::*;
+use mapgen::*;
 use rand::prelude::*;
 use std::collections::{HashMap, HashSet, VecDeque};
+use super::hex::HexCoord;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct MazeCoord {
@@ -310,34 +313,70 @@ pub fn generate_maze_for_dread_level(
     width: i32,
     height: i32,
     dread_level: f32,
-    rng: &mut impl Rng,
+    rng: &mut StdRng,
 ) -> Maze {
     let mut maze = Maze::new(width, height);
     
-    match dread_level as i32 {
+    // Use mapgen algorithms based on dread level
+    let map = match dread_level as i32 {
         0..=20 => {
-            // Simple, straightforward mazes
-            RecursiveBacktracker.generate(&mut maze, rng);
+            // Simple, peaceful mazes
+            MapBuilder::new(width as usize, height as usize)
+                .with(SimpleRooms::new())
+                .with(NearestCorridors::new())
+                .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+                .build_map(rng)
         }
         21..=40 => {
-            // More complex connectivity
-            Kruskals.generate(&mut maze, rng);
+            // BSP dungeon with increasing complexity
+            MapBuilder::new(width as usize, height as usize)
+                .with(BspDungeonBuilder::new())
+                .with(AreaStartingPosition::new(XStart::LEFT, YStart::CENTER))
+                .with(CullUnreachable::new())
+                .build_map(rng)
         }
         41..=60 => {
-            // Loop-erased random walks
-            Wilsons.generate(&mut maze, rng);
+            // Cellular automata for organic, unsettling layouts
+            MapBuilder::new(width as usize, height as usize)
+                .with(CellularAutomataBuilder::new())
+                .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+                .with(CullUnreachable::new())
+                .with(VoronoiSpawning::new())
+                .build_map(rng)
         }
         61..=80 => {
-            // Mix of algorithms for unpredictability
-            if rng.gen_bool(0.5) {
-                Wilsons.generate(&mut maze, rng);
-            } else {
-                RecursiveBacktracker.generate(&mut maze, rng);
-            }
+            // Diffusion limited aggregation for chaotic structures
+            MapBuilder::new(width as usize, height as usize)
+                .with(DiffusionLimitedAggregationBuilder::new())
+                .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+                .with(CullUnreachable::new())
+                .with(VoronoiSpawning::new())
+                .build_map(rng)
         }
         _ => {
-            // Non-euclidean nightmare geometry
-            NonEuclidean.generate(&mut maze, rng);
+            // Maze with prefab nightmare rooms
+            MapBuilder::new(width as usize, height as usize)
+                .with(MazeBuilder::new())
+                .with(PrefabBuilder::sectional())
+                .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+                .with(CullUnreachable::new())
+                .with(VoronoiSpawning::new())
+                .build_map(rng)
+        }
+    };
+    
+    // Convert mapgen result to our maze format
+    for y in 0..height {
+        for x in 0..width {
+            let idx = (y * width + x) as usize;
+            if idx < map.tiles.len() && map.tiles[idx] == TileType::Wall {
+                let current = MazeCoord::new(x, y);
+                for neighbor in current.neighbors() {
+                    if maze.is_valid_coord(neighbor) {
+                        maze.add_wall(current, neighbor);
+                    }
+                }
+            }
         }
     }
     

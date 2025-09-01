@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use crate::components::{Player, Companion};
 use crate::resources::{DreadLevel, GameState};
-use crate::game::{GameStateEnum, StartGameButton};
+use crate::game::{GameStateEnum};
+
+#[derive(Component)]
+pub struct StartGameButton;
 
 pub fn ui_update_system(
     mut contexts: Query<&mut Node>,

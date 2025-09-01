@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::resources::{AssetHandles, GameState};
+use bevy::asset::LoadState;
 
 pub fn load_assets(
     mut commands: Commands,

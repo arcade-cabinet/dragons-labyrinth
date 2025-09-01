@@ -98,7 +98,6 @@ pub fn spawn_companion(
         Transform::from_translation(spawn_position),
         GlobalTransform::default(),
         Visibility::default(),
-        ComputedVisibility::default(),
         Name::new(format!("Companion_{}", name)),
     ));
 }

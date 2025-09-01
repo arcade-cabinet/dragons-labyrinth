@@ -104,7 +104,6 @@ pub fn spawn_player(mut commands: Commands, world_state: Res<WorldState>) {
         Transform::from_translation(Vec3::new(0.0, 1.0, 0.0)),
         GlobalTransform::default(),
         Visibility::default(),
-        ComputedVisibility::default(),
         Name::new("Player"),
     ));
 }

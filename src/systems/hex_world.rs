@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use noise::{NoiseFn, Perlin};
+use mapgen::*;
 use rand::prelude::*;
 
 use crate::components::{Tile, BiomeType, PathOverlay, FeatureOverlay};
@@ -44,8 +44,18 @@ fn generate_chunk(
     asset_handles: &Res<AssetHandles>,
     tilemap_query: &mut Query<&mut TilemapStorage>,
 ) {
-    let perlin = Perlin::new(world_state.seed as u32);
     let chunk_size = 16;
+    let mut rng = StdRng::seed_from_u64(world_state.seed);
+    
+    // Use mapgen to create the terrain
+    let mut map_builder = MapBuilder::new(chunk_size as usize, chunk_size as usize)
+        .with(NoiseGenerator::new())
+        .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+        .with(CullUnreachable::new())
+        .with(VoronoiSpawning::new())
+        .with(DistantExit::new());
+    
+    let map = map_builder.build_map(&mut rng);
     
     for x in 0..chunk_size {
         for y in 0..chunk_size {
@@ -54,66 +64,115 @@ fn generate_chunk(
                 chunk_coord.y * chunk_size + y,
             );
             
-            // Generate biome using noise
-            let noise_value = perlin.get([hex_coord.x as f64 * 0.1, hex_coord.y as f64 * 0.1]);
-            let biome_type = get_biome_from_noise(noise_value, &world_state.corruption_map);
+            // Get terrain type from mapgen
+            let map_idx = (y * chunk_size + x) as usize;
+            let tile_type = if map_idx < map.tiles.len() {
+                map.tiles[map_idx]
+            } else {
+                TileType::Wall
+            };
             
-            // Create tile entity
-            let tile_entity = commands.spawn((
-                Tile {
-                    coords: hex_coord,
-                    biome_type: biome_type.clone(),
-                    paths: Vec::new(),
-                    features: Vec::new(),
-                },
-                Transform::from_translation(hex_to_world(hex_coord)),
-                Name::new(format!("Tile_{:?}", hex_coord)),
-            )).id();
+            // Convert mapgen tile to biome
+            let biome_type = match tile_type {
+                TileType::Floor => get_biome_from_position(hex_coord, &world_state.corruption_map, &mut rng),
+                TileType::Wall => BiomeType::Mountain,
+                TileType::DownStairs => BiomeType::Water,
+                TileType::UpStairs => BiomeType::Void,
+            };
             
-            // Add to tilemap storage
+            // Create tile entity with proper tilemap integration
+            let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
+            let texture_index = TileTextureIndex(get_texture_index_for_biome(&biome_type));
+            
             if let Ok(mut tilemap_storage) = tilemap_query.get_single_mut() {
-                let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
-                let tile_bundle = TileBundle {
-                    position: tile_pos,
-                    tilemap_id: TilemapId(world_state.tilemap_entity.unwrap()),
-                    texture_index: TileTextureIndex(get_texture_index_for_biome(&biome_type)),
-                    ..default()
-                };
+                let tile_entity = commands.spawn((
+                    TileBundle {
+                        position: tile_pos,
+                        tilemap_id: TilemapId(world_state.tilemap_entity.unwrap()),
+                        texture_index,
+                        ..default()
+                    },
+                    Tile {
+                        coords: hex_coord,
+                        biome_type: biome_type.clone(),
+                        paths: Vec::new(),
+                        features: Vec::new(),
+                    },
+                    Name::new(format!("Tile_{:?}", hex_coord)),
+                )).id();
                 
-                commands.entity(tile_entity).insert(tile_bundle);
                 tilemap_storage.set(&tile_pos, tile_entity);
-            }
-            
-            // Generate features based on biome and distance from corruption
-            if should_generate_feature(hex_coord, &biome_type) {
-                generate_tile_features(commands, tile_entity, hex_coord, &biome_type);
+                
+                // Generate features using mapgen spawn points
+                if map.spawn_list.iter().any(|(idx, _)| *idx == map_idx) {
+                    generate_tile_features(commands, tile_entity, hex_coord, &biome_type);
+                }
             }
         }
     }
 }
 
-fn get_biome_from_noise(noise_value: f64, corruption_map: &std::collections::HashMap<HexCoord, f32>) -> BiomeType {
-    match noise_value {
-        n if n < -0.5 => BiomeType::Water,
-        n if n < -0.2 => BiomeType::Swamp,
-        n if n < 0.0 => BiomeType::Grassland,
-        n if n < 0.3 => BiomeType::Forest,
-        n if n < 0.6 => BiomeType::Mountain,
-        _ => BiomeType::Desert,
+fn get_biome_from_position(
+    hex_coord: HexCoord, 
+    corruption_map: &std::collections::HashMap<HexCoord, f32>,
+    rng: &mut StdRng
+) -> BiomeType {
+    // Check for corruption first
+    if let Some(&corruption_level) = corruption_map.get(&hex_coord) {
+        if corruption_level > 0.3 {
+            return BiomeType::Corrupted(Box::new(BiomeType::Grassland));
+        }
+    }
+    
+    // Use distance from origin to determine biome progression
+    let distance_from_origin = (hex_coord.x.abs() + hex_coord.y.abs()) as f32;
+    let biome_roll: f32 = rng.gen();
+    
+    match distance_from_origin {
+        d if d < 10.0 => {
+            match biome_roll {
+                f if f < 0.6 => BiomeType::Grassland,
+                f if f < 0.8 => BiomeType::Forest,
+                _ => BiomeType::Water,
+            }
+        }
+        d if d < 30.0 => {
+            match biome_roll {
+                f if f < 0.4 => BiomeType::Forest,
+                f if f < 0.6 => BiomeType::Mountain,
+                f if f < 0.8 => BiomeType::Desert,
+                _ => BiomeType::Swamp,
+            }
+        }
+        d if d < 60.0 => {
+            match biome_roll {
+                f if f < 0.3 => BiomeType::Desert,
+                f if f < 0.6 => BiomeType::Mountain,
+                f if f < 0.8 => BiomeType::Lava,
+                _ => BiomeType::Corrupted(Box::new(BiomeType::Desert)),
+            }
+        }
+        _ => {
+            match biome_roll {
+                f if f < 0.5 => BiomeType::Lava,
+                f if f < 0.8 => BiomeType::Void,
+                _ => BiomeType::Corrupted(Box::new(BiomeType::Void)),
+            }
+        }
     }
 }
 
 fn get_texture_index_for_biome(biome_type: &BiomeType) -> u32 {
     match biome_type {
-        BiomeType::Grassland => 0,
-        BiomeType::Forest => 1,
-        BiomeType::Mountain => 2,
-        BiomeType::Desert => 3,
-        BiomeType::Swamp => 4,
-        BiomeType::Water => 5,
-        BiomeType::Lava => 6,
-        BiomeType::Void => 7,
-        BiomeType::Corrupted(_) => 8,
+        BiomeType::Desert => 0,     // Top left of sprite sheet
+        BiomeType::Forest => 1,     // Top middle of sprite sheet  
+        BiomeType::Swamp => 2,      // Top right of sprite sheet
+        BiomeType::Mountain => 3,   // Bottom left of sprite sheet
+        BiomeType::Water => 4,      // Bottom right of sprite sheet
+        BiomeType::Grassland => 1,  // Use forest texture for grassland for now
+        BiomeType::Lava => 0,       // Use desert texture for lava (similar sandy/rocky look)
+        BiomeType::Void => 3,       // Use mountain texture for void (dark rocky)
+        BiomeType::Corrupted(_) => 2, // Use swamp texture for corrupted (dark/ominous)
     }
 }
 
