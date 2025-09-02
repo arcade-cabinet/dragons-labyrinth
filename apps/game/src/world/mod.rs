@@ -7,5 +7,39 @@ pub mod abilities;
 pub mod alignment;
 pub mod atlas;
 pub mod actors;
-pub mod plugin;
 pub mod systems;
+
+// ECS consolidation: alias existing modules under world/
+#[path = "../components/tiles.rs"]
+pub mod tiles;
+#[path = "../components/player.rs"]
+pub mod player;
+#[path = "../components/companions.rs"]
+pub mod companions;
+#[path = "../components/dread.rs"]
+pub mod dread;
+#[path = "../components/character.rs"]
+pub mod character;
+
+#[path = "../systems/hex_world.rs"]
+pub mod hex_world;
+#[path = "../systems/player.rs"]
+pub mod player_systems;
+#[path = "../systems/companions.rs"]
+pub mod companion_systems;
+#[path = "../systems/dread.rs"]
+pub mod dread_systems;
+#[path = "../systems/assets.rs"]
+pub mod asset_systems;
+#[path = "../systems/ui.rs"]
+pub mod ui_systems;
+#[path = "../systems/ui_cobweb.rs"]
+pub mod ui_cobweb_systems;
+#[path = "../systems/procedural_audio.rs"]
+pub mod audio_systems;
+#[path = "../systems/regional_progression.rs"]
+pub mod regional_progression_systems;
+#[path = "../systems/pathfinding.rs"]
+pub mod pathfinding_systems;
+#[path = "../systems/rest_fatigue.rs"]
+pub mod rest_systems;
