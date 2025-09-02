@@ -39,7 +39,7 @@ jobs:
 
       - name: Build site
         run: |
-          trunk build --release
+          trunk build --release --public-url "/${{ github.event.repository.name }}"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
