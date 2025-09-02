@@ -17,7 +17,8 @@ use openai_dive::v1::resources::chat::{
     ChatCompletionParameters, ChatMessage, ChatMessageContent,
     ChatCompletionResponseFormat, JsonSchemaBuilder
 };
-use tiktoken_rs::tiktoken::get_bpe_from_model;
+// Remove tiktoken import for now as it's not properly used
+// use tiktoken_rs::tiktoken::get_bpe_from_model;
 
 use crate::base::{
     HTML_ENTITIES_SAMPLE_THRESHOLD, JSON_ENTITIES_SAMPLE_THRESHOLD,
@@ -235,7 +236,7 @@ impl BaseEntitiesCluster {
     }
 
     /// Render Rust model template from inventory (deterministic code generation)
-    fn render_model_template(&self, inventory: &Inventory) -> Result<String> {
+    pub fn render_model_template(&self, inventory: &Inventory) -> Result<String> {
         let mut lines = vec![
             format!("//! Generated models for {} entities", self.category.as_str()),
             "//! ".to_string(),
@@ -298,7 +299,7 @@ impl BaseEntitiesCluster {
     }
 
     /// Extract connection information from inventory
-    fn extract_connections_from_inventory(&self, inventory: &Inventory) -> ModelConnections {
+    pub fn extract_connections_from_inventory(&self, inventory: &Inventory) -> ModelConnections {
         let import_path = format!("dl_analysis::{}", self.category.as_str());
         let mut connections = ModelConnections::new(import_path);
 

@@ -249,10 +249,10 @@ pub mod utils {
     }
 
     /// Find settlements controlled by a specific faction
-    pub fn find_settlements_by_faction(
-        settlements: &[SettlementEstablishment], 
+    pub fn find_settlements_by_faction<'a>(
+        settlements: &'a [SettlementEstablishment],
         faction_uuid: &str
-    ) -> Vec<&SettlementEstablishment> {
+    ) -> Vec<&'a SettlementEstablishment> {
         settlements.iter()
             .filter(|settlement| {
                 settlement.controlling_faction
@@ -277,10 +277,10 @@ pub mod utils {
     }
 
     /// Find settlements with specific services
-    pub fn find_settlements_with_service(
-        settlements: &[SettlementEstablishment],
+    pub fn find_settlements_with_service<'a>(
+        settlements: &'a [SettlementEstablishment],
         service: &str
-    ) -> Vec<&SettlementEstablishment> {
+    ) -> Vec<&'a SettlementEstablishment> {
         settlements.iter()
             .filter(|settlement| settlement.services.contains(&service.to_string()))
             .collect()
@@ -305,10 +305,10 @@ pub mod utils {
     }
 
     /// Find settlements at a specific hex location
-    pub fn find_settlements_at_hex(
-        settlements: &[SettlementEstablishment],
+    pub fn find_settlements_at_hex<'a>(
+        settlements: &'a [SettlementEstablishment],
         hex_key: &HexKey
-    ) -> Vec<&SettlementEstablishment> {
+    ) -> Vec<&'a SettlementEstablishment> {
         settlements.iter()
             .filter(|settlement| {
                 settlement.hex_location

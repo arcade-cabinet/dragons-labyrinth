@@ -127,13 +127,14 @@ impl SettlementEstablishment {
             Some(pop) if pop < 1000 => SettlementSize::Village,
             Some(pop) if pop < 5000 => SettlementSize::Town,
             Some(pop) if pop >= 5000 => SettlementSize::City,
+            Some(_) => SettlementSize::Unknown, // Catch-all for other values
             None => SettlementSize::Unknown,
         }
     }
 }
 
 /// Settlement size categories
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum SettlementSize {
     Hamlet,
     Village, 
@@ -198,6 +199,7 @@ impl FactionEntity {
             Some(level) if level < 3 => FactionPower::Minor,
             Some(level) if level < 7 => FactionPower::Moderate,
             Some(level) if level >= 7 => FactionPower::Major,
+            Some(_) => FactionPower::Unknown, // Catch-all for other values
             None => FactionPower::Unknown,
         }
     }
@@ -214,7 +216,7 @@ impl FactionEntity {
 }
 
 /// Faction power level categories
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum FactionPower {
     Minor,
     Moderate,
@@ -367,10 +369,10 @@ pub mod utils {
     }
 
     /// Find entities that reference a specific UUID
-    pub fn find_referencing_entities<T: Entity>(
-        entities: &[T], 
+    pub fn find_referencing_entities<'a, T: Entity>(
+        entities: &'a [T], 
         target_uuid: &str
-    ) -> Vec<&T> {
+    ) -> Vec<&'a T> {
         entities.iter()
             .filter(|entity| {
                 entity.extract_referenced_uuids()
@@ -396,11 +398,11 @@ pub mod utils {
     }
 
     /// Filter entities by hex location
-    pub fn filter_entities_by_hex<T>(
-        entities: &[T],
+    pub fn filter_entities_by_hex<'a, T>(
+        entities: &'a [T],
         hex_key: &HexKey,
         location_fn: fn(&T) -> Option<&HexKey>,
-    ) -> Vec<&T> {
+    ) -> Vec<&'a T> {
         entities.iter()
             .filter(|entity| {
                 location_fn(entity).map_or(false, |hex| hex == hex_key)

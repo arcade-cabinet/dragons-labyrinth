@@ -16,6 +16,7 @@ use crate::base::Inventory;
 use crate::raw::EntityCategory;
 
 /// Template manager for the analysis system
+#[derive(Debug, Clone)]
 pub struct TemplateManager {
     env: Environment<'static>,
 }
@@ -74,18 +75,18 @@ impl TemplateManager {
         inventory: &Inventory,
         metadata: Option<&HashMap<String, String>>,
     ) -> Result<minijinja::Value> {
-        let mut ctx = context! {
-            inventory => inventory,
-            generation_timestamp => chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string(),
-        };
+        let mut ctx_map = HashMap::new();
+        ctx_map.insert("inventory".to_string(), minijinja::Value::from_serialize(inventory));
+        ctx_map.insert("generation_timestamp".to_string(), 
+                      minijinja::Value::from_serialize(&chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string()));
 
         if let Some(meta) = metadata {
             for (key, value) in meta {
-                ctx = context! { ..ctx, (key) => value };
+                ctx_map.insert(key.clone(), minijinja::Value::from_serialize(value));
             }
         }
 
-        Ok(minijinja::Value::from_serialize(&ctx)?)
+        Ok(minijinja::Value::from_serialize(&ctx_map))
     }
 
     /// Validate all templates can compile

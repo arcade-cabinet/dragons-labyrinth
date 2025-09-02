@@ -9,6 +9,7 @@ use std::path::PathBuf;
 /// Components used by the generated code
 pub mod components {
     use bevy::prelude::*;
+    use std::collections::HashMap;
     
     // Hex tile components
     #[derive(Component, Debug, Clone)]
@@ -43,6 +44,21 @@ pub mod components {
     
     #[derive(Component, Debug, Clone)]
     pub struct HexId(pub String);
+    
+    // New generated components for regions
+    #[derive(Component, Debug, Clone)]
+    pub struct RegionId(pub String);
+    
+    #[derive(Component, Debug, Clone)]
+    pub struct RegionName(pub String);
+    
+    #[derive(Component, Debug, Clone)]
+    pub struct CorruptionLevel(pub f32);
+    
+    #[derive(Component, Debug, Clone, Default)]
+    pub struct BiomeFeatures {
+        pub features: Vec<String>,
+    }
     
     // Settlement components
     #[derive(Component, Debug, Clone)]
@@ -91,6 +107,40 @@ pub mod components {
     #[derive(Component, Debug, Clone)]
     pub struct DungeonAreaId(pub String);
     
+    // Spatial container component for O(1) lookups
+    #[derive(Component, Default, Debug)]
+    pub struct SpatialContainer {
+        pub hex_entities: HashMap<(i32, i32), Entity>,
+        pub region_entities: HashMap<String, Entity>,
+        pub dungeon_entities: HashMap<String, Entity>,
+    }
+    
+    impl SpatialContainer {
+        pub fn new() -> Self {
+            Self::default()
+        }
+        
+        pub fn register_hex_entity(&mut self, coords: (i32, i32), entity: Entity) {
+            self.hex_entities.insert(coords, entity);
+        }
+        
+        pub fn get_hex_entity(&self, coords: (i32, i32)) -> Option<Entity> {
+            self.hex_entities.get(&coords).copied()
+        }
+        
+        pub fn register_region_entity(&mut self, uuid: String, entity: Entity) {
+            self.region_entities.insert(uuid, entity);
+        }
+        
+        pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> Vec<Entity> {
+            let mut entities = Vec::new();
+            if let Some(entity) = self.hex_entities.get(&coords) {
+                entities.push(*entity);
+            }
+            entities
+        }
+    }
+    
     // Static data types
     #[derive(Debug, Clone)]
     pub struct HexData {
@@ -98,6 +148,21 @@ pub mod components {
         pub q: i32,
         pub r: i32,
         pub biome: &'static str,
+    }
+    
+    #[derive(Debug, Clone)]
+    pub struct HexStaticData {
+        pub uuid: &'static str,
+        pub q: i32,
+        pub r: i32,
+        pub biome: &'static str,
+    }
+    
+    #[derive(Debug, Clone)]
+    pub struct RegionMetadata {
+        pub uuid: &'static str,
+        pub name: &'static str,
+        pub base_corruption: f32,
     }
     
     #[derive(Debug, Clone)]

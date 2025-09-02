@@ -287,7 +287,7 @@ pub mod utils {
     }
 
     /// Find areas accessible from a given hex coordinate
-    pub fn find_areas_at_hex(areas: &[DungeonArea], hex_key: &HexKey) -> Vec<&DungeonArea> {
+    pub fn find_areas_at_hex<'a>(areas: &'a [DungeonArea], hex_key: &HexKey) -> Vec<&'a DungeonArea> {
         areas.iter()
             .filter(|area| {
                 area.entrance_hex.as_ref().map_or(false, |hex| hex == hex_key)

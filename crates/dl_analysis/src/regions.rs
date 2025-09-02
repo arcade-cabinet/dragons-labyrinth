@@ -255,10 +255,10 @@ pub mod utils {
     }
 
     /// Find regions that contain a specific entity type
-    pub fn find_regions_with_entities(
-        regions: &[RegionHexTile], 
+    pub fn find_regions_with_entities<'a>(
+        regions: &'a [RegionHexTile],
         entity_type: &str
-    ) -> Vec<&RegionHexTile> {
+    ) -> Vec<&'a RegionHexTile> {
         match entity_type {
             "settlements" => regions.iter()
                 .filter(|region| !region.settlement_uuids.is_empty())

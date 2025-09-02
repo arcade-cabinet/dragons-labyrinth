@@ -118,11 +118,11 @@ impl AnalysisSummary {
     }
 
     pub fn set_entity_counts(mut self, counts: HashMap<String, HashMap<String, usize>>) -> Self {
-        self.entity_counts = counts;
-        // Calculate total from counts
+        // Calculate total before moving counts
         self.total_entities = counts.values()
             .flat_map(|category| category.values())
             .sum();
+        self.entity_counts = counts;
         self
     }
 

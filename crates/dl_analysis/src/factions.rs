@@ -250,30 +250,30 @@ pub mod utils {
     }
 
     /// Find factions that control a specific hex
-    pub fn find_factions_controlling_hex(
-        factions: &[FactionEntity], 
+    pub fn find_factions_controlling_hex<'a>(
+        factions: &'a [FactionEntity],
         hex_key: &HexKey
-    ) -> Vec<&FactionEntity> {
+    ) -> Vec<&'a FactionEntity> {
         factions.iter()
             .filter(|faction| faction.controls_hex(hex_key))
             .collect()
     }
 
     /// Find all allies of a faction
-    pub fn find_faction_allies(
-        factions: &[FactionEntity],
+    pub fn find_faction_allies<'a>(
+        factions: &'a [FactionEntity],
         faction_uuid: &str
-    ) -> Vec<&FactionEntity> {
+    ) -> Vec<&'a FactionEntity> {
         factions.iter()
             .filter(|faction| faction.is_ally(faction_uuid))
             .collect()
     }
 
     /// Find all enemies of a faction
-    pub fn find_faction_enemies(
-        factions: &[FactionEntity],
+    pub fn find_faction_enemies<'a>(
+        factions: &'a [FactionEntity],
         faction_uuid: &str
-    ) -> Vec<&FactionEntity> {
+    ) -> Vec<&'a FactionEntity> {
         factions.iter()
             .filter(|faction| faction.is_enemy(faction_uuid))
             .collect()
@@ -332,10 +332,10 @@ pub mod utils {
     }
 
     /// Find faction by type
-    pub fn find_factions_by_type(
-        factions: &[FactionEntity],
+    pub fn find_factions_by_type<'a>(
+        factions: &'a [FactionEntity],
         faction_type: &str
-    ) -> Vec<&FactionEntity> {
+    ) -> Vec<&'a FactionEntity> {
         factions.iter()
             .filter(|faction| {
                 faction.faction_type

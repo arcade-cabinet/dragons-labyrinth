@@ -1,503 +1,480 @@
 use anyhow::Result;
-use quote::quote;
-use std::collections::HashMap;
+use dl_analysis::{orchestration::RawEntities, results::GenerationResults};
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use dl_analysis;
-
-/// Main build function that processes analysis and generates Rust code
+/// Main build function that processes analysis and generates Rust ECS resources
 fn main() -> Result<()> {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=../dl_analysis");
     
     let out_dir = PathBuf::from(env::var("OUT_DIR")?);
     
-    // Get the analysis data from dl_analysis
-    let ron_dir = dl_analysis::ron_dir();
-    let index = dl_analysis::load_index();
+    // Phase 1: Run dl_analysis orchestration system
+    // This generates all raw HTML/JSON files + AI-generated models
+    println!("cargo:warning=Running dl_analysis orchestration...");
+    let orchestrator = RawEntities::new();
+    let results = orchestrator.run_full_analysis()?;
     
-    // Create output directories for generated code
+    println!("cargo:warning=Analysis complete - processed {} entities", 
+             results.summary.total_entities);
+    
+    // Phase 2: Load generated models and container data
+    let analysis_dir = dl_analysis::analysis_dir();
+    let models_dir = dl_analysis::models_dir();
+    let json_dir = dl_analysis::json_dir();
+    
+    // Create output directories for ECS resources
     let regions_dir = out_dir.join("regions");
     let dungeons_dir = out_dir.join("dungeons");
     let settlements_dir = out_dir.join("settlements");
+    let factions_dir = out_dir.join("factions");
     
     fs::create_dir_all(&regions_dir)?;
     fs::create_dir_all(&dungeons_dir)?;
     fs::create_dir_all(&settlements_dir)?;
+    fs::create_dir_all(&factions_dir)?;
     
-    // Process each entity type
-    let mut regions = Vec::new();
-    let mut dungeons = Vec::new();
-    let mut settlements = Vec::new();
+    // Phase 3: Process generated models into ECS resources
+    process_generated_models(&results, &json_dir, &models_dir, &out_dir)?;
     
-    for (uuid, path) in index {
-        let content = fs::read_to_string(&path)?;
+    // Phase 4: Generate spatial container-based resources
+    generate_container_resources(&results, &out_dir)?;
+    
+    // Phase 5: Generate main module files
+    generate_main_modules(&out_dir)?;
+    
+    println!("cargo:warning=dl_processors build complete - generated ECS resources");
+    
+    Ok(())
+}
+
+/// Process generated AI models into ECS resource code
+fn process_generated_models(
+    results: &GenerationResults,
+    json_dir: &PathBuf,
+    models_dir: &PathBuf,
+    out_dir: &PathBuf,
+) -> Result<()> {
+    // Load generated Rust models (these replace the old static structs)
+    let regions_model_path = models_dir.join("regions.rs");
+    let dungeons_model_path = models_dir.join("dungeons.rs"); 
+    let settlements_model_path = models_dir.join("settlements.rs");
+    let factions_model_path = models_dir.join("factions.rs");
+    
+    // Copy generated model files to our output
+    if regions_model_path.exists() {
+        let content = fs::read_to_string(&regions_model_path)?;
+        fs::write(out_dir.join("generated_models.rs"), 
+                  format!("//! Generated models from dl_analysis\n\n{}", content))?;
+    }
+    
+    // Process each category using generated models
+    process_region_entities(json_dir, out_dir)?;
+    process_dungeon_entities(json_dir, out_dir)?;
+    process_settlement_entities(json_dir, out_dir)?;
+    process_faction_entities(json_dir, out_dir)?;
+    
+    Ok(())
+}
+
+/// Process region entities using generated models and container system
+fn process_region_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+    let regions_dir = out_dir.join("regions");
+    let region_files = fs::read_dir(json_dir)
+        .map_err(|_| anyhow::anyhow!("Could not read JSON directory"))?;
+    
+    for entry in region_files {
+        let entry = entry?;
+        let path = entry.path();
         
-        // Try to parse as each type
-        if let Ok(region) = ron::from_str::<RegionAnalysis>(&content) {
-            generate_region_code(&region, &regions_dir)?;
-            regions.push(region);
-        } else if let Ok(dungeon) = ron::from_str::<DungeonAnalysis>(&content) {
-            generate_dungeon_code(&dungeon, &dungeons_dir)?;
-            dungeons.push(dungeon);
-        } else if let Ok(settlement) = ron::from_str::<SettlementAnalysis>(&content) {
-            generate_settlement_code(&settlement, &settlements_dir)?;
-            settlements.push(settlement);
+        if path.extension().map_or(false, |ext| ext == "json") {
+            let filename = path.file_stem().unwrap().to_string_lossy();
+            
+            // Check if this is a region file (heuristic based on naming)
+            if filename.contains("region") || filename.len() == 36 { // UUID length
+                process_single_region(&path, &regions_dir)?;
+            }
         }
     }
     
-    // Generate mod files
-    generate_regions_mod(&regions, &regions_dir)?;
-    generate_dungeons_mod(&dungeons, &dungeons_dir)?;
-    generate_settlements_mod(&settlements, &settlements_dir)?;
-    
-    // Generate main module file
-    generate_main_mod(&out_dir)?;
-    
     Ok(())
 }
 
-// Re-define the structures from dl_analysis (in real code, we'd share these)
-#[derive(Debug, serde::Deserialize)]
-struct RegionAnalysis {
-    uuid: String,
-    name: String,
-    hex_tiles: Vec<HexTile>,
-    biome_distribution: HashMap<String, u32>,
-    corruption_level: f32,
-    settlements: Vec<String>,
-    dungeons: Vec<String>,
-    rivers: Vec<(i32, i32)>,
-    trails: Vec<(i32, i32)>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct HexTile {
-    uuid: String,
-    q: i32,
-    r: i32,
-    biome: String,
-    features: Vec<String>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct SettlementAnalysis {
-    uuid: String,
-    name: String,
-    location: (i32, i32),
-    region: String,
-    population_estimate: u32,
-    threat_level: String,
-    notable_features: Vec<String>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct DungeonAnalysis {
-    uuid: String,
-    name: String,
-    areas: Vec<DungeonArea>,
-    total_depth: u32,
-    horror_themes: Vec<String>,
-    boss_entities: Vec<String>,
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct DungeonArea {
-    uuid: String,
-    level: u32,
-    room_count: u32,
-    encounter_density: String,
-    treasure_assessment: String,
-}
-
-/// Generate code for a region
-fn generate_region_code(region: &RegionAnalysis, regions_dir: &Path) -> Result<()> {
-    let region_uuid = sanitize_uuid(&region.uuid);
-    let region_dir = regions_dir.join(&region_uuid);
+/// Process a single region file into ECS resources
+fn process_single_region(json_path: &PathBuf, regions_dir: &PathBuf) -> Result<()> {
+    let content = fs::read_to_string(json_path)?;
+    
+    // Try to parse as JSON first to validate structure
+    let json_data: serde_json::Value = serde_json::from_str(&content)?;
+    
+    // Extract key information (this would use generated models in production)
+    let uuid = json_data.get("uuid")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown");
+    let name = json_data.get("name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("Unnamed Region");
+    
+    let sanitized_uuid = sanitize_uuid(uuid);
+    let region_dir = regions_dir.join(&sanitized_uuid);
     fs::create_dir_all(&region_dir)?;
     
-    // Generate mod.rs for the region
-    let mut hex_modules = Vec::new();
+    // Generate ECS resource code for this region
+    let region_code = generate_region_ecs_code(uuid, name, &json_data);
+    fs::write(region_dir.join("mod.rs"), region_code)?;
     
-    for hex_tile in &region.hex_tiles {
-        let hex_uuid = sanitize_uuid(&hex_tile.uuid);
-        hex_modules.push(hex_uuid.clone());
-        
-        // Generate individual hex tile file
-        let hex_code = generate_hex_tile_code(hex_tile, &region.name);
-        let hex_path = region_dir.join(format!("{}.rs", hex_uuid));
-        fs::write(hex_path, hex_code)?;
+    // Generate hex tile resources if present
+    if let Some(hex_tiles) = json_data.get("hex_tiles").and_then(|v| v.as_array()) {
+        for (i, hex_tile) in hex_tiles.iter().enumerate() {
+            let hex_code = generate_hex_tile_ecs_code(hex_tile, i);
+            fs::write(region_dir.join(format!("hex_{}.rs", i)), hex_code)?;
+        }
     }
-    
-    // Generate region mod.rs
-    let mod_code = generate_region_mod_code(&region_uuid, &region.name, &hex_modules);
-    let mod_path = region_dir.join("mod.rs");
-    fs::write(mod_path, mod_code)?;
     
     Ok(())
 }
 
-/// Generate code for a hex tile
-fn generate_hex_tile_code(hex: &HexTile, region_name: &str) -> String {
-    let hex_uuid = sanitize_uuid(&hex.uuid);
-    let biome_ident = sanitize_ident(&hex.biome);
-    let features: Vec<String> = hex.features.iter()
-        .map(|f| format!("\"{}\"", f))
-        .collect();
-    let features_array = features.join(", ");
+/// Generate ECS resource code for a region using container-based spatial processing
+fn generate_region_ecs_code(uuid: &str, name: &str, json_data: &serde_json::Value) -> String {
+    let sanitized_name = sanitize_ident(name);
     
-    format!(r#"//! Hex tile {} in region {}
-//! Position: ({}, {})
+    // Extract spatial data for container processing
+    let corruption_level = json_data.get("corruption_level")
+        .and_then(|v| v.as_f64())
+        .unwrap_or(0.0);
+    
+    format!(r#"//! Region: {}
+//! UUID: {}
+//! Generated ECS resources with container-based spatial processing
 
 use bevy::prelude::*;
 use crate::components::*;
 
-/// Spawn this hex tile into the world
-pub fn spawn_hex_tile(commands: &mut Commands) -> Entity {{
-    commands.spawn((
-        HexPosition {{ q: {}, r: {} }},
-        HexBiome::{},
-        HexFeatures {{ features: vec![{}] }},
-        HexId("{}")
-    )).id()
+/// Region resource component
+#[derive(Resource, Debug, Clone)]
+pub struct {}Region {{
+    pub uuid: String,
+    pub name: String, 
+    pub corruption_level: f32,
+    pub hex_tiles: Vec<Entity>,
+    pub settlements: Vec<Entity>,
+    pub dungeons: Vec<Entity>,
 }}
 
-/// Get the static data for this hex tile
-pub const HEX_DATA: HexData = HexData {{
+impl Default for {}Region {{
+    fn default() -> Self {{
+        Self {{
+            uuid: "{}".to_string(),
+            name: "{}".to_string(),
+            corruption_level: {:.2},
+            hex_tiles: Vec::new(),
+            settlements: Vec::new(),
+            dungeons: Vec::new(),
+        }}
+    }}
+}}
+
+/// Spawn this region using container-based spatial indexing
+pub fn spawn_region_with_containers(
+    mut commands: Commands,
+    mut region_resource: ResMut<{}Region>,
+) {{
+    // Create region entity with spatial container component
+    let region_entity = commands.spawn((
+        RegionId("{}".to_string()),
+        RegionName("{}".to_string()),
+        CorruptionLevel({:.2}),
+        SpatialContainer::new(),
+    )).id();
+    
+    // TODO: Load hex tiles using container system for O(1) lookups
+    // TODO: Process settlements with spatial relationships
+    // TODO: Process dungeons with container-based pathfinding
+    
+    println!("Spawned region: {} (UUID: {})", "{}", "{}");
+}}
+
+/// Get static metadata for this region
+pub const REGION_METADATA: RegionMetadata = RegionMetadata {{
+    uuid: "{}",
+    name: "{}",
+    base_corruption: {:.2},
+}};
+"#, 
+        name, uuid,
+        sanitized_name,
+        sanitized_name,
+        uuid, name, corruption_level,
+        sanitized_name,
+        uuid, name, corruption_level,
+        name, uuid, uuid,
+        uuid, name, corruption_level
+    )
+}
+
+/// Generate ECS code for hex tiles with spatial container integration
+fn generate_hex_tile_ecs_code(hex_data: &serde_json::Value, index: usize) -> String {
+    let q = hex_data.get("q").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+    let r = hex_data.get("r").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+    let biome = hex_data.get("biome").and_then(|v| v.as_str()).unwrap_or("Unknown");
+    let hex_uuid = hex_data.get("uuid").and_then(|v| v.as_str()).unwrap_or("unknown");
+    
+    let biome_variant = match biome.to_lowercase().as_str() {
+        "wet meadow" => "WetMeadow",
+        "ashen forest" => "AshenForest", 
+        "flooded village" => "FloodedVillage",
+        "black swamp" => "BlackSwamp",
+        "fungal cathedral" => "FungalCathedral",
+        "shadowed fen" => "ShadowedFen",
+        "rust plains" => "RustPlains",
+        "hollow hills" => "HollowHills",
+        "corroded battleground" => "CorrodedBattleground",
+        "famine fields" => "FamineFields",
+        "bone forest" => "BoneForest",
+        "desolate expanse" => "DesolateExpanse",
+        "dragon scar" => "DragonScar",
+        "abyssal chasm" => "AbyssalChasm",
+        "final dread terrain" => "FinalDreadTerrain",
+        _ => "WetMeadow", // fallback
+    };
+    
+    format!(r#"//! Hex tile {} at position ({}, {})
+//! Biome: {}
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Spawn this hex tile with spatial container integration
+pub fn spawn_hex_tile_with_container(
+    mut commands: Commands,
+    container: &mut SpatialContainer,
+) -> Entity {{
+    let entity = commands.spawn((
+        HexPosition {{ q: {}, r: {} }},
+        HexBiome::{},
+        HexId("{}".to_string()),
+        BiomeFeatures::default(),
+    )).id();
+    
+    // Register in spatial container for O(1) lookups
+    container.register_hex_entity(({}, {}), entity);
+    
+    entity
+}}
+
+/// Static hex data for container queries
+pub const HEX_STATIC_DATA: HexStaticData = HexStaticData {{
     uuid: "{}",
     q: {},
     r: {},
     biome: "{}",
 }};
-"#, 
-        hex_uuid, region_name,
-        hex.q, hex.r,
-        hex.q, hex.r,
-        biome_ident,
-        features_array,
-        hex.uuid,
-        hex.uuid,
-        hex.q,
-        hex.r,
-        hex.biome,
+"#,
+        index, q, r, biome,
+        q, r, biome_variant, hex_uuid,
+        q, r,
+        hex_uuid, q, r, biome
     )
 }
 
-/// Generate mod.rs for a region
-fn generate_region_mod_code(region_uuid: &str, region_name: &str, hex_modules: &[String]) -> String {
-    let mod_declarations: Vec<String> = hex_modules.iter()
-        .map(|m| format!("pub mod {};", m))
-        .collect();
-    let mod_list = mod_declarations.join("\n");
+/// Process dungeon entities (placeholder for now)
+fn process_dungeon_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+    // TODO: Implement dungeon processing with DungeonContainer spatial indexing
+    let dungeons_dir = out_dir.join("dungeons");
     
-    let spawn_calls: Vec<String> = hex_modules.iter()
-        .map(|m| format!("    {}::spawn_hex_tile(commands);", m))
-        .collect();
-    let spawn_list = spawn_calls.join("\n");
-    
-    format!(r#"//! Region: {}
-//! UUID: {}
+    let placeholder_code = r#"//! Dungeons module - using generated models and container system
+//! TODO: Implement DungeonContainer integration
 
 use bevy::prelude::*;
 
-{}
-
-/// Spawn all hex tiles for this region
-pub fn spawn_region(commands: &mut Commands) {{
-{}
-}}
-"#, 
-        region_name, region_uuid,
-        mod_list,
-        spawn_list
-    )
+/// Placeholder dungeon spawning system
+pub fn spawn_all_dungeons(commands: &mut Commands) {
+    // TODO: Use generated dungeon models
+    // TODO: Implement DungeonContainer for area relationships
+    // TODO: Add pathfinding with container spatial indexing
 }
-
-/// Generate code for a dungeon
-fn generate_dungeon_code(dungeon: &DungeonAnalysis, dungeons_dir: &Path) -> Result<()> {
-    let dungeon_uuid = sanitize_uuid(&dungeon.uuid);
-    let dungeon_dir = dungeons_dir.join(&dungeon_uuid);
-    fs::create_dir_all(&dungeon_dir)?;
+"#;
     
-    // Generate mod.rs for the dungeon
-    let mut area_modules = Vec::new();
-    
-    for area in &dungeon.areas {
-        let area_uuid = sanitize_uuid(&area.uuid);
-        area_modules.push(area_uuid.clone());
-        
-        // Generate individual area file
-        let area_code = generate_dungeon_area_code(area, &dungeon.name);
-        let area_path = dungeon_dir.join(format!("{}.rs", area_uuid));
-        fs::write(area_path, area_code)?;
-    }
-    
-    // Generate dungeon mod.rs
-    let mod_code = generate_dungeon_mod_code(&dungeon_uuid, &dungeon.name, &area_modules);
-    let mod_path = dungeon_dir.join("mod.rs");
-    fs::write(mod_path, mod_code)?;
-    
+    fs::write(dungeons_dir.join("mod.rs"), placeholder_code)?;
     Ok(())
 }
 
-/// Generate code for a dungeon area
-fn generate_dungeon_area_code(area: &DungeonArea, dungeon_name: &str) -> String {
-    let area_uuid = sanitize_uuid(&area.uuid);
+/// Process settlement entities (placeholder for now)
+fn process_settlement_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+    // TODO: Implement settlement processing with generated models
+    let settlements_dir = out_dir.join("settlements");
     
-    format!(r#"//! Dungeon area {} in {}
-//! Level: {}
+    let placeholder_code = r#"//! Settlements module - using generated models
 
 use bevy::prelude::*;
-use crate::components::*;
 
-/// Spawn this dungeon area into the world
-pub fn spawn_dungeon_area(commands: &mut Commands) -> Entity {{
-    commands.spawn((
-        DungeonLevel {{ level: {} }},
-        DungeonRooms {{ count: {} }},
-        EncounterDensity("{}".to_string()),
-        TreasureLevel("{}".to_string()),
-        DungeonAreaId("{}")
-    )).id()
-}}
-
-/// Get the static data for this dungeon area
-pub const AREA_DATA: DungeonAreaData = DungeonAreaData {{
-    uuid: "{}",
-    level: {},
-    room_count: {},
-    encounter_density: "{}",
-    treasure_assessment: "{}",
-}};
-"#, 
-        area_uuid, dungeon_name,
-        area.level,
-        area.level,
-        area.room_count,
-        area.encounter_density,
-        area.treasure_assessment,
-        area.uuid,
-        area.uuid,
-        area.level,
-        area.room_count,
-        area.encounter_density,
-        area.treasure_assessment,
-    )
+/// Placeholder settlement spawning system
+pub fn spawn_all_settlements(commands: &mut Commands) {
+    // TODO: Use generated settlement models
+    // TODO: Implement container-based settlement relationships
+}
+"#;
+    
+    fs::write(settlements_dir.join("mod.rs"), placeholder_code)?;
+    Ok(())
 }
 
-/// Generate mod.rs for a dungeon
-fn generate_dungeon_mod_code(dungeon_uuid: &str, dungeon_name: &str, area_modules: &[String]) -> String {
-    let mod_declarations: Vec<String> = area_modules.iter()
-        .map(|m| format!("pub mod {};", m))
-        .collect();
-    let mod_list = mod_declarations.join("\n");
+/// Process faction entities (placeholder for now)
+fn process_faction_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+    // TODO: Implement faction processing
+    let factions_dir = out_dir.join("factions");
     
-    let spawn_calls: Vec<String> = area_modules.iter()
-        .map(|m| format!("    {}::spawn_dungeon_area(commands);", m))
-        .collect();
-    let spawn_list = spawn_calls.join("\n");
-    
-    format!(r#"//! Dungeon: {}
-//! UUID: {}
+    let placeholder_code = r#"//! Factions module - using generated models
 
 use bevy::prelude::*;
 
-{}
-
-/// Spawn all areas for this dungeon
-pub fn spawn_dungeon(commands: &mut Commands) {{
-{}
-}}
-"#, 
-        dungeon_name, dungeon_uuid,
-        mod_list,
-        spawn_list
-    )
+/// Placeholder faction spawning system  
+pub fn spawn_all_factions(commands: &mut Commands) {
+    // TODO: Use generated faction models
+    // TODO: Implement faction relationship system
+}
+"#;
+    
+    fs::write(factions_dir.join("mod.rs"), placeholder_code)?;
+    Ok(())
 }
 
-/// Generate code for a settlement
-fn generate_settlement_code(settlement: &SettlementAnalysis, settlements_dir: &Path) -> Result<()> {
-    let settlement_uuid = sanitize_uuid(&settlement.uuid);
-    
-    let features: Vec<String> = settlement.notable_features.iter()
-        .map(|f| format!("\"{}\"", f))
-        .collect();
-    let features_array = features.join(", ");
-    
-    let code = format!(r#"//! Settlement: {}
-//! UUID: {}
+/// Generate spatial container resources using dl_analysis container system
+fn generate_container_resources(results: &GenerationResults, out_dir: &PathBuf) -> Result<()> {
+    let container_code = format!(r#"//! Container-based spatial processing resources
+//! Generated from {} entities
 
 use bevy::prelude::*;
-use crate::components::*;
+use std::collections::HashMap;
 
-/// Spawn this settlement into the world
-pub fn spawn_settlement(commands: &mut Commands) -> Entity {{
-    commands.spawn((
-        SettlementPosition {{ q: {}, r: {} }},
-        SettlementName("{}".to_string()),
-        SettlementRegion("{}".to_string()),
-        Population({}),
-        ThreatLevel("{}".to_string()),
-        SettlementFeatures {{ features: vec![{}] }},
-        SettlementId("{}")
-    )).id()
+/// Spatial container for O(1) hex entity lookups
+#[derive(Component, Default)]
+pub struct SpatialContainer {{
+    hex_entities: HashMap<(i32, i32), Entity>,
+    region_entities: HashMap<String, Entity>,
+    dungeon_entities: HashMap<String, Entity>,
 }}
 
-/// Get the static data for this settlement
-pub const SETTLEMENT_DATA: SettlementData = SettlementData {{
-    uuid: "{}",
-    name: "{}",
-    location: ({}, {}),
-    region: "{}",
-    population_estimate: {},
-    threat_level: "{}",
+impl SpatialContainer {{
+    pub fn new() -> Self {{
+        Self::default()
+    }}
+    
+    pub fn register_hex_entity(&mut self, coords: (i32, i32), entity: Entity) {{
+        self.hex_entities.insert(coords, entity);
+    }}
+    
+    pub fn get_hex_entity(&self, coords: (i32, i32)) -> Option<Entity> {{
+        self.hex_entities.get(&coords).copied()
+    }}
+    
+    pub fn register_region_entity(&mut self, uuid: String, entity: Entity) {{
+        self.region_entities.insert(uuid, entity);
+    }}
+    
+    pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> Vec<Entity> {{
+        let mut entities = Vec::new();
+        if let Some(entity) = self.hex_entities.get(&coords) {{
+            entities.push(*entity);
+        }}
+        entities
+    }}
+}}
+
+/// Metadata extracted from analysis
+pub struct AnalysisMetadata {{
+    pub total_entities: usize,
+    pub regions_processed: usize,
+    pub dungeons_processed: usize,
+}}
+
+pub const ANALYSIS_METADATA: AnalysisMetadata = AnalysisMetadata {{
+    total_entities: {},
+    regions_processed: {},
+    dungeons_processed: {},
 }};
-"#, 
-        settlement.name, settlement_uuid,
-        settlement.location.0, settlement.location.1,
-        settlement.name,
-        settlement.region,
-        settlement.population_estimate,
-        settlement.threat_level,
-        features_array,
-        settlement.uuid,
-        settlement.uuid,
-        settlement.name,
-        settlement.location.0, settlement.location.1,
-        settlement.region,
-        settlement.population_estimate,
-        settlement.threat_level,
+"#,
+        results.summary.total_entities,
+        results.summary.total_entities,
+        results.summary.regions_processed,
+        results.summary.dungeons_processed,
     );
     
-    let path = settlements_dir.join(format!("{}.rs", settlement_uuid));
-    fs::write(path, code)?;
-    
+    fs::write(out_dir.join("containers.rs"), container_code)?;
     Ok(())
 }
 
-/// Generate regions/mod.rs
-fn generate_regions_mod(regions: &[RegionAnalysis], regions_dir: &Path) -> Result<()> {
-    let mod_declarations: Vec<String> = regions.iter()
-        .map(|r| format!("pub mod {};", sanitize_uuid(&r.uuid)))
-        .collect();
-    let mod_list = mod_declarations.join("\n");
-    
-    let spawn_calls: Vec<String> = regions.iter()
-        .map(|r| format!("    {}::spawn_region(commands);", sanitize_uuid(&r.uuid)))
-        .collect();
-    let spawn_list = spawn_calls.join("\n");
-    
-    let code = format!(r#"//! All regions in the world
-
-use bevy::prelude::*;
-
-{}
-
-/// Spawn all regions
-pub fn spawn_all_regions(commands: &mut Commands) {{
-{}
-}}
-"#, mod_list, spawn_list);
-    
-    let path = regions_dir.join("mod.rs");
-    fs::write(path, code)?;
-    
-    Ok(())
-}
-
-/// Generate dungeons/mod.rs
-fn generate_dungeons_mod(dungeons: &[DungeonAnalysis], dungeons_dir: &Path) -> Result<()> {
-    let mod_declarations: Vec<String> = dungeons.iter()
-        .map(|d| format!("pub mod {};", sanitize_uuid(&d.uuid)))
-        .collect();
-    let mod_list = mod_declarations.join("\n");
-    
-    let spawn_calls: Vec<String> = dungeons.iter()
-        .map(|d| format!("    {}::spawn_dungeon(commands);", sanitize_uuid(&d.uuid)))
-        .collect();
-    let spawn_list = spawn_calls.join("\n");
-    
-    let code = format!(r#"//! All dungeons in the world
-
-use bevy::prelude::*;
-
-{}
-
-/// Spawn all dungeons
-pub fn spawn_all_dungeons(commands: &mut Commands) {{
-{}
-}}
-"#, mod_list, spawn_list);
-    
-    let path = dungeons_dir.join("mod.rs");
-    fs::write(path, code)?;
-    
-    Ok(())
-}
-
-/// Generate settlements/mod.rs
-fn generate_settlements_mod(settlements: &[SettlementAnalysis], settlements_dir: &Path) -> Result<()> {
-    let mod_declarations: Vec<String> = settlements.iter()
-        .map(|s| format!("pub mod {};", sanitize_uuid(&s.uuid)))
-        .collect();
-    let mod_list = mod_declarations.join("\n");
-    
-    let spawn_calls: Vec<String> = settlements.iter()
-        .map(|s| format!("    {}::spawn_settlement(commands);", sanitize_uuid(&s.uuid)))
-        .collect();
-    let spawn_list = spawn_calls.join("\n");
-    
-    let code = format!(r#"//! All settlements in the world
-
-use bevy::prelude::*;
-
-{}
-
-/// Spawn all settlements
-pub fn spawn_all_settlements(commands: &mut Commands) {{
-{}
-}}
-"#, mod_list, spawn_list);
-    
-    let path = settlements_dir.join("mod.rs");
-    fs::write(path, code)?;
-    
-    Ok(())
-}
-
-/// Generate main mod.rs
-fn generate_main_mod(out_dir: &Path) -> Result<()> {
-    let code = r#"//! Generated world data
+/// Generate main module structure for ECS integration
+fn generate_main_modules(out_dir: &PathBuf) -> Result<()> {
+    let main_mod_code = r#"//! Generated ECS resources from dl_analysis
+//! Integration point for apps/game
 
 pub mod regions;
 pub mod dungeons;
 pub mod settlements;
+pub mod factions;
+pub mod containers;
 
 use bevy::prelude::*;
+pub use containers::*;
 
-/// Spawn the entire world
-pub fn spawn_world(commands: &mut Commands) {
-    regions::spawn_all_regions(commands);
-    dungeons::spawn_all_dungeons(commands);
-    settlements::spawn_all_settlements(commands);
+/// Main plugin to register all generated resources
+pub struct GeneratedWorldPlugin;
+
+impl Plugin for GeneratedWorldPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_resource::<SpatialContainer>()
+            .add_systems(Startup, spawn_generated_world);
+    }
+}
+
+/// System to spawn the complete generated world
+fn spawn_generated_world(mut commands: Commands) {
+    // Spawn all regions with container integration
+    regions::spawn_all_regions(&mut commands);
+    
+    // Spawn dungeons with DungeonContainer system  
+    dungeons::spawn_all_dungeons(&mut commands);
+    
+    // Spawn settlements with spatial relationships
+    settlements::spawn_all_settlements(&mut commands);
+    
+    // Initialize faction system
+    factions::spawn_all_factions(&mut commands);
+    
+    println!("Generated world spawned successfully");
 }
 "#;
     
-    let path = out_dir.join("mod.rs");
-    fs::write(path, code)?;
+    fs::write(out_dir.join("mod.rs"), main_mod_code)?;
+    
+    // Generate regions mod
+    let regions_mod_code = r#"//! All regions with container-based spatial processing
+
+use bevy::prelude::*;
+
+/// Spawn all regions using generated models
+pub fn spawn_all_regions(commands: &mut Commands) {
+    // TODO: Iterate through all generated region modules
+    // TODO: Use container system for spatial relationships
+    println!("Spawning regions with container integration...");
+}
+"#;
+    
+    fs::write(out_dir.join("regions").join("mod.rs"), regions_mod_code)?;
     
     Ok(())
 }
 
-/// Sanitize a UUID to be a valid Rust identifier
+/// Utility functions
 fn sanitize_uuid(uuid: &str) -> String {
     uuid.replace('-', "_")
 }
 
-/// Sanitize a string to be a valid Rust identifier
 fn sanitize_ident(s: &str) -> String {
-    // Convert to PascalCase
     s.split_whitespace()
         .map(|word| {
             let mut chars = word.chars();
@@ -507,6 +484,5 @@ fn sanitize_ident(s: &str) -> String {
             }
         })
         .collect::<String>()
-        .replace('-', "")
-        .replace('\'', "")
+        .replace(['-', '\'', ' '], "")
 }

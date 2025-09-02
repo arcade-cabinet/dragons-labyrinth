@@ -8,7 +8,7 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rerun-if-changed=../../raw/game.hbf");
+    println!("cargo:rerun-if-changed=game.hbf");
     println!("cargo:rerun-if-changed=build.rs");
     
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -28,7 +28,7 @@ fn main() {
     }
     
     // Check if HBF database exists and report status
-    let hbf_path = std::path::Path::new("../../raw/game.hbf");
+    let hbf_path = std::path::Path::new("game.hbf");
     if hbf_path.exists() {
         println!("cargo:warning=HBF database found at {:?}", hbf_path);
     } else {
@@ -37,7 +37,7 @@ fn main() {
     
     // Create environment variables for runtime use
     println!("cargo:rustc-env=DL_ANALYSIS_OUT_DIR={}", out_dir.display());
-    println!("cargo:rustc-env=DL_HBF_PATH=../../raw/game.hbf");
+    println!("cargo:rustc-env=DL_HBF_PATH=game.hbf");
     
     println!("cargo:warning=dl_analysis build script completed successfully");
 }

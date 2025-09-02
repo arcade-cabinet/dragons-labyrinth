@@ -475,7 +475,7 @@ pub mod generation {
             
             // Write container to file
             let container_file = output_dir.join(format!("dungeon_{}.ron", dungeon_uuid));
-            let container_content = ron::to_string_pretty(&container, ron::PrettyConfig::default())?;
+            let container_content = ron::ser::to_string_pretty(&container, Default::default())?;
             std::fs::write(container_file, container_content)?;
             
             containers.push(container);
@@ -517,7 +517,7 @@ pub mod generation {
             
             // Write container to file
             let container_file = output_dir.join(format!("region_{}.ron", region_uuid));
-            let container_content = ron::to_string_pretty(&container, ron::PrettyConfig::default())?;
+            let container_content = ron::ser::to_string_pretty(&container, Default::default())?;
             std::fs::write(container_file, container_content)?;
             
             containers.push(container);

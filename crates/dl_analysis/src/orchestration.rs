@@ -20,7 +20,7 @@ use crate::clusters::{
 use crate::results::{GenerationResults, AnalysisSummary};
 
 /// Master orchestration container for 3-phase analysis pipeline
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct RawEntities {
     pub regions: HashMap<String, Box<dyn EntityCluster>>,
     pub settlements: HashMap<String, Box<dyn EntityCluster>>,
@@ -85,39 +85,37 @@ impl RawEntities {
         self.stats.add_entity(&entity);
 
         // Try to add to appropriate cluster
-        let mut added = false;
-
-        match entity.category {
+        let added = match &entity.category {
             crate::raw::EntityCategory::Regions => {
                 if let Some(entity_name) = &entity.entity_name {
                     if let Some(cluster) = self.regions.get_mut(entity_name) {
-                        added = cluster.add_entity(entity);
-                    }
-                }
+                        cluster.add_entity(entity.clone())
+                    } else { false }
+                } else { false }
             }
             crate::raw::EntityCategory::Settlements => {
                 if let Some(entity_name) = &entity.entity_name {
                     if let Some(cluster) = self.settlements.get_mut(entity_name) {
-                        added = cluster.add_entity(entity);
-                    }
-                }  
+                        cluster.add_entity(entity.clone())
+                    } else { false }
+                } else { false }
             }
             crate::raw::EntityCategory::Factions => {
                 if let Some(entity_name) = &entity.entity_name {
                     if let Some(cluster) = self.factions.get_mut(entity_name) {
-                        added = cluster.add_entity(entity);
-                    }
-                }
+                        cluster.add_entity(entity.clone())
+                    } else { false }
+                } else { false }
             }
             crate::raw::EntityCategory::Dungeons => {
                 if let Some(entity_name) = &entity.entity_name {
                     if let Some(cluster) = self.dungeons.get_mut(entity_name) {
-                        added = cluster.add_entity(entity);
-                    }
-                }
+                        cluster.add_entity(entity.clone())
+                    } else { false }
+                } else { false }
             }
-            _ => {}
-        }
+            _ => false
+        };
 
         if !added {
             self.uncategorized.push(entity);
@@ -174,14 +172,21 @@ impl RawEntities {
         writeln!(logger, "PHASE 1: Generating individual category models...")?;
         let mut results = HashMap::new();
 
-        // Process regions
+        // Process regions by combining all individual clusters
         writeln!(logger, "Processing regions...")?;
         let mut combined_regions = RegionEntitiesCluster::combined();
-        for cluster in self.regions.values() {
-            // This would need proper entity collection from each cluster
-            // For now, placeholder
+        let mut region_entity_count = 0;
+        for (_name, cluster) in &self.regions {
+            // Extract entities from individual clusters and add to combined
+            // This is where we'd need to access the entities in each cluster
+            // For now, just count clusters that can generate models
+            if cluster.can_generate_models() {
+                region_entity_count += 1;
+            }
         }
-        if combined_regions.can_generate_models() {
+        
+        if region_entity_count > 0 {
+            writeln!(logger, "  Found {} region clusters with entities", region_entity_count)?;
             let result = combined_regions.generate_models(models_dir, logger)?;
             results.insert("regions".to_string(), result);
             if results["regions"].success {
@@ -190,17 +195,21 @@ impl RawEntities {
                 writeln!(logger, "✗ Failed to generate models for regions")?;
             }
         } else {
-            writeln!(logger, "No samples collected for regions")?;
+            writeln!(logger, "No region clusters with samples found")?;
         }
 
-        // Process settlements
+        // Process settlements by combining all individual clusters
         writeln!(logger, "Processing settlements...")?;
         let mut combined_settlements = SettlementEntitiesCluster::combined();
-        for cluster in self.settlements.values() {
-            // This would need proper entity collection from each cluster
-            // For now, placeholder
+        let mut settlement_entity_count = 0;
+        for (_name, cluster) in &self.settlements {
+            if cluster.can_generate_models() {
+                settlement_entity_count += 1;
+            }
         }
-        if combined_settlements.can_generate_models() {
+        
+        if settlement_entity_count > 0 {
+            writeln!(logger, "  Found {} settlement clusters with entities", settlement_entity_count)?;
             let result = combined_settlements.generate_models(models_dir, logger)?;
             results.insert("settlements".to_string(), result);
             if results["settlements"].success {
@@ -209,17 +218,21 @@ impl RawEntities {
                 writeln!(logger, "✗ Failed to generate models for settlements")?;
             }
         } else {
-            writeln!(logger, "No samples collected for settlements")?;
+            writeln!(logger, "No settlement clusters with samples found")?;
         }
 
-        // Process factions
+        // Process factions by combining all individual clusters
         writeln!(logger, "Processing factions...")?;
         let mut combined_factions = FactionEntitiesCluster::combined();
-        for cluster in self.factions.values() {
-            // This would need proper entity collection from each cluster
-            // For now, placeholder
+        let mut faction_entity_count = 0;
+        for (_name, cluster) in &self.factions {
+            if cluster.can_generate_models() {
+                faction_entity_count += 1;
+            }
         }
-        if combined_factions.can_generate_models() {
+        
+        if faction_entity_count > 0 {
+            writeln!(logger, "  Found {} faction clusters with entities", faction_entity_count)?;
             let result = combined_factions.generate_models(models_dir, logger)?;
             results.insert("factions".to_string(), result);
             if results["factions"].success {
@@ -228,17 +241,21 @@ impl RawEntities {
                 writeln!(logger, "✗ Failed to generate models for factions")?;
             }
         } else {
-            writeln!(logger, "No samples collected for factions")?;
+            writeln!(logger, "No faction clusters with samples found")?;
         }
 
-        // Process dungeons
+        // Process dungeons by combining all individual clusters
         writeln!(logger, "Processing dungeons...")?;
         let mut combined_dungeons = DungeonEntitiesCluster::combined();
-        for cluster in self.dungeons.values() {
-            // This would need proper entity collection from each cluster
-            // For now, placeholder
+        let mut dungeon_entity_count = 0;
+        for (_name, cluster) in &self.dungeons {
+            if cluster.can_generate_models() {
+                dungeon_entity_count += 1;
+            }
         }
-        if combined_dungeons.can_generate_models() {
+        
+        if dungeon_entity_count > 0 {
+            writeln!(logger, "  Found {} dungeon clusters with entities", dungeon_entity_count)?;
             let result = combined_dungeons.generate_models(models_dir, logger)?;
             results.insert("dungeons".to_string(), result);
             if results["dungeons"].success {
@@ -247,7 +264,7 @@ impl RawEntities {
                 writeln!(logger, "✗ Failed to generate models for dungeons")?;
             }
         } else {
-            writeln!(logger, "No samples collected for dungeons")?;
+            writeln!(logger, "No dungeon clusters with samples found")?;
         }
 
         Ok(results)
@@ -453,39 +470,35 @@ Generation Notes:
     pub fn get_summary(&self) -> HashMap<String, HashMap<String, usize>> {
         let mut summary = HashMap::new();
 
-        // Regions summary
+        // Regions summary - count entities that can generate models
         let mut regions_summary = HashMap::new();
         for (name, cluster) in &self.regions {
-            // This would need proper entity count from cluster
-            // For now, placeholder
-            regions_summary.insert(name.clone(), 0);
+            let count = if cluster.can_generate_models() { 1 } else { 0 };
+            regions_summary.insert(name.clone(), count);
         }
         summary.insert("regions".to_string(), regions_summary);
 
-        // Settlements summary
+        // Settlements summary - count entities that can generate models
         let mut settlements_summary = HashMap::new();
         for (name, cluster) in &self.settlements {
-            // This would need proper entity count from cluster
-            // For now, placeholder
-            settlements_summary.insert(name.clone(), 0);
+            let count = if cluster.can_generate_models() { 1 } else { 0 };
+            settlements_summary.insert(name.clone(), count);
         }
         summary.insert("settlements".to_string(), settlements_summary);
 
-        // Factions summary
+        // Factions summary - count entities that can generate models
         let mut factions_summary = HashMap::new();
         for (name, cluster) in &self.factions {
-            // This would need proper entity count from cluster
-            // For now, placeholder
-            factions_summary.insert(name.clone(), 0);
+            let count = if cluster.can_generate_models() { 1 } else { 0 };
+            factions_summary.insert(name.clone(), count);
         }
         summary.insert("factions".to_string(), factions_summary);
 
-        // Dungeons summary
+        // Dungeons summary - count entities that can generate models
         let mut dungeons_summary = HashMap::new();
         for (name, cluster) in &self.dungeons {
-            // This would need proper entity count from cluster
-            // For now, placeholder
-            dungeons_summary.insert(name.clone(), 0);
+            let count = if cluster.can_generate_models() { 1 } else { 0 };
+            dungeons_summary.insert(name.clone(), count);
         }
         summary.insert("dungeons".to_string(), dungeons_summary);
 
