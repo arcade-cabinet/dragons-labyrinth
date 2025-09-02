@@ -1,0 +1,1 @@
+// Alignment module placeholder for future world rules integration

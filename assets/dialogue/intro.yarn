@@ -1,0 +1,195 @@
+title: Start
+tags: 
+---
+The mist clings to your skin like cold fingers as you step into this unfamiliar realm.
+
+Your companion shifts nervously beside you, eyes darting to shadows that seem to move when observed directly.
+
+-> Meet your companion
+-> Examine the surroundings
+-> Check your supplies
+
+===
+
+title: Meet your companion
+tags: companion_intro
+---
+<<if $companion_type == "scholar">>
+    The scholar adjusts their worn satchel, filled with tomes that may hold answers... or terrible truths.
+    
+    Scholar: "The texts spoke of this place, but seeing it... feeling it... this is different. The very air tastes of ancient sorrow."
+<<elseif $companion_type == "warrior">>
+    The warrior's hand rests instinctively on their weapon, trained reflexes already sensing danger.
+    
+    Warrior: "I've faced many enemies, but this... this feels wrong. Like the world itself is wounded."
+<<elseif $companion_type == "guide">>
+    The guide surveys the terrain with experienced eyes, but uncertainty clouds their usually confident demeanor.
+    
+    Guide: "I know these lands... or thought I did. Nothing looks quite right anymore. The paths have... changed."
+<<else>>
+    Your companion looks around with growing unease, their breathing shallow.
+    
+    Companion: "Something's not right here. Can you feel it? Like we're being watched by things that shouldn't exist."
+<<endif>>
+
+-> "We'll face whatever comes together"
+-> "Tell me what you know about this place"
+-> "Are you having second thoughts?"
+
+===
+
+title: Examine the surroundings
+tags: world_intro
+---
+The landscape stretches before you in hexagonal patches, each tile of reality distinct yet unnaturally connected.
+
+Grasslands fade abruptly into dense forests. Mountains rise without foothills. Swamps border deserts in defiance of nature's laws.
+
+<<set $dread_level += 2>>
+
+This is not a world that grew naturally. This is a world that was... assembled.
+
+-> Look closer at the tile boundaries
+-> Focus on a distant structure
+-> Notice your companion's reaction
+
+===
+
+title: Look closer at the tile boundaries
+tags: corruption_hint
+---
+Where one terrain meets another, the edges shimmer slightly, like heat distortion on a summer day.
+
+But the air here is cold.
+
+Your companion notices your intense focus: "You see it too, don't you? The seams. Like reality was stitched together by amateur hands."
+
+<<set $dread_level += 3>>
+<<set $companion_stress += 5>>
+
+The wrongness of it all settles in your stomach like a stone.
+
+-> "We need to understand this place"
+-> "Let's keep moving"
+-> Comfort your companion
+
+===
+
+title: Check your supplies
+tags: inventory_intro
+---
+Your pack feels heavier than it should, but not from extra weight.
+
+Each item you carry seems significant now, precious in a way that speaks of difficult journeys ahead.
+
+<<if $has_mount>>
+    Your mount stamps nervously, sensing something in the air that human senses cannot fully perceive.
+    
+    Even the animals know this place is wrong.
+<<endif>>
+
+-> Take inventory
+-> Pet your mount (if available)
+-> Share supplies with companion
+
+===
+
+title: Focus on a distant structure
+tags: feature_intro
+---
+Through the strange patchwork landscape, a structure rises from what appears to be a grassland tile.
+
+Even from this distance, you can tell it's wrong. The proportions are subtly off, the shadows fall in directions that don't match the sun.
+
+<<set $dread_level += 1>>
+
+Your companion follows your gaze: "Should we... investigate?"
+
+-> "Yes, we need answers"
+-> "Not yet, let's explore closer areas first"
+-> "That place feels dangerous"
+
+===
+
+title: "We'll face whatever comes together"
+tags: companion_trust_gain
+---
+<<set $companion_trust += 10>>
+<<set $companion_stress -= 3>>
+
+Your companion's shoulders relax slightly, and you see a flicker of their old confidence return.
+
+"You're right. Whatever brought us here, whatever changed this world... we'll figure it out. Together."
+
+The bond between you feels stronger now, a small light against the growing darkness.
+
+-> Continue exploring
+-> Ask about their background
+-> Plan your next move
+
+===
+
+title: "Tell me what you know about this place"
+tags: lore_dump
+---
+<<if $companion_type == "scholar">>
+    "The ancient texts called it the Sundered Realm. A place where reality was... reorganized. But the descriptions were fragmentary, written by survivors who could barely comprehend what they'd witnessed."
+    
+    The scholar's voice drops to a whisper: "They spoke of tiles of existence, floating in a void between worlds. And something that... arranged them."
+<<elseif $companion_type == "guide">>
+    "I've heard rumors from other travelers. They said the landscape changes when you're not looking. That paths lead to places they shouldn't. That the very ground remembers things it should have forgotten."
+    
+    The guide shudders: "I thought they were just stories meant to scare children."
+<<else>>
+    "I... I don't know much. Just that people who come here... they change. The lucky ones come back different. The unlucky ones..."
+    
+    Your companion's voice trails off, unable to finish the thought.
+<<endif>>
+
+<<set $dread_level += 2>>
+<<set $companion_stress += 3>>
+
+-> Press for more details
+-> Reassure them
+-> Change the subject
+
+===
+
+title: Comfort your companion
+tags: companion_care
+---
+You place a gentle hand on your companion's shoulder, feeling them trembling slightly.
+
+"It's alright," you say, though you're not sure you believe it yourself. "We'll take this one step at a time."
+
+<<set $companion_stress -= 8>>
+<<set $companion_trust += 5>>
+
+Your companion takes a deep breath, steadying themselves: "Thank you. I... I needed that. This place gets inside your head so quickly."
+
+The simple act of human connection feels precious here, a reminder of warmth in a cold world.
+
+-> "Stay close to me"
+-> "Tell me what you're feeling"
+-> "We should keep moving"
+
+===
+
+title: Continue exploring
+tags: world_movement
+---
+You take your first steps into this strange realm, each footfall marking your commitment to this journey.
+
+The hex tiles stretch endlessly in all directions, a patchwork world of impossible juxtapositions.
+
+<<set $world_explored += 1>>
+
+Behind you, the mist closes in, obscuring the way you came.
+
+There is only forward now.
+
+-> Head toward the grasslands
+-> Investigate the forest edge
+-> Approach the distant mountain
+
+===

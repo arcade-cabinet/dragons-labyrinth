@@ -1,0 +1,322 @@
+BiomeConfig(
+    biomes: {
+        "grassland": BiomeDefinition(
+            name: "Grassland",
+            description: "Rolling hills covered in green grass, peaceful under normal circumstances",
+            base_texture: "textures/biomes/grassland.png",
+            movement_speed_multiplier: 1.0,
+            mounted_speed_multiplier: 1.5,
+            damage_per_turn: 0.0,
+            companion_stress_modifier: -0.5,
+            dread_generation_rate: 0.0,
+            corruption_resistance: 0.8,
+            compatible_neighbors: ["forest", "mountain", "desert", "swamp"],
+            feature_spawn_chances: {
+                "tavern": 0.15,
+                "shop": 0.10,
+                "shrine": 0.08,
+                "campsite": 0.20,
+                "village": 0.05,
+            },
+            ambient_sounds: ["wind_grass", "birds_peaceful"],
+            weather_effects: {
+                "rain": 0.3,
+                "fog": 0.1,
+                "clear": 0.6,
+            },
+        ),
+        
+        "forest": BiomeDefinition(
+            name: "Forest",
+            description: "Dense woodland where shadows hide both sanctuary and danger",
+            base_texture: "textures/biomes/forest.png",
+            movement_speed_multiplier: 0.8,
+            mounted_speed_multiplier: 0.6,
+            damage_per_turn: 0.0,
+            companion_stress_modifier: 1.0,
+            dread_generation_rate: 0.2,
+            corruption_resistance: 0.6,
+            compatible_neighbors: ["grassland", "mountain", "swamp"],
+            feature_spawn_chances: {
+                "campsite": 0.25,
+                "dungeon_entrance": 0.15,
+                "monster_lair": 0.20,
+                "shrine": 0.12,
+                "treasure_cache": 0.10,
+                "witch_hut": 0.08,
+            },
+            ambient_sounds: ["wind_trees", "owl_distant", "branches_creaking"],
+            weather_effects: {
+                "rain": 0.4,
+                "fog": 0.3,
+                "clear": 0.3,
+            },
+        ),
+        
+        "mountain": BiomeDefinition(
+            name: "Mountain",
+            description: "Towering peaks that scrape the sky, cold and unforgiving",
+            base_texture: "textures/biomes/mountain.png",
+            movement_speed_multiplier: 0.6,
+            mounted_speed_multiplier: 0.3,
+            damage_per_turn: 0.5,
+            companion_stress_modifier: 2.0,
+            dread_generation_rate: 0.5,
+            corruption_resistance: 0.9,
+            compatible_neighbors: ["grassland", "forest", "desert", "lava"],
+            feature_spawn_chances: {
+                "tower": 0.20,
+                "treasure_cache": 0.25,
+                "shrine": 0.15,
+                "monster_lair": 0.18,
+                "observatory": 0.08,
+                "mine_entrance": 0.14,
+            },
+            ambient_sounds: ["wind_mountain", "echo_distant", "rock_fall"],
+            weather_effects: {
+                "snow": 0.4,
+                "fog": 0.3,
+                "clear": 0.2,
+                "storm": 0.1,
+            },
+        ),
+        
+        "desert": BiomeDefinition(
+            name: "Desert",
+            description: "Endless dunes under a merciless sun, hiding ancient secrets",
+            base_texture: "textures/biomes/desert.png",
+            movement_speed_multiplier: 0.7,
+            mounted_speed_multiplier: 1.2,
+            damage_per_turn: 1.0,
+            companion_stress_modifier: 3.0,
+            dread_generation_rate: 1.0,
+            corruption_resistance: 0.4,
+            compatible_neighbors: ["grassland", "mountain", "lava"],
+            feature_spawn_chances: {
+                "oasis": 0.15,
+                "ruins": 0.30,
+                "treasure_cache": 0.20,
+                "mirage": 0.12,
+                "tomb": 0.18,
+                "caravan_stop": 0.05,
+            },
+            ambient_sounds: ["wind_sand", "sand_shifting", "silence_deep"],
+            weather_effects: {
+                "sandstorm": 0.2,
+                "heat_wave": 0.5,
+                "clear": 0.3,
+            },
+        ),
+        
+        "swamp": BiomeDefinition(
+            name: "Swamp",
+            description: "Fetid marshlands where the dead do not rest easy",
+            base_texture: "textures/biomes/swamp.png",
+            movement_speed_multiplier: 0.5,
+            mounted_speed_multiplier: 0.2,
+            damage_per_turn: 0.5,
+            companion_stress_modifier: 4.0,
+            dread_generation_rate: 2.0,
+            corruption_resistance: 0.2,
+            compatible_neighbors: ["grassland", "forest", "water"],
+            feature_spawn_chances: {
+                "witch_hut": 0.25,
+                "monster_lair": 0.30,
+                "cursed_shrine": 0.20,
+                "bog_light": 0.15,
+                "necromancer_tower": 0.10,
+            },
+            ambient_sounds: ["water_bubble", "frogs_ominous", "mist_whisper"],
+            weather_effects: {
+                "fog": 0.6,
+                "rain": 0.3,
+                "miasma": 0.1,
+            },
+        ),
+        
+        "water": BiomeDefinition(
+            name: "Water",
+            description: "Dark waters that reflect nothing, hiding depths unknown",
+            base_texture: "textures/biomes/water.png",
+            movement_speed_multiplier: 0.3,
+            mounted_speed_multiplier: 0.1,
+            damage_per_turn: 2.0,
+            companion_stress_modifier: 2.5,
+            dread_generation_rate: 1.5,
+            corruption_resistance: 0.3,
+            compatible_neighbors: ["swamp"],
+            feature_spawn_chances: {
+                "island": 0.20,
+                "shipwreck": 0.25,
+                "whirlpool": 0.15,
+                "sea_shrine": 0.18,
+                "lighthouse": 0.12,
+                "pier": 0.10,
+            },
+            ambient_sounds: ["water_lap", "depth_call", "waves_distant"],
+            weather_effects: {
+                "fog": 0.5,
+                "storm": 0.3,
+                "clear": 0.2,
+            },
+        ),
+        
+        "lava": BiomeDefinition(
+            name: "Lava",
+            description: "Molten rock flows like blood from the earth's wounds",
+            base_texture: "textures/biomes/lava.png",
+            movement_speed_multiplier: 0.3,
+            mounted_speed_multiplier: 0.1,
+            damage_per_turn: 10.0,
+            companion_stress_modifier: 8.0,
+            dread_generation_rate: 5.0,
+            corruption_resistance: 0.1,
+            compatible_neighbors: ["desert", "mountain", "void"],
+            feature_spawn_chances: {
+                "volcano": 0.30,
+                "obsidian_spire": 0.25,
+                "fire_shrine": 0.20,
+                "elemental_rift": 0.15,
+                "demon_gate": 0.10,
+            },
+            ambient_sounds: ["lava_bubble", "fire_roar", "earth_groan"],
+            weather_effects: {
+                "ash_fall": 0.4,
+                "heat_shimmer": 0.4,
+                "volcanic_storm": 0.2,
+            },
+        ),
+        
+        "void": BiomeDefinition(
+            name: "Void",
+            description: "Reality erased, leaving only hungry emptiness",
+            base_texture: "textures/biomes/void.png",
+            movement_speed_multiplier: 1.5,
+            mounted_speed_multiplier: 0.8,
+            damage_per_turn: 2.0,
+            companion_stress_modifier: 15.0,
+            dread_generation_rate: 10.0,
+            corruption_resistance: 0.0,
+            compatible_neighbors: ["lava", "corrupted_grassland", "corrupted_forest"],
+            feature_spawn_chances: {
+                "void_tear": 0.40,
+                "reality_anchor": 0.20,
+                "void_shrine": 0.25,
+                "memory_fragment": 0.15,
+            },
+            ambient_sounds: ["void_whisper", "reality_tear", "existence_fade"],
+            weather_effects: {
+                "reality_storm": 0.3,
+                "void_wind": 0.4,
+                "emptiness": 0.3,
+            },
+        ),
+        
+        "corrupted_grassland": BiomeDefinition(
+            name: "Corrupted Grassland",
+            description: "Once-peaceful fields now writhe with unnatural growth",
+            base_texture: "textures/biomes/corrupted_grassland.png",
+            movement_speed_multiplier: 0.8,
+            mounted_speed_multiplier: 0.5,
+            damage_per_turn: 1.5,
+            companion_stress_modifier: 6.0,
+            dread_generation_rate: 3.0,
+            corruption_resistance: 0.0,
+            compatible_neighbors: ["void", "corrupted_forest", "corrupted_swamp"],
+            feature_spawn_chances: {
+                "corruption_node": 0.35,
+                "twisted_shrine": 0.25,
+                "blood_pool": 0.20,
+                "flesh_tree": 0.20,
+            },
+            ambient_sounds: ["grass_whisper_wrong", "corruption_pulse", "reality_bend"],
+            weather_effects: {
+                "blood_rain": 0.3,
+                "corruption_mist": 0.4,
+                "false_clear": 0.3,
+            },
+        ),
+        
+        "corrupted_forest": BiomeDefinition(
+            name: "Corrupted Forest",
+            description: "Trees that bleed sap like tears, leaves that whisper forbidden truths",
+            base_texture: "textures/biomes/corrupted_forest.png",
+            movement_speed_multiplier: 0.6,
+            mounted_speed_multiplier: 0.3,
+            damage_per_turn: 2.0,
+            companion_stress_modifier: 8.0,
+            dread_generation_rate: 4.0,
+            corruption_resistance: 0.0,
+            compatible_neighbors: ["void", "corrupted_grassland", "corrupted_swamp"],
+            feature_spawn_chances: {
+                "weeping_tree": 0.30,
+                "corruption_node": 0.25,
+                "nightmare_den": 0.25,
+                "soul_well": 0.20,
+            },
+            ambient_sounds: ["trees_weep", "corruption_growth", "nightmare_rustle"],
+            weather_effects: {
+                "sorrow_rain": 0.4,
+                "nightmare_fog": 0.4,
+                "despair_wind": 0.2,
+            },
+        ),
+    },
+    
+    // Biome transition rules
+    transitions: {
+        "natural": {
+            // Gradual transitions between compatible biomes
+            "grassland_to_forest": BiomeTransition(
+                gradient_length: 3,
+                intermediate_features: ["forest_edge", "meadow_clearing"],
+                stress_modifier: 0.5,
+            ),
+            "forest_to_mountain": BiomeTransition(
+                gradient_length: 4,
+                intermediate_features: ["treeline", "rocky_outcrop"],
+                stress_modifier: 1.0,
+            ),
+            "grassland_to_desert": BiomeTransition(
+                gradient_length: 5,
+                intermediate_features: ["dry_grass", "sand_dune"],
+                stress_modifier: 1.5,
+            ),
+        },
+        
+        "corrupted": {
+            // Harsh, unnatural transitions
+            "any_to_void": BiomeTransition(
+                gradient_length: 1,
+                intermediate_features: ["reality_fray", "existence_doubt"],
+                stress_modifier: 10.0,
+            ),
+            "any_to_corrupted": BiomeTransition(
+                gradient_length: 2,
+                intermediate_features: ["corruption_seep", "wrongness_taste"],
+                stress_modifier: 5.0,
+            ),
+        },
+    },
+    
+    // Global modifiers based on world state
+    world_state_modifiers: {
+        "dread_multipliers": {
+            0: 1.0,    // Peace
+            25: 1.2,   // Unease
+            50: 1.5,   // Dread
+            75: 2.0,   // Terror
+            100: 3.0,  // Void
+        },
+        
+        "corruption_spread_rates": {
+            "grassland": 0.1,
+            "forest": 0.15,
+            "mountain": 0.05,
+            "desert": 0.12,
+            "swamp": 0.25,
+            "water": 0.08,
+            "lava": 0.20,
+        },
+    },
+)

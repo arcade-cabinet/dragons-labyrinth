@@ -1,0 +1,1 @@
+// Actors data types placeholder; integrated character components exist under components/
