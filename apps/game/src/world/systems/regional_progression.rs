@@ -3,7 +3,7 @@ use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
 use std::collections::HashMap;
 use crate::world::components::tiles::{BiomeType, HexCoord};
-use crate::world::resources::WorldState;
+use crate::world::state::WorldState;
 
 #[derive(Component, Debug, Clone)]
 pub struct RegionalMilestone {

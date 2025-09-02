@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::world::components::{DreadSource, Player};
-use crate::world::resources::{DreadLevel, WorldState};
+use crate::world::state::DreadLevel;
+use crate::world::state::WorldState;
 
 pub fn dread_progression_system(
     time: Res<Time>,

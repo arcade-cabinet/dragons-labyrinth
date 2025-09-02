@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::world::resources::{AssetHandles, GameState};
+use crate::world::state::AssetHandles;
 use bevy::asset::LoadState;
 use std::fs;
 use std::path::Path;

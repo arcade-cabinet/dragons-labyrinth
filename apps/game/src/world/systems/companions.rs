@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::world::components::{Companion, CompanionState, TraumaLevel};
-use crate::world::resources::{DreadLevel, GameState};
+use crate::world::state::DreadLevel;
 
 pub fn companion_psychology_system(
     time: Res<Time>,

@@ -4,7 +4,7 @@ use mapgen::*;
 use rand::prelude::*;
 
 use crate::world::components::{Tile, BiomeType, PathOverlay, FeatureOverlay};
-use crate::world::resources::{WorldState, AssetHandles};
+use crate::world::state::{WorldState, AssetHandles};
 use crate::utils::hex::*;
 
 pub fn hex_world_generation_system(

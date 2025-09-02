@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::world::components::{Player, Companion};
-use crate::world::resources::{DreadLevel, GameState};
+use crate::world::state::DreadLevel;
 use crate::game::{GameStateEnum};
 
 #[derive(Component)]
