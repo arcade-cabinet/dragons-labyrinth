@@ -1,0 +1,507 @@
+FeatureConfig(
+    features: {
+        // Social/Civilization Features
+        "tavern": FeatureDefinition(
+            name: "Tavern",
+            description: "A place of warmth and rumors, where weary travelers find respite",
+            model_path: "models/features/tavern.glb",
+            interaction_type: "enter_building",
+            interaction_range: 3.0,
+            spawn_weight: 10,
+            biome_restrictions: ["grassland", "forest"],
+            companion_effects: CompanionEffects(
+                stress_modifier: -5.0,
+                trust_modifier: 2.0,
+                dialogue_triggers: ["tavern_comfort", "local_rumors"],
+            ),
+            gameplay_effects: GameplayEffects(
+                rest_bonus: 15.0,
+                health_recovery: 10.0,
+                sanity_recovery: 8.0,
+                shop_available: true,
+                information_source: true,
+            ),
+            upgrade_levels: {
+                1: FeatureLevel(
+                    name: "Roadside Inn",
+                    staff_count: 2,
+                    services: ["basic_food", "simple_rooms"],
+                    reputation_threshold: 0,
+                ),
+                2: FeatureLevel(
+                    name: "Prosperous Tavern",
+                    staff_count: 4,
+                    services: ["good_food", "comfortable_rooms", "local_guides"],
+                    reputation_threshold: 25,
+                ),
+                3: FeatureLevel(
+                    name: "Grand Inn",
+                    staff_count: 6,
+                    services: ["fine_food", "luxury_rooms", "rare_information", "mount_care"],
+                    reputation_threshold: 50,
+                ),
+            },
+        ),
+        
+        "shop": FeatureDefinition(
+            name: "Shop",
+            description: "A merchant's stall offering goods for the discerning traveler",
+            model_path: "models/features/shop.glb",
+            interaction_type: "trade",
+            interaction_range: 2.5,
+            spawn_weight: 8,
+            biome_restrictions: ["grassland", "desert"],
+            companion_effects: CompanionEffects(
+                stress_modifier: -2.0,
+                trust_modifier: 1.0,
+                dialogue_triggers: ["shopping_advice", "merchant_gossip"],
+            ),
+            gameplay_effects: GameplayEffects(
+                shop_available: true,
+                information_source: false,
+                special_items: true,
+            ),
+            shop_types: {
+                "general": ShopInventory(
+                    item_categories: ["food", "basic_supplies", "tools"],
+                    price_modifier: 1.0,
+                    rarity_max: 2,
+                ),
+                "weapons": ShopInventory(
+                    item_categories: ["weapons", "armor", "combat_supplies"],
+                    price_modifier: 1.2,
+                    rarity_max: 3,
+                ),
+                "magic": ShopInventory(
+                    item_categories: ["potions", "scrolls", "magic_items"],
+                    price_modifier: 1.5,
+                    rarity_max: 4,
+                ),
+            },
+        ),
+        
+        "shrine": FeatureDefinition(
+            name: "Shrine",
+            description: "A sacred place where the divine still touches the world",
+            model_path: "models/features/shrine.glb",
+            interaction_type: "pray",
+            interaction_range: 2.0,
+            spawn_weight: 6,
+            biome_restrictions: ["grassland", "forest", "mountain"],
+            companion_effects: CompanionEffects(
+                stress_modifier: -8.0,
+                trust_modifier: 3.0,
+                dialogue_triggers: ["spiritual_comfort", "divine_hope"],
+            ),
+            gameplay_effects: GameplayEffects(
+                sanity_recovery: 15.0,
+                blessing_available: true,
+                corruption_cleansing: 5.0,
+            ),
+            blessing_types: {
+                "protection": Blessing(
+                    effect: "damage_reduction",
+                    magnitude: 0.2,
+                    duration: 3600.0, // 1 hour
+                    description: "Divine protection reduces incoming damage",
+                ),
+                "clarity": Blessing(
+                    effect: "sanity_resistance",
+                    magnitude: 0.3,
+                    duration: 1800.0, // 30 minutes
+                    description: "Mental clarity protects against dread",
+                ),
+                "journey": Blessing(
+                    effect: "movement_speed",
+                    magnitude: 0.15,
+                    duration: 7200.0, // 2 hours
+                    description: "Swift passage across the troubled lands",
+                ),
+            },
+        ),
+        
+        // Exploration Features
+        "campsite": FeatureDefinition(
+            name: "Campsite",
+            description: "A place where other travelers have rested before",
+            model_path: "models/features/campsite.glb",
+            interaction_type: "rest",
+            interaction_range: 4.0,
+            spawn_weight: 15,
+            biome_restrictions: ["grassland", "forest", "desert"],
+            companion_effects: CompanionEffects(
+                stress_modifier: -3.0,
+                trust_modifier: 1.0,
+                dialogue_triggers: ["campfire_stories", "shared_warmth"],
+            ),
+            gameplay_effects: GameplayEffects(
+                rest_bonus: 8.0,
+                health_recovery: 5.0,
+                safety_level: 0.7,
+                supply_cache_chance: 0.3,
+            ),
+            safety_levels: {
+                "abandoned": SafetyLevel(
+                    safety_rating: 0.4,
+                    encounter_chance: 0.3,
+                    description: "Old ashes and scattered supplies",
+                ),
+                "recent": SafetyLevel(
+                    safety_rating: 0.7,
+                    encounter_chance: 0.1,
+                    description: "Still warm embers and fresh provisions",
+                ),
+                "protected": SafetyLevel(
+                    safety_rating: 0.9,
+                    encounter_chance: 0.05,
+                    description: "Blessed by protective wards",
+                ),
+            },
+        ),
+        
+        "tower": FeatureDefinition(
+            name: "Tower",
+            description: "An ancient spire reaching toward forgotten skies",
+            model_path: "models/features/tower.glb",
+            interaction_type: "explore",
+            interaction_range: 3.0,
+            spawn_weight: 4,
+            biome_restrictions: ["mountain", "desert", "grassland"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 2.0,
+                trust_modifier: 0.0,
+                dialogue_triggers: ["ancient_mystery", "tower_fear"],
+            ),
+            gameplay_effects: GameplayEffects(
+                treasure_chance: 0.6,
+                lore_discovery: true,
+                skill_challenge: true,
+                danger_level: 3,
+            ),
+            tower_types: {
+                "mage": TowerType(
+                    floors: 5,
+                    hazards: ["magical_traps", "arcane_puzzles"],
+                    rewards: ["spell_scrolls", "magical_items"],
+                    boss_chance: 0.3,
+                ),
+                "watchtower": TowerType(
+                    floors: 3,
+                    hazards: ["structural_damage", "hostile_guards"],
+                    rewards: ["tactical_maps", "military_gear"],
+                    boss_chance: 0.1,
+                ),
+                "void_touched": TowerType(
+                    floors: 7,
+                    hazards: ["reality_distortion", "void_corruption"],
+                    rewards: ["forbidden_knowledge", "cursed_artifacts"],
+                    boss_chance: 0.8,
+                ),
+            },
+        ),
+        
+        // Encounter Features
+        "dungeon_entrance": FeatureDefinition(
+            name: "Dungeon Entrance",
+            description: "A passage leading into the depths below",
+            model_path: "models/features/dungeon_entrance.glb",
+            interaction_type: "enter_dungeon",
+            interaction_range: 2.0,
+            spawn_weight: 5,
+            biome_restrictions: ["forest", "mountain", "desert", "swamp"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 8.0,
+                trust_modifier: -2.0,
+                dialogue_triggers: ["dungeon_fear", "depths_warning"],
+            ),
+            gameplay_effects: GameplayEffects(
+                labyrinth_entrance: true,
+                danger_level: 4,
+                treasure_chance: 0.8,
+                boss_encounter_chance: 0.4,
+            ),
+            dungeon_types: {
+                "natural_cave": DungeonType(
+                    depth_levels: 3,
+                    maze_algorithm: "recursive_backtracker",
+                    monster_types: ["cave_dwellers", "earth_elementals"],
+                    theme: "natural",
+                ),
+                "ancient_tomb": DungeonType(
+                    depth_levels: 5,
+                    maze_algorithm: "kruskals",
+                    monster_types: ["undead", "constructs"],
+                    theme: "necromantic",
+                ),
+                "void_rift": DungeonType(
+                    depth_levels: 7,
+                    maze_algorithm: "non_euclidean",
+                    monster_types: ["void_spawn", "reality_echoes"],
+                    theme: "corrupted",
+                ),
+            },
+        ),
+        
+        "monster_lair": FeatureDefinition(
+            name: "Monster Lair",
+            description: "The dwelling of something that should not be",
+            model_path: "models/features/monster_lair.glb",
+            interaction_type: "combat_encounter",
+            interaction_range: 5.0,
+            spawn_weight: 7,
+            biome_restrictions: ["forest", "swamp", "mountain", "corrupted_grassland"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 10.0,
+                trust_modifier: -3.0,
+                dialogue_triggers: ["monster_terror", "retreat_suggestion"],
+            ),
+            gameplay_effects: GameplayEffects(
+                combat_encounter: true,
+                treasure_chance: 0.5,
+                danger_level: 3,
+                territory_size: 2, // Affects nearby tiles
+            ),
+            monster_types: {
+                "beast": MonsterLair(
+                    cr_range: (1, 5),
+                    pack_size: (2, 6),
+                    territory_aggressive: true,
+                    treasure_type: "natural",
+                ),
+                "aberration": MonsterLair(
+                    cr_range: (3, 8),
+                    pack_size: (1, 3),
+                    territory_aggressive: false,
+                    treasure_type: "aberrant",
+                ),
+                "void_spawn": MonsterLair(
+                    cr_range: (5, 12),
+                    pack_size: (1, 2),
+                    territory_aggressive: true,
+                    treasure_type: "corrupted",
+                ),
+            },
+        ),
+        
+        // Corruption Features
+        "corruption_node": FeatureDefinition(
+            name: "Corruption Node",
+            description: "A wound in reality where wrongness seeps into the world",
+            model_path: "models/features/corruption_node.glb",
+            interaction_type: "cleanse_or_harvest",
+            interaction_range: 6.0,
+            spawn_weight: 3,
+            biome_restrictions: ["corrupted_grassland", "corrupted_forest", "void"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 20.0,
+                trust_modifier: -5.0,
+                dialogue_triggers: ["corruption_terror", "reality_doubt"],
+            ),
+            gameplay_effects: GameplayEffects(
+                corruption_source: true,
+                dread_generation: 5.0,
+                affect_radius: 3,
+                cleansing_possible: true,
+                harvesting_possible: true,
+            ),
+            corruption_effects: CorruptionEffects(
+                biome_conversion_rate: 0.1,
+                monster_spawn_rate: 0.3,
+                reality_distortion: 0.8,
+                sanity_drain_range: 8.0,
+            ),
+        ),
+        
+        "void_tear": FeatureDefinition(
+            name: "Void Tear",
+            description: "A rent in the fabric of existence itself",
+            model_path: "models/features/void_tear.glb",
+            interaction_type: "void_interaction",
+            interaction_range: 10.0,
+            spawn_weight: 1,
+            biome_restrictions: ["void"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 50.0,
+                trust_modifier: -10.0,
+                dialogue_triggers: ["void_madness", "existence_doubt", "flee_impulse"],
+            ),
+            gameplay_effects: GameplayEffects(
+                dread_generation: 15.0,
+                affect_radius: 5,
+                reality_anchor_needed: true,
+                boss_spawn_chance: 0.6,
+                world_ending_threat: true,
+            ),
+            void_effects: VoidEffects(
+                reality_erosion_rate: 0.5,
+                time_distortion: true,
+                memory_corruption: true,
+                companion_breakdown_threshold: 30.0,
+            ),
+        ),
+        
+        // Utility Features
+        "treasure_cache": FeatureDefinition(
+            name: "Treasure Cache",
+            description: "Hidden riches left by those who came before",
+            model_path: "models/features/treasure_cache.glb",
+            interaction_type: "loot",
+            interaction_range: 1.5,
+            spawn_weight: 8,
+            biome_restrictions: ["mountain", "desert", "forest", "ruins"],
+            companion_effects: CompanionEffects(
+                stress_modifier: -1.0,
+                trust_modifier: 2.0,
+                dialogue_triggers: ["treasure_excitement", "luck_comment"],
+            ),
+            gameplay_effects: GameplayEffects(
+                guaranteed_loot: true,
+                trap_chance: 0.4,
+                puzzle_chance: 0.3,
+                value_range: (50, 500),
+            ),
+            cache_types: {
+                "bandit": CacheType(
+                    loot_table: ["weapons", "coins", "gems"],
+                    trap_types: ["poison_dart", "explosive"],
+                    discovery_difficulty: 2,
+                ),
+                "merchant": CacheType(
+                    loot_table: ["trade_goods", "maps", "coins"],
+                    trap_types: ["lock_puzzle", "false_bottom"],
+                    discovery_difficulty: 3,
+                ),
+                "ancient": CacheType(
+                    loot_table: ["artifacts", "scrolls", "rare_materials"],
+                    trap_types: ["magical_ward", "cursed_trigger"],
+                    discovery_difficulty: 4,
+                ),
+            },
+        ),
+        
+        "ruins": FeatureDefinition(
+            name: "Ruins",
+            description: "Remnants of a civilization lost to time and horror",
+            model_path: "models/features/ruins.glb",
+            interaction_type: "explore",
+            interaction_range: 4.0,
+            spawn_weight: 6,
+            biome_restrictions: ["desert", "forest", "grassland"],
+            companion_effects: CompanionEffects(
+                stress_modifier: 5.0,
+                trust_modifier: 0.0,
+                dialogue_triggers: ["ruins_melancholy", "history_lesson", "civilization_loss"],
+            ),
+            gameplay_effects: GameplayEffects(
+                lore_discovery: true,
+                treasure_chance: 0.4,
+                shelter_available: true,
+                historical_significance: true,
+            ),
+            ruin_types: {
+                "village": RuinType(
+                    size: "small",
+                    lore_fragments: 3,
+                    shelter_quality: 0.6,
+                    treasure_rooms: 2,
+                ),
+                "temple": RuinType(
+                    size: "medium",
+                    lore_fragments: 5,
+                    shelter_quality: 0.8,
+                    treasure_rooms: 4,
+                ),
+                "city": RuinType(
+                    size: "large",
+                    lore_fragments: 10,
+                    shelter_quality: 0.4,
+                    treasure_rooms: 8,
+                ),
+            },
+        ),
+    },
+    
+    // Feature interaction rules
+    feature_interactions: {
+        "proximity_effects": {
+            "tavern_near_shop": ProximityEffect(
+                range: 2,
+                effect: "settlement_bonus",
+                magnitude: 1.5,
+                description: "Trade settlement provides better services",
+            ),
+            "shrine_near_corruption": ProximityEffect(
+                range: 3,
+                effect: "divine_resistance",
+                magnitude: 0.8,
+                description: "Sacred ground resists corruption",
+            ),
+            "void_tear_near_anything": ProximityEffect(
+                range: 5,
+                effect: "reality_erosion",
+                magnitude: 2.0,
+                description: "Void presence corrupts nearby features",
+            ),
+        },
+        
+        "combination_effects": {
+            "multiple_shrines": CombinationEffect(
+                required_count: 3,
+                range: 5,
+                effect: "sacred_ground",
+                description: "Multiple shrines create consecrated area",
+            ),
+            "corruption_cluster": CombinationEffect(
+                required_count: 2,
+                range: 4,
+                effect: "corruption_amplification",
+                description: "Corruption nodes reinforce each other",
+            ),
+        },
+    },
+    
+    // Dynamic feature generation rules
+    generation_rules: {
+        "progression_scaling": {
+            0: GenerationParams(
+                max_danger_level: 2,
+                corruption_chance: 0.0,
+                boss_feature_chance: 0.0,
+            ),
+            30: GenerationParams(
+                max_danger_level: 3,
+                corruption_chance: 0.1,
+                boss_feature_chance: 0.05,
+            ),
+            60: GenerationParams(
+                max_danger_level: 4,
+                corruption_chance: 0.3,
+                boss_feature_chance: 0.15,
+            ),
+            90: GenerationParams(
+                max_danger_level: 5,
+                corruption_chance: 0.6,
+                boss_feature_chance: 0.3,
+            ),
+            120: GenerationParams(
+                max_danger_level: 6,
+                corruption_chance: 0.8,
+                boss_feature_chance: 0.5,
+            ),
+            150: GenerationParams(
+                max_danger_level: 8,
+                corruption_chance: 1.0,
+                boss_feature_chance: 0.8,
+            ),
+        },
+        
+        "biome_feature_affinity": {
+            "grassland": ["tavern", "shop", "shrine", "campsite"],
+            "forest": ["campsite", "dungeon_entrance", "monster_lair", "ruins"],
+            "mountain": ["tower", "treasure_cache", "shrine", "monster_lair"],
+            "desert": ["ruins", "treasure_cache", "oasis", "shop"],
+            "swamp": ["monster_lair", "witch_hut", "corruption_node"],
+            "void": ["void_tear", "corruption_node", "reality_anchor"],
+        },
+    },
+)

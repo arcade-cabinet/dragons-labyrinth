@@ -1,0 +1,1 @@
+// Legacy placeholder removed; world is now consolidated into GamePlugin
