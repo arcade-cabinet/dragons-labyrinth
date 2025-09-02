@@ -9,22 +9,30 @@ use bevy_yoleck::prelude::*;
 use crate::systems::*;
 use crate::components::*;
 use crate::resources::*;
+use crate::world::plugin::WorldPlugin;
 
 pub struct HorrorRpgPlugin;
 
 impl Plugin for HorrorRpgPlugin {
     fn build(&self, app: &mut App) {
         // Core Bevy plugins
-        app.add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Horror RPG".into(),
-                canvas: Some("#game-canvas".into()),
-                fit_canvas_to_parent: true,
-                prevent_default_event_handling: false,
+        app.add_plugins(DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Horror RPG".into(),
+                    canvas: Some("#game-canvas".into()),
+                    fit_canvas_to_parent: true,
+                    prevent_default_event_handling: false,
+                    ..default()
+                }),
                 ..default()
-            }),
-            ..default()
-        }));
+            })
+            .set(bevy::asset::AssetPlugin {
+                // Point AssetServer to app-local assets directory
+                file_path: "apps/game/assets".into(),
+                ..default()
+            })
+        );
 
         // Third-party plugins
         app.add_plugins((
@@ -35,6 +43,9 @@ impl Plugin for HorrorRpgPlugin {
             YarnSpinnerPlugin,
             YoleckPlugin,
         ));
+
+        // World organization plugin (aggregates ECS world setup)
+        app.add_plugins(WorldPlugin);
 
         // Game resources
         app.init_resource::<WorldState>()

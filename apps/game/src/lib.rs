@@ -3,6 +3,7 @@ mod systems;
 mod components;
 mod resources;
 mod utils;
+mod world;
 
 use bevy::prelude::*;
 use game::*;

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use horror_rpg::run_app;
+use game::run_app;
 
 fn main() {
     #[cfg(target_arch = "wasm32")]
