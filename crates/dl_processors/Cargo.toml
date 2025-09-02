@@ -1,0 +1,32 @@
+[package]
+name = "dl_processors"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+ron = { workspace = true }
+uuid = { workspace = true }
+regex = { workspace = true }
+lazy_static = { workspace = true }
+scraper = { workspace = true }
+ammonia = { workspace = true }
+bevy = "0.16.1"
+bevy_ecs_tilemap = "0.16"
+
+[build-dependencies]
+dl_analysis = { path = "../dl_analysis" }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+ron = { workspace = true }
+uuid = { workspace = true }
+quote = { workspace = true }
+syn = { workspace = true }
+proc-macro2 = { workspace = true }

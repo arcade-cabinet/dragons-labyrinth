@@ -1,0 +1,76 @@
+[workspace]
+members = [
+    "apps/game",
+    "crates/dl_analysis",
+    "crates/dl_processors",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+authors = ["Dragon's Labyrinth Team"]
+license = "MIT"
+repository = "https://github.com/jbcom/dragons-labyrinth"
+
+[workspace.dependencies]
+# Core dependencies
+anyhow = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ron = "0.11"
+toml = "0.9"
+
+# AI and tokenization
+openai_dive = "1.2"
+tiktoken-rs = "0.7"
+tokio = { version = "1.47", features = ["full"] }
+
+# Database
+rusqlite = { version = "0.37", features = ["bundled", "serde_json"] }
+
+# Utilities
+uuid = { version = "1.18", features = ["v4", "serde"] }
+regex = "1.11"
+lazy_static = "1.5"
+rayon = "1.11"
+glob = "0.3"
+walkdir = "2.5"
+
+# HTML/JSON processing
+scraper = "0.24"
+html5ever = "0.35"
+ammonia = "4.1"
+
+# File system
+fs_extra = "1.3"
+tempfile = "3.21"
+
+# Build dependencies
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+proc-macro2 = "1.0"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
