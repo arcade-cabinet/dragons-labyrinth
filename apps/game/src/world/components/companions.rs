@@ -104,12 +104,12 @@ impl Companion {
     
     pub fn react_to_dread_phase(&mut self, dread_phase: &crate::world::components::DreadPhase) {
         let (stress_change, trust_change) = match dread_phase {
-            crate::components::DreadPhase::Peace => (-2.0, 1.0),
-            crate::components::DreadPhase::Unease => (1.0, 0.0),
-            crate::components::DreadPhase::Dread => (3.0, -1.0),
-            crate::components::DreadPhase::Terror => (8.0, -3.0),
-            crate::components::DreadPhase::Void => (15.0, -8.0),
-            crate::components::DreadPhase::BeyondVoid => (25.0, -15.0),
+            crate::world::components::DreadPhase::Peace => (-2.0, 1.0),
+            crate::world::components::DreadPhase::Unease => (1.0, 0.0),
+            crate::world::components::DreadPhase::Dread => (3.0, -1.0),
+            crate::world::components::DreadPhase::Terror => (8.0, -3.0),
+            crate::world::components::DreadPhase::Void => (15.0, -8.0),
+            crate::world::components::DreadPhase::BeyondVoid => (25.0, -15.0),
         };
         
         self.stress += stress_change;
