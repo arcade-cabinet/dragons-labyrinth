@@ -1,0 +1,29 @@
+[build]
+target = "index.html"
+dist = "dist"
+target-dir = "target"
+public_url = "/"
+
+[watch]
+ignore = [
+    "dist",
+    ".git",
+]
+
+[serve]
+address = "0.0.0.0"
+port = 5000
+open = false
+
+[tools]
+wasm-bindgen = "0.2"
+
+[[hooks]]
+stage = "pre_build"
+command = "echo"
+command_arguments = ["Building Horror RPG..."]
+
+[[hooks]]
+stage = "post_build" 
+command = "echo"
+command_arguments = ["Build complete. The horror awaits..."]
