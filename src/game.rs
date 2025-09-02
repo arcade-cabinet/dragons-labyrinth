@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use avian3d::prelude::*;
+use bevy_cobweb::prelude::*;
+use bevy_cobweb_ui::prelude::*;
 use bevy_yarnspinner::prelude::*;
 use bevy_yoleck::prelude::*;
 
@@ -28,6 +30,8 @@ impl Plugin for HorrorRpgPlugin {
         app.add_plugins((
             TilemapPlugin,
             PhysicsPlugins::default(),
+            CobwebPlugin::default(),
+            CobwebUiPlugin,
             YarnSpinnerPlugin,
             YoleckPlugin,
         ));
@@ -41,7 +45,9 @@ impl Plugin for HorrorRpgPlugin {
             .init_resource::<MovementPreview>()
             .init_resource::<DayNightCycle>()
             .init_resource::<WeatherSystem>()
-            .init_resource::<CharacterCreator>();
+            .init_resource::<CharacterCreator>()
+            .init_resource::<UIManager>()
+            .init_resource::<ProceduralAudioSystem>();
 
         // Game components registration
         app.register_component_hooks::<Tile>()
@@ -56,7 +62,7 @@ impl Plugin for HorrorRpgPlugin {
         app.add_systems(Startup, (
             setup_camera,
             setup_world,
-            setup_ui,
+            setup_splash_screen,
             load_assets,
         ))
         .add_systems(Update, (
@@ -70,14 +76,28 @@ impl Plugin for HorrorRpgPlugin {
             update_movement_preview,
             check_forced_rest,
             update_regional_progression,
+            update_horror_audio,
+            update_ui_animations,
+            update_procedural_audio,
+            play_ui_sound_effects,
         ).run_if(in_state(GameStateEnum::Playing)))
-        .add_systems(OnEnter(GameStateEnum::MainMenu), setup_main_menu)
-        .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_main_menu)
-        .add_systems(OnEnter(GameStateEnum::CharacterCreation), setup_character_creator)
-        .add_systems(Update, (
-            handle_character_creator_input,
-            update_character_preview,
-        ).run_if(in_state(GameStateEnum::CharacterCreation)));
+        
+        // Splash screen
+        .add_systems(Update, update_splash_screen.run_if(in_state(GameStateEnum::Loading)))
+        .add_systems(OnExit(GameStateEnum::Loading), cleanup_ui_screen::<SplashScreen>)
+        
+        // Main menu
+        .add_systems(OnEnter(GameStateEnum::MainMenu), (setup_main_menu, play_menu_audio))
+        .add_systems(Update, handle_main_menu_input.run_if(in_state(GameStateEnum::MainMenu)))
+        .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_ui_screen::<MainMenuScreen>)
+        
+        // Character creation
+        .add_systems(OnEnter(GameStateEnum::CharacterCreation), (setup_character_creator_ui, play_character_creation_audio))
+        .add_systems(Update, handle_character_creator_input.run_if(in_state(GameStateEnum::CharacterCreation)))
+        .add_systems(OnExit(GameStateEnum::CharacterCreation), (
+            cleanup_ui_screen::<CharacterCreationScreen>,
+            spawn_player_character,
+        ));
 
         // Game states
         app.init_state::<GameStateEnum>();
@@ -147,71 +167,9 @@ fn setup_world(
     world_state.tilemap_entity = Some(tilemap_entity);
 }
 
-fn setup_ui(mut commands: Commands) {
-    // Root UI container
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            ..default()
-        },
-        Name::new("UIRoot"),
-    ));
-}
+// Removed - using Cobweb UI system instead
 
-fn setup_main_menu(mut commands: Commands) {
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            background_color: BackgroundColor(Color::srgba(0.1, 0.1, 0.1, 0.8)),
-            ..default()
-        },
-        MainMenuMarker,
-    )).with_children(|parent| {
-        parent.spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(200.0),
-                    height: Val::Px(50.0),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                background_color: BackgroundColor(Color::srgb(0.3, 0.3, 0.3)),
-                ..default()
-            },
-            StartGameButton,
-        )).with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                "Start Journey",
-                TextStyle {
-                    font_size: 24.0,
-                    color: Color::WHITE,
-                    ..default()
-                },
-            ));
-        });
-    });
-}
-
-fn cleanup_main_menu(
-    mut commands: Commands,
-    menu_query: Query<Entity, With<MainMenuMarker>>,
-) {
-    for entity in menu_query.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-}
+// Removed - using Cobweb UI system instead
 
 #[derive(Component)]
 struct MainMenuMarker;
