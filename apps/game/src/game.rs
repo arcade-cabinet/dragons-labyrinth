@@ -28,8 +28,8 @@ impl Plugin for HorrorRpgPlugin {
                 ..default()
             })
             .set(bevy::asset::AssetPlugin {
-                // Point AssetServer to app-local assets directory
-                file_path: "apps/game/assets".into(),
+                // assets/ is copied to dist by Trunk; load with paths like "textures/..."
+                file_path: "assets".into(),
                 ..default()
             })
         );

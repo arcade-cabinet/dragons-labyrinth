@@ -94,5 +94,7 @@
 
     <!-- Trunk will build and load the WASM for the crate in apps/game -->
     <link data-trunk rel="rust" data-cargo-dir="apps/game" />
+    <!-- Copy assets into dist so AssetServer(file_path = "assets") can load them -->
+    <link data-trunk rel="copy-dir" href="apps/game/assets" />
 </body>
 </html>
