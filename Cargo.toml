@@ -9,43 +9,12 @@ edition = "2024"
 license = "MIT"
 name = "bevy-worldbuilder"
 
-[package]
-name = "horror-rpg"
-version = "0.1.0"
-edition = "2024"
-build = "build_audio.rs"
-
-[lib]
-crate-type = ["cdylib"]
-
-[[bin]]
-name = "horror-rpg"
-path = "src/main.rs"
-
-[dependencies]
-bevy = { version = "0.16.1", features = ["bevy_dev_tools"] }
-bevy_ecs_tilemap = "0.16"
-avian3d = "0.3"
-bevy_cobweb = "0.17"
-bevy_cobweb_ui = "0.21"
-bevy_yarnspinner = "0.5"
-bevy-yoleck = "0.28"
-bevy_egui = "0.36"
-mapgen = "0.6"
-serde = { version = "1.0", features = ["derive"] }
-ron = "0.11"
-noise = "0.9"
-rand = { version = "0.8", features = ["small_rng"] }
-wasm-bindgen = "0.2"
-web-sys = "0.3"
-console_error_panic_hook = "0.1"
-serde_json = "1.0"
-
-[build-dependencies]
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen-futures = "0.4"
-getrandom = { version = "0.2", features = ["js"] }
+[workspace.dependencies]
+bevy = "0.16.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+rand = "0.8"
 
 [profile.release]
 opt-level = "s"

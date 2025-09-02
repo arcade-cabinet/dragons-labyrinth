@@ -2,6 +2,7 @@
 target = "index.html"
 dist = "dist"
 target-dir = "target"
+public_url = "/"
 
 [watch]
 ignore = [
