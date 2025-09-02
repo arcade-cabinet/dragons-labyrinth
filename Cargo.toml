@@ -1,28 +1,20 @@
-<<<<<<< HEAD
-[workspace]
+[
+workspace
+]
 members = ["apps/game", "crates/world"]
 resolver = "2"
-=======
-[package]
-name = "horror-rpg"
-version = "0.1.0"
-edition = "2024"
-build = "build_audio.rs"
->>>>>>> 9f8fb441 (Created a checkpoint)
 
 [workspace.package]
 edition = "2024"
 license = "MIT"
 name = "bevy-worldbuilder"
 
-<<<<<<< HEAD
-[workspace.dependencies]
-bevy = "0.16.1"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-anyhow = "1"
-rand = "0.8"
-=======
+[package]
+name = "horror-rpg"
+version = "0.1.0"
+edition = "2024"
+build = "build_audio.rs"
+
 [lib]
 crate-type = ["cdylib"]
 
@@ -31,7 +23,7 @@ name = "horror-rpg"
 path = "src/main.rs"
 
 [dependencies]
-bevy = { version = "0.16", features = ["bevy_dev_tools"] }
+bevy = { version = "0.16.1", features = ["bevy_dev_tools"] }
 bevy_ecs_tilemap = "0.16"
 avian3d = "0.3"
 bevy_cobweb = "0.17"
@@ -50,7 +42,6 @@ console_error_panic_hook = "0.1"
 serde_json = "1.0"
 
 [build-dependencies]
-# Only used during build time for audio generation
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4"
@@ -69,11 +60,9 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
-# Bevy WASM optimizations
 [profile.wasm-release]
 inherits = "release"
 opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
->>>>>>> 4738a0a1 (Created a checkpoint)
