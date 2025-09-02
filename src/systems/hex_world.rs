@@ -163,21 +163,44 @@ fn get_biome_from_position(
     }
 }
 
-fn get_texture_index_for_biome(biome_type: &BiomeType) -> (u32, u32) {
-    // Returns (texture_atlas_index, tile_index_in_atlas)
+fn get_model_path_for_biome(biome_type: &BiomeType) -> String {
     match biome_type {
-        // First sprite sheet (user provided)
-        BiomeType::Desert => (0, 0),     // Top left of first sprite sheet
-        BiomeType::Forest => (0, 1),     // Top middle of first sprite sheet  
-        BiomeType::Swamp => (0, 2),      // Top right of first sprite sheet
-        BiomeType::Mountain => (0, 3),   // Bottom left of first sprite sheet
-        BiomeType::Water => (0, 4),      // Bottom right of first sprite sheet
+        // Core biomes
+        BiomeType::Grassland => "models/biomes/core/grassland.glb".to_string(),
+        BiomeType::Forest => "models/biomes/core/forest.glb".to_string(),
+        BiomeType::Mountain => "models/biomes/core/mountain.glb".to_string(),
+        BiomeType::Desert => "models/biomes/core/desert.glb".to_string(),
+        BiomeType::Swamp => "models/biomes/core/swamp.glb".to_string(),
+        BiomeType::Water => "models/biomes/core/water.glb".to_string(),
+        BiomeType::Snow => "models/biomes/core/snow.glb".to_string(),
+        BiomeType::Lava => "models/biomes/core/lava.glb".to_string(),
+        BiomeType::Void => "models/biomes/core/void.glb".to_string(),
         
-        // Second sprite sheet (generated)
-        BiomeType::Grassland => (1, 4),  // Bright grassland from generated sheet
-        BiomeType::Lava => (1, 0),       // Lava terrain from generated sheet
-        BiomeType::Void => (1, 1),       // Void terrain from generated sheet
-        BiomeType::Corrupted(_) => (1, 2), // Corrupted terrain from generated sheet
+        // Transitional biomes
+        BiomeType::ForestGrassland => "models/biomes/transitional/forest_grassland.glb".to_string(),
+        BiomeType::MountainForest => "models/biomes/transitional/mountain_forest.glb".to_string(),
+        BiomeType::DesertMountain => "models/biomes/transitional/desert_mountain.glb".to_string(),
+        BiomeType::SwampWater => "models/biomes/transitional/swamp_water.glb".to_string(),
+        BiomeType::SnowMountain => "models/biomes/transitional/snow_mountain.glb".to_string(),
+        
+        // Corrupted variants
+        BiomeType::CorruptedGrassland => "models/biomes/corrupted/grassland.glb".to_string(),
+        BiomeType::CorruptedForest => "models/biomes/corrupted/forest.glb".to_string(),
+        BiomeType::CorruptedMountain => "models/biomes/corrupted/mountain.glb".to_string(),
+        BiomeType::CorruptedDesert => "models/biomes/corrupted/desert.glb".to_string(),
+        BiomeType::CorruptedSwamp => "models/biomes/corrupted/swamp.glb".to_string(),
+        BiomeType::CorruptedWater => "models/biomes/corrupted/water.glb".to_string(),
+        BiomeType::CorruptedSnow => "models/biomes/corrupted/snow.glb".to_string(),
+        
+        // Void-touched variants
+        BiomeType::VoidGrassland => "models/biomes/void/grassland.glb".to_string(),
+        BiomeType::VoidForest => "models/biomes/void/forest.glb".to_string(),
+        BiomeType::VoidMountain => "models/biomes/void/mountain.glb".to_string(),
+        BiomeType::VoidDesert => "models/biomes/void/desert.glb".to_string(),
+        BiomeType::VoidSwamp => "models/biomes/void/swamp.glb".to_string(),
+        BiomeType::VoidWater => "models/biomes/void/water.glb".to_string(),
+        BiomeType::VoidSnow => "models/biomes/void/snow.glb".to_string(),
+        BiomeType::VoidLava => "models/biomes/void/lava.glb".to_string(),
     }
 }
 

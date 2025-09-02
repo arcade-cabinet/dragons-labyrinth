@@ -14,29 +14,83 @@ pub struct Tile {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum BiomeType {
+    // Core biomes
     Grassland,
     Forest,
     Mountain,
     Desert,
     Swamp,
     Water,
+    Snow,
     Lava,
     Void,
-    Corrupted(Box<BiomeType>), // Corrupted version of base biome
+    
+    // Transitional biomes
+    ForestGrassland,
+    MountainForest,
+    DesertMountain,
+    SwampWater,
+    SnowMountain,
+    
+    // Corrupted variants
+    CorruptedGrassland,
+    CorruptedForest,
+    CorruptedMountain,
+    CorruptedDesert,
+    CorruptedSwamp,
+    CorruptedWater,
+    CorruptedSnow,
+    
+    // Void-touched variants
+    VoidGrassland,
+    VoidForest,
+    VoidMountain,
+    VoidDesert,
+    VoidSwamp,
+    VoidWater,
+    VoidSnow,
+    VoidLava,
 }
 
 impl BiomeType {
     pub fn get_movement_multiplier(&self) -> f32 {
         match self {
+            // Core biomes
             BiomeType::Grassland => 1.0,
             BiomeType::Forest => 0.8,
             BiomeType::Mountain => 0.6,
             BiomeType::Desert => 0.7,
             BiomeType::Swamp => 0.5,
             BiomeType::Water => 0.3,
+            BiomeType::Snow => 0.4,
             BiomeType::Lava => 0.2,
             BiomeType::Void => 1.5, // Faster but dangerous
-            BiomeType::Corrupted(base) => base.get_movement_multiplier() * 0.8,
+            
+            // Transitional biomes (average of components)
+            BiomeType::ForestGrassland => 0.9,
+            BiomeType::MountainForest => 0.7,
+            BiomeType::DesertMountain => 0.65,
+            BiomeType::SwampWater => 0.4,
+            BiomeType::SnowMountain => 0.5,
+            
+            // Corrupted variants (reduced movement)
+            BiomeType::CorruptedGrassland => 0.8,
+            BiomeType::CorruptedForest => 0.6,
+            BiomeType::CorruptedMountain => 0.4,
+            BiomeType::CorruptedDesert => 0.5,
+            BiomeType::CorruptedSwamp => 0.3,
+            BiomeType::CorruptedWater => 0.2,
+            BiomeType::CorruptedSnow => 0.3,
+            
+            // Void-touched variants (unpredictable movement)
+            BiomeType::VoidGrassland => 1.2,
+            BiomeType::VoidForest => 0.9,
+            BiomeType::VoidMountain => 0.8,
+            BiomeType::VoidDesert => 1.0,
+            BiomeType::VoidSwamp => 0.7,
+            BiomeType::VoidWater => 0.5,
+            BiomeType::VoidSnow => 0.6,
+            BiomeType::VoidLava => 0.4,
         }
     }
     
