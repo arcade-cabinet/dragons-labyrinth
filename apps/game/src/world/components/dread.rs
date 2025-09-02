@@ -100,20 +100,20 @@ pub enum CorruptionType {
 }
 
 impl CorruptionType {
-    pub fn get_biome_effect(&self, base_biome: &crate::components::BiomeType) -> crate::components::BiomeType {
+    pub fn get_biome_effect(&self, base_biome: &crate::world::components::BiomeType) -> crate::world::components::BiomeType {
         match self {
-            CorruptionType::VoidTaint => crate::components::BiomeType::Void,
+            CorruptionType::VoidTaint => crate::world::components::BiomeType::Void,
             CorruptionType::BloodCurse => {
-                crate::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
             }
             CorruptionType::ShadowBlight => {
-                crate::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
             }
-            CorruptionType::TimeFracture => crate::components::BiomeType::Void,
+            CorruptionType::TimeFracture => crate::world::components::BiomeType::Void,
             CorruptionType::MindRot => {
-                crate::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
             }
-            CorruptionType::ElementalFlux => crate::components::BiomeType::Lava,
+            CorruptionType::ElementalFlux => crate::world::components::BiomeType::Lava,
         }
     }
     
@@ -128,27 +128,27 @@ impl CorruptionType {
         }
     }
     
-    pub fn get_companion_effects(&self) -> crate::components::EmotionalResponse {
+    pub fn get_companion_effects(&self) -> crate::world::components::EmotionalResponse {
         match self {
-            CorruptionType::VoidTaint => crate::components::EmotionalResponse {
+            CorruptionType::VoidTaint => crate::world::components::EmotionalResponse {
                 stress_modifier: 20.0,
                 trust_modifier: -10.0,
                 dialogue_trigger: Some("void_terror".to_string()),
                 behavioral_change: Some("panic_flee".to_string()),
             },
-            CorruptionType::BloodCurse => crate::components::EmotionalResponse {
+            CorruptionType::BloodCurse => crate::world::components::EmotionalResponse {
                 stress_modifier: 15.0,
                 trust_modifier: -5.0,
                 dialogue_trigger: Some("blood_revulsion".to_string()),
                 behavioral_change: Some("avoid_area".to_string()),
             },
-            CorruptionType::MindRot => crate::components::EmotionalResponse {
+            CorruptionType::MindRot => crate::world::components::EmotionalResponse {
                 stress_modifier: 25.0,
                 trust_modifier: -15.0,
                 dialogue_trigger: Some("mind_confusion".to_string()),
                 behavioral_change: Some("disoriented".to_string()),
             },
-            _ => crate::components::EmotionalResponse {
+            _ => crate::world::components::EmotionalResponse {
                 stress_modifier: 10.0,
                 trust_modifier: -3.0,
                 dialogue_trigger: None,

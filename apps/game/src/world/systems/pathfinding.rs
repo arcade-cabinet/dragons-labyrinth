@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::collections::{HashMap, VecDeque, BinaryHeap};
 use std::cmp::Ordering;
-use crate::components::tiles::{HexCoord, BiomeType};
+use crate::world::components::tiles::{HexCoord, BiomeType};
 
 #[derive(Component, Debug)]
 pub struct PlayerPosition {

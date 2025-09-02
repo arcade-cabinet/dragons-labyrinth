@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use rand::{Rng, thread_rng};
-use crate::components::tiles::HexCoord;
+use crate::world::components::tiles::HexCoord;
 use crate::systems::regional_progression::EmotionalState;
 
 #[derive(Component, Debug)]

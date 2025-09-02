@@ -114,7 +114,7 @@ impl AssetHandles {
 #[derive(Resource)]
 pub struct DreadLevel {
     pub current: f32,
-    pub phase: crate::components::DreadPhase,
+    pub phase: crate::world::components::DreadPhase,
     pub phase_changed_this_frame: bool,
     pub progression_rate: f32,
     pub resistance: f32, // Player's resistance to dread
@@ -124,7 +124,7 @@ impl Default for DreadLevel {
     fn default() -> Self {
         Self {
             current: 0.0,
-            phase: crate::components::DreadPhase::Peace,
+            phase: crate::world::components::DreadPhase::Peace,
             phase_changed_this_frame: false,
             progression_rate: 1.0,
             resistance: 0.0,
@@ -153,9 +153,9 @@ impl DreadLevel {
     pub fn can_trigger_boss_encounter(&self) -> bool {
         matches!(
             self.phase,
-            crate::components::DreadPhase::Terror 
-                | crate::components::DreadPhase::Void 
-                | crate::components::DreadPhase::BeyondVoid
+            crate::world::components::DreadPhase::Terror 
+                | crate::world::components::DreadPhase::Void 
+                | crate::world::components::DreadPhase::BeyondVoid
         )
     }
 }

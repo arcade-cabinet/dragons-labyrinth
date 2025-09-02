@@ -3,14 +3,14 @@ use bevy_ecs_tilemap::prelude::*;
 use mapgen::*;
 use rand::prelude::*;
 
-use crate::components::{Tile, BiomeType, PathOverlay, FeatureOverlay};
-use crate::resources::{WorldState, AssetHandles};
+use crate::world::components::{Tile, BiomeType, PathOverlay, FeatureOverlay};
+use crate::world::resources::{WorldState, AssetHandles};
 use crate::utils::hex::*;
 
 pub fn hex_world_generation_system(
     mut commands: Commands,
     mut world_state: ResMut<WorldState>,
-    player_query: Query<&Transform, (With<crate::components::Player>, Changed<Transform>)>,
+    player_query: Query<&Transform, (With<crate::world::components::Player>, Changed<Transform>)>,
     asset_handles: Res<AssetHandles>,
     mut tilemap_query: Query<&mut TilemapStorage>,
 ) {

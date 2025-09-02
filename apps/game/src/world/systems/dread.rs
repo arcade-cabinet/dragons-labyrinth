@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use crate::components::{DreadSource, Player};
-use crate::resources::{DreadLevel, WorldState};
+use crate::world::components::{DreadSource, Player};
+use crate::world::resources::{DreadLevel, WorldState};
 
 pub fn dread_progression_system(
     time: Res<Time>,
@@ -64,12 +64,12 @@ fn update_dread_phase(dread_level: &mut ResMut<DreadLevel>) {
     let previous_phase = dread_level.phase.clone();
     
     dread_level.phase = match dread_level.current as i32 {
-        0..=20 => crate::components::DreadPhase::Peace,
-        21..=40 => crate::components::DreadPhase::Unease,
-        41..=60 => crate::components::DreadPhase::Dread,
-        61..=80 => crate::components::DreadPhase::Terror,
-        81..=100 => crate::components::DreadPhase::Void,
-        _ => crate::components::DreadPhase::BeyondVoid,
+        0..=20 => crate::world::components::DreadPhase::Peace,
+        21..=40 => crate::world::components::DreadPhase::Unease,
+        41..=60 => crate::world::components::DreadPhase::Dread,
+        61..=80 => crate::world::components::DreadPhase::Terror,
+        81..=100 => crate::world::components::DreadPhase::Void,
+        _ => crate::world::components::DreadPhase::BeyondVoid,
     };
     
     dread_level.phase_changed_this_frame = previous_phase != dread_level.phase;
@@ -77,26 +77,26 @@ fn update_dread_phase(dread_level: &mut ResMut<DreadLevel>) {
 
 fn handle_dread_phase_change(dread_level: &DreadLevel) {
     match dread_level.phase {
-        crate::components::DreadPhase::Peace => {
+        crate::world::components::DreadPhase::Peace => {
             info!("Dread Phase: Peace - The world feels safe and welcoming");
         }
-        crate::components::DreadPhase::Unease => {
+        crate::world::components::DreadPhase::Unease => {
             info!("Dread Phase: Unease - Something feels... wrong");
             // TODO: Start subtle audio/visual changes
         }
-        crate::components::DreadPhase::Dread => {
+        crate::world::components::DreadPhase::Dread => {
             info!("Dread Phase: Dread - The horror is manifesting");
             // TODO: More obvious corruption effects
         }
-        crate::components::DreadPhase::Terror => {
+        crate::world::components::DreadPhase::Terror => {
             info!("Dread Phase: Terror - Reality is breaking down");
             // TODO: Significant world corruption, companion panic
         }
-        crate::components::DreadPhase::Void => {
+        crate::world::components::DreadPhase::Void => {
             info!("Dread Phase: Void - The void consumes everything");
             // TODO: World becomes increasingly alien
         }
-        crate::components::DreadPhase::BeyondVoid => {
+        crate::world::components::DreadPhase::BeyondVoid => {
             info!("Dread Phase: Beyond Void - You have seen too much");
             // TODO: Complete reality breakdown, final encounters
         }
@@ -130,22 +130,22 @@ pub fn dread_visual_effects_system(
 ) {
     if dread_level.phase_changed_this_frame {
         match dread_level.phase {
-            crate::components::DreadPhase::Peace => {
+            crate::world::components::DreadPhase::Peace => {
                 clear_color.0 = Color::srgb(0.7, 0.9, 1.0); // Light blue sky
             }
-            crate::components::DreadPhase::Unease => {
+            crate::world::components::DreadPhase::Unease => {
                 clear_color.0 = Color::srgb(0.8, 0.8, 0.7); // Slightly yellow/grey
             }
-            crate::components::DreadPhase::Dread => {
+            crate::world::components::DreadPhase::Dread => {
                 clear_color.0 = Color::srgb(0.6, 0.5, 0.5); // Reddish grey
             }
-            crate::components::DreadPhase::Terror => {
+            crate::world::components::DreadPhase::Terror => {
                 clear_color.0 = Color::srgb(0.4, 0.2, 0.2); // Dark red
             }
-            crate::components::DreadPhase::Void => {
+            crate::world::components::DreadPhase::Void => {
                 clear_color.0 = Color::srgb(0.1, 0.05, 0.1); // Near black with purple tint
             }
-            crate::components::DreadPhase::BeyondVoid => {
+            crate::world::components::DreadPhase::BeyondVoid => {
                 clear_color.0 = Color::srgb(0.0, 0.0, 0.0); // Pure black
             }
         }

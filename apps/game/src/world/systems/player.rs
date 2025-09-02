@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use crate::components::{Player, Mount};
-use crate::resources::{WorldState, GameState};
+use crate::world::components::{Player, Mount};
+use crate::world::resources::{WorldState, GameState};
 use crate::utils::hex::*;
 
 pub fn player_movement_system(

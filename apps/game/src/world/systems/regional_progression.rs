@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
 use std::collections::HashMap;
-use crate::components::tiles::{BiomeType, HexCoord};
-use crate::resources::world::WorldState;
+use crate::world::components::tiles::{BiomeType, HexCoord};
+use crate::world::resources::WorldState;
 
 #[derive(Component, Debug, Clone)]
 pub struct RegionalMilestone {

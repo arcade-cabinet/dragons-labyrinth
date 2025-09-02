@@ -1,12 +1,12 @@
 use bevy::prelude::*;
-use crate::components::{Companion, CompanionState, TraumaLevel};
-use crate::resources::{DreadLevel, GameState};
+use crate::world::components::{Companion, CompanionState, TraumaLevel};
+use crate::world::resources::{DreadLevel, GameState};
 
 pub fn companion_psychology_system(
     time: Res<Time>,
     dread_level: Res<DreadLevel>,
     mut companion_query: Query<(&mut Companion, &Transform)>,
-    player_query: Query<&Transform, (With<crate::components::Player>, Without<Companion>)>,
+    player_query: Query<&Transform, (With<crate::world::components::Player>, Without<Companion>)>,
 ) {
     if let Ok(player_transform) = player_query.get_single() {
         for (mut companion, companion_transform) in companion_query.iter_mut() {

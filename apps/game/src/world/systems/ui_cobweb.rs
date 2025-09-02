@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_cobweb_ui::prelude::*;
-use crate::components::character::*;
-use crate::resources::GameState;
+use crate::world::components::character::*;
+use crate::world::resources::GameState;
 use crate::game::GameStateEnum;
 
 #[derive(Resource, Debug)]

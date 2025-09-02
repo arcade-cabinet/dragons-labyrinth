@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use crate::components::character::*;
-use crate::resources::GameState;
+use crate::world::components::character::*;
+use crate::world::resources::GameState;
 
 #[derive(Resource, Debug)]
 pub struct CharacterCreator {

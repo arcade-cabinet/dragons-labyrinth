@@ -6,9 +6,9 @@ use bevy_cobweb_ui::prelude::*;
 use bevy_yarnspinner::prelude::*;
 use bevy_yoleck::prelude::*;
 
-use crate::systems::*;
-use crate::components::*;
-use crate::resources::*;
+use crate::world::systems::*;
+use crate::world::components::*;
+use crate::world::resources::*;
 // Consolidated: no separate WorldPlugin needed
 
 pub struct GamePlugin;

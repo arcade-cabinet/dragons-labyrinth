@@ -85,24 +85,24 @@ impl Companion {
         }
     }
     
-    pub fn react_to_biome(&mut self, biome_type: &crate::components::BiomeType) {
+    pub fn react_to_biome(&mut self, biome_type: &crate::world::components::BiomeType) {
         let stress_change = match biome_type {
-            crate::components::BiomeType::Grassland => -0.5,
-            crate::components::BiomeType::Forest => 0.0,
-            crate::components::BiomeType::Mountain => 1.0,
-            crate::components::BiomeType::Desert => 2.0,
-            crate::components::BiomeType::Swamp => 3.0,
-            crate::components::BiomeType::Water => 1.5,
-            crate::components::BiomeType::Lava => 8.0,
-            crate::components::BiomeType::Void => 15.0,
-            crate::components::BiomeType::Corrupted(_) => 10.0,
+            crate::world::components::BiomeType::Grassland => -0.5,
+            crate::world::components::BiomeType::Forest => 0.0,
+            crate::world::components::BiomeType::Mountain => 1.0,
+            crate::world::components::BiomeType::Desert => 2.0,
+            crate::world::components::BiomeType::Swamp => 3.0,
+            crate::world::components::BiomeType::Water => 1.5,
+            crate::world::components::BiomeType::Lava => 8.0,
+            crate::world::components::BiomeType::Void => 15.0,
+            crate::world::components::BiomeType::Corrupted(_) => 10.0,
         };
         
         self.stress += stress_change;
         self.stress = self.stress.clamp(0.0, 100.0);
     }
     
-    pub fn react_to_dread_phase(&mut self, dread_phase: &crate::components::DreadPhase) {
+    pub fn react_to_dread_phase(&mut self, dread_phase: &crate::world::components::DreadPhase) {
         let (stress_change, trust_change) = match dread_phase {
             crate::components::DreadPhase::Peace => (-2.0, 1.0),
             crate::components::DreadPhase::Unease => (1.0, 0.0),
