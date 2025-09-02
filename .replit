@@ -1,4 +1,4 @@
-modules = ["rust"]
+modules = ["rust", "nix", "docker", "web", "rust-nightly", "rust-stable", "bash"]
 [agent]
 expertMode = true
 
