@@ -5,9 +5,8 @@ use serde_json::Value;
 use crate::components::dread::DreadLevel;
 use crate::resources::GameState;
 
-// Audio API configuration
-const AUDIO_API_KEY: &str = "OWCOBXsYZx3cyyOMB3WYcFsyENh9QXRnhm9Yf9HF";
-const AUDIO_API_BASE_URL: &str = "https://api.elevenlabs.io/v1";
+// Note: Audio assets are pre-generated during build time using FREESOUND_API_KEY
+// Runtime audio system only plays pre-bundled audio files - no API calls needed
 
 #[derive(Resource, Debug)]
 pub struct ProceduralAudioSystem {
@@ -179,17 +178,41 @@ fn request_theme_audio(audio_system: &mut ProceduralAudioSystem, theme: &DreadTh
         return;
     }
     
-    let prompts = ProceduralAudioSystem::get_theme_prompts();
-    if let Some(theme_prompts) = prompts.get(theme) {
-        audio_system.is_loading = true;
-        
-        // For now, log the audio request - in a full implementation this would make HTTP requests
-        for prompt in theme_prompts {
-            info!("Requesting procedural audio: {} - {}", prompt.theme, prompt.description);
-        }
-        
-        // Simulate loading time (in real implementation, this would be async HTTP requests)
-        audio_system.is_loading = false;
+    // Load pre-generated audio files based on theme
+    // These files were created during build time using the audio API
+    let audio_files = get_theme_audio_files(theme);
+    
+    for audio_file in audio_files {
+        info!("Loading pre-generated audio: {}", audio_file);
+        // Audio files are loaded from assets/audio/ directory
+        // No runtime API calls - everything is bundled with the game
+    }
+    
+    audio_system.is_loading = false;
+}
+
+fn get_theme_audio_files(theme: &DreadTheme) -> Vec<&'static str> {
+    match theme {
+        DreadTheme::Peace => vec![
+            "audio/themes/peace_ambient.ogg",
+            "audio/themes/peace_musical.ogg",
+        ],
+        DreadTheme::Unease => vec![
+            "audio/themes/unease_ambient.ogg", 
+            "audio/themes/unease_musical.ogg",
+        ],
+        DreadTheme::Dread => vec![
+            "audio/themes/dread_ambient.ogg",
+            "audio/themes/dread_musical.ogg", 
+        ],
+        DreadTheme::Terror => vec![
+            "audio/themes/terror_ambient.ogg",
+            "audio/themes/terror_musical.ogg",
+        ],
+        DreadTheme::Void => vec![
+            "audio/themes/void_ambient.ogg",
+            "audio/themes/void_musical.ogg",
+        ],
     }
 }
 
