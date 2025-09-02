@@ -9,11 +9,11 @@ use bevy_yoleck::prelude::*;
 use crate::systems::*;
 use crate::components::*;
 use crate::resources::*;
-use crate::world::plugin::WorldPlugin;
+// Consolidated: no separate WorldPlugin needed
 
-pub struct HorrorRpgPlugin;
+pub struct GamePlugin;
 
-impl Plugin for HorrorRpgPlugin {
+impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         // Core Bevy plugins
         app.add_plugins(DefaultPlugins
@@ -44,8 +44,7 @@ impl Plugin for HorrorRpgPlugin {
             YoleckPlugin,
         ));
 
-        // World organization plugin (aggregates ECS world setup)
-        app.add_plugins(WorldPlugin);
+        // World organization consolidated into this plugin
 
         // Game resources
         app.init_resource::<WorldState>()

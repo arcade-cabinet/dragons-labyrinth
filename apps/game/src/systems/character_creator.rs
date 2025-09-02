@@ -55,7 +55,7 @@ pub fn setup_character_creator(
             preview_panel.spawn(TextBundle::from_section(
                 "Character Preview",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/Creepster-Regular.ttf"),
                     font_size: 24.0,
                     color: Color::WHITE,
                 },
@@ -78,7 +78,7 @@ pub fn setup_character_creator(
             options_panel.spawn(TextBundle::from_section(
                 "Create Your Character",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/Creepster-Regular.ttf"),
                     font_size: 32.0,
                     color: Color::rgb(0.8, 0.2, 0.2),
                 },
@@ -115,7 +115,7 @@ pub fn setup_character_creator(
                 button.spawn(TextBundle::from_section(
                     "Begin Adventure",
                     TextStyle {
-                        font: asset_server.load("fonts/courier_new.ttf"),
+                        font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
                         font_size: 20.0,
                         color: Color::WHITE,
                     },
@@ -129,7 +129,7 @@ fn spawn_name_section(parent: &mut ChildBuilder, asset_server: &AssetServer) {
     parent.spawn(TextBundle::from_section(
         "Name:",
         TextStyle {
-            font: asset_server.load("fonts/courier_new.ttf"),
+            font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
             font_size: 18.0,
             color: Color::WHITE,
         },
@@ -157,7 +157,7 @@ fn spawn_gender_section(parent: &mut ChildBuilder, asset_server: &AssetServer) {
     parent.spawn(TextBundle::from_section(
         "Gender:",
         TextStyle {
-            font: asset_server.load("fonts/courier_new.ttf"),
+            font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
             font_size: 18.0,
             color: Color::WHITE,
         },
@@ -190,7 +190,7 @@ fn spawn_gender_section(parent: &mut ChildBuilder, asset_server: &AssetServer) {
             button.spawn(TextBundle::from_section(
                 "Male",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/PressStart2P-Regular.ttf"),
                     font_size: 16.0,
                     color: Color::WHITE,
                 },
@@ -215,7 +215,7 @@ fn spawn_gender_section(parent: &mut ChildBuilder, asset_server: &AssetServer) {
             button.spawn(TextBundle::from_section(
                 "Female",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/PressStart2P-Regular.ttf"),
                     font_size: 16.0,
                     color: Color::WHITE,
                 },
@@ -228,7 +228,7 @@ fn spawn_appearance_section(parent: &mut ChildBuilder, asset_server: &AssetServe
     parent.spawn(TextBundle::from_section(
         "Appearance:",
         TextStyle {
-            font: asset_server.load("fonts/courier_new.ttf"),
+            font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
             font_size: 18.0,
             color: Color::WHITE,
         },
@@ -251,7 +251,7 @@ fn spawn_stats_section(parent: &mut ChildBuilder, asset_server: &AssetServer) {
     parent.spawn(TextBundle::from_section(
         "Attributes (20 points to distribute):",
         TextStyle {
-            font: asset_server.load("fonts/courier_new.ttf"),
+            font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
             font_size: 18.0,
             color: Color::WHITE,
         },
@@ -276,7 +276,7 @@ fn spawn_slider_option(parent: &mut ChildBuilder, asset_server: &AssetServer, la
         row.spawn(TextBundle::from_section(
             format!("{}:", label),
             TextStyle {
-                font: asset_server.load("fonts/courier_new.ttf"),
+                font: asset_server.load("fonts/PressStart2P-Regular.ttf"),
                 font_size: 14.0,
                 color: Color::WHITE,
             },
@@ -315,7 +315,7 @@ fn spawn_stat_adjuster(parent: &mut ChildBuilder, asset_server: &AssetServer, st
         row.spawn(TextBundle::from_section(
             format!("{}:", stat_name),
             TextStyle {
-                font: asset_server.load("fonts/courier_new.ttf"),
+                font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
                 font_size: 14.0,
                 color: Color::WHITE,
             },
@@ -340,7 +340,7 @@ fn spawn_stat_adjuster(parent: &mut ChildBuilder, asset_server: &AssetServer, st
             button.spawn(TextBundle::from_section(
                 "-",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/PressStart2P-Regular.ttf"),
                     font_size: 16.0,
                     color: Color::WHITE,
                 },
@@ -352,7 +352,7 @@ fn spawn_stat_adjuster(parent: &mut ChildBuilder, asset_server: &AssetServer, st
             TextBundle::from_section(
                 "10",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/MedievalSharp-Regular.ttf"),
                     font_size: 14.0,
                     color: Color::WHITE,
                 },
@@ -379,7 +379,7 @@ fn spawn_stat_adjuster(parent: &mut ChildBuilder, asset_server: &AssetServer, st
             button.spawn(TextBundle::from_section(
                 "+",
                 TextStyle {
-                    font: asset_server.load("fonts/courier_new.ttf"),
+                    font: asset_server.load("fonts/PressStart2P-Regular.ttf"),
                     font_size: 16.0,
                     color: Color::WHITE,
                 },

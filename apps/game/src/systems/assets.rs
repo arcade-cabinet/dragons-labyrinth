@@ -10,49 +10,17 @@ pub fn load_assets(
     // Load tilemap texture atlas
     asset_handles.tilemap_texture = Some(asset_server.load("textures/tilemap.png"));
     
-    // Load biome textures
-    asset_handles.biome_textures.insert("grassland".to_string(), 
-        asset_server.load("textures/biomes/grassland.png"));
-    asset_handles.biome_textures.insert("forest".to_string(), 
-        asset_server.load("textures/biomes/forest.png"));
-    asset_handles.biome_textures.insert("mountain".to_string(), 
-        asset_server.load("textures/biomes/mountain.png"));
-    asset_handles.biome_textures.insert("desert".to_string(), 
-        asset_server.load("textures/biomes/desert.png"));
-    asset_handles.biome_textures.insert("swamp".to_string(), 
-        asset_server.load("textures/biomes/swamp.png"));
-    asset_handles.biome_textures.insert("water".to_string(), 
-        asset_server.load("textures/biomes/water.png"));
+    // Biome textures not yet present - rely on tilemap for now
     
-    // Load feature models
-    asset_handles.feature_models.insert("tavern".to_string(), 
-        asset_server.load("models/tavern.glb"));
-    asset_handles.feature_models.insert("tower".to_string(), 
-        asset_server.load("models/tower.glb"));
-    asset_handles.feature_models.insert("spring".to_string(), 
-        asset_server.load("models/spring.glb"));
-    asset_handles.feature_models.insert("ruins".to_string(), 
-        asset_server.load("models/ruins.glb"));
-    asset_handles.feature_models.insert("blacksmith".to_string(), 
-        asset_server.load("models/blacksmith.glb"));
+    // Feature models not yet available - use fallbacks when spawning
     
-    // Load character models
-    asset_handles.character_models.insert("player".to_string(),
-        asset_server.load("models/characters/player.glb"));
-    asset_handles.character_models.insert("companion_male".to_string(),
-        asset_server.load("models/characters/companion_male.glb"));
-    asset_handles.character_models.insert("companion_female".to_string(),
-        asset_server.load("models/characters/companion_female.glb"));
+    // Character models not yet available - use fallbacks when spawning
     
     // Load dialogue files
     asset_handles.dialogue_files.insert("intro".to_string(),
         asset_server.load("dialogue/intro.yarn"));
     
-    // Load audio files
-    asset_handles.audio_files.insert("ambient_peace".to_string(),
-        asset_server.load("audio/ambient_peace.ogg"));
-    asset_handles.audio_files.insert("ambient_dread".to_string(),
-        asset_server.load("audio/ambient_dread.ogg"));
+    // Audio handled by dedicated systems with concrete paths
     
     info!("Assets loading initiated");
 }
