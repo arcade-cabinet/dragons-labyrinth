@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use avian3d::prelude::*;
-use bevy_cobweb::prelude::*;
-use bevy_cobweb_ui::prelude::*;
 use bevy_yarnspinner::prelude::*;
 use bevy_yoleck::prelude::*;
 
@@ -30,8 +28,6 @@ impl Plugin for HorrorRpgPlugin {
         app.add_plugins((
             TilemapPlugin,
             PhysicsPlugins::default(),
-            CobwebPlugin::default(),
-            CobwebUiPlugin,
             YarnSpinnerPlugin,
             YoleckPlugin,
         ));
@@ -44,13 +40,17 @@ impl Plugin for HorrorRpgPlugin {
             .init_resource::<RegionalProgression>()
             .init_resource::<MovementPreview>()
             .init_resource::<DayNightCycle>()
-            .init_resource::<WeatherSystem>();
+            .init_resource::<WeatherSystem>()
+            .init_resource::<CharacterCreator>();
 
         // Game components registration
         app.register_component_hooks::<Tile>()
             .register_component_hooks::<Player>()
             .register_component_hooks::<Companion>()
-            .register_component_hooks::<DreadSource>();
+            .register_component_hooks::<DreadSource>()
+            .register_component_hooks::<NPC>()
+            .register_component_hooks::<Monster>()
+            .register_component_hooks::<CharacterModel>();
 
         // Game systems
         app.add_systems(Startup, (
@@ -72,7 +72,12 @@ impl Plugin for HorrorRpgPlugin {
             update_regional_progression,
         ).run_if(in_state(GameStateEnum::Playing)))
         .add_systems(OnEnter(GameStateEnum::MainMenu), setup_main_menu)
-        .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_main_menu);
+        .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_main_menu)
+        .add_systems(OnEnter(GameStateEnum::CharacterCreation), setup_character_creator)
+        .add_systems(Update, (
+            handle_character_creator_input,
+            update_character_preview,
+        ).run_if(in_state(GameStateEnum::CharacterCreation)));
 
         // Game states
         app.init_state::<GameStateEnum>();
@@ -90,6 +95,7 @@ pub enum GameStateEnum {
     #[default]
     Loading,
     MainMenu,
+    CharacterCreation,
     Playing,
     Dialogue,
     Boss,

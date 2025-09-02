@@ -7,6 +7,7 @@ pub mod ui;
 pub mod regional_progression;
 pub mod pathfinding;
 pub mod rest_fatigue;
+pub mod character_creator;
 
 pub use hex_world::*;
 pub use player::*;
@@ -17,3 +18,4 @@ pub use ui::*;
 pub use regional_progression::*;
 pub use pathfinding::*;
 pub use rest_fatigue::*;
+pub use character_creator::*;

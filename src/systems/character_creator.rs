@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_cobweb_ui::prelude::*;
 use crate::components::character::*;
 use crate::resources::GameState;
 
