@@ -1,0 +1,18 @@
+{
+  "npc_id": "n_vicar",
+  "context": "First greeting",
+  "lines": [
+    {
+      "speaker": "Marn",
+      "line": "Welcome to the Vale.",
+      "intent": "greet",
+      "stage": "macro"
+    },
+    {
+      "speaker": "Marn",
+      "line": "Beware the lair beyond the ridge.",
+      "intent": "warn",
+      "stage": "meso"
+    }
+  ]
+}

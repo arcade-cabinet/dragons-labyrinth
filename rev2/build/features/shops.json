@@ -1,0 +1,22 @@
+{
+  "shops": [
+    {
+      "id": "village_shop",
+      "name": "Quartermaster's Tent",
+      "inventory": [
+        {
+          "item": "bread",
+          "cost": 2
+        },
+        {
+          "item": "bandage",
+          "cost": 4
+        },
+        {
+          "item": "torch",
+          "cost": 1
+        }
+      ]
+    }
+  ]
+}

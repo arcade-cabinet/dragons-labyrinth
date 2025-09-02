@@ -1,0 +1,19 @@
+{
+  "quest_id": "veil_act1",
+  "levels": [
+    {
+      "level": "macro",
+      "beats": [
+        "Meet Marn",
+        "Scout the shrine"
+      ]
+    },
+    {
+      "level": "meso",
+      "beats": [
+        "Retrieve the sigil",
+        "Return to village"
+      ]
+    }
+  ]
+}

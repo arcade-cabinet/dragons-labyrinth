@@ -1,0 +1,82 @@
+You are an expert Python developer creating a comprehensive DungeonContainer model for a D&D dungeon system.
+
+## GOAL: Create a master dungeon integration model
+
+**Context**: You have access to ALL the individual component models generated from Phase 1:
+
+**Available Individual Models**:
+- Import path: `{{ dungeons_connections.import_path }}`
+- **Exported Classes**: {{ dungeons_connections.exported_classes | join(', ') }}
+- **UUID Fields**: {{ dungeons_connections.uuid_fields | join(', ') }}
+- **Connection Fields**: {{ dungeons_connections.connection_fields | join(', ') }}
+
+**Model Data Available**:
+- Individual dungeon area models (rooms, passages, chambers)
+- Monster encounter models with complete stat blocks
+- Treasure distribution models (loot tables, monetary values, magic items)
+- Environmental models (atmosphere, hazards, lighting, connections)
+
+**Your Task**: Create a DungeonContainer model that intelligently combines ALL dungeon areas into complete dungeon complexes.
+
+## Integration Requirements
+
+**The DungeonContainer must**:
+1. **Import individual models**: Use absolute imports only
+2. **Aggregate areas** - All dungeon areas with complete encounter data
+3. **Map connections** - How areas connect (doors, passages, stairs, teleporters)
+4. **Track progression** - Entry points, boss encounters, treasure rooms
+5. **Link to overworld** - Connection to hex tile entrance in region
+6. **Integrate encounters** - Complete combat and treasure systems
+7. **Provide navigation** - Area-to-area movement and dungeon layout
+
+## Key Integration Patterns
+
+**Spatial Relationships**:
+- Areas connect via doors, passages, stairways
+- Entry/exit points link to overworld hex tiles
+- Boss areas and treasure vaults in deeper sections
+- Multiple levels and vertical connections
+
+**Combat Integration**:
+- Monster encounters with complete stat blocks
+- Scaling difficulty as players progress deeper
+- Boss encounters and unique creatures
+- Environmental hazards and combat modifiers
+
+**Economic Integration**:
+- Treasure distribution across areas
+- Loot tables and random generation
+- Magic item placement and rarity
+- Monetary treasure and trade goods
+
+**Narrative Integration**:
+- Foreshadowing and area descriptions
+- Environmental storytelling
+- Plot hooks and dungeon lore
+- Connection to overworld storylines
+
+## Output Requirements
+
+Generate a comprehensive DungeonContainer model with:
+- **Absolute imports only**: Use provided connection information for exact imports
+- **Reference existing models**: Use and integrate models from individual classes
+- **Complete area integration** - Every area with full encounter/treasure data
+- **Navigation system integration** - All connections and movement options
+- **Combat system integration** - All monsters, encounters, and treasure
+- **Progression tracking** - Entry to exit with difficulty scaling
+- **Overworld linking** - Connection points to regional hex grid
+- **Modern Python types**: str, int, list[str], dict[str, Any], str | None
+
+**File Structure**:
+```python
+# Absolute imports - NO wildcards
+{% for class_name in dungeons_connections.exported_classes %}
+from {{ dungeons_connections.import_path }} import {{ class_name }}
+{% endfor %}
+
+class DungeonContainer(BaseModel):
+    # Integration models that use individual dungeon components
+    pass
+```
+
+Create the master container that brings all dungeon areas together for complete dungeon gameplay.

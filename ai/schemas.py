@@ -127,3 +127,16 @@ class IconJob(BaseModel):
 class ImagePlan(BaseModel):
     tilesets: list[BiomeTileset]
     icons: list[IconJob]
+
+# ---- ECS IR ----
+class ECSResources(BaseModel):
+    biome_to_index: dict[str, int]
+    poi_types: list[str]
+
+class ECSEntity(BaseModel):
+    name: str
+    components: dict[str, dict]
+
+class ECSWorld(BaseModel):
+    resources: ECSResources
+    entities: list[ECSEntity]

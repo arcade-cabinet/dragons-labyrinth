@@ -8,4 +8,8 @@ bevy = { workspace = true, features = ["png"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
-world = { path = "../../crates/world" }
+avian2d = { workspace = true }
+bevy_ecs_tilemap = { workspace = true }
+
+[build-dependencies]
+builder = { path = "../../crates/builder" }

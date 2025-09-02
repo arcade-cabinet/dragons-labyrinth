@@ -1,25 +1,76 @@
-test_output
+# Rust/Cargo
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
 
-# Godot-specific ignores
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ruff_cache/
+
+# Environment variables and secrets
+.env
+.env.local
+.envrc.local
+*.secret
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# OS-specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Direnv
+.direnv/
+
+# Project-specific
+/test_output/
+/visuals/
+/audio/
+/tmp/
+*.log
+*.bak
+*.orig
+
+# Old Godot artifacts (can be removed once cleaned)
 .plugged
 .import/
 export.cfg
 export_presets.cfg
-
-# Imported translations (automatically generated from CSV files)
 *.translation
-
-# Mono-specific ignores
 .mono/
 data_*/
 mono_crash.*.json
-
-# System/tool-specific ignores
-.directory
-*~
-
-# Project-specific ignores
-/visuals
-/audio
-/godot/debug/save
 .godot/

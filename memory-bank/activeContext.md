@@ -1,173 +1,180 @@
-# Active Development Context
+# Active Development Context - Dragon's Labyrinth
 
-## Current Architecture
+## Current Session Summary (Complete Analysis System Architecture Refactor)
 
-### Stack Overview
-- **Game Engine**: Rust + Bevy 0.16.1 (replaced Godot)
-- **Content Pipeline**: Python + OpenAI (markdown → JSON → game)
-- **Rendering**: 2D hex-based with Material2dPlugin
-- **Data Flow**: No database, direct JSON loading at runtime
+### Major Achievement: Clean Architecture Implementation ✅
 
-### Why We Pivoted from Godot
-- **Complexity**: Godot's node system was overkill for hex-based game
-- **Performance**: Rust/Bevy provides better control and speed
-- **Architecture**: ECS pattern fits our component-heavy design better
-- **Workflow**: Hot-reload JSON simpler than Godot resource management
+- **COMPLETE ARCHITECTURE REFACTOR**: Eliminated ProcessorModelsGenerator class and moved all intelligence into model classes
+- **GENERIC OPENAI UTILITY**: Added reusable `generate_with_openai()` function to utils.py with proper file upload handling
+- **INTELLIGENT MODEL ARCHITECTURE**: RawEntity → RawEntitiesCluster → RawEntities with built-in AI generation and orchestration
+- **DRAMATICALLY SIMPLIFIED MAIN**: Reduced from complex loops to clean 5-line high-level orchestration
+- **TEMPLATE-BASED GENERATION**: Proper Jinja2 templates for all code generation including __init__.py
+- **UUID CONNECTION TRACKING**: All templates now extract spatial coordinates (hex coordinates) and entity relationships
+- **ABSOLUTE IMPORTS ENFORCED**: No wildcards, explicit imports with full paths throughout
+- **CLEAN CODE**: Deleted obsolete files, replaced print with logging, proper separation of concerns
 
-## Active Work Areas
+## What Was Accomplished
 
-### 1. Python AI Pipeline (`ai/` directory)
-**Status**: Core structure complete, needs schema implementation
+### 1. JSON-First Processing Implementation
+- **Transformer Fixed**: Individual entity processing with `SELECT uuid, value FROM Entities`
+- **JSON Extraction**: 47 JSON entities saved by UUID to proper world crate subdirectories
+- **Text Routing**: 2,198 text entities routed by raw text matching (not HTML bundling)
+- **ML Analysis Success**: 55/55 sophisticated processors successful with rich analysis
 
-**Files**:
-- `ai.py`: Main orchestrator with 6 commands (canonize, plan, expand, image-plan, images, narrative)
-- `schemas.py`: Pydantic models for all game data structures
-- `prompts.py`: System prompts for creative and image generation
-- `images.py`: DALL-E integration for tileset generation
-- `dialogue.py`: NPC dialogue and questline expansion
-- `atlas.py`: Atlas/map generation utilities
-- `util.py`: Helper functions and path management
+### 2. Clean Architecture Established
+- **Individual JSON Entities**: `crates/world/json_entities/{uuid}.json` for structured analysis
+- **Sophisticated Text Analysis**: Biome distribution, corruption levels, threat assessment
+- **World Crate Organization**: Proper subdirectories in `crates/world/entities/`
+- **No More HTML Bundling**: Clean entity processing exactly as specified
 
-**Workflow**:
-1. Edit markdown in `content/` (Architecture.md, Themes.md)
-2. Run `python -m ai canonize` to convert to canon.json
-3. Run `python -m ai plan` to generate world plan
-4. Run `python -m ai expand` to create region details
-5. Run `python -m ai image-plan` to design assets
-6. Run `python -m ai images` to generate tilesets
-7. Run `python -m ai narrative` to expand dialogue
-
-### 2. Rust/Bevy Game (`apps/game/` and `crates/world/`)
-**Status**: Basic systems working, needs feature completion
-
-**Core Systems**:
-- **World Plugin**: Main game logic orchestrator
-- **Hex Movement**: Q/W/E/A/S/D navigation implemented
-- **Hot Reload**: R key reloads worldbook.json
-- **Shop System**: T key opens/closes shop UI
-- **Dungeon System**: Enter/Esc for dungeon transitions
-- **Lighting**: Ambient light cycles over time
-
-**Architecture**:
-```rust
-// Main game loop
-App::new()
-    .add_plugins(DefaultPlugins)
-    .add_plugins(Material2dPlugin::<HexTileMaterial>)
-    .add_plugins(WorldPlugin)
-    .add_systems(Startup, setup_camera)
-    .add_systems(Startup, load_worldbook)
-    .run()
+### 3. Rich Data Analysis Complete
+```
+JSON Entities (47): Cities, Dungeons, Hazards, Spatial Maps → Individual analysis ready
+Text Entities (2,198): Regions, Settlements, Dungeons → ML analysis complete  
+Output Structure: crates/world/json_entities/ + crates/world/entities/
 ```
 
-**Key Components** (`crates/world/src/`):
-- `plugin.rs`: Main world plugin definition
-- `resources.rs`: WorldBook, PlayerState, Lighting, GameMode
-- `systems/`: Movement, encounters, shops, dungeons, lighting
-- `components.rs`: ECS components for entities
-- `hex.rs`: Hex grid math and utilities
-- `material.rs`: Shader materials for hex tiles
+## Current State Analysis
 
-### 3. Content Structure (`build/` directory)
-**Generated Files**:
-- `build/master/canon.json`: Core game rules from Architecture.md
-- `build/master/themes.json`: Art bible from Themes.md
-- `build/world/plan.json`: High-level world structure
-- `build/world/region_*.json`: Detailed region data
-- `build/world/worldbook.json`: Complete world data (loaded by game)
-- `build/features/shops/*.json`: Shop inventories
-- `build/narrative/`: Dialogue and questline bundles
+### What's Working ✅
+- **JSON-First Pipeline**: Perfect individual entity processing by UUID
+- **Sophisticated Processors**: 55/55 successful with ML analysis (biome, corruption, threat assessment)
+- **Clean Output Structure**: Proper world crate subdirectories with no HTML bundling
+- **Rich JSON Entities**: 47 structured entities (cities, dungeons, hazards, spatial maps)
 
-## Immediate Tasks
+### What's Completed This Session ✅
+- **JSON Record Processors**: 4 specialized processors created and integrated
+- **Pattern Extraction**: Rich processing patterns documented for HTML enhancement
+- **Architecture Integration**: Clean BaseProcessor pattern following existing conventions
+- **100% Success Rate**: All 47 JSON entities processed with detailed analysis
 
-### Critical Path to Playable
-1. **Complete Schema Definitions** (`ai/schemas.py`)
-   - [ ] GameCanon, ThemeBible, WorldPlan models
-   - [ ] RegionBible, WorldBook, ImagePlan models
-   - [ ] BiomeTileset, TileVariant, IconJob models
+## Current Phase: Analysis System Complete - Ready for Processor Implementation
 
-2. **Implement Image Generation** (`ai/images.py`)
-   - [ ] DALL-E API integration
-   - [ ] Tileset generation for each biome
-   - [ ] POI icon generation
-   - [ ] Asset organization in game directory
+### Architecture Achieved ✅
+- **Clean Model Architecture**: RawEntity + RawEntitiesCluster + RawEntities with built-in intelligence
+- **Generic OpenAI Integration**: Reusable utilities in utils.py for all AI generation needs
+- **3-Phase Orchestration**: Individual models → Dungeon containers → Region containers
+- **UUID Connection Tracking**: All entity relationships and spatial coordinates properly extracted
+- **Absolute Import System**: No wildcards, explicit imports with full connection information
+- **Template-Based Generation**: Jinja2 templates for all generated code including __init__.py
 
-3. **Core Game Mechanics** (`crates/world/`)
-   - [ ] Combat system with inverted economy
-   - [ ] Companion trauma tracking
-   - [ ] Forge redemption mechanic
-   - [ ] Band-based progression gates
+### Next: Test and Processor Implementation
+1. **Test Analysis System**: Run `hatch run dl_analysis` to verify complete architecture
+2. **Processor Phase**: Use generated models to process entities into Rust ECS components
+3. **Container Integration**: Use dungeon_container and region_container for complete integration
+4. **Rust Code Generation**: Generate actual ECS components using analyzed data
+5. **Game Integration**: Connect generated processor data to Bevy game systems
 
-4. **Content Generation**
-   - [ ] Run full pipeline for all 5 bands
-   - [ ] Generate all biome tilesets
-   - [ ] Create complete NPC dialogue
-   - [ ] Design signature encounters
+### UUID-Based Structure
+```
+apps/game/src/world/resources/
+├── regions/
+│   └── {region_uuid}/
+│       ├── mod.rs
+│       ├── {hex_uuid_001}.rs
+│       ├── {hex_uuid_002}.rs
+│       └── ...
+└── dungeons/
+    └── {dungeon_uuid}/
+        ├── mod.rs  
+        ├── {area_uuid_001}.rs
+        ├── {area_uuid_002}.rs
+        └── ...
+```
 
-## Current Session Focus
+Every hex tile and dungeon area becomes its own ECS module using real HBF UUIDs for perfect correlation.
 
-### What We Just Did
-- Fixed git remote from godot-open-rpg to dragons-labyrinth
-- Reviewed entire new codebase structure
-- Understood pivot from Godot to Rust/Bevy
-- Started rewriting memory-bank for new architecture
+## Technical Architecture Decisions
 
-### What We're Doing Now
-- Completing memory-bank rewrite
-- Documenting new technical architecture
-- Preparing for force push to correct repo
+### Preserve Working Components
+- **Keep transformer.py clustering logic** - Routes entities excellently by category
+- **Keep HBF entity extraction patterns** - Successfully processes 70,801 entities
+- **Keep processor organization** - Good separation by entity type
+- **Keep entity recognition from constants.py** - Known regions/settlements/factions/dungeons
 
-### Next Immediate Steps
-1. Finish rewriting remaining memory-bank files
-2. Force push to git@github.com:jbcom/dragons-labyrinth.git
-3. Begin implementing missing schemas
-4. Test full AI generation pipeline
-5. Polish core game mechanics
+### Replace Broken Components  
+- **Replace SQLite models with Pydantic models** - Rust-compatible data structures
+- **Replace database integration with world generation** - Generate Rust files instead
+- **Add Rust code generation** - world_generator.py and Jinja2 templates
+- **Add world crate integration** - Enable build.rs → ECS generation
 
-## Key Decisions Made
+## Rich HBF Data Available (Confirmed Working)
 
-### Architecture Choices
-- **No Database**: Direct JSON loading simpler and faster
-- **ECS Pattern**: Better for component-heavy game design
-- **Hot Reload**: Rapid iteration via R key
-- **AI Pipeline**: Markdown source of truth for all content
+### Entity Categories Successfully Processed
+```python
+REGIONS = ["Aurora Bushes", "Vicious Crags", "Javelin Plains", ...] # 27 total
+SETTLEMENTS = ["Village of Harad", "City of Headsmen", "Town of Tinder", ...] # 10 total  
+FACTIONS = ["The Defiled Wolves", "Fists of Justice", ...] # 5 total
+DUNGEONS = ["Bowel of the Raging Pits", "Den of the Raging Pits", ...] # 18 total
+```
 
-### Design Principles
-- **Content First**: Markdown drives everything
-- **Simple Tools**: Each script does one thing well
-- **Fast Iteration**: Hot reload for instant testing
-- **Clear Separation**: AI generation vs game runtime
+### Sample Processing Results (From Testing)
+- **Aurora Bushes region**: Complete hex map with Village of Harad, rivers [2,1], trails [2,5]
+- **The Defiled Wolves faction**: Political alignment assessment, hostility evaluation
+- **Bowel of the Raging Pits dungeon**: Horror themes, encounter density, treasure assessment
 
-## Known Issues
+## Critical Next Steps
 
-### Technical Debt
-- Missing schema implementations in Python
-- Image generation not connected
-- Combat system not implemented
-- Companion system placeholder only
+### Immediate (Next Session)
+1. **JSON Record Processor** - Create specialized processor for structured JSON entities
+2. **Pattern Analysis** - Extract patterns from JSON entities for HTML enhancement
+3. **Cross-Validation** - Validate processing results between JSON and text entities
+4. **Enhanced Processing** - Use JSON insights to improve HTML fragment processing
 
-### Content Gaps
-- No generated tilesets yet
-- Missing NPC dialogue
-- Questlines not expanded
-- Encounters undefined
+### This Milestone
+1. **JSON Entity Analysis** - Thorough review of 47 JSON entities for patterns
+2. **Structured Processor** - Build processor for JSON entities (easier than HTML)
+3. **Pattern Extraction** - Identify processing patterns from structured data
+4. **HTML Enhancement** - Apply JSON patterns to improve text entity processing
 
-## Success Metrics
+## Success Criteria for Next Phase
 
-### Short Term (This Week)
-- [ ] Complete AI pipeline can generate full world
-- [ ] Game loads and displays generated world
-- [ ] Player can navigate all hex tiles
-- [ ] Basic combat encounter triggers
+- [ ] JSON record processor created for structured entities
+- [ ] Pattern analysis complete on 47 JSON entities  
+- [ ] Cross-validation working between JSON and text processing
+- [ ] HTML processing enhanced with JSON-derived patterns
+- [ ] Complete processing pipeline optimized
+- [ ] Ready for game integration with rich, validated data
 
-### Medium Term (This Month)
-- [ ] All 5 progression bands playable
-- [ ] Companion trauma system working
-- [ ] Forge mechanic implemented
-- [ ] First 60 levels polished
+## Memory Bank Status  
 
-### Long Term (Launch)
-- [ ] Complete 180-level experience
-- [ ] All biomes and POIs rendered
-- [ ] Full narrative content
-- [ ] Performance optimized
+Updated with complete architecture refactor documentation. Analysis system architecture is now clean and ready for testing.
+
+## Session Outcome
+
+**ANALYSIS SYSTEM ARCHITECTURE COMPLETE WITH MODULAR REFACTORING**: Successfully eliminated the messy ProcessorModelsGenerator approach and implemented a clean model-based architecture, then further refactored into focused modules:
+
+### Initial Clean Architecture Achievement
+- **RawEntitiesCluster** handles AI generation with proper file uploads and connection parsing
+- **RawEntities** orchestrates the complete 3-phase pipeline
+- **Generic utilities** in utils.py for reusable OpenAI and template operations
+- **Absolute imports** and UUID connection tracking throughout all templates
+
+### Modular Refactoring Complete (Latest)
+Successfully split the monolithic models.py into focused modules in analysis/models/ subpackage:
+
+**Core Infrastructure:**
+- **`base.py`**: Value objects (HexKey, MapCoord, EdgeType) and inventory types
+- **`raw.py`**: RawEntity model with smart clustering and file writing
+- **`results.py`**: Generation tracking (ModelConnections, GenerationResults, AnalysisSummary)
+- **`clusters.py`**: BaseEntitiesCluster abstraction with two-stage AI generation
+
+**Category-Specific Models:**
+- **`regions.py`**: RegionHexTile entity and RawRegionEntities cluster
+- **`settlements.py`**: SettlementEstablishment entity and RawSettlementEntities cluster
+- **`factions.py`**: FactionEntity and RawFactionEntities cluster
+- **`dungeons.py`**: DungeonArea and RawDungeonEntities cluster
+
+**Integration & Orchestration:**
+- **`orchestration.py`**: RawEntities master orchestrator for 3-phase pipeline
+- **`containers.py`**: DungeonContainer and RegionContainer with spatial indexing
+- **`__init__.py`**: Clean public API exports
+
+### Key Improvements
+- **Single Responsibility**: Each module has one focused purpose
+- **Clean Separation**: No more massive base.py file
+- **Better Organization**: Related functionality grouped logically
+- **Maintainable**: Easier to find and modify specific components
+- **Standards Compliant**: Follows .clinerules with modern Python type hints
+
+The system now follows proper separation of concerns with models containing intelligence, clean orchestration, focused modules, and thorough documentation. The analysis package is fully modularized and ready for the processor implementation phase.
