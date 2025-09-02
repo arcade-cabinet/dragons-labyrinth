@@ -73,6 +73,7 @@ impl Plugin for GamePlugin {
             setup_camera,
             setup_world,
             setup_splash_screen,
+            setup_asset_fallbacks,
             load_assets,
         ))
         .add_systems(Update, (

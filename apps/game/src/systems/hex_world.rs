@@ -243,7 +243,7 @@ fn generate_tile_features(
         let feature_entity = commands.spawn((
             FeatureOverlay {
                 feature_type: feature_type.to_string(),
-                model_id: format!("models/{}.glb", feature_type),
+                model_id: format!("textures/{}_marker.png", feature_type),
                 interaction_type: get_interaction_for_feature(feature_type),
             },
             Transform::from_translation(hex_to_world(hex_coord) + Vec3::new(0.0, 1.0, 0.0)),
