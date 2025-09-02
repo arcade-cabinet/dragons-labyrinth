@@ -27,6 +27,8 @@ html5ever = { workspace = true }
 ammonia = { workspace = true }
 fs_extra = { workspace = true }
 tempfile = { workspace = true }
+minijinja = "2.0"
+chrono = { version = "0.4", features = ["serde"] }
 
 [build-dependencies]
 anyhow = { workspace = true }
