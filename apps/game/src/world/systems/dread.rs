@@ -14,7 +14,7 @@ pub fn dread_progression_system(
         let mut dread_accumulation = 0.0;
         
         // Base dread progression over time
-        dread_accumulation += 0.1 * time.delta_seconds();
+        dread_accumulation += 0.1 * time.delta_secs();
         
         // Calculate dread from nearby sources
         for (source_transform, dread_source) in dread_sources.iter() {
@@ -24,20 +24,20 @@ pub fn dread_progression_system(
             if distance <= max_range {
                 let distance_factor = 1.0 - (distance / max_range);
                 let source_dread = dread_source.intensity * distance_factor;
-                dread_accumulation += source_dread * time.delta_seconds();
+                dread_accumulation += source_dread * time.delta_secs();
             }
         }
         
         // Apply corruption-based dread
         if let Some(player_hex) = world_state.player_hex {
             if let Some(&corruption_level) = world_state.corruption_map.get(&player_hex) {
-                dread_accumulation += corruption_level * 2.0 * time.delta_seconds();
+                dread_accumulation += corruption_level * 2.0 * time.delta_secs();
             }
         }
         
         // Update dread level with decay
         let decay_rate = calculate_decay_rate(dread_level.current);
-        dread_level.current += dread_accumulation - (decay_rate * time.delta_seconds());
+        dread_level.current += dread_accumulation - (decay_rate * time.delta_secs());
         dread_level.current = dread_level.current.clamp(0.0, 120.0); // Allow over 100 for void states
         
         // Update dread phase

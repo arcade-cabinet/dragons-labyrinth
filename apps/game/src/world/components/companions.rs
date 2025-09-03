@@ -95,7 +95,32 @@ impl Companion {
             crate::world::components::BiomeType::Water => 1.5,
             crate::world::components::BiomeType::Lava => 8.0,
             crate::world::components::BiomeType::Void => 15.0,
-            crate::world::components::BiomeType::Corrupted(_) => 10.0,
+            // Corrupted variants cause high stress
+            crate::world::components::BiomeType::CorruptedGrassland | 
+            crate::world::components::BiomeType::CorruptedForest |
+            crate::world::components::BiomeType::CorruptedMountain |
+            crate::world::components::BiomeType::CorruptedDesert |
+            crate::world::components::BiomeType::CorruptedSwamp |
+            crate::world::components::BiomeType::CorruptedWater |
+            crate::world::components::BiomeType::CorruptedSnow => 10.0,
+            
+            // Void variants cause extreme stress
+            crate::world::components::BiomeType::VoidGrassland |
+            crate::world::components::BiomeType::VoidForest |
+            crate::world::components::BiomeType::VoidMountain |
+            crate::world::components::BiomeType::VoidDesert |
+            crate::world::components::BiomeType::VoidSwamp |
+            crate::world::components::BiomeType::VoidWater |
+            crate::world::components::BiomeType::VoidSnow |
+            crate::world::components::BiomeType::VoidLava => 20.0,
+            
+            // Transitional biomes cause mild stress
+            crate::world::components::BiomeType::ForestGrassland |
+            crate::world::components::BiomeType::MountainForest |
+            crate::world::components::BiomeType::DesertMountain |
+            crate::world::components::BiomeType::SwampWater |
+            crate::world::components::BiomeType::SnowMountain => 0.5,
+            crate::world::components::BiomeType::Snow => 1.5,
         };
         
         self.stress += stress_change;

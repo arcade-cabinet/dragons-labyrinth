@@ -42,7 +42,7 @@ pub fn player_movement_system(
             
             // Smooth movement to target position
             let direction = (target_world - transform.translation).normalize();
-            transform.translation += direction * movement_speed * time.delta_seconds();
+            transform.translation += direction * movement_speed * time.delta_secs();
             
             // Snap to hex center when close enough
             if transform.translation.distance(target_world) < 0.1 {

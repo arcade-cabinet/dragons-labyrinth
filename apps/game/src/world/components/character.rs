@@ -93,9 +93,9 @@ impl Default for CharacterAppearance {
     fn default() -> Self {
         Self {
             hair_style: HairStyle::Medium,
-            hair_color: Color::BROWN,
+            hair_color: Color::srgb(0.4, 0.2, 0.1), // Brown
             skin_tone: SkinTone::Fair,
-            eye_color: Color::BLUE,
+            eye_color: Color::srgb(0.0, 0.4, 0.8), // Blue
             height: 1.0,
             weight: 1.0,
             clothing_set: ClothingSet::Peasant,

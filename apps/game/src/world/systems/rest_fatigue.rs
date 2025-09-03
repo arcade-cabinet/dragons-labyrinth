@@ -158,7 +158,7 @@ pub fn update_day_night_cycle(
     mut day_night: ResMut<DayNightCycle>,
 ) {
     // Advance time - each real second = 1 game hour by default
-    day_night.current_hour += time.delta_seconds() / 60.0; // 1 real minute = 1 game hour
+    day_night.current_hour += time.delta_secs() / 60.0; // 1 real minute = 1 game hour
     
     if day_night.current_hour >= 24.0 {
         day_night.current_hour -= 24.0;
@@ -215,7 +215,7 @@ pub fn generate_weather_for_region(
         ],
     };
     
-    let roll: f32 = rng.r#gen();
+    let roll: f32 = rng.gen();
     let mut cumulative = 0.0;
     let mut selected_weather = WeatherType::Clear;
     
@@ -228,13 +228,13 @@ pub fn generate_weather_for_region(
     }
     
     let base_intensity = 0.2 + corruption_level * 0.6;
-    let intensity_variation: f32 = rng.r#gen::<f32>() * 0.4 - 0.2; // ±0.2
+    let intensity_variation: f32 = rng.gen::<f32>() * 0.4 - 0.2; // ±0.2
     let final_intensity = (base_intensity + intensity_variation).clamp(0.0, 1.0);
     
     WeatherSystem {
         current_weather: selected_weather,
         intensity: final_intensity,
-        temperature: rng.r#gen::<f32>() * 2.0 - 1.0, // -1.0 to 1.0
+        temperature: rng.gen::<f32>() * 2.0 - 1.0, // -1.0 to 1.0
         visibility: match selected_weather {
             WeatherType::Clear => 1.0,
             WeatherType::Rain => 0.8,

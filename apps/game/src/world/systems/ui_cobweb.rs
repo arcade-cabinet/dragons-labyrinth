@@ -39,7 +39,7 @@ pub fn handle_ui_transitions(
 ) {
     match ui_manager.current_screen {
         UIScreen::Splash => {
-            ui_manager.splash_progress += time.delta_seconds() * 0.5;
+            ui_manager.splash_progress += time.delta_secs() * 0.5;
             if ui_manager.splash_progress >= 1.0 {
                 ui_manager.splash_complete = true;
             }

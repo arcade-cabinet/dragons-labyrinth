@@ -104,14 +104,41 @@ impl CorruptionType {
         match self {
             CorruptionType::VoidTaint => crate::world::components::BiomeType::Void,
             CorruptionType::BloodCurse => {
-                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                match base_biome {
+                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::CorruptedGrassland,
+                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::CorruptedForest,
+                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::CorruptedMountain,
+                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::CorruptedDesert,
+                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::CorruptedSwamp,
+                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::CorruptedWater,
+                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::CorruptedSnow,
+                    _ => crate::world::components::BiomeType::CorruptedGrassland, // Default fallback
+                }
             }
             CorruptionType::ShadowBlight => {
-                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                match base_biome {
+                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::CorruptedGrassland,
+                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::CorruptedForest,
+                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::CorruptedMountain,
+                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::CorruptedDesert,
+                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::CorruptedSwamp,
+                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::CorruptedWater,
+                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::CorruptedSnow,
+                    _ => crate::world::components::BiomeType::CorruptedForest, // Default to corrupted forest for shadow
+                }
             }
             CorruptionType::TimeFracture => crate::world::components::BiomeType::Void,
             CorruptionType::MindRot => {
-                crate::world::components::BiomeType::Corrupted(Box::new(base_biome.clone()))
+                match base_biome {
+                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::VoidGrassland,
+                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::VoidForest,
+                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::VoidMountain,
+                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::VoidDesert,
+                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::VoidSwamp,
+                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::VoidWater,
+                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::VoidSnow,
+                    _ => crate::world::components::BiomeType::Void, // Default to pure void for mind rot
+                }
             }
             CorruptionType::ElementalFlux => crate::world::components::BiomeType::Lava,
         }

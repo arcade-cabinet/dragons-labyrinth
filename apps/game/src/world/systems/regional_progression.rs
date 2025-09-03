@@ -109,8 +109,8 @@ fn generate_region_name(emotional_state: &EmotionalState, rng: &mut ChaCha8Rng) 
         EmotionalState::Void => vec!["Nothing", "Expanse", "Rift", "Absence", "Silence"],
     };
     
-    let prefix = prefixes[rng.r#gen_range(0..prefixes.len())];
-    let suffix = suffixes[rng.r#gen_range(0..suffixes.len())];
+    let prefix = prefixes[rng.gen_range(0..prefixes.len())];
+    let suffix = suffixes[rng.gen_range(0..suffixes.len())];
     
     format!("{} {}", prefix, suffix)
 }
@@ -130,24 +130,24 @@ fn generate_biome_composition(emotional_state: &EmotionalState, rng: &mut ChaCha
             composition.insert(BiomeType::Swamp, 0.25);
             composition.insert(BiomeType::Mountain, 0.2);
             composition.insert(BiomeType::Desert, 0.15);
-            composition.insert(BiomeType::Corrupted(Box::new(BiomeType::Grassland)), 0.1);
+            composition.insert(BiomeType::CorruptedGrassland, 0.1);
         },
         EmotionalState::Dread => {
             composition.insert(BiomeType::Desert, 0.3);
             composition.insert(BiomeType::Mountain, 0.25);
-            composition.insert(BiomeType::Corrupted(Box::new(BiomeType::Forest)), 0.2);
+            composition.insert(BiomeType::CorruptedForest, 0.2);
             composition.insert(BiomeType::Lava, 0.15);
             composition.insert(BiomeType::Swamp, 0.1);
         },
         EmotionalState::Terror => {
             composition.insert(BiomeType::Lava, 0.4);
-            composition.insert(BiomeType::Corrupted(Box::new(BiomeType::Desert)), 0.3);
+            composition.insert(BiomeType::CorruptedDesert, 0.3);
             composition.insert(BiomeType::Void, 0.2);
             composition.insert(BiomeType::Mountain, 0.1);
         },
         EmotionalState::Void => {
             composition.insert(BiomeType::Void, 0.6);
-            composition.insert(BiomeType::Corrupted(Box::new(BiomeType::Void)), 0.4);
+            composition.insert(BiomeType::VoidGrassland, 0.4);
         },
     }
     
@@ -190,10 +190,10 @@ pub fn should_spawn_milestone(
     
     let spawn_chance = base_chance * level_modifier * distance_modifier;
     
-    if rng.r#gen::<f32>() < spawn_chance {
+    if rng.gen::<f32>() < spawn_chance {
         let milestone_types = get_available_milestones(&region_data.emotional_arc);
         if !milestone_types.is_empty() {
-            return Some(milestone_types[rng.r#gen_range(0..milestone_types.len())].clone());
+            return Some(milestone_types[rng.gen_range(0..milestone_types.len())].clone());
         }
     }
     

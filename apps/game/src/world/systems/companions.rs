@@ -16,23 +16,23 @@ pub fn companion_psychology_system(
             
             // Apply dread effects to companion psychology
             let dread_stress = match dread_level.current {
-                0..=20 => 0.0,
-                21..=40 => 0.5,
-                41..=60 => 1.5,
-                61..=80 => 3.0,
-                81..=100 => 5.0,
+                x if x <= 20.0 => 0.0,
+                x if x <= 40.0 => 0.5,
+                x if x <= 60.0 => 1.5,
+                x if x <= 80.0 => 3.0,
+                x if x <= 100.0 => 5.0,
                 _ => 10.0,
             };
             
             // Update companion stress
-            companion.stress += (distance_stress + dread_stress) * time.delta_seconds();
+            companion.stress += (distance_stress + dread_stress) * time.delta_secs();
             companion.stress = companion.stress.clamp(0.0, 100.0);
             
             // Update trust based on player actions and time
             if companion.stress < 30.0 {
-                companion.trust += 0.1 * time.delta_seconds();
+                companion.trust += 0.1 * time.delta_secs();
             } else if companion.stress > 70.0 {
-                companion.trust -= 0.2 * time.delta_seconds();
+                companion.trust -= 0.2 * time.delta_secs();
             }
             companion.trust = companion.trust.clamp(0.0, 100.0);
             

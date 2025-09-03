@@ -110,7 +110,24 @@ pub fn get_movement_cost(biome: &BiomeType, weather_intensity: f32) -> f32 {
         BiomeType::Water => 1.3, // Assuming shallow water/fording
         BiomeType::Lava => 3.0,
         BiomeType::Void => 4.0,
-        BiomeType::Corrupted(_) => 2.5,
+        // Corrupted variants have high movement cost
+        BiomeType::CorruptedGrassland | BiomeType::CorruptedForest | 
+        BiomeType::CorruptedMountain | BiomeType::CorruptedDesert | 
+        BiomeType::CorruptedSwamp | BiomeType::CorruptedWater | 
+        BiomeType::CorruptedSnow => 2.5,
+        
+        // Void variants have highest movement cost
+        BiomeType::VoidGrassland | BiomeType::VoidForest | BiomeType::VoidMountain | 
+        BiomeType::VoidDesert | BiomeType::VoidSwamp | BiomeType::VoidWater | 
+        BiomeType::VoidSnow | BiomeType::VoidLava => 4.0,
+        
+        // Transitional biomes
+        BiomeType::ForestGrassland => 1.1,
+        BiomeType::MountainForest => 1.6,
+        BiomeType::DesertMountain => 1.75,
+        BiomeType::SwampWater => 1.55,
+        BiomeType::SnowMountain => 1.7,
+        BiomeType::Snow => 1.8,
     };
     
     // Weather makes movement more difficult
@@ -142,13 +159,34 @@ pub fn get_tile_accessibility(biome: &BiomeType, player_level: u32) -> TileAcces
                 TileAccessibility::Impassable
             }
         },
-        BiomeType::Corrupted(_) => {
+        // Corrupted variants require level 10+
+        BiomeType::CorruptedGrassland | BiomeType::CorruptedForest | 
+        BiomeType::CorruptedMountain | BiomeType::CorruptedDesert | 
+        BiomeType::CorruptedSwamp | BiomeType::CorruptedWater | 
+        BiomeType::CorruptedSnow => {
             if player_level >= 10 {
                 TileAccessibility::Difficult
             } else {
                 TileAccessibility::Impassable
             }
         },
+        
+        // Void variants require very high level
+        BiomeType::VoidGrassland | BiomeType::VoidForest | BiomeType::VoidMountain | 
+        BiomeType::VoidDesert | BiomeType::VoidSwamp | BiomeType::VoidWater | 
+        BiomeType::VoidSnow | BiomeType::VoidLava => {
+            if player_level >= 50 {
+                TileAccessibility::Difficult
+            } else {
+                TileAccessibility::Impassable
+            }
+        },
+        
+        // Transitional biomes
+        BiomeType::ForestGrassland | BiomeType::MountainForest | 
+        BiomeType::DesertMountain | BiomeType::SwampWater | 
+        BiomeType::SnowMountain => TileAccessibility::Passable,
+        BiomeType::Snow => TileAccessibility::Difficult,
     }
 }
 

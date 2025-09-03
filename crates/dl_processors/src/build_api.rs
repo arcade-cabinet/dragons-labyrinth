@@ -231,6 +231,9 @@ fn process_world_resources(
     generate_hex_tile_modules(&hex_tiles, output_dir)?;
     generate_region_modules(&region_modules, output_dir)?;
     generate_dungeon_modules(&dungeon_areas, output_dir)?;
+    
+    // Generate the main generated_world.rs file that hex_world.rs expects
+    generate_world_correlations_file(&hex_tiles, &region_modules, &dungeon_areas, output_dir)?;
 
     Ok(WorldResourceData {
         total_hexes: hex_tiles.len(),
@@ -448,6 +451,95 @@ fn generate_npc_dialogues(npcs: &[NpcDialogueData], output_dir: &Path) -> Result
     content.push_str("}\n");
     
     std::fs::write(output_dir.join("npcs.rs"), content)?;
+    Ok(())
+}
+
+/// Generate the main generated_world.rs file with EntityCorrelations resource
+fn generate_world_correlations_file(
+    hex_tiles: &[HexTileData],
+    regions: &[RegionModuleData],
+    dungeons: &[DungeonAreaData],
+    output_dir: &Path,
+) -> Result<()> {
+    let mut content = String::from("//! Generated world correlations for hex entity queries\n\n");
+    content.push_str("use bevy::prelude::*;\n");
+    content.push_str("use std::collections::HashMap;\n");
+    content.push_str("use crate::world::systems::hex_world::HexEntitySet;\n\n");
+    
+    // Define EntityCorrelations resource
+    content.push_str("#[derive(Resource, Debug)]\n");
+    content.push_str("pub struct EntityCorrelations {\n");
+    content.push_str("    hex_entities: HashMap<(i32, i32), HexEntitySet>,\n");
+    content.push_str("}\n\n");
+    
+    content.push_str("impl EntityCorrelations {\n");
+    content.push_str("    pub fn new() -> Self {\n");
+    content.push_str("        let mut hex_entities = HashMap::new();\n\n");
+    
+    // Generate hex entity correlations based on processed data
+    for tile in hex_tiles {
+        let mut settlements = Vec::new();
+        let mut factions = Vec::new();
+        let mut npcs = Vec::new();
+        let mut tile_dungeons = Vec::new();
+        
+        // Find settlements in this region
+        for region in regions {
+            let distance = ((region.center_q - tile.q).abs() + (region.center_r - tile.r).abs()) as u32;
+            if distance <= region.radius {
+                settlements.extend(region.settlements.iter().cloned());
+                // Add faction presence based on settlements
+                factions.push(format!("faction_{}", region.region_id));
+                // Add NPCs in settlements
+                for settlement in &region.settlements {
+                    npcs.push(format!("npc_{}_merchant", settlement));
+                    npcs.push(format!("npc_{}_guard", settlement));
+                }
+            }
+        }
+        
+        // Find nearby dungeons
+        for dungeon in dungeons {
+            let distance = ((dungeon.location_q - tile.q).abs() + (dungeon.location_r - tile.r).abs()) as f32;
+            if distance <= 3.0 {  // Dungeons affect nearby hexes
+                tile_dungeons.push(dungeon.dungeon_id.clone());
+            }
+        }
+        
+        content.push_str(&format!(
+            "        hex_entities.insert(({}, {}), HexEntitySet {{\n",
+            tile.q, tile.r
+        ));
+        content.push_str(&format!("            settlements: vec!{:?},\n", settlements));
+        content.push_str(&format!("            factions: vec!{:?},\n", factions));
+        content.push_str(&format!("            npcs: vec!{:?},\n", npcs));
+        content.push_str(&format!("            dungeons: vec!{:?},\n", tile_dungeons));
+        content.push_str("            special_features: vec![],\n");
+        content.push_str("        });\n\n");
+    }
+    
+    content.push_str("        Self { hex_entities }\n");
+    content.push_str("    }\n\n");
+    
+    content.push_str("    pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> &HexEntitySet {\n");
+    content.push_str("        self.hex_entities.get(&coords).unwrap_or(&HexEntitySet::default())\n");
+    content.push_str("    }\n");
+    content.push_str("}\n\n");
+    
+    // Add default implementation for HexEntitySet
+    content.push_str("impl Default for HexEntitySet {\n");
+    content.push_str("    fn default() -> Self {\n");
+    content.push_str("        Self {\n");
+    content.push_str("            settlements: Vec::new(),\n");
+    content.push_str("            factions: Vec::new(),\n");
+    content.push_str("            npcs: Vec::new(),\n");
+    content.push_str("            dungeons: Vec::new(),\n");
+    content.push_str("            special_features: Vec::new(),\n");
+    content.push_str("        }\n");
+    content.push_str("    }\n");
+    content.push_str("}\n");
+    
+    std::fs::write(output_dir.join("generated_world.rs"), content)?;
     Ok(())
 }
 

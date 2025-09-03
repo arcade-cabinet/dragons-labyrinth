@@ -247,7 +247,7 @@ pub fn play_contextual_audio_stinger(
     commands.spawn(AudioBundle {
         source: handle,
         settings: PlaybackSettings {
-            volume: Volume::new(audio_system.volume_multiplier * 0.8),
+            volume: Volume::Linear(audio_system.volume_multiplier * 0.8),
             mode: PlaybackMode::Despawn,
             ..default()
         },
@@ -274,7 +274,7 @@ pub fn play_menu_audio(
     commands.spawn(AudioBundle {
         source: menu_audio,
         settings: PlaybackSettings {
-            volume: Volume::new(0.5),
+            volume: Volume::Linear(0.5),
             mode: PlaybackMode::Loop,
             ..default()
         },
@@ -291,7 +291,7 @@ pub fn play_character_creation_audio(
     commands.spawn(AudioBundle {
         source: creation_audio,
         settings: PlaybackSettings {
-            volume: Volume::new(0.4),
+            volume: Volume::Linear(0.4),
             mode: PlaybackMode::Loop,
             ..default()
         },
@@ -315,7 +315,7 @@ pub fn play_ui_sound_effects(
         commands.spawn(AudioBundle {
             source: handle,
             settings: PlaybackSettings {
-                volume: Volume::new(0.3),
+                volume: Volume::Linear(0.3),
                 mode: PlaybackMode::Despawn,
                 ..default()
             },
