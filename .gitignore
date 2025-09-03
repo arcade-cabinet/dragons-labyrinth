@@ -1,10 +1,69 @@
+# ====================
 # Rust/Cargo
+# ====================
+# Compiled files and dependencies
 /target/
+**/target/
 **/*.rs.bk
 *.pdb
-Cargo.lock
 
+# Remove Cargo.lock from gitignore for binary crates
+# Cargo.lock
+
+# Rust profiling
+*.profdata
+*.profraw
+
+# ====================
+# Bevy Game Engine
+# ====================
+# Bevy asset processing
+/imported_assets/
+**/.imported_assets/
+
+# Bevy debug symbols
+*.dSYM/
+
+# ====================
+# Build Artifacts & Cache
+# ====================
+# Build directories
+/build/
+**/build/
+/dist/
+**/dist/
+/out/
+**/out/
+
+# Cache directories
+/cache/
+**/cache/
+/crates/dl_analysis/cache/
+/crates/dl_analysis/build/
+/.cache/
+
+# Generated code
+/apps/game/src/generated/
+**/generated/
+
+# ====================
+# Reports & Data
+# ====================
+# Generated reports
+/reports/
+**/reports/
+/dl_analysis_reports/
+*.csv
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.hbf.lock
+
+# ====================
 # Python
+# ====================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -26,53 +85,155 @@ htmlcov/
 dmypy.json
 .pyre/
 .ruff_cache/
+.ipynb_checkpoints/
 
-# Environment variables and secrets
+# ====================
+# Environment & Secrets
+# ====================
 .env
-.env.local
+.env.*
 .envrc.local
 *.secret
+*.key
+*.pem
+*.crt
 
+# ====================
 # IDEs and Editors
+# ====================
+# VSCode
 .vscode/
+*.code-workspace
+.history/
+
+# IntelliJ/CLion
 .idea/
+*.iml
+*.iws
+*.ipr
+cmake-build-*/
+
+# Vim/Neovim
 *.swp
 *.swo
 *~
 .*.swp
 .*.swo
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+.netrwhist
+tags
 
-# OS-specific
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ====================
+# Operating Systems
+# ====================
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
-Thumbs.db
-desktop.ini
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ====================
+# Development Tools
+# ====================
 # Direnv
 .direnv/
 
-# Project-specific
+# Node (for web builds)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ====================
+# Project Specific
+# ====================
+# Test outputs
 /test_output/
+/tests/output/
+
+# Media working directories
 /visuals/
 /audio/
 /tmp/
+/temp/
+
+# Logs
 *.log
+*.log.*
+logs/
+
+# Backups
 *.bak
+*.backup
 *.orig
+*.old
 
-# Generated reports
-/reports/
-/dl_analysis_reports/
-*.csv
+# WASM builds
+/pkg/
+/wasm-pack.log
 
-# Build artifacts
-/apps/game/src/generated/
+# Trunk (for web builds)
+/dist-trunk/
 
-# Old Godot artifacts (can be removed once cleaned)
+# ====================
+# Old/Legacy (to be removed)
+# ====================
+# Godot artifacts
 .plugged
 .import/
 export.cfg
@@ -82,3 +243,41 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 .godot/
+
+# ====================
+# Documentation
+# ====================
+# Generated documentation
+/target/doc/
+/target/criterion/
+
+# ====================
+# Debugging
+# ====================
+# Core dumps
+core
+core.*
+*.core
+
+# Profiling
+perf.data
+perf.data.old
+*.gcda
+*.gcno
+*.gcov
+
+# Valgrind
+*.memcheck
+*.callgrind
+*.cachegrind
+*.massif
+*.helgrind
+*.drd
+
+# ====================
+# Temporary Files
+# ====================
+*.tmp
+*.temp
+.tmp/
+.temp/
