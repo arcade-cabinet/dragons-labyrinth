@@ -10,9 +10,9 @@ use std::collections::HashMap;
 use std::path::Path;
 use anyhow::Result;
 
-use crate::clusters::{BaseEntitiesCluster, EntityCluster};
-use crate::raw::{RawEntity, EntityCategory};
-use crate::results::GenerationResults;
+use dl_analysis::clusters::{BaseEntitiesCluster, EntityCluster};
+use dl_types::analysis::raw::{RawEntity, EntityCategory};
+use dl_analysis::results::GenerationResults;
 
 /// Dungeon area entity matching Python DungeonArea model
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -271,7 +271,6 @@ Generation Notes:
 /// Dungeon-specific utility functions
 pub mod utils {
     use super::*;
-    use crate::base::HexKey;
 
     /// Extract all area connections from a dungeon
     pub fn extract_area_connections(areas: &[DungeonArea]) -> HashMap<i32, Vec<i32>> {
@@ -287,7 +286,7 @@ pub mod utils {
     }
 
     /// Find areas accessible from a given hex coordinate
-    pub fn find_areas_at_hex<'a>(areas: &'a [DungeonArea], hex_key: &HexKey) -> Vec<&'a DungeonArea> {
+    pub fn find_areas_at_hex<'a>(areas: &'a [DungeonArea], hex_key: &str) -> Vec<&'a DungeonArea> {
         areas.iter()
             .filter(|area| {
                 area.entrance_hex.as_ref().map_or(false, |hex| hex == hex_key)
@@ -327,7 +326,7 @@ pub mod utils {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::raw::RawEntity;
+    use dl_types::analysis::raw::RawEntity;
 
     #[test]
     fn test_dungeon_area_creation() {

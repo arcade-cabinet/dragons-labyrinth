@@ -9,9 +9,10 @@ use std::path::{Path, PathBuf};
 use csv::Writer;
 use anyhow::Result;
 
+use dl_types::analysis::raw::RawEntity;
+use dl_types::analysis::base::{KNOWN_REGIONS, KNOWN_SETTLEMENTS, KNOWN_FACTIONS, KNOWN_DUNGEONS};
 use crate::orchestration::RawEntities;
-use crate::raw::RawEntity;
-use crate::base::{KNOWN_REGIONS, KNOWN_SETTLEMENTS, KNOWN_FACTIONS, KNOWN_DUNGEONS};
+use crate::clusters::EntityCluster;
 
 /// Get the reports directory from environment or use default
 pub fn get_reports_dir() -> Result<PathBuf> {
@@ -382,23 +383,18 @@ pub fn generate_uncategorized_report(
     
     // Write each uncategorized entity
     for entity in uncategorized {
-        let content_preview = if entity.value.len() > 100 {
-            format!("{}...", &entity.value[..100])
+        let content_preview = if entity.raw_value.len() > 100 {
+            format!("{}...", &entity.raw_value[..100])
         } else {
-            entity.value.clone()
+            entity.raw_value.clone()
         };
-        
-        let hex_coords = entity.hex_coordinate
-            .as_ref()
-            .map(|coord| coord.to_string())
-            .unwrap_or_else(|| "None".to_string());
         
         wtr.write_record(&[
             &entity.uuid,
-            &format!("{:?}", entity.category),
-            entity.entity_name.as_deref().unwrap_or("Unknown"),
+            &entity.category,
+            &entity.entity_name,
             &content_preview,
-            &hex_coords,
+            "Unknown", // Placeholder for hex coordinates - need to extract from content
         ])?;
     }
     

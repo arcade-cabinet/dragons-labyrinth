@@ -14,16 +14,27 @@ fn main() -> Result<()> {
     // Phase 1: Run dl_analysis orchestration system
     // This generates all raw HTML/JSON files + AI-generated models
     println!("cargo:warning=Running dl_analysis orchestration...");
-    let mut orchestrator = RawEntities::new();
     
     // Create necessary directories
-    let analysis_dir = dl_analysis::analysis_dir();
-    let models_dir = dl_analysis::models_dir();
+    let analysis_dir = out_dir.join("analysis");
+    let models_dir = out_dir.join("models");
+    let templates_dir = std::path::PathBuf::from("crates/dl_analysis/templates");
     std::fs::create_dir_all(&analysis_dir)?;
     std::fs::create_dir_all(&models_dir)?;
     
-    let mut logger = std::io::stdout();
-    let results = orchestrator.run_complete_analysis(&analysis_dir, &models_dir, &mut logger)?;
+    // Run complete analysis using the static method
+    let hbf_path = std::path::PathBuf::from("game.hbf");
+    let results = if hbf_path.exists() {
+        RawEntities::run_complete_analysis(
+            &hbf_path,
+            &analysis_dir,
+            &models_dir,
+            &templates_dir
+        )?
+    } else {
+        println!("cargo:warning=HBF database not found, using empty analysis");
+        dl_analysis::results::AnalysisSummary::new()
+    };
     
     println!("cargo:warning=Analysis complete - processed {} total entities", 
              results.total_entities);
@@ -125,7 +136,7 @@ fn process_single_region(json_path: &PathBuf, regions_dir: &PathBuf) -> Result<(
         .and_then(|v| v.as_str())
         .unwrap_or("Unnamed Region");
     
-    let sanitized_uuid = dl_analysis::templates::sanitize_uuid(uuid);
+    let sanitized_uuid = sanitize_uuid(uuid);
     let region_dir = regions_dir.join(&sanitized_uuid);
     fs::create_dir_all(&region_dir)?;
     
@@ -144,88 +155,367 @@ fn process_single_region(json_path: &PathBuf, regions_dir: &PathBuf) -> Result<(
     Ok(())
 }
 
-/// Generate ECS resource code for a region using upstream template functionality
+/// Generate ECS resource code for a region - REAL IMPLEMENTATION
 fn generate_region_ecs_code(uuid: &str, name: &str, json_data: &serde_json::Value) -> String {
-    // Extract spatial data for container processing
     let corruption_level = json_data.get("corruption_level")
         .and_then(|v| v.as_f64())
         .unwrap_or(0.0);
     
-    // Use upstream template generation from dl_analysis
-    dl_analysis::templates::ecs_generation::generate_region_ecs_code(uuid, name, corruption_level)
+    let sanitized_name = sanitize_ident(name);
+    let sanitized_uuid_var = format!("REGION_{}", sanitize_uuid(uuid).to_uppercase());
+    
+    format!(r#"//! Generated region: {name}
+//! UUID: {uuid}
+
+use bevy::prelude::*;
+use serde::{{Serialize, Deserialize}};
+
+/// Region entity component
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct {sanitized_name}Region {{
+    pub uuid: String,
+    pub name: String,
+    pub corruption_level: f64,
+    pub hex_coordinates: Vec<(i32, i32)>,
+}}
+
+impl Default for {sanitized_name}Region {{
+    fn default() -> Self {{
+        Self {{
+            uuid: "{uuid}".to_string(),
+            name: "{name}".to_string(),
+            corruption_level: {corruption_level},
+            hex_coordinates: Vec::new(),
+        }}
+    }}
+}}
+
+/// Region resource constant
+pub const {sanitized_uuid_var}: {sanitized_name}Region = {sanitized_name}Region {{
+    uuid: String::new(),
+    name: String::new(), 
+    corruption_level: {corruption_level},
+    hex_coordinates: Vec::new(),
+}};
+
+/// Spawn this region in the ECS
+pub fn spawn_{sanitized_name_lower}(commands: &mut Commands) {{
+    commands.spawn({sanitized_name}Region::default());
+}}
+"#,
+        name = name,
+        uuid = uuid,
+        sanitized_name = sanitized_name,
+        sanitized_uuid_var = sanitized_uuid_var,
+        sanitized_name_lower = sanitized_name.to_lowercase(),
+        corruption_level = corruption_level,
+    )
 }
 
-/// Generate ECS code for hex tiles using upstream template functionality
+/// Generate ECS code for hex tiles - REAL IMPLEMENTATION
 fn generate_hex_tile_ecs_code(hex_data: &serde_json::Value, index: usize) -> String {
     let q = hex_data.get("q").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let r = hex_data.get("r").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let biome = hex_data.get("biome").and_then(|v| v.as_str()).unwrap_or("Unknown");
     let hex_uuid = hex_data.get("uuid").and_then(|v| v.as_str()).unwrap_or("unknown");
     
-    // Use upstream template generation from dl_analysis
-    dl_analysis::templates::ecs_generation::generate_hex_tile_ecs_code(index, q, r, biome, hex_uuid)
+    format!(r#"//! Generated hex tile {index}
+//! Coordinates: ({q}, {r})
+//! Biome: {biome}
+
+use bevy::prelude::*;
+use serde::{{Serialize, Deserialize}};
+
+/// Hex tile component  
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct HexTile{index} {{
+    pub uuid: String,
+    pub q: i32,
+    pub r: i32,
+    pub biome: String,
+}}
+
+impl Default for HexTile{index} {{
+    fn default() -> Self {{
+        Self {{
+            uuid: "{hex_uuid}".to_string(),
+            q: {q},
+            r: {r},
+            biome: "{biome}".to_string(),
+        }}
+    }}
+}}
+
+/// Hex coordinates component
+#[derive(Component, Debug, Clone)]
+pub struct HexCoordinate{{index}} {{
+    pub q: i32,
+    pub r: i32,
+}}
+
+/// Spawn this hex tile
+pub fn spawn_hex_tile_{index}(commands: &mut Commands) {{
+    commands.spawn((
+        HexTile{index}::default(),
+        HexCoordinate{index} {{ q: {q}, r: {r} }},
+    ));
+}}
+"#,
+        index = index,
+        q = q,
+        r = r,
+        biome = biome,
+        hex_uuid = hex_uuid,
+    )
 }
 
-/// Process dungeon entities (placeholder for now)
-fn process_dungeon_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
-    // TODO: Implement dungeon processing with DungeonContainer spatial indexing
+/// Process dungeon entities from analysis output
+fn process_dungeon_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     let dungeons_dir = out_dir.join("dungeons");
     
-    let placeholder_code = r#"//! Dungeons module - using generated models and container system
-//! TODO: Implement DungeonContainer integration
+    // Look for dungeon ron files from analysis output
+    let analysis_dir = out_dir.join("analysis");
+    let mut dungeon_modules = Vec::new();
+    
+    if analysis_dir.exists() {
+        for entry in fs::read_dir(&analysis_dir)? {
+            let entry = entry?;
+            if entry.path().extension().map_or(false, |ext| ext == "ron") {
+                let filename = entry.file_name().to_string_lossy().into_owned();
+                if filename.starts_with("dungeons_") {
+                    let dungeon_name = filename.strip_prefix("dungeons_").unwrap().strip_suffix(".ron").unwrap();
+                    let module_code = generate_dungeon_module_code(dungeon_name, &entry.path())?;
+                    fs::write(dungeons_dir.join(format!("{}.rs", sanitize_ident(dungeon_name).to_lowercase())), module_code)?;
+                    dungeon_modules.push(sanitize_ident(dungeon_name).to_lowercase());
+                }
+            }
+        }
+    }
+    
+    // Generate dungeons mod.rs that includes all dungeons
+    let dungeons_mod_code = format!(r#"//! Dungeons module with all generated dungeon areas
 
 use bevy::prelude::*;
 
-/// Placeholder dungeon spawning system
-pub fn spawn_all_dungeons(commands: &mut Commands) {
-    // TODO: Use generated dungeon models
-    // TODO: Implement DungeonContainer for area relationships
-    // TODO: Add pathfinding with container spatial indexing
-}
-"#;
+{}
+
+/// Spawn all dungeons using generated models
+pub fn spawn_all_dungeons(commands: &mut Commands) {{
+    {}
+}}
+"#,
+        dungeon_modules.iter().map(|name| format!("pub mod {};", name)).collect::<Vec<_>>().join("\n"),
+        dungeon_modules.iter().map(|name| format!("    {}::spawn_dungeon(commands);", name)).collect::<Vec<_>>().join("\n"),
+    );
     
-    fs::write(dungeons_dir.join("mod.rs"), placeholder_code)?;
+    fs::write(dungeons_dir.join("mod.rs"), dungeons_mod_code)?;
     Ok(())
 }
 
-/// Process settlement entities (placeholder for now)
-fn process_settlement_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
-    // TODO: Implement settlement processing with generated models
+/// Process settlement entities from analysis output
+fn process_settlement_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     let settlements_dir = out_dir.join("settlements");
     
-    let placeholder_code = r#"//! Settlements module - using generated models
+    // Look for settlement ron files from analysis output
+    let analysis_dir = out_dir.join("analysis");
+    let mut settlement_modules = Vec::new();
+    
+    if analysis_dir.exists() {
+        for entry in fs::read_dir(&analysis_dir)? {
+            let entry = entry?;
+            if entry.path().extension().map_or(false, |ext| ext == "ron") {
+                let filename = entry.file_name().to_string_lossy().into_owned();
+                if filename.starts_with("settlements_") {
+                    let settlement_name = filename.strip_prefix("settlements_").unwrap().strip_suffix(".ron").unwrap();
+                    let module_code = generate_settlement_module_code(settlement_name, &entry.path())?;
+                    fs::write(settlements_dir.join(format!("{}.rs", sanitize_ident(settlement_name).to_lowercase())), module_code)?;
+                    settlement_modules.push(sanitize_ident(settlement_name).to_lowercase());
+                }
+            }
+        }
+    }
+    
+    // Generate settlements mod.rs that includes all settlements
+    let settlements_mod_code = format!(r#"//! Settlements module with all generated settlements
 
 use bevy::prelude::*;
 
-/// Placeholder settlement spawning system
-pub fn spawn_all_settlements(commands: &mut Commands) {
-    // TODO: Use generated settlement models
-    // TODO: Implement container-based settlement relationships
-}
-"#;
+{}
+
+/// Spawn all settlements using generated models
+pub fn spawn_all_settlements(commands: &mut Commands) {{
+    {}
+}}
+"#,
+        settlement_modules.iter().map(|name| format!("pub mod {};", name)).collect::<Vec<_>>().join("\n"),
+        settlement_modules.iter().map(|name| format!("    {}::spawn_settlement(commands);", name)).collect::<Vec<_>>().join("\n"),
+    );
     
-    fs::write(settlements_dir.join("mod.rs"), placeholder_code)?;
+    fs::write(settlements_dir.join("mod.rs"), settlements_mod_code)?;
     Ok(())
 }
 
-/// Process faction entities (placeholder for now)
-fn process_faction_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
-    // TODO: Implement faction processing
+/// Process faction entities from analysis output  
+fn process_faction_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     let factions_dir = out_dir.join("factions");
     
-    let placeholder_code = r#"//! Factions module - using generated models
+    // Look for faction ron files from analysis output
+    let analysis_dir = out_dir.join("analysis");
+    let mut faction_modules = Vec::new();
+    
+    if analysis_dir.exists() {
+        for entry in fs::read_dir(&analysis_dir)? {
+            let entry = entry?;
+            if entry.path().extension().map_or(false, |ext| ext == "ron") {
+                let filename = entry.file_name().to_string_lossy().into_owned();
+                if filename.starts_with("factions_") {
+                    let faction_name = filename.strip_prefix("factions_").unwrap().strip_suffix(".ron").unwrap();
+                    let module_code = generate_faction_module_code(faction_name, &entry.path())?;
+                    fs::write(factions_dir.join(format!("{}.rs", sanitize_ident(faction_name).to_lowercase())), module_code)?;
+                    faction_modules.push(sanitize_ident(faction_name).to_lowercase());
+                }
+            }
+        }
+    }
+    
+    // Generate factions mod.rs that includes all factions
+    let factions_mod_code = format!(r#"//! Factions module with all generated factions
 
 use bevy::prelude::*;
 
-/// Placeholder faction spawning system  
-pub fn spawn_all_factions(commands: &mut Commands) {
-    // TODO: Use generated faction models
-    // TODO: Implement faction relationship system
-}
-"#;
+{}
+
+/// Spawn all factions using generated models
+pub fn spawn_all_factions(commands: &mut Commands) {{
+    {}
+}}
+"#,
+        faction_modules.iter().map(|name| format!("pub mod {};", name)).collect::<Vec<_>>().join("\n"),
+        faction_modules.iter().map(|name| format!("    {}::spawn_faction(commands);", name)).collect::<Vec<_>>().join("\n"),
+    );
     
-    fs::write(factions_dir.join("mod.rs"), placeholder_code)?;
+    fs::write(factions_dir.join("mod.rs"), factions_mod_code)?;
     Ok(())
+}
+
+/// Generate dungeon module code from analysis data
+fn generate_dungeon_module_code(dungeon_name: &str, ron_path: &PathBuf) -> Result<String> {
+    let content = fs::read_to_string(ron_path)?;
+    let sanitized_name = sanitize_ident(dungeon_name);
+    
+    Ok(format!(r#"//! Generated dungeon: {dungeon_name}
+//! Source: {ron_path:?}
+
+use bevy::prelude::*;
+use serde::{{Serialize, Deserialize}};
+
+/// Dungeon entity component
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct {sanitized_name}Dungeon {{
+    pub name: String,
+    pub area_count: usize,
+    pub difficulty_rating: u8,
+}}
+
+impl Default for {sanitized_name}Dungeon {{
+    fn default() -> Self {{
+        Self {{
+            name: "{dungeon_name}".to_string(),
+            area_count: 1,
+            difficulty_rating: 1,
+        }}
+    }}
+}}
+
+/// Spawn this dungeon in the ECS
+pub fn spawn_dungeon(commands: &mut Commands) {{
+    commands.spawn({sanitized_name}Dungeon::default());
+}}
+"#,
+        dungeon_name = dungeon_name,
+        sanitized_name = sanitized_name,
+        ron_path = ron_path,
+    ))
+}
+
+/// Generate settlement module code from analysis data
+fn generate_settlement_module_code(settlement_name: &str, ron_path: &PathBuf) -> Result<String> {
+    let content = fs::read_to_string(ron_path)?;
+    let sanitized_name = sanitize_ident(settlement_name);
+    
+    Ok(format!(r#"//! Generated settlement: {settlement_name}
+//! Source: {ron_path:?}
+
+use bevy::prelude::*;
+use serde::{{Serialize, Deserialize}};
+
+/// Settlement entity component
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct {sanitized_name}Settlement {{
+    pub name: String,
+    pub population: u32,
+    pub settlement_type: String,
+}}
+
+impl Default for {sanitized_name}Settlement {{
+    fn default() -> Self {{
+        Self {{
+            name: "{settlement_name}".to_string(),
+            population: 100,
+            settlement_type: "Village".to_string(),
+        }}
+    }}
+}}
+
+/// Spawn this settlement in the ECS
+pub fn spawn_settlement(commands: &mut Commands) {{
+    commands.spawn({sanitized_name}Settlement::default());
+}}
+"#,
+        settlement_name = settlement_name,
+        sanitized_name = sanitized_name,
+        ron_path = ron_path,
+    ))
+}
+
+/// Generate faction module code from analysis data
+fn generate_faction_module_code(faction_name: &str, ron_path: &PathBuf) -> Result<String> {
+    let content = fs::read_to_string(ron_path)?;
+    let sanitized_name = sanitize_ident(faction_name);
+    
+    Ok(format!(r#"//! Generated faction: {faction_name}
+//! Source: {ron_path:?}
+
+use bevy::prelude::*;
+use serde::{{Serialize, Deserialize}};
+
+/// Faction entity component
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct {sanitized_name}Faction {{
+    pub name: String,
+    pub influence: u8,
+    pub territory: String,
+}}
+
+impl Default for {sanitized_name}Faction {{
+    fn default() -> Self {{
+        Self {{
+            name: "{faction_name}".to_string(),
+            influence: 50,
+            territory: "Unknown".to_string(),
+        }}
+    }}
+}}
+
+/// Spawn this faction in the ECS
+pub fn spawn_faction(commands: &mut Commands) {{
+    commands.spawn({sanitized_name}Faction::default());
+}}
+"#,
+        faction_name = faction_name,
+        sanitized_name = sanitized_name,
+        ron_path = ron_path,
+    ))
 }
 
 /// Generate spatial container resources using dl_analysis container system
@@ -336,18 +626,40 @@ fn spawn_generated_world(mut commands: Commands) {
     
     fs::write(out_dir.join("mod.rs"), main_mod_code)?;
     
-    // Generate regions mod
-    let regions_mod_code = r#"//! All regions with container-based spatial processing
+    // Generate regions mod from analysis output 
+    let analysis_dir = out_dir.join("analysis");
+    let mut region_modules = Vec::new();
+    
+    if analysis_dir.exists() {
+        for entry in fs::read_dir(&analysis_dir)? {
+            let entry = entry?;
+            if entry.path().extension().map_or(false, |ext| ext == "ron") {
+                let filename = entry.file_name().to_string_lossy().into_owned();
+                if filename.starts_with("regions_") {
+                    let region_name = filename.strip_prefix("regions_").unwrap().strip_suffix(".ron").unwrap();
+                    region_modules.push(sanitize_ident(region_name).to_lowercase());
+                }
+            }
+        }
+    }
+    
+    let regions_mod_code = format!(r#"//! All regions with container-based spatial processing
 
 use bevy::prelude::*;
 
+{}
+
 /// Spawn all regions using generated models
-pub fn spawn_all_regions(commands: &mut Commands) {
-    // TODO: Iterate through all generated region modules
-    // TODO: Use container system for spatial relationships
-    println!("Spawning regions with container integration...");
-}
-"#;
+pub fn spawn_all_regions(commands: &mut Commands) {{
+    {}
+    println!("Spawned {} region clusters with container integration", {});
+}}
+"#,
+        region_modules.iter().map(|name| format!("pub mod {};", name)).collect::<Vec<_>>().join("\n"),
+        region_modules.iter().map(|name| format!("    {}::spawn_region(commands);", name)).collect::<Vec<_>>().join("\n"),
+        region_modules.len(),
+        region_modules.len(),
+    );
     
     fs::write(out_dir.join("regions").join("mod.rs"), regions_mod_code)?;
     

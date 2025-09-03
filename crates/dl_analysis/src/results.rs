@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::base::EdgeType;
+use dl_types::analysis::base::EdgeType;
 
 /// Connection information for container integration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -48,10 +48,10 @@ impl ModelConnections {
 /// Entity collections organized by type
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntityCollections {
-    pub regions: Vec<crate::entities::RegionHexTile>,
-    pub settlements: Vec<crate::entities::SettlementEstablishment>,
-    pub factions: Vec<crate::entities::FactionEntity>,
-    pub dungeons: Vec<crate::entities::RegionHexTile>, // Dungeons are also hex tiles for now
+    pub regions: Vec<dl_types::analysis::entities::RegionHexTile>,
+    pub settlements: Vec<dl_types::analysis::entities::SettlementEstablishment>,
+    pub factions: Vec<dl_types::analysis::entities::FactionEntity>,
+    pub dungeons: Vec<dl_types::analysis::entities::RegionHexTile>, // Dungeons are also hex tiles for now
 }
 
 impl EntityCollections {

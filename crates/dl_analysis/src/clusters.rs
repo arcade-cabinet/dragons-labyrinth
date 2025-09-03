@@ -322,7 +322,7 @@ impl BaseEntitiesCluster {
 }
 
 /// Specialized cluster for regions
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegionEntitiesCluster {
     pub base: BaseEntitiesCluster,
 }
@@ -602,7 +602,7 @@ impl RegionEntitiesCluster {
 }
 
 /// Specialized cluster for settlements
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SettlementEntitiesCluster {
     pub base: BaseEntitiesCluster,
 }
@@ -731,7 +731,7 @@ impl {{ entity.name }} {
 }
 
 /// Specialized cluster for factions
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FactionEntitiesCluster {
     pub base: BaseEntitiesCluster,
 }
@@ -860,7 +860,7 @@ impl {{ entity.name }} {
 }
 
 /// Specialized cluster for dungeons
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DungeonEntitiesCluster {
     pub base: BaseEntitiesCluster,
 }

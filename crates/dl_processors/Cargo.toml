@@ -25,6 +25,7 @@ tokio = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 dl_analysis = { workspace = true }
 dl_seeds = { workspace = true }
+dl_types = { path = "../dl_types" }
 
 [build-dependencies]
 dl_analysis = { workspace = true }

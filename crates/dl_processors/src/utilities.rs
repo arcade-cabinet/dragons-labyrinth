@@ -14,58 +14,44 @@ pub struct AreaData {
     pub connections: Vec<String>,
 }
 
-/// Extract hex coordinates from region entity using actual HBF data
-pub fn extract_hex_coordinates_from_region_properly(region: &dl_analysis::entities::RegionHexTile) -> Result<Vec<(i32, i32)>> {
-    // Parse actual region content for hex coordinates
+/// Extract hex coordinates from content string using HBF patterns
+pub fn extract_hex_coordinates_from_content(content: &str) -> Result<Vec<(i32, i32)>> {
     let hex_pattern = Regex::new(r"([WE])(\d+)([NS])(\d+)")?;
     let mut coordinates = Vec::new();
     
-    // Extract coordinates from hex_key if available
-    if let Some(hex_key) = &region.hex_key {
-        if let Some(cap) = hex_pattern.captures(hex_key) {
-            let ew = &cap[1];
-            let ew_num: i32 = cap[2].parse().unwrap_or(0);
-            let ns = &cap[3]; 
-            let ns_num: i32 = cap[4].parse().unwrap_or(0);
-            
-            let q = if ew == "E" { ew_num } else { -ew_num };
-            let r = if ns == "N" { ns_num } else { -ns_num };
-            
-            coordinates.push((q, r));
-        }
-    }
-    
-    // If no coordinates found, generate some based on UUID hash
-    if coordinates.is_empty() {
-        let hash = simple_hash(&region.entity_uuid);
-        let base_q = (hash % 20) as i32 - 10;
-        let base_r = ((hash / 20) % 20) as i32 - 10;
+    // Find all hex coordinate patterns in content
+    for cap in hex_pattern.captures_iter(content) {
+        let ew = &cap[1];
+        let ew_num: i32 = cap[2].parse().unwrap_or(0);
+        let ns = &cap[3]; 
+        let ns_num: i32 = cap[4].parse().unwrap_or(0);
         
-        // Generate a 3x3 grid around the base
-        for dq in -1..=1 {
-            for dr in -1..=1 {
-                coordinates.push((base_q + dq, base_r + dr));
-            }
-        }
+        let q = if ew == "E" { ew_num } else { -ew_num };
+        let r = if ns == "N" { ns_num } else { -ns_num };
+        
+        coordinates.push((q, r));
     }
     
     Ok(coordinates)
 }
 
-/// Extract areas from dungeon entity using actual HBF data
-pub fn extract_areas_from_dungeon_properly(dungeon: &dl_analysis::entities::RegionHexTile) -> Result<Vec<AreaData>> {
+/// Extract areas from dungeon content string
+pub fn extract_areas_from_content(content: &str) -> Result<Vec<AreaData>> {
     let mut areas = Vec::new();
     
-    // Use special features as area information for dungeons
-    for (index, feature) in dungeon.special_features.iter().enumerate() {
-        let area = AreaData {
-            uuid: format!("area_{}", index),
-            name: feature.clone(),
-            monsters: vec![extract_monster_from_line(feature)],
-            treasures: vec![extract_treasure_from_line(feature)],
-            connections: if index > 0 { vec![format!("area_{}", index - 1)] } else { Vec::new() },
-        };
-        areas.push(area);
+    // Simple parsing for area information
+    let lines: Vec<&str> = content.lines().collect();
+    for (index, line) in lines.iter().enumerate() {
+        if line.contains("area") || line.contains("chamber") || line.contains("room") {
+            let area = AreaData {
+                uuid: format!("area_{}", index),
+                name: line.trim().to_string(),
+                monsters: vec![extract_monster_from_line(line)],
+                treasures: vec![extract_treasure_from_line(line)],
+                connections: if index > 0 { vec![format!("area_{}", index - 1)] } else { Vec::new() },
+            };
+            areas.push(area);
+        }
     }
     
     // If no areas found, create default areas
@@ -76,13 +62,6 @@ pub fn extract_areas_from_dungeon_properly(dungeon: &dl_analysis::entities::Regi
             monsters: vec!["guard".to_string()],
             treasures: vec!["key".to_string()],
             connections: vec!["main_chamber".to_string()],
-        });
-        areas.push(AreaData {
-            uuid: "main_chamber".to_string(),
-            name: "Main Chamber".to_string(),
-            monsters: vec!["boss".to_string()],
-            treasures: vec!["artifact".to_string()],
-            connections: vec!["entrance".to_string()],
         });
     }
     
@@ -170,37 +149,8 @@ pub fn get_dungeons_at_hex_from_analysis(
 
 /// Create sample entities for testing
 pub fn create_sample_entities() -> dl_analysis::results::EntityCollections {
-    use dl_analysis::entities::*;
-    
-    let mut entities = dl_analysis::results::EntityCollections::new();
-    
-    // Create sample region
-    let mut sample_region = RegionHexTile::new("sample_region".to_string());
-    sample_region.hex_key = Some("E5N3".to_string());
-    sample_region.settlement_uuids.push("village_start".to_string());
-    entities.regions.push(sample_region);
-    
-    // Create sample settlement
-    let mut sample_settlement = SettlementEstablishment::new("village_start".to_string());
-    sample_settlement.settlement_name = Some("Starting Village".to_string());
-    sample_settlement.population = Some(100);
-    sample_settlement.hex_location = Some("E5N3".to_string());
-    entities.settlements.push(sample_settlement);
-    
-    // Create sample faction
-    let mut sample_faction = FactionEntity::new("peaceful_guards".to_string());
-    sample_faction.faction_name = Some("Village Guards".to_string());
-    sample_faction.territories.push("E5N3".to_string());
-    entities.factions.push(sample_faction);
-    
-    // Create sample dungeon (using RegionHexTile for now)
-    let mut sample_dungeon = RegionHexTile::new("crypt_nearby".to_string());
-    sample_dungeon.hex_key = Some("E6N3".to_string());
-    sample_dungeon.special_features.push("entrance_hall".to_string());
-    sample_dungeon.special_features.push("treasure_chamber".to_string());
-    entities.dungeons.push(sample_dungeon);
-    
-    entities
+    // Create empty collection - entity creation requires proper types from dl_types
+    dl_analysis::results::EntityCollections::new()
 }
 
 /// Extract monster from content line

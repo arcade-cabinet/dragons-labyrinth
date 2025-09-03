@@ -32,7 +32,7 @@ pub fn generated_dir() -> PathBuf {
 pub fn generate_world_resources(out_dir: &std::path::Path) -> Result<()> {
     use minijinja::Environment;
     
-    println!("Generating world resources using external templates...");
+    println!("Generating world resources using HBF analysis and external templates...");
     
     // Set up template environment with embedded templates for now
     let mut env = Environment::new();
@@ -46,14 +46,25 @@ pub fn generate_world_resources(out_dir: &std::path::Path) -> Result<()> {
     env.add_template("dialogue_module.rs.jinja2", include_str!("../templates/dialogue_module.rs.jinja2"))?;
     env.add_template("npc_dialogue.rs.jinja2", include_str!("../templates/npc_dialogue.rs.jinja2"))?;
     
-    // Call dl_analysis with OUR OUT_DIR - it will analyze both HBF entities AND seeds data 
-    let mut orchestrator = dl_analysis::orchestration::RawEntities::new();
-    let mut logger = std::io::stdout();
-    let analysis_dir = std::path::Path::new("analysis");
+    // Run complete HBF analysis using the new orchestration system
+    let hbf_path = std::path::Path::new("game.hbf");
+    let analysis_output_dir = out_dir.join("analysis");
+    let models_dir = out_dir.join("models");
+    let templates_dir = std::path::Path::new("crates/dl_analysis/templates");
     
-    // dl_analysis processes everything and outputs organized data to our OUT_DIR
-    let analysis_summary = orchestrator.run_complete_analysis(&analysis_dir, out_dir, &mut logger)?;
-    let analysis_results = dl_analysis::results::GenerationResults::success(vec!["sample.rs".to_string()])
+    println!("📂 Running HBF analysis...");
+    let analysis_summary = dl_analysis::orchestration::RawEntities::run_complete_analysis(
+        hbf_path,
+        &analysis_output_dir,
+        &models_dir,
+        &templates_dir
+    )?;
+    
+    println!("✅ Analysis complete: {} total entities processed", analysis_summary.total_entities);
+    println!("📊 Found {} entity categories", analysis_summary.entity_counts.len());
+    
+    // Create generation results wrapper
+    let analysis_results = dl_analysis::results::GenerationResults::success(vec!["analysis.rs".to_string()])
         .with_summary(analysis_summary)
         .with_entities(utilities::create_sample_entities());
     
