@@ -1,0 +1,35 @@
+//! Region {{ region_uuid }} module with all hex tiles
+//! Generated with {{ hex_coords|length }} hex tiles
+
+use bevy::prelude::*;
+use crate::components::*;
+
+{% for coords in hex_coords %}
+pub mod hex_{{ coords[0] }}_{{ coords[1] }};
+pub use hex_{{ coords[0] }}_{{ coords[1] }}::*;
+{% endfor %}
+
+/// Spawn entire region with all hex tiles
+pub fn spawn_{{ region_uuid|replace('-', '_') }}_region(
+    mut commands: Commands,
+    mut spatial_container: ResMut<SpatialContainer>,
+) {
+    println!("Spawning region {{ region_uuid }} with {{ hex_coords|length }} hex tiles...");
+    
+{% for coords in hex_coords %}
+    spawn_hex_{{ coords[0] }}_{{ coords[1] }}(&mut commands, &mut spatial_container);
+{% endfor %}
+    
+    println!("Region {{ region_uuid }} spawned successfully");
+}
+
+/// Get all entities in this region
+pub fn get_{{ region_uuid|replace('-', '_') }}_entities(
+    spatial_container: &SpatialContainer,
+) -> Vec<Entity> {
+    let mut entities = Vec::new();
+{% for coords in hex_coords %}
+    entities.extend(spatial_container.get_entities_at_hex(({{ coords[0] }}, {{ coords[1] }})));
+{% endfor %}
+    entities
+}

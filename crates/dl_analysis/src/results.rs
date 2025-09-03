@@ -45,6 +45,26 @@ impl ModelConnections {
     }
 }
 
+/// Entity collections organized by type
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EntityCollections {
+    pub regions: Vec<crate::entities::RegionHexTile>,
+    pub settlements: Vec<crate::entities::SettlementEstablishment>,
+    pub factions: Vec<crate::entities::FactionEntity>,
+    pub dungeons: Vec<crate::entities::RegionHexTile>, // Dungeons are also hex tiles for now
+}
+
+impl EntityCollections {
+    pub fn new() -> Self {
+        Self {
+            regions: Vec::new(),
+            settlements: Vec::new(),
+            factions: Vec::new(),
+            dungeons: Vec::new(),
+        }
+    }
+}
+
 /// Results from AI model generation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GenerationResults {
@@ -56,6 +76,10 @@ pub struct GenerationResults {
     pub connections: Option<ModelConnections>,
     /// Success status
     pub success: bool,
+    /// Organized entity collections
+    pub entities: EntityCollections,
+    /// Analysis summary information
+    pub summary: AnalysisSummary,
 }
 
 impl GenerationResults {
@@ -65,6 +89,8 @@ impl GenerationResults {
             analysis_notes: Vec::new(),
             connections: None,
             success: true,
+            entities: EntityCollections::new(),
+            summary: AnalysisSummary::new(),
         }
     }
 
@@ -74,6 +100,8 @@ impl GenerationResults {
             analysis_notes: vec![error_message],
             connections: None,
             success: false,
+            entities: EntityCollections::new(),
+            summary: AnalysisSummary::new(),
         }
     }
 
@@ -84,6 +112,16 @@ impl GenerationResults {
 
     pub fn add_note(mut self, note: String) -> Self {
         self.analysis_notes.push(note);
+        self
+    }
+
+    pub fn with_entities(mut self, entities: EntityCollections) -> Self {
+        self.entities = entities;
+        self
+    }
+
+    pub fn with_summary(mut self, summary: AnalysisSummary) -> Self {
+        self.summary = summary;
         self
     }
 }

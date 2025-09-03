@@ -19,6 +19,8 @@ scraper = { workspace = true }
 ammonia = { workspace = true }
 bevy = "0.16.1"
 bevy_ecs_tilemap = "0.16"
+minijinja = { version = "2.3", features = ["loader"] }
+dl_analysis = { path = "../dl_analysis" }
 
 [build-dependencies]
 dl_analysis = { path = "../dl_analysis" }

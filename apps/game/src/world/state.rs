@@ -7,6 +7,7 @@ pub struct WorldState {
     pub seed: u64,
     pub tilemap_entity: Option<Entity>,
     pub generated_chunks: HashSet<ChunkCoord>,
+    pub loaded_hexes: HashSet<HexCoord>, // Layer cake system - tracks loaded hex tiles
     pub corruption_map: HashMap<HexCoord, f32>,
     pub player_hex: Option<HexCoord>,
     pub world_progression: u32, // 1-180 progression system
@@ -18,6 +19,7 @@ impl WorldState {
             seed,
             tilemap_entity: None,
             generated_chunks: HashSet::new(),
+            loaded_hexes: HashSet::new(), // Initialize layer cake system
             corruption_map: HashMap::new(),
             player_hex: Some(HexCoord::new(0, 0)),
             world_progression: 1,

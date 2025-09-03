@@ -1,0 +1,122 @@
+//! World integration module generated from {{ total_entities }} entities
+//! This connects all generated resources to the ECS system
+
+use bevy::prelude::*;
+use std::collections::HashMap;
+
+/// Entity set at a hex coordinate from generated resources
+#[derive(Debug, Clone, Default)]
+pub struct HexEntitySet {
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub dungeons: Vec<String>,
+    pub special_features: Vec<String>,
+}
+
+/// Entity correlation system for fast relationship queries
+#[derive(Resource, Default)]
+pub struct EntityCorrelations {
+    /// Map hex coordinates to all entity types at that location
+    pub hex_to_entities: HashMap<(i32, i32), HexEntitySet>,
+    /// Map settlement UUIDs to their controlling factions
+    pub settlement_to_factions: HashMap<String, Vec<String>>,
+    /// Map faction UUIDs to their territories (hex coordinates)
+    pub faction_territories: HashMap<String, Vec<(i32, i32)>>,
+    /// Map NPC UUIDs to their current hex location
+    pub npc_locations: HashMap<String, (i32, i32)>,
+}
+
+impl EntityCorrelations {
+    /// Initialize correlations from generated data
+    pub fn from_generated_data() -> Self {
+        let mut correlations = Self::default();
+        
+        // Load generated region data
+        {% for region in regions %}
+        // Region {{ region.uuid }}
+        // TODO: Load hex tiles for this region
+        {% endfor %}
+        
+        // Load generated dungeon data  
+        {% for dungeon in dungeons %}
+        // Dungeon {{ dungeon.uuid }}
+        // TODO: Add dungeon entrance markers to appropriate hex tiles
+        {% endfor %}
+        
+        correlations
+    }
+    
+    /// Get all entities at a specific hex coordinate (O(1) lookup)
+    pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> &HexEntitySet {
+        self.hex_to_entities.get(&coords).unwrap_or(&HexEntitySet::default())
+    }
+}
+
+/// Plugin to register correlation resources
+pub struct CorrelationsPlugin;
+
+impl Plugin for CorrelationsPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<EntityCorrelations>()
+           .add_systems(Startup, initialize_correlations);
+    }
+}
+
+fn initialize_correlations(mut correlations: ResMut<EntityCorrelations>) {
+    *correlations = EntityCorrelations::from_generated_data();
+    println!("Entity correlations initialized from generated data");
+}
+
+/// Main plugin that integrates all generated world resources
+pub struct GeneratedGameWorldPlugin;
+
+impl Plugin for GeneratedGameWorldPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(CorrelationsPlugin)
+           .add_systems(Startup, spawn_all_generated_world_resources);
+    }
+}
+
+/// Spawn all generated world resources
+fn spawn_all_generated_world_resources(
+    mut commands: Commands,
+    correlations: Res<EntityCorrelations>,
+) {
+    println!("Spawning {{ total_entities }} entities from generated data...");
+    
+    // Spawn ECS entities for each hex with data
+    for (coords, entities) in &correlations.hex_to_entities {
+        let hex_world_pos = Vec3::new(coords.0 as f32 * 64.0, 0.0, coords.1 as f32 * 64.0);
+        
+        // Spawn hex tile entity
+        let hex_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos),
+            Name::new(format!("Hex_{}_{}", coords.0, coords.1)),
+        )).id();
+        
+        // Spawn settlements, factions, NPCs, dungeons at this hex
+        for settlement_uuid in &entities.settlements {
+            commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.0, 0.0)),
+                Name::new(format!("Settlement_{}", settlement_uuid)),
+            ));
+        }
+        
+        for faction_uuid in &entities.factions {
+            commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(10.0, 1.0, 0.0)),
+                Name::new(format!("Faction_{}", faction_uuid)),
+            ));
+        }
+        
+        for dungeon_uuid in &entities.dungeons {
+            commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(0.0, 2.0, 0.0)),
+                Name::new(format!("DungeonEntrance_{}", dungeon_uuid)),
+            ));
+        }
+    }
+    
+    println!("Generated world resources spawned successfully");
+}

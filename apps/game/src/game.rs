@@ -78,7 +78,7 @@ impl Plugin for GamePlugin {
         ))
         .add_systems(Update, (
             player_movement_system,
-            hex_world_generation_system,
+            layer_cake_hex_world_system,
             companion_psychology_system,
             dread_progression_system,
             asset_loading_system,
@@ -92,6 +92,9 @@ impl Plugin for GamePlugin {
             update_procedural_audio,
             play_ui_sound_effects,
         ).run_if(in_state(GameStateEnum::Playing)))
+        
+        // Add generated world plugin
+        .add_plugins(crate::spatial::SpatialPlugin)
         
         // Splash screen
         .add_systems(Update, update_splash_screen.run_if(in_state(GameStateEnum::Loading)))

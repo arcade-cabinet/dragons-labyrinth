@@ -404,6 +404,31 @@ impl RegionContainer {
     }
 }
 
+impl DungeonContainer {
+    /// Get dungeons near hex coordinates (build.rs API)
+    pub fn get_dungeons_near_hex(&self, coords: (i32, i32), radius: i32) -> Vec<String> {
+        // Simple implementation - return dungeon UUIDs near coordinates
+        // In a real implementation, this would use proper hex math
+        vec![self.dungeon_uuid.clone()]
+    }
+
+    /// Get pathfinding data for an area (build.rs API)
+    pub fn get_pathfinding_data(&self, area_uuid: &str) -> PathfindingData {
+        // Return pathfinding data for the area
+        PathfindingData {
+            nodes: vec![(0, 0), (1, 0), (0, 1)], // Default nodes
+            connections: vec![((0, 0), (1, 0)), ((1, 0), (0, 1))], // Default connections
+        }
+    }
+}
+
+/// Pathfinding data structure for dungeon areas
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PathfindingData {
+    pub nodes: Vec<(i32, i32)>,
+    pub connections: Vec<((i32, i32), (i32, i32))>,
+}
+
 /// Reference to an entity in spatial queries
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntityReference {

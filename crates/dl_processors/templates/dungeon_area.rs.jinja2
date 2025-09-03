@@ -1,0 +1,73 @@
+//! Dungeon area {{ area_name }} in {{ dungeon_uuid }}
+//! Area UUID: {{ area_uuid }}
+//! Generated with {{ monsters|length }} monsters, {{ treasures|length }} treasures, {{ connections|length }} connections
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Area data for {{ area_name }}
+#[derive(Resource, Debug, Clone)]
+pub struct {{ area_uuid|title|replace('_', '') }}Area {
+    pub dungeon_uuid: String,
+    pub area_uuid: String,
+    pub area_name: String,
+    pub monsters: Vec<String>,
+    pub treasures: Vec<String>,
+    pub connections: Vec<String>,
+}
+
+impl Default for {{ area_uuid|title|replace('_', '') }}Area {
+    fn default() -> Self {
+        Self {
+            dungeon_uuid: "{{ dungeon_uuid }}".to_string(),
+            area_uuid: "{{ area_uuid }}".to_string(),
+            area_name: "{{ area_name }}".to_string(),
+            monsters: vec![{% for monster in monsters %}"{{ monster }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            treasures: vec![{% for treasure in treasures %}"{{ treasure }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            connections: vec![{% for connection in connections %}"{{ connection }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+        }
+    }
+}
+
+/// Spawn {{ area_name }} with all entities
+pub fn spawn_{{ area_uuid }}_area(
+    mut commands: Commands,
+    mut spatial_container: ResMut<SpatialContainer>,
+) -> Entity {
+    // Create main area entity
+    let area_entity = commands.spawn((
+        DungeonAreaId("{{ area_uuid }}".to_string()),
+        Name::new("{{ area_name }}"),
+    )).id();
+    
+    // Register in spatial container
+    spatial_container.register_dungeon_area_entity("{{ area_uuid }}".to_string(), area_entity);
+    
+{% for monster in monsters %}
+    // Spawn {{ monster }} in this area
+    commands.spawn((
+        Transform::from_translation(Vec3::new({{ loop.index * 10 }} as f32, 0.0, 0.0)),
+        Name::new("{{ monster|title }}"),
+    ));
+{% endfor %}
+
+{% for treasure in treasures %}
+    // Spawn {{ treasure }} in this area
+    commands.spawn((
+        Transform::from_translation(Vec3::new(0.0, 1.0, {{ loop.index * 10 }} as f32)),
+        Name::new("{{ treasure|title }}"),
+    ));
+{% endfor %}
+    
+    println!("Spawned area {{ area_name }} with {{ monsters|length }} monsters, {{ treasures|length }} treasures");
+    area_entity
+}
+
+/// Area metadata for queries
+pub const {{ area_uuid|upper }}_METADATA: DungeonAreaData = DungeonAreaData {
+    uuid: "{{ area_uuid }}",
+    level: 1,
+    room_count: {{ (monsters|length + treasures|length + 1) }},
+    encounter_density: "{% if monsters|length > 3 %}high{% elif monsters|length > 1 %}medium{% else %}low{% endif %}",
+    treasure_assessment: "{% if treasures|length > 2 %}rich{% elif treasures|length > 0 %}moderate{% else %}poor{% endif %}",
+};

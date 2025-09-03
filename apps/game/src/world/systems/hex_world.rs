@@ -1,284 +1,344 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use mapgen::*;
-use rand::prelude::*;
+use std::collections::HashMap;
 
-use crate::world::components::{Tile, BiomeType, PathOverlay, FeatureOverlay};
+use crate::world::components::{Tile, BiomeType, PathOverlay, FeatureOverlay, HexPosition, HexId, HexCorrelations};
 use crate::world::state::{WorldState, AssetHandles};
 use crate::utils::hex::*;
+use crate::spatial::SpatialContainer;
 
-pub fn hex_world_generation_system(
+// Include generated world resources
+include!(concat!(env!("OUT_DIR"), "/generated_world.rs"));
+
+/// Entity set at a hex coordinate from generated resources
+#[derive(Debug, Clone, Default)]
+pub struct HexEntitySet {
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub dungeons: Vec<String>,
+    pub special_features: Vec<String>,
+}
+
+/// Layer cake hex world system that uses generated dual pattern resources
+/// Replaces static mapgen with sophisticated generated content
+pub fn layer_cake_hex_world_system(
     mut commands: Commands,
     mut world_state: ResMut<WorldState>,
+    mut spatial_container: ResMut<SpatialContainer>,
     player_query: Query<&Transform, (With<crate::world::components::Player>, Changed<Transform>)>,
     asset_handles: Res<AssetHandles>,
     mut tilemap_query: Query<&mut TilemapStorage>,
+    correlations: Res<EntityCorrelations>,
 ) {
-    // Only generate if player has moved or initial generation needed
+    // Use generated resources instead of procedural generation
     if let Ok(player_transform) = player_query.get_single() {
         let player_hex = world_to_hex(player_transform.translation);
         
-        // Check if we need to generate new chunks around player
-        let chunks_to_generate = get_chunks_around_point(player_hex, 2);
+        // Get hex tiles to load around player using generated resources
+        let hexes_to_load = get_hexes_around_point(player_hex, 3);
         
-        for chunk_coord in chunks_to_generate {
-            if !world_state.generated_chunks.contains(&chunk_coord) {
-                generate_chunk(&mut commands, &mut world_state, chunk_coord, &asset_handles, &mut tilemap_query);
-                world_state.generated_chunks.insert(chunk_coord);
+        for hex_coord in hexes_to_load {
+            if !world_state.loaded_hexes.contains(&hex_coord) {
+                load_generated_hex_with_correlations(
+                    hex_coord,
+                    &mut commands,
+                    &mut world_state,
+                    &mut spatial_container,
+                    &asset_handles,
+                    &mut tilemap_query,
+                    &correlations,
+                );
+                world_state.loaded_hexes.insert(hex_coord);
             }
         }
-    } else if world_state.generated_chunks.is_empty() {
-        // Initial world generation around origin
-        let origin_chunks = get_chunks_around_point(HexCoord::new(0, 0), 3);
-        for chunk_coord in origin_chunks {
-            generate_chunk(&mut commands, &mut world_state, chunk_coord, &asset_handles, &mut tilemap_query);
-            world_state.generated_chunks.insert(chunk_coord);
+    } else if world_state.loaded_hexes.is_empty() {
+        // Initial world loading around origin using generated resources
+        let origin_hexes = get_hexes_around_point(HexCoord::new(0, 0), 5);
+        for hex_coord in origin_hexes {
+            load_generated_hex_with_correlations(
+                hex_coord,
+                &mut commands,
+                &mut world_state,
+                &mut spatial_container,
+                &asset_handles,
+                &mut tilemap_query,
+                &correlations,
+            );
+            world_state.loaded_hexes.insert(hex_coord);
         }
+        
+        // Establish player starting position based on monster CR analysis
+        establish_player_starting_position(&mut commands, &correlations, &spatial_container);
     }
 }
 
-fn generate_chunk(
+/// Load a hex tile using generated resources with all correlated entities
+fn load_generated_hex_with_correlations(
+    hex_coord: HexCoord,
     commands: &mut Commands,
     world_state: &mut ResMut<WorldState>,
-    chunk_coord: ChunkCoord,
+    spatial_container: &mut ResMut<SpatialContainer>,
     asset_handles: &Res<AssetHandles>,
     tilemap_query: &mut Query<&mut TilemapStorage>,
+    correlations: &Res<EntityCorrelations>,
 ) {
-    let chunk_size = 16;
-    let mut rng = StdRng::seed_from_u64(world_state.seed);
+    // Query generated resources for this hex coordinate
+    let hex_entities = correlations.get_entities_at_hex((hex_coord.x, hex_coord.y));
     
-    // Use mapgen to create the terrain
-    let mut map_builder = MapBuilder::new(chunk_size as usize, chunk_size as usize)
-        .with(NoiseGenerator::new())
-        .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
-        .with(CullUnreachable::new())
-        .with(VoronoiSpawning::new())
-        .with(DistantExit::new());
+    // Determine biome type from generated data or default based on distance
+    let biome_type = determine_biome_from_correlations(hex_coord, hex_entities);
     
-    let map = map_builder.build_map(&mut rng);
+    // Create tile entity with bevy_ecs_tilemap integration
+    let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
+    let texture_index = get_texture_index_for_biome(&biome_type);
     
-    for x in 0..chunk_size {
-        for y in 0..chunk_size {
-            let hex_coord = HexCoord::new(
-                chunk_coord.x * chunk_size + x,
-                chunk_coord.y * chunk_size + y,
-            );
-            
-            // Get terrain type from mapgen
-            let map_idx = (y * chunk_size + x) as usize;
-            let tile_type = if map_idx < map.tiles.len() {
-                map.tiles[map_idx]
-            } else {
-                TileType::Wall
-            };
-            
-            // Convert mapgen tile to biome
-            let biome_type = match tile_type {
-                TileType::Floor => get_biome_from_position(hex_coord, &world_state.corruption_map, &mut rng),
-                TileType::Wall => BiomeType::Mountain,
-                TileType::DownStairs => BiomeType::Water,
-                TileType::UpStairs => BiomeType::Void,
-            };
-            
-            // Create tile entity with proper tilemap integration
-            let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
-            let (atlas_index, tile_index) = get_texture_index_for_biome(&biome_type);
-            let texture_index = TileTextureIndex(tile_index);
-            
-            if let Ok(mut tilemap_storage) = tilemap_query.get_single_mut() {
-                let tile_entity = commands.spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(world_state.tilemap_entity.unwrap()),
-                        texture_index,
-                        ..default()
-                    },
-                    Tile {
-                        coords: hex_coord,
-                        biome_type: biome_type.clone(),
-                        paths: Vec::new(),
-                        features: Vec::new(),
-                    },
-                    Name::new(format!("Tile_{:?}", hex_coord)),
-                )).id();
-                
-                tilemap_storage.set(&tile_pos, tile_entity);
-                
-                // Generate features using mapgen spawn points
-                if map.spawn_list.iter().any(|(idx, _)| *idx == map_idx) {
-                    generate_tile_features(commands, tile_entity, hex_coord, &biome_type);
-                }
-            }
-        }
-    }
-}
-
-fn get_biome_from_position(
-    hex_coord: HexCoord, 
-    corruption_map: &std::collections::HashMap<HexCoord, f32>,
-    rng: &mut StdRng
-) -> BiomeType {
-    // Check for corruption first
-    if let Some(&corruption_level) = corruption_map.get(&hex_coord) {
-        if corruption_level > 0.3 {
-            return BiomeType::Corrupted(Box::new(BiomeType::Grassland));
-        }
-    }
-    
-    // Use distance from origin to determine biome progression
-    let distance_from_origin = (hex_coord.x.abs() + hex_coord.y.abs()) as f32;
-    let biome_roll: f32 = rng.gen();
-    
-    match distance_from_origin {
-        d if d < 10.0 => {
-            match biome_roll {
-                f if f < 0.6 => BiomeType::Grassland,
-                f if f < 0.8 => BiomeType::Forest,
-                _ => BiomeType::Water,
-            }
-        }
-        d if d < 30.0 => {
-            match biome_roll {
-                f if f < 0.4 => BiomeType::Forest,
-                f if f < 0.6 => BiomeType::Mountain,
-                f if f < 0.8 => BiomeType::Desert,
-                _ => BiomeType::Swamp,
-            }
-        }
-        d if d < 60.0 => {
-            match biome_roll {
-                f if f < 0.3 => BiomeType::Desert,
-                f if f < 0.6 => BiomeType::Mountain,
-                f if f < 0.8 => BiomeType::Lava,
-                _ => BiomeType::Corrupted(Box::new(BiomeType::Desert)),
-            }
-        }
-        _ => {
-            match biome_roll {
-                f if f < 0.5 => BiomeType::Lava,
-                f if f < 0.8 => BiomeType::Void,
-                _ => BiomeType::Corrupted(Box::new(BiomeType::Void)),
-            }
-        }
-    }
-}
-
-fn get_model_path_for_biome(biome_type: &BiomeType) -> String {
-    match biome_type {
-        // Core biomes
-        BiomeType::Grassland => "models/biomes/core/grassland.glb".to_string(),
-        BiomeType::Forest => "models/biomes/core/forest.glb".to_string(),
-        BiomeType::Mountain => "models/biomes/core/mountain.glb".to_string(),
-        BiomeType::Desert => "models/biomes/core/desert.glb".to_string(),
-        BiomeType::Swamp => "models/biomes/core/swamp.glb".to_string(),
-        BiomeType::Water => "models/biomes/core/water.glb".to_string(),
-        BiomeType::Snow => "models/biomes/core/snow.glb".to_string(),
-        BiomeType::Lava => "models/biomes/core/lava.glb".to_string(),
-        BiomeType::Void => "models/biomes/core/void.glb".to_string(),
-        
-        // Transitional biomes
-        BiomeType::ForestGrassland => "models/biomes/transitional/forest_grassland.glb".to_string(),
-        BiomeType::MountainForest => "models/biomes/transitional/mountain_forest.glb".to_string(),
-        BiomeType::DesertMountain => "models/biomes/transitional/desert_mountain.glb".to_string(),
-        BiomeType::SwampWater => "models/biomes/transitional/swamp_water.glb".to_string(),
-        BiomeType::SnowMountain => "models/biomes/transitional/snow_mountain.glb".to_string(),
-        
-        // Corrupted variants
-        BiomeType::CorruptedGrassland => "models/biomes/corrupted/grassland.glb".to_string(),
-        BiomeType::CorruptedForest => "models/biomes/corrupted/forest.glb".to_string(),
-        BiomeType::CorruptedMountain => "models/biomes/corrupted/mountain.glb".to_string(),
-        BiomeType::CorruptedDesert => "models/biomes/corrupted/desert.glb".to_string(),
-        BiomeType::CorruptedSwamp => "models/biomes/corrupted/swamp.glb".to_string(),
-        BiomeType::CorruptedWater => "models/biomes/corrupted/water.glb".to_string(),
-        BiomeType::CorruptedSnow => "models/biomes/corrupted/snow.glb".to_string(),
-        
-        // Void-touched variants
-        BiomeType::VoidGrassland => "models/biomes/void/grassland.glb".to_string(),
-        BiomeType::VoidForest => "models/biomes/void/forest.glb".to_string(),
-        BiomeType::VoidMountain => "models/biomes/void/mountain.glb".to_string(),
-        BiomeType::VoidDesert => "models/biomes/void/desert.glb".to_string(),
-        BiomeType::VoidSwamp => "models/biomes/void/swamp.glb".to_string(),
-        BiomeType::VoidWater => "models/biomes/void/water.glb".to_string(),
-        BiomeType::VoidSnow => "models/biomes/void/snow.glb".to_string(),
-        BiomeType::VoidLava => "models/biomes/void/lava.glb".to_string(),
-    }
-}
-
-fn should_generate_feature(hex_coord: HexCoord, biome_type: &BiomeType) -> bool {
-    let mut rng = thread_rng();
-    let base_chance = match biome_type {
-        BiomeType::Grassland => 0.1,
-        BiomeType::Forest => 0.15,
-        BiomeType::Mountain => 0.08,
-        BiomeType::Desert => 0.05,
-        BiomeType::Swamp => 0.12,
-        BiomeType::Water => 0.02,
-        _ => 0.0,
-    };
-    
-    rng.gen::<f32>() < base_chance
-}
-
-fn generate_tile_features(
-    commands: &mut Commands,
-    tile_entity: Entity,
-    hex_coord: HexCoord,
-    biome_type: &BiomeType,
-) {
-    let mut rng = thread_rng();
-    
-    // Generate appropriate features for biome
-    let features = match biome_type {
-        BiomeType::Grassland => vec!["tavern", "shop", "shrine"],
-        BiomeType::Forest => vec!["campsite", "dungeon_entrance", "monster_lair"],
-        BiomeType::Mountain => vec!["tower", "treasure_cache", "shrine"],
-        BiomeType::Desert => vec!["oasis", "ruins", "treasure_cache"],
-        BiomeType::Swamp => vec!["witch_hut", "monster_lair", "cursed_shrine"],
-        _ => vec![],
-    };
-    
-    if !features.is_empty() {
-        let feature_type = features[rng.gen_range(0..features.len())];
-        
-        let feature_entity = commands.spawn((
-            FeatureOverlay {
-                feature_type: feature_type.to_string(),
-                model_id: format!("models/{}.glb", feature_type),
-                interaction_type: get_interaction_for_feature(feature_type),
+    if let Ok(mut tilemap_storage) = tilemap_query.get_single_mut() {
+        let tile_entity = commands.spawn((
+            TileBundle {
+                position: tile_pos,
+                tilemap_id: TilemapId(world_state.tilemap_entity.unwrap()),
+                texture_index,
+                ..default()
             },
-            Transform::from_translation(hex_to_world(hex_coord) + Vec3::new(0.0, 1.0, 0.0)),
-            Name::new(format!("Feature_{}_{:?}", feature_type, hex_coord)),
+            Tile {
+                coords: hex_coord,
+                biome_type: biome_type.clone(),
+                paths: Vec::new(),
+                features: Vec::new(),
+            },
+            HexPosition { q: hex_coord.x, r: hex_coord.y },
+            HexId(format!("hex_{}_{}", hex_coord.x, hex_coord.y)),
+            HexCorrelations {
+                settlements: hex_entities.settlements.clone(),
+                factions: hex_entities.factions.clone(),
+                npcs: hex_entities.npcs.clone(),
+                nearby_dungeons: hex_entities.dungeons.clone(),
+            },
+            Name::new(format!("GeneratedTile_{:?}", hex_coord)),
         )).id();
         
-        // Link feature to tile
-        commands.entity(tile_entity).add_child(feature_entity);
+        tilemap_storage.set(&tile_pos, tile_entity);
+        
+        // Register in spatial container for O(1) lookups
+        spatial_container.register_hex_entity((hex_coord.x, hex_coord.y), tile_entity);
+        
+        // Spawn correlated entities at this hex using generated data
+        spawn_correlated_entities_at_hex(
+            commands,
+            tile_entity,
+            hex_coord,
+            hex_entities,
+            &biome_type,
+        );
     }
 }
 
-fn get_interaction_for_feature(feature_type: &str) -> String {
-    match feature_type {
-        "tavern" => "enter_building",
-        "shop" => "enter_building",
-        "dungeon_entrance" => "enter_dungeon",
-        "shrine" => "pray",
-        "campsite" => "rest",
-        _ => "examine",
-    }.to_string()
+/// Spawn all correlated entities at a hex using generated resource data
+fn spawn_correlated_entities_at_hex(
+    commands: &mut Commands,
+    hex_entity: Entity,
+    hex_coord: HexCoord,
+    hex_entities: &HexEntitySet,
+    biome_type: &BiomeType,
+) {
+    let hex_world_pos = hex_to_world(hex_coord);
+    
+    // Spawn settlements from generated data
+    for settlement_uuid in &hex_entities.settlements {
+        let settlement_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.0, 0.0)),
+            SettlementMarker {
+                uuid: settlement_uuid.clone(),
+                settlement_type: determine_settlement_type_from_biome(biome_type),
+            },
+            Name::new(format!("Settlement_{}", settlement_uuid)),
+        )).id();
+        
+        commands.entity(hex_entity).add_child(settlement_entity);
+    }
+    
+    // Spawn faction presence markers from generated data
+    for faction_uuid in &hex_entities.factions {
+        let faction_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos + Vec3::new(1.0, 1.0, 0.0)),
+            FactionPresenceMarker {
+                uuid: faction_uuid.clone(),
+                influence_level: calculate_faction_influence(faction_uuid, hex_coord),
+            },
+            Name::new(format!("FactionPresence_{}", faction_uuid)),
+        )).id();
+        
+        commands.entity(hex_entity).add_child(faction_entity);
+    }
+    
+    // Spawn NPCs from generated data
+    for npc_uuid in &hex_entities.npcs {
+        let npc_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos + Vec3::new(-1.0, 1.0, 0.0)),
+            NPCMarker {
+                uuid: npc_uuid.clone(),
+                npc_type: "generated".to_string(),
+                is_active: true,
+            },
+            Name::new(format!("NPC_{}", npc_uuid)),
+        )).id();
+        
+        commands.entity(hex_entity).add_child(npc_entity);
+    }
+    
+    // Create dungeon entrance markers for nearby dungeons
+    for dungeon_uuid in &hex_entities.dungeons {
+        let dungeon_marker_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.5, 0.0)),
+            DungeonEntranceMarker {
+                dungeon_uuid: dungeon_uuid.clone(),
+                entrance_type: "portal".to_string(),
+                is_accessible: true,
+            },
+            Name::new(format!("DungeonEntrance_{}", dungeon_uuid)),
+        )).id();
+        
+        commands.entity(hex_entity).add_child(dungeon_marker_entity);
+    }
+    
+    // Add special features based on generated data and biome
+    spawn_biome_specific_features(commands, hex_entity, hex_coord, biome_type, hex_entities);
 }
 
-type ChunkCoord = HexCoord;
+/// Establish player starting position based on monster CR analysis
+fn establish_player_starting_position(
+    commands: &mut Commands,
+    correlations: &Res<EntityCorrelations>,
+    spatial_container: &SpatialContainer,
+) {
+    // Find hex coordinates with appropriate starting difficulty
+    let suitable_starting_hex = find_suitable_starting_hex(correlations);
+    
+    match suitable_starting_hex {
+        Some(coords) => {
+            let world_pos = hex_to_world(HexCoord::new(coords.0, coords.1));
+            
+            // Spawn player at the suitable starting position
+            commands.spawn((
+                Transform::from_translation(world_pos + Vec3::new(0.0, 2.0, 0.0)),
+                crate::world::components::Player::default(),
+                HexPosition { q: coords.0, r: coords.1 },
+                Name::new("Player"),
+            ));
+            
+            info!("Player spawned at starting hex {:?} based on monster CR analysis", coords);
+        }
+        None => {
+            // Fallback to origin if no suitable hex found
+            let origin_pos = hex_to_world(HexCoord::new(0, 0));
+            commands.spawn((
+                Transform::from_translation(origin_pos + Vec3::new(0.0, 2.0, 0.0)),
+                crate::world::components::Player::default(),
+                HexPosition { q: 0, r: 0 },
+                Name::new("Player"),
+            ));
+            
+            warn!("No suitable starting hex found, spawning player at origin");
+        }
+    }
+}
 
-fn get_chunks_around_point(center: HexCoord, radius: i32) -> Vec<ChunkCoord> {
-    let mut chunks = Vec::new();
-    let chunk_size = 16;
+/// Find suitable starting hex based on monster CR and difficulty analysis
+fn find_suitable_starting_hex(correlations: &Res<EntityCorrelations>) -> Option<(i32, i32)> {
+    // Analyze hex coordinates within starting distance from origin
+    let starting_search_radius = 10;
+    
+    for q in -starting_search_radius..=starting_search_radius {
+        for r in -starting_search_radius..=starting_search_radius {
+            let hex_entities = correlations.get_entities_at_hex((q, r));
+            
+            // Check if this hex has appropriate difficulty for starting
+            if is_suitable_starting_hex((q, r), hex_entities) {
+                return Some((q, r));
+            }
+        }
+    }
+    
+    None
+}
+
+/// Determine if a hex is suitable for player starting position
+fn is_suitable_starting_hex(coords: (i32, i32), hex_entities: &HexEntitySet) -> bool {
+    let distance_from_origin = (coords.0.abs() + coords.1.abs()) as f32;
+    
+    // Ideal starting conditions:
+    // - Close to origin (distance < 5)
+    // - Has at least one settlement (safety)
+    // - No dungeons nearby (too dangerous for start)
+    // - Some faction presence (interaction opportunities)
+    
+    distance_from_origin < 5.0
+        && !hex_entities.settlements.is_empty()
+        && hex_entities.dungeons.is_empty()
+        && hex_entities.factions.len() <= 2  // Not too politically complex
+}
+
+/// Determine biome type from correlated entities or default logic
+fn determine_biome_from_correlations(hex_coord: HexCoord, hex_entities: &HexEntitySet) -> BiomeType {
+    // Use generated entity correlations to determine biome
+    if !hex_entities.settlements.is_empty() {
+        // Hexes with settlements tend to be more hospitable
+        BiomeType::Grassland
+    } else if !hex_entities.dungeons.is_empty() {
+        // Hexes with dungeons tend to be corrupted or dangerous
+        BiomeType::Corrupted(Box::new(BiomeType::Forest))
+    } else {
+        // Use distance-based fallback like original system
+        get_biome_from_distance(hex_coord)
+    }
+}
+
+/// Fallback biome determination based on distance (simplified from original)
+fn get_biome_from_distance(hex_coord: HexCoord) -> BiomeType {
+    let distance_from_origin = (hex_coord.x.abs() + hex_coord.y.abs()) as f32;
+    
+    match distance_from_origin {
+        d if d < 10.0 => BiomeType::Grassland,
+        d if d < 30.0 => BiomeType::Forest,
+        d if d < 60.0 => BiomeType::Desert,
+        _ => BiomeType::Corrupted(Box::new(BiomeType::Void)),
+    }
+}
+
+/// Get texture index for biome (simplified)
+fn get_texture_index_for_biome(biome_type: &BiomeType) -> TileTextureIndex {
+    let index = match biome_type {
+        BiomeType::Grassland => 0,
+        BiomeType::Forest => 1,
+        BiomeType::Mountain => 2,
+        BiomeType::Desert => 3,
+        BiomeType::Swamp => 4,
+        BiomeType::Water => 5,
+        BiomeType::Snow => 6,
+        BiomeType::Lava => 7,
+        BiomeType::Void => 8,
+        BiomeType::Corrupted(_) => 9,
+        _ => 0, // Default to grassland
+    };
+    TileTextureIndex(index)
+}
+
+/// Get hexes around a point (renamed from chunks)
+fn get_hexes_around_point(center: HexCoord, radius: i32) -> Vec<HexCoord> {
+    let mut hexes = Vec::new();
     
     for dx in -radius..=radius {
         for dy in -radius..=radius {
-            let chunk_x = (center.x + dx * chunk_size) / chunk_size;
-            let chunk_y = (center.y + dy * chunk_size) / chunk_size;
-            chunks.push(ChunkCoord::new(chunk_x, chunk_y));
+            if dx.abs() + dy.abs() <= radius {  // Hex distance constraint
+                hexes.push(HexCoord::new(center.x + dx, center.y + dy));
+            }
         }
     }
     
-    chunks
+    hexes
 }
+
+// === OLD SYSTEM FUNCTIONS (REMOVED) ===
+// These functions are kept for reference but the new layer cake system
+// replaces procedural generation with generated resources

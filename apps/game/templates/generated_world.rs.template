@@ -1,0 +1,245 @@
+//! Generated world integration for ECS system
+//! This is the layer cake system that connects generated resources to Bevy ECS
+
+use bevy::prelude::*;
+use std::collections::HashMap;
+
+/// Entity set at a hex coordinate from generated resources
+#[derive(Debug, Clone, Default)]
+pub struct HexEntitySet {
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub dungeons: Vec<String>,
+    pub special_features: Vec<String>,
+}
+
+/// Entity correlation system for fast relationship queries
+#[derive(Resource, Default)]
+pub struct EntityCorrelations {
+    /// Map hex coordinates to all entity types at that location
+    pub hex_to_entities: HashMap<(i32, i32), HexEntitySet>,
+    /// Map settlement UUIDs to their controlling factions
+    pub settlement_to_factions: HashMap<String, Vec<String>>,
+    /// Map faction UUIDs to their territories (hex coordinates)
+    pub faction_territories: HashMap<String, Vec<(i32, i32)>>,
+    /// Map NPC UUIDs to their current hex location
+    pub npc_locations: HashMap<String, (i32, i32)>,
+}
+
+impl EntityCorrelations {
+    /// Initialize correlations from analysis results
+    pub fn from_analysis_results() -> Self {
+        let mut correlations = Self::default();
+        
+        // Generate some sample data for testing the layer cake system
+        let mut sample_hex = HexEntitySet::default();
+        sample_hex.settlements.push("village_of_start".to_string());
+        sample_hex.factions.push("peaceful_guards".to_string());
+        
+        correlations.hex_to_entities.insert((0, 0), sample_hex);
+        
+        // Add more hexes around origin for testing
+        for q in -2..=2 {
+            for r in -2..=2 {
+                if q == 0 && r == 0 { continue; } // Skip origin, already added
+                let mut hex_entities = HexEntitySet::default();
+                
+                // Add some variety based on distance from origin
+                let distance = (q.abs() + r.abs()) as f32;
+                if distance == 1.0 {
+                    hex_entities.settlements.push(format!("settlement_{}_{}", q, r));
+                } else if distance == 2.0 {
+                    hex_entities.dungeons.push(format!("dungeon_{}_{}", q, r));
+                    hex_entities.factions.push("wandering_threats".to_string());
+                }
+                
+                correlations.hex_to_entities.insert((q, r), hex_entities);
+            }
+        }
+        
+        correlations
+    }
+    
+    /// Get all entities at a specific hex coordinate (O(1) lookup)
+    pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> &HexEntitySet {
+        self.hex_to_entities.get(&coords).unwrap_or(&HexEntitySet::default())
+    }
+    
+    /// Get faction controlling a settlement
+    pub fn get_settlement_faction(&self, settlement_uuid: &str) -> Vec<&String> {
+        self.settlement_to_factions.get(settlement_uuid)
+            .map(|factions| factions.iter().collect())
+            .unwrap_or_default()
+    }
+    
+    /// Get all hex coordinates controlled by a faction
+    pub fn get_faction_territory(&self, faction_uuid: &str) -> &[(i32, i32)] {
+        self.faction_territories.get(faction_uuid)
+            .map(|coords| coords.as_slice())
+            .unwrap_or(&[])
+    }
+}
+
+/// Plugin to register correlation resources
+pub struct CorrelationsPlugin;
+
+impl Plugin for CorrelationsPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<EntityCorrelations>()
+           .add_systems(Startup, initialize_correlations);
+    }
+}
+
+fn initialize_correlations(mut correlations: ResMut<EntityCorrelations>) {
+    *correlations = EntityCorrelations::from_analysis_results();
+    println!("Entity correlations initialized with layer cake system");
+}
+
+/// Main plugin that integrates all generated world resources
+pub struct GeneratedGameWorldPlugin;
+
+impl Plugin for GeneratedGameWorldPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_plugins(CorrelationsPlugin)
+            .add_systems(Startup, spawn_all_generated_world_resources)
+            .add_systems(Update, update_spatial_queries);
+    }
+}
+
+/// Spawn all generated world resources with correlations
+fn spawn_all_generated_world_resources(
+    mut commands: Commands,
+    correlations: Res<EntityCorrelations>,
+) {
+    println!("Spawning generated ECS entities for layer cake system...");
+    
+    // Spawn actual ECS entities for each hex with correlated data
+    for (coords, entities) in &correlations.hex_to_entities {
+        let hex_world_pos = Vec3::new(coords.0 as f32 * 64.0, 0.0, coords.1 as f32 * 64.0);
+        
+        // Create hex tile entity
+        let hex_entity = commands.spawn((
+            Transform::from_translation(hex_world_pos),
+            Name::new(format!("Hex_{}_{}", coords.0, coords.1)),
+        )).id();
+        
+        // Spawn settlement entities at this hex
+        for settlement_uuid in &entities.settlements {
+            let settlement_entity = commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.0, 0.0)),
+                Name::new(format!("Settlement_{}", settlement_uuid)),
+            )).id();
+            commands.entity(hex_entity).add_child(settlement_entity);
+        }
+        
+        // Spawn faction presence entities at this hex
+        for faction_uuid in &entities.factions {
+            let faction_entity = commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(10.0, 1.0, 0.0)),
+                Name::new(format!("Faction_{}", faction_uuid)),
+            )).id();
+            commands.entity(hex_entity).add_child(faction_entity);
+        }
+        
+        // Spawn NPC entities at this hex
+        for npc_uuid in &entities.npcs {
+            let npc_entity = commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(-10.0, 1.0, 0.0)),
+                Name::new(format!("NPC_{}", npc_uuid)),
+            )).id();
+            commands.entity(hex_entity).add_child(npc_entity);
+        }
+        
+        // Spawn dungeon entrance entities at this hex
+        for dungeon_uuid in &entities.dungeons {
+            let dungeon_entity = commands.spawn((
+                Transform::from_translation(hex_world_pos + Vec3::new(0.0, 2.0, 0.0)),
+                Name::new(format!("DungeonEntrance_{}", dungeon_uuid)),
+            )).id();
+            commands.entity(hex_entity).add_child(dungeon_entity);
+        }
+    }
+    
+    println!("Spawned {} hex tiles with ECS entities", correlations.hex_to_entities.len());
+}
+
+/// Update spatial queries each frame for efficient entity lookups
+fn update_spatial_queries(
+    correlations: Res<EntityCorrelations>,
+    player_query: Query<&Transform, With<crate::world::components::Player>>,
+    mut spatial_events: EventWriter<SpatialQueryEvent>,
+) {
+    // Get player position for spatial queries
+    if let Ok(player_transform) = player_query.get_single() {
+        let player_hex_coords = world_pos_to_hex_coords(player_transform.translation);
+        
+        // Query entities at player's current hex
+        let entities_at_hex = correlations.get_entities_at_hex(player_hex_coords);
+        
+        // Send spatial events for systems that need to react to hex changes
+        if !entities_at_hex.settlements.is_empty() {
+            spatial_events.send(SpatialQueryEvent::PlayerEnteredSettlement {
+                coords: player_hex_coords,
+                settlements: entities_at_hex.settlements.clone(),
+            });
+        }
+        
+        if !entities_at_hex.dungeons.is_empty() {
+            spatial_events.send(SpatialQueryEvent::PlayerNearDungeon {
+                coords: player_hex_coords,
+                dungeons: entities_at_hex.dungeons.clone(),
+            });
+        }
+    }
+}
+
+/// Convert world position to hex coordinates
+fn world_pos_to_hex_coords(world_pos: Vec3) -> (i32, i32) {
+    let q = (world_pos.x / 64.0).round() as i32;
+    let r = (world_pos.z / 64.0).round() as i32;
+    (q, r)
+}
+
+/// Spatial query events for other systems to react to
+#[derive(Event)]
+pub enum SpatialQueryEvent {
+    PlayerEnteredSettlement {
+        coords: (i32, i32),
+        settlements: Vec<String>,
+    },
+    PlayerNearDungeon {
+        coords: (i32, i32),
+        dungeons: Vec<String>,
+    },
+}
+
+/// Query API for game systems to use generated data
+pub struct WorldQuery;
+
+impl WorldQuery {
+    /// Get settlement data for a hex (with faction correlations)
+    pub fn settlements_at_hex(
+        correlations: &EntityCorrelations,
+        coords: (i32, i32)
+    ) -> &[String] {
+        &correlations.get_entities_at_hex(coords).settlements
+    }
+    
+    /// Get faction presence at a hex
+    pub fn factions_at_hex(
+        correlations: &EntityCorrelations,
+        coords: (i32, i32)
+    ) -> &[String] {
+        &correlations.get_entities_at_hex(coords).factions
+    }
+    
+    /// Get dungeons at a hex
+    pub fn dungeons_at_hex(
+        correlations: &EntityCorrelations,
+        coords: (i32, i32)
+    ) -> &[String] {
+        &correlations.get_entities_at_hex(coords).dungeons
+    }
+}
