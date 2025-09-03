@@ -19,7 +19,9 @@ pub mod raw;
 pub mod regions;
 pub mod results;
 pub mod settlements;
+pub mod seeds;
 pub mod templates;
+pub mod reporting;
 
 // Re-export key types for external usage
 pub use base::{HexKey, MapCoord, EdgeType, FieldSpec, EntitySpec, Inventory};

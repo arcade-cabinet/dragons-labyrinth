@@ -1,0 +1,20 @@
+# Edgar Allan Poe - Curated Horror Excerpts
+
+THE RAVEN
+Once upon a midnight dreary, while I pondered, weak and weary,
+Over many a quaint and curious volume of forgotten lore—
+While I nodded, nearly napping, suddenly there came a tapping,
+As of some one gently rapping, rapping at my chamber door.
+
+THE TELL-TALE HEART
+True!—nervous—very, very dreadfully nervous I had been and am; but why will you say that I am mad?
+The disease had sharpened my senses—not destroyed—not dulled them.
+
+THE FALL OF THE HOUSE OF USHER
+During the whole of a dull, dark, and soundless day in the autumn of the year, when the clouds hung oppressively low in the heavens, I had been passing alone, on horseback, through a singularly dreary tract of country.
+
+Quest Patterns from Poe:
+- Investigation: mysterious sounds, hidden secrets, guilty conscience
+- Revelation: truth emerges through obsession and madness
+- Confrontation: face the horror within oneself
+- Themes: guilt, paranoia, decay, hidden knowledge

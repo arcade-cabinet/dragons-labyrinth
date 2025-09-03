@@ -27,15 +27,12 @@ html5ever = { workspace = true }
 ammonia = { workspace = true }
 fs_extra = { workspace = true }
 tempfile = { workspace = true }
-minijinja = "2.0"
+minijinja = "2.12"
 chrono = { version = "0.4", features = ["serde"] }
+csv = "1.3"
 
 [build-dependencies]
 anyhow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-tokio = { workspace = true, features = ["rt", "macros"] }
-openai_dive = { workspace = true }
-rusqlite = { workspace = true }
-uuid = { workspace = true }
-ron = { workspace = true }
+dl_seeds = { path = "../dl_seeds" }

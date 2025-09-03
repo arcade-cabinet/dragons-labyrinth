@@ -1,17 +1,16 @@
 //! Build script for dl_analysis crate
 //! 
-//! Simplified build script that sets up the environment for the analysis system.
-//! The actual HBF processing and AI generation happens at runtime, not build time.
+//! Sets up the environment for HBF processing and downloads Seeds data
 
 use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=game.hbf");
     println!("cargo:rerun-if-changed=build.rs");
     
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(env::var("OUT_DIR")?);
     
     // Create directories for analysis output
     let analysis_dir = out_dir.join("analysis");
@@ -19,9 +18,14 @@ fn main() {
     let html_dir = out_dir.join("html");
     let json_dir = out_dir.join("json");
     let ron_dir = out_dir.join("ron");
+    let seeds_cache_dir = out_dir.join("seeds_cache");
     
     // Create all output directories
-    for dir in [&analysis_dir, &models_dir, &html_dir, &json_dir, &ron_dir] {
+    let dirs = [
+        &analysis_dir, &models_dir, &html_dir, &json_dir, &ron_dir, &seeds_cache_dir
+    ];
+    
+    for dir in dirs {
         if let Err(e) = fs::create_dir_all(dir) {
             println!("cargo:warning=Failed to create directory {:?}: {}", dir, e);
         }
@@ -35,9 +39,39 @@ fn main() {
         println!("cargo:warning=HBF database not found at {:?} - analysis will be skipped at runtime", hbf_path);
     }
     
+    // Initialize Seeds data sources using dl_seeds crate
+    println!("cargo:warning=Initializing Seeds data sources...");
+    match dl_seeds::SeedsManager::initialize(&seeds_cache_dir) {
+        Ok(seeds_manager) => {
+            println!("cargo:warning=Seeds data initialized successfully");
+            
+            // Report downloaded books
+            for book in seeds_manager.books.get_downloaded_books() {
+                println!("cargo:warning=  Book: {} ({} bytes from {})", 
+                         book.title, book.file_size, book.source);
+            }
+            
+            // Report linguistic data
+            println!("cargo:warning=  Old Norse dictionary loaded with {} entries", 
+                     seeds_manager.linguistics.old_norse_dictionary.len());
+            
+            // Report dialogue archetypes
+            println!("cargo:warning=  {} character archetypes loaded", 
+                     seeds_manager.dialogue.character_archetypes.len());
+            println!("cargo:warning=  {} trait templates loaded", 
+                     seeds_manager.dialogue.trait_templates.len());
+        }
+        Err(e) => {
+            println!("cargo:warning=Failed to initialize Seeds data: {}. Will retry at runtime.", e);
+        }
+    }
+    
     // Create environment variables for runtime use
     println!("cargo:rustc-env=DL_ANALYSIS_OUT_DIR={}", out_dir.display());
     println!("cargo:rustc-env=DL_HBF_PATH=game.hbf");
+    println!("cargo:rustc-env=DL_SEEDS_CACHE_DIR={}", seeds_cache_dir.display());
     
     println!("cargo:warning=dl_analysis build script completed successfully");
+    
+    Ok(())
 }

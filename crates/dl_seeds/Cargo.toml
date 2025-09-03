@@ -1,0 +1,24 @@
+[package]
+name = "dl_seeds"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+urlencoding = "2.1"
+gutenberg-rs = "0.1.4"
+iars = "0.1.0"
+cleasby_vigfusson_dictionary = "1.1.0"
+tokio = { workspace = true, features = ["rt", "macros"] }
+tempfile = { workspace = true }
+regex = { workspace = true }
+
+[build-dependencies]
+tempfile = { workspace = true }

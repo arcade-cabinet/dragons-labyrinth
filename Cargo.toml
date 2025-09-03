@@ -3,6 +3,7 @@ members = [
     "apps/game",
     "crates/dl_analysis",
     "crates/dl_processors",
+    "crates/dl_seeds",
 ]
 resolver = "2"
 
@@ -31,7 +32,7 @@ tiktoken-rs = "0.7"
 tokio = { version = "1.47", features = ["full"] }
 
 # Database
-rusqlite = { version = "0.37", features = ["bundled", "serde_json"] }
+rusqlite = { version = "0.28", features = ["bundled", "serde_json"] }
 
 # Utilities
 uuid = { version = "1.18", features = ["v4", "serde"] }

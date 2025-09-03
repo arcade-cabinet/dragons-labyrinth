@@ -64,6 +64,14 @@ desktop.ini
 *.bak
 *.orig
 
+# Generated reports
+/reports/
+/dl_analysis_reports/
+*.csv
+
+# Build artifacts
+/apps/game/src/generated/
+
 # Old Godot artifacts (can be removed once cleaned)
 .plugged
 .import/
