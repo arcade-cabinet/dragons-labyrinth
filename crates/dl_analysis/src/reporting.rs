@@ -409,7 +409,7 @@ mod tests {
     #[test]
     fn test_get_reports_dir_default() {
         // When no env vars are set, should use default
-        env::remove_var("REPORTS_DIR");
+        unsafe { env::remove_var("REPORTS_DIR"); }
         let dir = get_reports_dir().unwrap();
         assert!(dir.to_string_lossy().contains("reports"));
     }
@@ -417,9 +417,9 @@ mod tests {
     #[test]
     fn test_get_reports_dir_from_env() {
         // When REPORTS_DIR is set, should use it
-        env::set_var("REPORTS_DIR", "/tmp/test_reports");
+        unsafe { env::set_var("REPORTS_DIR", "/tmp/test_reports"); }
         let dir = get_reports_dir().unwrap();
         assert_eq!(dir, PathBuf::from("/tmp/test_reports"));
-        env::remove_var("REPORTS_DIR");
+        unsafe { env::remove_var("REPORTS_DIR"); }
     }
 }

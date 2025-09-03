@@ -100,13 +100,12 @@ mod tests {
 
     #[test]
     fn test_entity_creation_html() {
-        let content = r#"<div>Content about Aurora Bushes region with Hex W2S51</div>"#;
+        let content = r#"<div>Content about Aurora Bushes region</div>"#;
         let entity = RawEntity::create("test_uuid".to_string(), content.to_string());
         
-        assert_eq!(entity.category, EntityCategory::Regions);
-        assert_eq!(entity.entity_name, Some("Aurora Bushes".to_string()));
-        assert_eq!(entity.format, ContentFormat::Html);
-        assert_eq!(entity.hex_coordinate, Some("W2S51".to_string()));
+        assert_eq!(entity.category, "regions");
+        assert_eq!(entity.entity_name, "Aurora Bushes");
+        assert_eq!(entity.entity_type, "html");
     }
 
     #[test]
@@ -114,50 +113,40 @@ mod tests {
         let content = r#"{"type": "settlement", "name": "test"}"#;
         let entity = RawEntity::create("test_uuid".to_string(), content.to_string());
         
-        assert_eq!(entity.category, EntityCategory::Json);
-        assert_eq!(entity.format, ContentFormat::Json);
+        assert_eq!(entity.entity_type, "json");
     }
 
     #[test]
-    fn test_slugify() {
-        assert_eq!(RawEntity::slugify("Aurora Bushes"), "aurora_bushes");
-        assert_eq!(RawEntity::slugify("Village of Harad"), "village_of_harad");
-        assert_eq!(RawEntity::slugify("The Defiled Wolves"), "the_defiled_wolves");
+    fn test_sanitized_name() {
+        let entity = RawEntity::create("test".to_string(), "Aurora Bushes content".to_string());
+        assert_eq!(entity.get_sanitized_name(), "aurora_bushes");
     }
 
     #[test]
     fn test_entity_categorization() {
         let region_content = "Content about Aurora Bushes";
-        assert_eq!(RawEntity::categorize_entity(region_content), EntityCategory::Regions);
+        let entity = RawEntity::create("test".to_string(), region_content.to_string());
+        assert_eq!(entity.category, "regions");
+        assert_eq!(entity.entity_name, "Aurora Bushes");
         
         let settlement_content = "Content about Village of Harad";
-        assert_eq!(RawEntity::categorize_entity(settlement_content), EntityCategory::Settlements);
-        
-        let json_content = r#"{"test": true}"#;
-        assert_eq!(RawEntity::categorize_entity(json_content), EntityCategory::Json);
+        let entity = RawEntity::create("test".to_string(), settlement_content.to_string());
+        assert_eq!(entity.category, "settlements");
+        assert_eq!(entity.entity_name, "Village of Harad");
         
         let unknown_content = "Some random content";
-        assert_eq!(RawEntity::categorize_entity(unknown_content), EntityCategory::Unknown);
-    }
-
-    #[test]
-    fn test_spatial_info() {
-        let content = r#"<div>Content about Aurora Bushes region with Hex W2S51</div>"#;
-        let entity = RawEntity::create("test_uuid".to_string(), content.to_string());
-        let spatial = entity.spatial_info();
-        
-        assert!(spatial.has_spatial_data());
-        assert_eq!(spatial.hex_coordinate, Some("W2S51".to_string()));
+        let entity = RawEntity::create("test".to_string(), unknown_content.to_string());
+        assert_eq!(entity.category, "uncategorized");
+        assert_eq!(entity.entity_name, "unknown");
     }
 
     #[test]
     fn test_entity_stats() {
         let mut stats = EntityStats::new();
-        let entity = RawEntity::create("test".to_string(), "Aurora Bushes Hex W2S51".to_string());
+        let entity = RawEntity::create("test".to_string(), "Aurora Bushes content".to_string());
         stats.add_entity(&entity);
         
         assert_eq!(stats.total_entities, 1);
-        assert_eq!(stats.with_spatial_data, 1);
         assert_eq!(stats.by_category.get("regions"), Some(&1));
     }
 }

@@ -40,13 +40,42 @@ pub struct RawEntities {
 }
 
 impl RawEntities {
-    /// Create new empty RawEntities container
+    /// Create new RawEntities container with all known clusters pre-initialized.
+    /// 
+    /// CRITICAL: This matches Python model_post_init() to ensure ALL known
+    /// clusters exist regardless of whether entities are found for them.
+    /// This fixes the bug where we got 25 regions instead of 27.
     pub fn new() -> Self {
+        let mut regions = HashMap::new();
+        let mut settlements = HashMap::new(); 
+        let mut factions = HashMap::new();
+        let mut dungeons = HashMap::new();
+
+        // Pre-initialize ALL known region clusters (27 total)
+        for &region in KNOWN_REGIONS {
+            regions.insert(region.to_string(), RegionEntitiesCluster::new(region.to_string()));
+        }
+
+        // Pre-initialize ALL known settlement clusters (10 total) 
+        for &settlement in KNOWN_SETTLEMENTS {
+            settlements.insert(settlement.to_string(), SettlementEntitiesCluster::new(settlement.to_string()));
+        }
+
+        // Pre-initialize ALL known faction clusters (5 total)
+        for &faction in KNOWN_FACTIONS {
+            factions.insert(faction.to_string(), FactionEntitiesCluster::new(faction.to_string()));
+        }
+
+        // Pre-initialize ALL known dungeon clusters (18 total)
+        for &dungeon in KNOWN_DUNGEONS {
+            dungeons.insert(dungeon.to_string(), DungeonEntitiesCluster::new(dungeon.to_string()));
+        }
+
         Self {
-            regions: HashMap::new(),
-            settlements: HashMap::new(),
-            factions: HashMap::new(),
-            dungeons: HashMap::new(),
+            regions,
+            settlements,
+            factions,
+            dungeons,
             uncategorized: Vec::new(),
             total_entities: 0,
         }
@@ -54,8 +83,8 @@ impl RawEntities {
 
     /// Add an entity to the appropriate cluster or uncategorized list.
     /// 
-    /// This is the critical method that routes ALL entities (not just categorized ones)
-    /// to solve the 50% efficiency issue where entities were being lost.
+    /// CRITICAL: Uses pre-initialized clusters to match Python behavior exactly.
+    /// Routes entities to existing clusters or uncategorized if unknown.
     pub fn add_entity(&mut self, uuid: String, raw_value: String) {
         let entity = RawEntity::create(uuid, raw_value);
         self.total_entities += 1;
@@ -63,36 +92,52 @@ impl RawEntities {
         match entity.category.as_str() {
             "regions" => {
                 if entity.entity_name != "unknown" {
-                    let cluster = self.regions.entry(entity.entity_name.clone())
-                        .or_insert_with(|| RegionEntitiesCluster::new(entity.entity_name.clone()));
-                    cluster.add_entity(entity);
+                    // Use pre-initialized cluster - all KNOWN_REGIONS clusters already exist
+                    if let Some(cluster) = self.regions.get_mut(&entity.entity_name) {
+                        cluster.add_entity(entity);
+                    } else {
+                        // Entity name not in KNOWN_REGIONS - this shouldn't happen with correct constants
+                        self.uncategorized.push(entity);
+                    }
                 } else {
                     self.uncategorized.push(entity);
                 }
             }
             "settlements" => {
                 if entity.entity_name != "unknown" {
-                    let cluster = self.settlements.entry(entity.entity_name.clone())
-                        .or_insert_with(|| SettlementEntitiesCluster::new(entity.entity_name.clone()));
-                    cluster.add_entity(entity);
+                    // Use pre-initialized cluster - all KNOWN_SETTLEMENTS clusters already exist
+                    if let Some(cluster) = self.settlements.get_mut(&entity.entity_name) {
+                        cluster.add_entity(entity);
+                    } else {
+                        // Entity name not in KNOWN_SETTLEMENTS - shouldn't happen with correct constants
+                        self.uncategorized.push(entity);
+                    }
                 } else {
                     self.uncategorized.push(entity);
                 }
             }
             "factions" => {
                 if entity.entity_name != "unknown" {
-                    let cluster = self.factions.entry(entity.entity_name.clone())
-                        .or_insert_with(|| FactionEntitiesCluster::new(entity.entity_name.clone()));
-                    cluster.add_entity(entity);
+                    // Use pre-initialized cluster - all KNOWN_FACTIONS clusters already exist
+                    if let Some(cluster) = self.factions.get_mut(&entity.entity_name) {
+                        cluster.add_entity(entity);
+                    } else {
+                        // Entity name not in KNOWN_FACTIONS - shouldn't happen with correct constants
+                        self.uncategorized.push(entity);
+                    }
                 } else {
                     self.uncategorized.push(entity);
                 }
             }
             "dungeons" => {
                 if entity.entity_name != "unknown" {
-                    let cluster = self.dungeons.entry(entity.entity_name.clone())
-                        .or_insert_with(|| DungeonEntitiesCluster::new(entity.entity_name.clone()));
-                    cluster.add_entity(entity);
+                    // Use pre-initialized cluster - all KNOWN_DUNGEONS clusters already exist
+                    if let Some(cluster) = self.dungeons.get_mut(&entity.entity_name) {
+                        cluster.add_entity(entity);
+                    } else {
+                        // Entity name not in KNOWN_DUNGEONS - shouldn't happen with correct constants
+                        self.uncategorized.push(entity);
+                    }
                 } else {
                     self.uncategorized.push(entity);
                 }
@@ -369,7 +414,11 @@ mod tests {
         let entities = RawEntities::new();
         assert_eq!(entities.total_entities, 0);
         assert!(entities.uncategorized.is_empty());
-        assert!(entities.regions.is_empty());
+        // All known clusters should be pre-initialized
+        assert_eq!(entities.regions.len(), 27);
+        assert_eq!(entities.settlements.len(), 10); 
+        assert_eq!(entities.factions.len(), 5);
+        assert_eq!(entities.dungeons.len(), 18);
     }
 
     #[test]
