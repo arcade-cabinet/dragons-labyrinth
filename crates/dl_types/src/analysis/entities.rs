@@ -6,6 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use crate::audit::AuditableType;
 use crate::base::HexKey;
 
 /// Region hex tile entity matching Python RegionHexTile
@@ -24,6 +25,73 @@ pub struct RegionHexTile {
     pub resource_nodes: Vec<String>,
 }
 
+impl AuditableType for RegionHexTile {
+    fn audit_headers() -> Vec<String> {
+        vec![
+            "entity_uuid".to_string(),
+            "hex_key".to_string(),
+            "has_region".to_string(),
+            "settlement_count".to_string(),
+            "dungeon_count".to_string(),
+            "faction_count".to_string(),
+            "total_entities".to_string(),
+            "biome_type".to_string(),
+            "terrain_features_count".to_string(),
+            "special_features_count".to_string(),
+            "resource_nodes_count".to_string(),
+            "data_completeness_score".to_string(),
+        ]
+    }
+    
+    fn audit_row(&self) -> Vec<String> {
+        vec![
+            self.entity_uuid.clone(),
+            self.hex_key.as_ref().map(|h| h.clone()).unwrap_or("MISSING".to_string()),
+            self.region_uuid.is_some().to_string(),
+            self.settlement_uuids.len().to_string(),
+            self.dungeon_uuids.len().to_string(),
+            self.faction_uuids.len().to_string(),
+            self.entity_count().to_string(),
+            self.biome_type.as_ref().unwrap_or(&"UNKNOWN".to_string()).clone(),
+            self.terrain_features.len().to_string(),
+            self.special_features.len().to_string(),
+            self.resource_nodes.len().to_string(),
+            self.data_completeness_score().to_string(),
+        ]
+    }
+    
+    fn audit_category() -> String {
+        "analytics".to_string()
+    }
+    
+    fn audit_subcategory() -> String {
+        "hbf_coverage".to_string()
+    }
+    
+    fn extract_numeric_fields(&self) -> HashMap<String, f64> {
+        let mut fields = HashMap::new();
+        fields.insert("settlement_count".to_string(), self.settlement_uuids.len() as f64);
+        fields.insert("dungeon_count".to_string(), self.dungeon_uuids.len() as f64);
+        fields.insert("faction_count".to_string(), self.faction_uuids.len() as f64);
+        fields.insert("total_entities".to_string(), self.entity_count() as f64);
+        fields.insert("terrain_features_count".to_string(), self.terrain_features.len() as f64);
+        fields.insert("special_features_count".to_string(), self.special_features.len() as f64);
+        fields.insert("resource_nodes_count".to_string(), self.resource_nodes.len() as f64);
+        fields.insert("data_completeness_score".to_string(), self.data_completeness_score());
+        fields
+    }
+    
+    fn custom_fields(&self) -> HashMap<String, String> {
+        let mut fields = HashMap::new();
+        fields.insert("has_complete_data".to_string(), (self.data_completeness_score() > 0.7).to_string());
+        fields.insert("needs_attention".to_string(), (self.data_completeness_score() < 0.5).to_string());
+        fields.insert("hex_coordinate_status".to_string(), 
+            if self.hex_key.is_some() { "VALID".to_string() } else { "MISSING_COORDS".to_string() }
+        );
+        fields
+    }
+}
+
 impl RegionHexTile {
     pub fn new(entity_uuid: String) -> Self {
         Self {
@@ -39,6 +107,34 @@ impl RegionHexTile {
             special_features: Vec::new(),
             resource_nodes: Vec::new(),
         }
+    }
+
+    /// Calculate data completeness score for pipeline efficiency tracking
+    /// This is critical for identifying the HBF coverage issues
+    pub fn data_completeness_score(&self) -> f64 {
+        let mut score = 0.0;
+        let mut max_score = 0.0;
+        
+        // Critical fields (worth more)
+        max_score += 0.3; // hex_key - essential for game world mapping
+        if self.hex_key.is_some() { score += 0.3; }
+        
+        max_score += 0.3; // region_uuid - essential for region assignment
+        if self.region_uuid.is_some() { score += 0.3; }
+        
+        max_score += 0.2; // biome_type - important for game mechanics
+        if self.biome_type.is_some() { score += 0.2; }
+        
+        // Entity presence (worth less but indicates data richness)
+        max_score += 0.1; // has entities
+        if self.has_entities() { score += 0.1; }
+        
+        max_score += 0.1; // feature richness
+        if !self.terrain_features.is_empty() || !self.special_features.is_empty() { 
+            score += 0.1; 
+        }
+        
+        score / max_score
     }
 
     /// Extract all referenced UUIDs from this hex tile
@@ -516,5 +612,27 @@ mod tests {
         
         faction.influence_level = Some(8);
         assert_eq!(faction.get_power_level(), FactionPower::Major);
+    }
+    
+    #[test]
+    fn test_hex_tile_audit_functionality() {
+        let mut tile = RegionHexTile::new("test-uuid".to_string());
+        
+        // Empty tile should have low completeness score
+        assert!(tile.data_completeness_score() < 0.5);
+        
+        // Add critical data
+        tile.hex_key = Some("q1r2".to_string());
+        tile.region_uuid = Some("region1".to_string());
+        tile.biome_type = Some("grassland".to_string());
+        
+        // Should have high completeness score now
+        assert!(tile.data_completeness_score() > 0.7);
+        
+        // Test audit row generation
+        let audit_row = tile.audit_row();
+        assert_eq!(audit_row[0], "test-uuid"); // entity_uuid
+        assert_eq!(audit_row[1], "q1r2"); // hex_key
+        assert_eq!(audit_row[7], "grassland"); // biome_type
     }
 }

@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use bevy_ecs::prelude::*;
+use crate::{BiomeType, DreadPhase};
+use bevy_math::Vec3;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -85,56 +87,56 @@ impl Companion {
         }
     }
     
-    pub fn react_to_biome(&mut self, biome_type: &crate::world::components::BiomeType) {
+    pub fn react_to_biome(&mut self, biome_type: &BiomeType) {
         let stress_change = match biome_type {
-            crate::world::components::BiomeType::Grassland => -0.5,
-            crate::world::components::BiomeType::Forest => 0.0,
-            crate::world::components::BiomeType::Mountain => 1.0,
-            crate::world::components::BiomeType::Desert => 2.0,
-            crate::world::components::BiomeType::Swamp => 3.0,
-            crate::world::components::BiomeType::Water => 1.5,
-            crate::world::components::BiomeType::Lava => 8.0,
-            crate::world::components::BiomeType::Void => 15.0,
+            BiomeType::Grassland => -0.5,
+            BiomeType::Forest => 0.0,
+            BiomeType::Mountain => 1.0,
+            BiomeType::Desert => 2.0,
+            BiomeType::Swamp => 3.0,
+            BiomeType::Water => 1.5,
+            BiomeType::Lava => 8.0,
+            BiomeType::Void => 15.0,
             // Corrupted variants cause high stress
-            crate::world::components::BiomeType::CorruptedGrassland | 
-            crate::world::components::BiomeType::CorruptedForest |
-            crate::world::components::BiomeType::CorruptedMountain |
-            crate::world::components::BiomeType::CorruptedDesert |
-            crate::world::components::BiomeType::CorruptedSwamp |
-            crate::world::components::BiomeType::CorruptedWater |
-            crate::world::components::BiomeType::CorruptedSnow => 10.0,
+            BiomeType::CorruptedGrassland | 
+            BiomeType::CorruptedForest |
+            BiomeType::CorruptedMountain |
+            BiomeType::CorruptedDesert |
+            BiomeType::CorruptedSwamp |
+            BiomeType::CorruptedWater |
+            BiomeType::CorruptedSnow => 10.0,
             
             // Void variants cause extreme stress
-            crate::world::components::BiomeType::VoidGrassland |
-            crate::world::components::BiomeType::VoidForest |
-            crate::world::components::BiomeType::VoidMountain |
-            crate::world::components::BiomeType::VoidDesert |
-            crate::world::components::BiomeType::VoidSwamp |
-            crate::world::components::BiomeType::VoidWater |
-            crate::world::components::BiomeType::VoidSnow |
-            crate::world::components::BiomeType::VoidLava => 20.0,
+            BiomeType::VoidGrassland |
+            BiomeType::VoidForest |
+            BiomeType::VoidMountain |
+            BiomeType::VoidDesert |
+            BiomeType::VoidSwamp |
+            BiomeType::VoidWater |
+            BiomeType::VoidSnow |
+            BiomeType::VoidLava => 20.0,
             
             // Transitional biomes cause mild stress
-            crate::world::components::BiomeType::ForestGrassland |
-            crate::world::components::BiomeType::MountainForest |
-            crate::world::components::BiomeType::DesertMountain |
-            crate::world::components::BiomeType::SwampWater |
-            crate::world::components::BiomeType::SnowMountain => 0.5,
-            crate::world::components::BiomeType::Snow => 1.5,
+            BiomeType::ForestGrassland |
+            BiomeType::MountainForest |
+            BiomeType::DesertMountain |
+            BiomeType::SwampWater |
+            BiomeType::SnowMountain => 0.5,
+            BiomeType::Snow => 1.5,
         };
         
         self.stress += stress_change;
         self.stress = self.stress.clamp(0.0, 100.0);
     }
     
-    pub fn react_to_dread_phase(&mut self, dread_phase: &crate::world::components::DreadPhase) {
+    pub fn react_to_dread_phase(&mut self, dread_phase: &DreadPhase) {
         let (stress_change, trust_change) = match dread_phase {
-            crate::world::components::DreadPhase::Peace => (-2.0, 1.0),
-            crate::world::components::DreadPhase::Unease => (1.0, 0.0),
-            crate::world::components::DreadPhase::Dread => (3.0, -1.0),
-            crate::world::components::DreadPhase::Terror => (8.0, -3.0),
-            crate::world::components::DreadPhase::Void => (15.0, -8.0),
-            crate::world::components::DreadPhase::BeyondVoid => (25.0, -15.0),
+            DreadPhase::Peace => (-2.0, 1.0),
+            DreadPhase::Unease => (1.0, 0.0),
+            DreadPhase::Dread => (3.0, -1.0),
+            DreadPhase::Terror => (8.0, -3.0),
+            DreadPhase::Void => (15.0, -8.0),
+            DreadPhase::BeyondVoid => (25.0, -15.0),
         };
         
         self.stress += stress_change;

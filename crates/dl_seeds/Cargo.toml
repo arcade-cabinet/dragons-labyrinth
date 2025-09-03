@@ -10,12 +10,11 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-chrono = { version = "0.4", features = ["serde"] }
-reqwest = { version = "0.12", features = ["blocking", "json"] }
-urlencoding = "2.1"
-gutenberg-rs = "0.1.4"
-iars = "0.1.0"
-cleasby_vigfusson_dictionary = "1.1.0"
+chrono = { workspace = true, features = ["serde"] }
+reqwest = { workspace = true, features = ["blocking", "json"] }
+urlencoding = { workspace = true }
+iars = { workspace = true }
+cleasby_vigfusson_dictionary = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 tempfile = { workspace = true }
 regex = { workspace = true }

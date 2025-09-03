@@ -1,0 +1,33 @@
+[package]
+name = "dl_types"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Core dependencies
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Minimal bevy for Component derives and basic types
+bevy_ecs = "0.16.1"
+bevy_math = "0.16.1" 
+bevy_color = "0.16.2"
+bevy_asset = "0.16.1"
+bevy_animation = "0.16.1"
+bevy_scene = "0.16.1"
+bevy_transform = "0.16.1"
+
+# For moved type dependencies
+regex = { workspace = true }
+cleasby_vigfusson_dictionary = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+
+# For audit functionality (only trait, not implementation)
+# csv will be in dl_audit crate
+
+# HBF analysis types
+uuid = { workspace = true }

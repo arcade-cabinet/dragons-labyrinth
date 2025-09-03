@@ -1,0 +1,13 @@
+{
+  "category": "analytics",
+  "subcategory": "hbf_coverage",
+  "type_name": "dl_types::analysis::entities::RegionHexTile",
+  "report_name": "hbf_coverage_analysis",
+  "timestamp": "2025-09-03T19:12:02.284720Z",
+  "row_count": 3,
+  "column_count": 23,
+  "file_path": "./audit_reports/audits/analytics/hbf_coverage/hbf_coverage_analysis.csv",
+  "file_size_bytes": 721,
+  "archive_created": null,
+  "generation_time_ms": 8
+}

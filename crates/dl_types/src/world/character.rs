@@ -1,4 +1,10 @@
-use bevy::prelude::*;
+use bevy_ecs::prelude::*;
+use bevy_math::Vec3;
+use bevy_color::Color;
+use bevy_asset::Handle;
+use bevy_animation::AnimationClip;
+use bevy_scene::Scene;
+use bevy_transform::components::Transform;
 use serde::{Deserialize, Serialize};
 
 #[derive(Component, Debug, Clone)]

@@ -17,17 +17,17 @@ regex = { workspace = true }
 lazy_static = { workspace = true }
 scraper = { workspace = true }
 ammonia = { workspace = true }
-bevy = "0.16.1"
-bevy_ecs_tilemap = "0.16"
-minijinja = { version = "2.12", features = ["loader"] }
+bevy = { workspace = true }
+bevy_ecs_tilemap = { workspace = true }
+minijinja = { workspace = true, features = ["loader"] }
 openai_dive = { workspace = true }
 tokio = { workspace = true }
-chrono = { version = "0.4", features = ["serde"] }
-dl_analysis = { path = "../dl_analysis" }
-dl_seeds = { path = "../dl_seeds" }
+chrono = { workspace = true, features = ["serde"] }
+dl_analysis = { workspace = true }
+dl_seeds = { workspace = true }
 
 [build-dependencies]
-dl_analysis = { path = "../dl_analysis" }
+dl_analysis = { workspace = true }
 anyhow = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use bevy_ecs::prelude::*;
+use crate::BiomeType;
+use crate::world::companions::EmotionalResponse;
 use serde::{Deserialize, Serialize};
 
 #[derive(Component, Debug, Clone)]
@@ -100,47 +102,47 @@ pub enum CorruptionType {
 }
 
 impl CorruptionType {
-    pub fn get_biome_effect(&self, base_biome: &crate::world::components::BiomeType) -> crate::world::components::BiomeType {
+    pub fn get_biome_effect(&self, base_biome: &BiomeType) -> BiomeType {
         match self {
-            CorruptionType::VoidTaint => crate::world::components::BiomeType::Void,
+            CorruptionType::VoidTaint => BiomeType::Void,
             CorruptionType::BloodCurse => {
                 match base_biome {
-                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::CorruptedGrassland,
-                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::CorruptedForest,
-                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::CorruptedMountain,
-                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::CorruptedDesert,
-                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::CorruptedSwamp,
-                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::CorruptedWater,
-                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::CorruptedSnow,
-                    _ => crate::world::components::BiomeType::CorruptedGrassland, // Default fallback
+                    BiomeType::Grassland => BiomeType::CorruptedGrassland,
+                    BiomeType::Forest => BiomeType::CorruptedForest,
+                    BiomeType::Mountain => BiomeType::CorruptedMountain,
+                    BiomeType::Desert => BiomeType::CorruptedDesert,
+                    BiomeType::Swamp => BiomeType::CorruptedSwamp,
+                    BiomeType::Water => BiomeType::CorruptedWater,
+                    BiomeType::Snow => BiomeType::CorruptedSnow,
+                    _ => BiomeType::CorruptedGrassland, // Default fallback
                 }
             }
             CorruptionType::ShadowBlight => {
                 match base_biome {
-                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::CorruptedGrassland,
-                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::CorruptedForest,
-                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::CorruptedMountain,
-                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::CorruptedDesert,
-                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::CorruptedSwamp,
-                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::CorruptedWater,
-                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::CorruptedSnow,
-                    _ => crate::world::components::BiomeType::CorruptedForest, // Default to corrupted forest for shadow
+                    BiomeType::Grassland => BiomeType::CorruptedGrassland,
+                    BiomeType::Forest => BiomeType::CorruptedForest,
+                    BiomeType::Mountain => BiomeType::CorruptedMountain,
+                    BiomeType::Desert => BiomeType::CorruptedDesert,
+                    BiomeType::Swamp => BiomeType::CorruptedSwamp,
+                    BiomeType::Water => BiomeType::CorruptedWater,
+                    BiomeType::Snow => BiomeType::CorruptedSnow,
+                    _ => BiomeType::CorruptedForest, // Default to corrupted forest for shadow
                 }
             }
-            CorruptionType::TimeFracture => crate::world::components::BiomeType::Void,
+            CorruptionType::TimeFracture => BiomeType::Void,
             CorruptionType::MindRot => {
                 match base_biome {
-                    crate::world::components::BiomeType::Grassland => crate::world::components::BiomeType::VoidGrassland,
-                    crate::world::components::BiomeType::Forest => crate::world::components::BiomeType::VoidForest,
-                    crate::world::components::BiomeType::Mountain => crate::world::components::BiomeType::VoidMountain,
-                    crate::world::components::BiomeType::Desert => crate::world::components::BiomeType::VoidDesert,
-                    crate::world::components::BiomeType::Swamp => crate::world::components::BiomeType::VoidSwamp,
-                    crate::world::components::BiomeType::Water => crate::world::components::BiomeType::VoidWater,
-                    crate::world::components::BiomeType::Snow => crate::world::components::BiomeType::VoidSnow,
-                    _ => crate::world::components::BiomeType::Void, // Default to pure void for mind rot
+                    BiomeType::Grassland => BiomeType::VoidGrassland,
+                    BiomeType::Forest => BiomeType::VoidForest,
+                    BiomeType::Mountain => BiomeType::VoidMountain,
+                    BiomeType::Desert => BiomeType::VoidDesert,
+                    BiomeType::Swamp => BiomeType::VoidSwamp,
+                    BiomeType::Water => BiomeType::VoidWater,
+                    BiomeType::Snow => BiomeType::VoidSnow,
+                    _ => BiomeType::Void, // Default to pure void for mind rot
                 }
             }
-            CorruptionType::ElementalFlux => crate::world::components::BiomeType::Lava,
+            CorruptionType::ElementalFlux => BiomeType::Lava,
         }
     }
     
@@ -155,27 +157,27 @@ impl CorruptionType {
         }
     }
     
-    pub fn get_companion_effects(&self) -> crate::world::components::EmotionalResponse {
+    pub fn get_companion_effects(&self) -> EmotionalResponse {
         match self {
-            CorruptionType::VoidTaint => crate::world::components::EmotionalResponse {
+            CorruptionType::VoidTaint => EmotionalResponse {
                 stress_modifier: 20.0,
                 trust_modifier: -10.0,
                 dialogue_trigger: Some("void_terror".to_string()),
                 behavioral_change: Some("panic_flee".to_string()),
             },
-            CorruptionType::BloodCurse => crate::world::components::EmotionalResponse {
+            CorruptionType::BloodCurse => EmotionalResponse {
                 stress_modifier: 15.0,
                 trust_modifier: -5.0,
                 dialogue_trigger: Some("blood_revulsion".to_string()),
                 behavioral_change: Some("avoid_area".to_string()),
             },
-            CorruptionType::MindRot => crate::world::components::EmotionalResponse {
+            CorruptionType::MindRot => EmotionalResponse {
                 stress_modifier: 25.0,
                 trust_modifier: -15.0,
                 dialogue_trigger: Some("mind_confusion".to_string()),
                 behavioral_change: Some("disoriented".to_string()),
             },
-            _ => crate::world::components::EmotionalResponse {
+            _ => EmotionalResponse {
                 stress_modifier: 10.0,
                 trust_modifier: -3.0,
                 dialogue_trigger: None,

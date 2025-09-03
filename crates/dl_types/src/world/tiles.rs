@@ -1,8 +1,7 @@
-use bevy::prelude::*;
+use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
-use crate::utils::hex::HexCoord;
+use crate::world::hex::HexCoord;
 
 #[derive(Component, Debug, Clone)]
 pub struct Tile {

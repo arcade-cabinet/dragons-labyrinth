@@ -20,14 +20,14 @@ anyhow = { workspace = true }
 ron = { workspace = true }
 
 # Game-specific dependencies
-bevy = { version = "0.16.1", features = ["bevy_dev_tools", "png"] }
-bevy_ecs_tilemap = "0.16"
-bevy_rand = "0.11"
+bevy = { workspace = true, features = ["bevy_dev_tools", "png"] }
+bevy_ecs_tilemap = { workspace = true }
+bevy_rand = { workspace = true }
 
 # UI and dialogue systems only (everything else is in .cob files or HBF data)
-bevy_cobweb = "0.17"
-bevy_cobweb_ui = "0.21"
-bevy_yarnspinner = "0.5"
+bevy_cobweb = { workspace = true }
+bevy_cobweb_ui = { workspace = true }
+bevy_yarnspinner = { workspace = true }
 
 # WASM-specific deps (only included when building for wasm)
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -37,6 +37,6 @@ console_error_panic_hook = "0.1"
 wasm-bindgen-futures = "0.4"
 
 [build-dependencies]
-dl_processors = { path = "../../crates/dl_processors" }
-dl_analysis = { path = "../../crates/dl_analysis" }
+dl_processors = { workspace = true }
+dl_analysis = { workspace = true }
 anyhow = { workspace = true }
