@@ -4,7 +4,16 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["trunk", "cargo-edit", "rustup", "wasm-pack"]
+packages = ["trunk", "cargo-edit", "rustup", "wasm-pack", "pkg-config", "openssl"]
+
+# Environment variables for Dragon's Labyrinth
+[env]
+RUST_BACKTRACE = "1"
+RUST_LOG = "info"
+# OpenAI API key should be set as a secret in Replit
+# OPENAI_API_KEY = "your_api_key_here"
+# OPENAI_MODEL = "gpt-4o"
+# REPORTS_DIR = "/tmp/reports"
 
 [workflows]
 runButton = "Project"
