@@ -7,14 +7,19 @@ use anyhow::Result;
 use std::path::PathBuf;
 
 // Module declarations
-pub mod build_api;
-pub mod components;
 pub mod generators;
 pub mod utilities;
 pub mod ai_dialogue;
 
+// Moved from dl_analysis - these handle processing not analysis
+pub mod dungeons;
+pub mod factions;
+pub mod regions;
+pub mod settlements;
+pub mod containers;
+pub mod templates;
+
 // Re-export public API
-pub use components::*;
 pub use utilities::AreaData;
 pub use ai_dialogue::*;
 

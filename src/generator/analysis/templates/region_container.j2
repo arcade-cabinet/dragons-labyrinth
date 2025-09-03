@@ -1,0 +1,79 @@
+You are an expert Python developer creating a comprehensive RegionContainer model for a D&D hex-based RPG.
+
+## GOAL: Create a master region integration model
+
+**Context**: You have access to ALL the individual component models generated from Phase 1:
+
+**Available Individual Models**:
+{% for category, connections in individual_models.items() %}
+- `{{ connections.import_path }}` - **Classes**: {{ connections.exported_classes | join(', ') }} | **Connections**: {{ connections.connection_fields | join(', ') }}
+{% endfor %}
+
+**Required Imports (Absolute - NO wildcards)**:
+{% for category, connections in individual_models.items() %}
+{% for class_name in connections.exported_classes %}
+- `from {{ connections.import_path }} import {{ class_name }}`
+{% endfor %}
+{% endfor %}
+
+**Your Task**: Create a RegionContainer model that intelligently combines ALL available data from individual models for complete region gameplay.
+
+## Integration Requirements
+
+**The RegionContainer must**:
+1. **Import all individual models**: Use absolute imports only
+2. **Aggregate hex tiles** - All hex tiles in this region with full data
+3. **Connect settlements** - Link settlements to their hex tiles using settlement models
+4. **Map dungeons** - Connect dungeons to their entrance hex tiles and areas
+5. **Track factions** - Which factions control/influence this region using faction models
+6. **Integrate containers** - Use DungeonContainer models if available from Phase 2
+7. **Integrate systems** - Weather, encounters, travel, economics across the region
+8. **Provide navigation** - Connections to adjacent regions and internal routing
+
+## Key Integration Patterns
+
+**Spatial Relationships**:
+- Hex tiles reference settlements/dungeons via feature_uuid
+- Settlements contain multiple establishments and NPCs
+- Dungeons contain multiple areas with monsters/treasure
+- Factions have territorial control and member presence
+
+**Economic Integration**:
+- Regional trade routes via trails/rivers
+- Settlement economic data aggregated
+- Resource availability and scarcity
+- Travel costs and services
+
+**Political Integration**:
+- Faction territorial control
+- Settlement political affiliations  
+- Regional conflicts and alliances
+- Hidden faction activities
+
+## Output Requirements
+
+Generate a comprehensive RegionContainer model with:
+- **Absolute imports only**: Use provided connection information for exact imports
+- **Reference existing models**: Use and integrate all models from Phase 1 (and Phase 2 if available)
+- **Complete spatial integration** - Every hex tile with full linked data
+- **Economic system integration** - All trade, services, pricing aggregated
+- **Political system integration** - All faction relationships and control
+- **Navigation system integration** - Travel routes and regional connections
+- **Quest system integration** - All available quests, rumors, and hooks
+- **Modern Python types**: str, int, list[str], dict[str, Any], str | None
+
+**File Structure**:
+```python
+# Absolute imports - NO wildcards
+{% for category, connections in individual_models.items() %}
+{% for class_name in connections.exported_classes %}
+from {{ connections.import_path }} import {{ class_name }}
+{% endfor %}
+{% endfor %}
+
+class RegionContainer(BaseModel):
+    # Master integration that uses ALL individual models
+    pass
+```
+
+Create the master container that brings everything together for complete regional gameplay.

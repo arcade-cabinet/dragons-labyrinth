@@ -5,7 +5,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use std::fs;
-use crate::base::{
+use dl_types::analysis::base::{
     KNOWN_REGIONS, KNOWN_SETTLEMENTS, KNOWN_FACTIONS, KNOWN_DUNGEONS,
     hex_utils, uuid_utils, HexKey, MapCoord
 };

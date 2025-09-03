@@ -1,0 +1,79 @@
+use bevy::prelude::*;
+
+#[derive(Component, Debug, Clone)]
+pub struct Settlement {
+    pub name: String,
+    pub scale: SettlementScale,
+    pub economic_activity: u32,
+    pub corruption_resistance: u32,
+    pub service_types: Vec<ServiceType>,
+    pub npc_count: u32,
+    pub establishment_count: u32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SettlementScale {
+    Village,
+    Town,
+    City,
+    Metropolis,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ServiceType {
+    Commerce,
+    Lodging,
+    Crafting,
+    Medical,
+    Religious,
+    Defense,
+    Government,
+    Learning,
+}
+
+impl Settlement {
+    {% for settlement in settlements -%}
+    pub fn {{ settlement.rust_name }}() -> Self {
+        Settlement {
+            name: "{{ settlement.name }}".to_string(),
+            scale: SettlementScale::{{ settlement.scale_rust }},
+            economic_activity: {{ settlement.economic_activity }},
+            corruption_resistance: {{ settlement.corruption_resistance }},
+            service_types: vec![{{ settlement.service_types_rust }}],
+            npc_count: {{ settlement.npc_count }},
+            establishment_count: {{ settlement.establishment_count }},
+        }
+    }
+    {% endfor %}
+}
+
+// Settlement-specific systems
+pub fn spawn_settlements(mut commands: Commands) {
+    {% for settlement in settlements -%}
+    commands.spawn((
+        Settlement::{{ settlement.rust_name }}(),
+        HexTile { 
+            q: {{ settlement.hex_q }}, 
+            r: {{ settlement.hex_r }}, 
+            biome: "{{ settlement.biome }}".to_string(), 
+            distance_band: "{{ settlement.distance_band }}".to_string() 
+        },
+    ));
+    {% endfor %}
+}
+
+pub fn update_settlement_corruption(
+    mut settlements: Query<&mut Settlement>,
+    player_distance: Res<PlayerDistance>,
+) {
+    for mut settlement in settlements.iter_mut() {
+        // Apply distance-based corruption to settlements
+        let base_resistance = settlement.corruption_resistance;
+        let distance_corruption = player_distance.corruption_level();
+        
+        // Settlements resist corruption based on their characteristics
+        if distance_corruption > base_resistance {
+            // Settlement begins to show corruption
+        }
+    }
+}

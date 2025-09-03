@@ -10,7 +10,6 @@
 pub mod books;
 pub mod dialogue;
 pub mod linguistics;
-pub mod build_api;
 
 use anyhow::Result;
 use std::path::Path;

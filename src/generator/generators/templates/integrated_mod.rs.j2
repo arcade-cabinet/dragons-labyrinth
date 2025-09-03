@@ -1,0 +1,522 @@
+use bevy::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
+use avian2d::prelude::*;
+use std::collections::{HashMap, HashSet, BinaryHeap};
+use std::cmp::Ordering;
+
+pub mod components;
+pub mod resources;  
+pub mod queries;
+
+// Generated ECS modules from HBF entity processing
+{% for module in modules -%}
+pub mod {{ module }};
+{% endfor %}
+
+// Integrated systems module with chunking and pathfinding
+pub mod systems {
+    use super::*;
+    
+    // Chunking configuration
+    pub const TILE_SIZE: TilemapTileSize = TilemapTileSize { x: 32.0, y: 32.0 };
+    pub const CHUNK_SIZE: UVec2 = UVec2 { x: 16, y: 16 };
+    pub const RENDER_CHUNK_SIZE: UVec2 = UVec2 { x: 32, y: 32 };
+    
+    pub fn setup_physics_world(mut commands: Commands) {
+        // Set up Avian 2D physics world for hex movement
+        commands.insert_resource(Gravity(Vec2::ZERO)); // Top-down, no gravity
+        commands.insert_resource(SubstepCount(4));
+        
+        // Initialize chunk manager and pathfinding resources
+        commands.insert_resource(ChunkManager::default());
+        commands.insert_resource(PathfindingGraph::default());
+    }
+    
+    pub fn spawn_hex_player(
+        mut commands: Commands,
+        asset_server: Res<AssetServer>,
+    ) {
+        // Spawn player with physics body for hex movement
+        commands.spawn((
+            SpriteBundle {
+                texture: asset_server.load("chars/player_token.png"),
+                transform: Transform::from_xyz(0.0, 0.0, 1.0),
+                ..default()
+            },
+            RigidBody::Dynamic,
+            Collider::circle(16.0),
+            LockedAxes::ROTATION_LOCKED,
+            Friction::new(0.8),
+            Restitution::new(0.0),
+            HexPosition { q: 0, r: 0 },
+            PlayerMarker,
+        ));
+    }
+    
+    pub fn spawn_chunks_around_camera(
+        mut commands: Commands,
+        asset_server: Res<AssetServer>,
+        camera_query: Query<&Transform, With<Camera>>,
+        mut chunk_manager: ResMut<ChunkManager>,
+        regions: Query<&{{ modules.0 }}::Region>,
+    ) {
+        for transform in camera_query.iter() {
+            let camera_chunk_pos = camera_pos_to_chunk_pos(&transform.translation.xy());
+            
+            // Spawn chunks in 4x4 grid around camera
+            for y in (camera_chunk_pos.y - 2)..(camera_chunk_pos.y + 2) {
+                for x in (camera_chunk_pos.x - 2)..(camera_chunk_pos.x + 2) {
+                    let chunk_pos = IVec2::new(x, y);
+                    if !chunk_manager.spawned_chunks.contains(&chunk_pos) {
+                        chunk_manager.spawned_chunks.insert(chunk_pos);
+                        spawn_hex_chunk(&mut commands, &asset_server, chunk_pos, &regions);
+                    }
+                }
+            }
+        }
+    }
+    
+    pub fn despawn_outofrange_chunks(
+        mut commands: Commands,
+        camera_query: Query<&Transform, With<Camera>>,
+        chunks_query: Query<(Entity, &Transform), With<TilemapId>>,
+        mut chunk_manager: ResMut<ChunkManager>,
+    ) {
+        for camera_transform in camera_query.iter() {
+            for (entity, chunk_transform) in chunks_query.iter() {
+                let chunk_pos = chunk_transform.translation.xy();
+                let distance = camera_transform.translation.xy().distance(chunk_pos);
+                
+                // Despawn chunks beyond view range
+                if distance > 640.0 {
+                    let chunk_coord = world_pos_to_chunk_pos(&chunk_pos);
+                    chunk_manager.spawned_chunks.remove(&chunk_coord);
+                    commands.entity(entity).despawn_recursive();
+                }
+            }
+        }
+    }
+    
+    pub fn hex_movement_system(
+        keyboard_input: Res<ButtonInput<KeyCode>>,
+        mut player_query: Query<(&mut HexPosition, &mut Transform), With<PlayerMarker>>,
+        time: Res<Time>,
+    ) {
+        for (mut hex_pos, mut transform) in player_query.iter_mut() {
+            let mut new_pos = *hex_pos;
+            
+            // Hex movement directions (Q/W/E/A/S/D)
+            if keyboard_input.just_pressed(KeyCode::KeyQ) {
+                new_pos.q -= 1;
+                new_pos.r += 1;
+            }
+            if keyboard_input.just_pressed(KeyCode::KeyW) {
+                new_pos.r -= 1;
+            }
+            if keyboard_input.just_pressed(KeyCode::KeyE) {
+                new_pos.q += 1;
+                new_pos.r -= 1;
+            }
+            if keyboard_input.just_pressed(KeyCode::KeyA) {
+                new_pos.q -= 1;
+            }
+            if keyboard_input.just_pressed(KeyCode::KeyS) {
+                new_pos.r += 1;
+            }
+            if keyboard_input.just_pressed(KeyCode::KeyD) {
+                new_pos.q += 1;
+            }
+            
+            // Apply smooth movement with physics if position changed
+            if new_pos != *hex_pos {
+                *hex_pos = new_pos;
+                let target_world_pos = hex_to_world_pos(hex_pos.q, hex_pos.r);
+                transform.translation = target_world_pos.extend(transform.translation.z);
+            }
+        }
+    }
+    
+    pub fn pathfinding_system(
+        mut pathfinding_requests: Query<(Entity, &PathRequest, &mut PathResult)>,
+        pathfinding_graph: Res<PathfindingGraph>,
+        mut commands: Commands,
+    ) {
+        for (entity, request, mut result) in pathfinding_requests.iter_mut() {
+            // Run A* pathfinding
+            if let Some(path) = a_star_pathfind(
+                request.start,
+                request.end,
+                &pathfinding_graph,
+            ) {
+                result.path = path;
+                result.found = true;
+                result.cost = result.path.len() as f32;
+            } else {
+                result.found = false;
+                result.path.clear();
+                result.cost = f32::INFINITY;
+            }
+            
+            // Remove PathRequest component when done
+            commands.entity(entity).remove::<PathRequest>();
+        }
+    }
+    
+    pub fn update_pathfinding_graph(
+        mut pathfinding_graph: ResMut<PathfindingGraph>,
+        chunk_manager: Res<ChunkManager>,
+        tile_query: Query<(&TilePos, &TilemapId), With<TileTextureIndex>>,
+        regions: Query<&{{ modules.0 }}::Region>,
+    ) {
+        // Rebuild pathfinding graph when chunks change
+        if chunk_manager.is_changed() {
+            pathfinding_graph.nodes.clear();
+            
+            // Build graph from current tiles
+            for (tile_pos, _tilemap_id) in tile_query.iter() {
+                let hex_pos = tile_pos_to_hex_pos(*tile_pos);
+                
+                // Check if tile is traversable based on region data
+                let traversable = is_hex_traversable(hex_pos, &regions);
+                
+                if traversable {
+                    pathfinding_graph.add_node(hex_pos);
+                    
+                    // Add edges to neighbors
+                    for neighbor in get_hex_neighbors(hex_pos) {
+                        if is_hex_traversable(neighbor, &regions) {
+                            let cost = calculate_movement_cost(hex_pos, neighbor, &regions);
+                            pathfinding_graph.add_edge(hex_pos, neighbor, cost);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    fn spawn_hex_chunk(
+        commands: &mut Commands,
+        asset_server: &AssetServer,
+        chunk_pos: IVec2,
+        regions: &Query<&{{ modules.0 }}::Region>,
+    ) {
+        let tilemap_entity = commands.spawn_empty().id();
+        let mut tile_storage = TileStorage::empty(CHUNK_SIZE.into());
+        
+        // Spawn hex tiles with biome data from generated regions
+        for x in 0..CHUNK_SIZE.x {
+            for y in 0..CHUNK_SIZE.y {
+                let tile_pos = TilePos { x, y };
+                let world_hex_pos = chunk_tile_to_hex_pos(chunk_pos, tile_pos);
+                
+                // Determine biome and texture index from region data
+                let texture_index = get_biome_texture_index(world_hex_pos, regions);
+                
+                let tile_entity = commands.spawn(TileBundle {
+                    position: tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: TileTextureIndex(texture_index),
+                    ..Default::default()
+                }).id();
+                
+                commands.entity(tilemap_entity).add_child(tile_entity);
+                tile_storage.set(&tile_pos, tile_entity);
+            }
+        }
+        
+        let transform = Transform::from_translation(Vec3::new(
+            chunk_pos.x as f32 * CHUNK_SIZE.x as f32 * TILE_SIZE.x,
+            chunk_pos.y as f32 * CHUNK_SIZE.y as f32 * TILE_SIZE.y,
+            0.0,
+        ));
+        
+        let texture_handle: Handle<Image> = asset_server.load("biomes/biomes_3x3.png");
+        
+        commands.entity(tilemap_entity).insert(TilemapBundle {
+            grid_size: TILE_SIZE.into(),
+            size: CHUNK_SIZE.into(),
+            storage: tile_storage,
+            texture: TilemapTexture::Single(texture_handle),
+            tile_size: TILE_SIZE,
+            transform,
+            map_type: TilemapType::Hexagon(HexCoordSystem::Row),
+            render_settings: TilemapRenderSettings {
+                render_chunk_size: RENDER_CHUNK_SIZE,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+    }
+    
+    // A* Pathfinding Algorithm Implementation
+    fn a_star_pathfind(
+        start: HexPosition,
+        goal: HexPosition,
+        graph: &PathfindingGraph,
+    ) -> Option<Vec<HexPosition>> {
+        let mut open_set = BinaryHeap::new();
+        let mut came_from: HashMap<HexPosition, HexPosition> = HashMap::new();
+        let mut g_score: HashMap<HexPosition, f32> = HashMap::new();
+        let mut f_score: HashMap<HexPosition, f32> = HashMap::new();
+        
+        g_score.insert(start, 0.0);
+        f_score.insert(start, hex_distance(start, goal));
+        open_set.push(PathNode { position: start, f_score: hex_distance(start, goal) });
+        
+        while let Some(current_node) = open_set.pop() {
+            let current = current_node.position;
+            
+            if current == goal {
+                // Reconstruct path
+                let mut path = Vec::new();
+                let mut current_pos = current;
+                path.push(current_pos);
+                
+                while let Some(&parent) = came_from.get(&current_pos) {
+                    current_pos = parent;
+                    path.push(current_pos);
+                }
+                
+                path.reverse();
+                return Some(path);
+            }
+            
+            // Explore neighbors
+            for neighbor in get_hex_neighbors(current) {
+                if !graph.nodes.contains(&neighbor) {
+                    continue;
+                }
+                
+                let tentative_g_score = g_score.get(&current).unwrap_or(&f32::INFINITY) 
+                    + graph.get_edge_cost(current, neighbor).unwrap_or(f32::INFINITY);
+                
+                let neighbor_g_score = g_score.get(&neighbor).unwrap_or(&f32::INFINITY);
+                
+                if tentative_g_score < *neighbor_g_score {
+                    came_from.insert(neighbor, current);
+                    g_score.insert(neighbor, tentative_g_score);
+                    let neighbor_f_score = tentative_g_score + hex_distance(neighbor, goal);
+                    f_score.insert(neighbor, neighbor_f_score);
+                    
+                    open_set.push(PathNode { position: neighbor, f_score: neighbor_f_score });
+                }
+            }
+        }
+        
+        None // No path found
+    }
+    
+    // Utility functions
+    fn camera_pos_to_chunk_pos(camera_pos: &Vec2) -> IVec2 {
+        let camera_pos = camera_pos.as_ivec2();
+        let chunk_size = IVec2::new(CHUNK_SIZE.x as i32, CHUNK_SIZE.y as i32);
+        let tile_size = IVec2::new(TILE_SIZE.x as i32, TILE_SIZE.y as i32);
+        camera_pos / (chunk_size * tile_size)
+    }
+    
+    fn world_pos_to_chunk_pos(world_pos: &Vec2) -> IVec2 {
+        let chunk_size_world = CHUNK_SIZE.as_vec2() * TILE_SIZE.as_vec2();
+        IVec2::new(
+            (world_pos.x / chunk_size_world.x).floor() as i32,
+            (world_pos.y / chunk_size_world.y).floor() as i32,
+        )
+    }
+    
+    fn chunk_tile_to_hex_pos(chunk_pos: IVec2, tile_pos: TilePos) -> HexPosition {
+        let world_tile_x = chunk_pos.x * CHUNK_SIZE.x as i32 + tile_pos.x as i32;
+        let world_tile_y = chunk_pos.y * CHUNK_SIZE.y as i32 + tile_pos.y as i32;
+        
+        // Convert to hex coordinates
+        HexPosition { q: world_tile_x, r: world_tile_y }
+    }
+    
+    fn tile_pos_to_hex_pos(tile_pos: TilePos) -> HexPosition {
+        HexPosition { q: tile_pos.x as i32, r: tile_pos.y as i32 }
+    }
+    
+    fn get_biome_texture_index(hex_pos: HexPosition, regions: &Query<&{{ modules.0 }}::Region>) -> u32 {
+        // Determine texture index based on region biome data
+        for region in regions.iter() {
+            // Simplified - would need proper region boundary checking
+            match region.dominant_biome {
+                {{ modules.0 }}::BiomeType::WetMeadow => return 0,
+                {{ modules.0 }}::BiomeType::AshenForest => return 1,
+                {{ modules.0 }}::BiomeType::BlackSwamp => return 2,
+                {{ modules.0 }}::BiomeType::RustPlains => return 3,
+                {{ modules.0 }}::BiomeType::BoneForest => return 4,
+                {{ modules.0 }}::BiomeType::DragonScar => return 5,
+                _ => return 0,
+            }
+        }
+        0 // Default to first texture
+    }
+    
+    fn is_hex_traversable(hex_pos: HexPosition, regions: &Query<&{{ modules.0 }}::Region>) -> bool {
+        // Check if hex is traversable based on biome and corruption
+        for region in regions.iter() {
+            // Simplified traversability rules
+            match region.dominant_biome {
+                {{ modules.0 }}::BiomeType::DragonScar => return false, // Impassable
+                {{ modules.0 }}::BiomeType::AbyssalChasm => return false, // Impassable
+                _ => {
+                    // Traversable but may have movement cost
+                    return region.corruption_level < 4; // Too corrupted = impassable
+                }
+            }
+        }
+        true // Default to traversable
+    }
+    
+    fn calculate_movement_cost(from: HexPosition, to: HexPosition, regions: &Query<&{{ modules.0 }}::Region>) -> f32 {
+        // Base movement cost
+        let mut cost = 1.0;
+        
+        // Increase cost based on biome difficulty
+        for region in regions.iter() {
+            match region.dominant_biome {
+                {{ modules.0 }}::BiomeType::BlackSwamp => cost += 1.0,
+                {{ modules.0 }}::BiomeType::BoneForest => cost += 2.0,
+                {{ modules.0 }}::BiomeType::RustPlains => cost += 1.5,
+                _ => {}
+            }
+            
+            // Corruption increases movement cost
+            cost += region.corruption_level as f32 * 0.5;
+        }
+        
+        cost
+    }
+    
+    fn get_hex_neighbors(hex_pos: HexPosition) -> [HexPosition; 6] {
+        [
+            HexPosition { q: hex_pos.q + 1, r: hex_pos.r },
+            HexPosition { q: hex_pos.q + 1, r: hex_pos.r - 1 },
+            HexPosition { q: hex_pos.q, r: hex_pos.r - 1 },
+            HexPosition { q: hex_pos.q - 1, r: hex_pos.r },
+            HexPosition { q: hex_pos.q - 1, r: hex_pos.r + 1 },
+            HexPosition { q: hex_pos.q, r: hex_pos.r + 1 },
+        ]
+    }
+    
+    fn hex_distance(a: HexPosition, b: HexPosition) -> f32 {
+        ((a.q - b.q).abs() + (a.q + a.r - b.q - b.r).abs() + (a.r - b.r).abs()) as f32 / 2.0
+    }
+}
+
+// Components for pathfinding and movement
+#[derive(Component)]
+pub struct PlayerMarker;
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct HexPosition {
+    pub q: i32,
+    pub r: i32,
+}
+
+#[derive(Component)]
+pub struct PathRequest {
+    pub start: HexPosition,
+    pub end: HexPosition,
+}
+
+#[derive(Component)]
+pub struct PathResult {
+    pub path: Vec<HexPosition>,
+    pub found: bool,
+    pub cost: f32,
+}
+
+// Resources for chunk management and pathfinding
+#[derive(Default, Debug, Resource)]
+pub struct ChunkManager {
+    pub spawned_chunks: HashSet<IVec2>,
+}
+
+#[derive(Default, Resource)]
+pub struct PathfindingGraph {
+    pub nodes: HashSet<HexPosition>,
+    pub edges: HashMap<HexPosition, Vec<(HexPosition, f32)>>, // (neighbor, cost)
+}
+
+impl PathfindingGraph {
+    pub fn add_node(&mut self, pos: HexPosition) {
+        self.nodes.insert(pos);
+        self.edges.entry(pos).or_insert_with(Vec::new);
+    }
+    
+    pub fn add_edge(&mut self, from: HexPosition, to: HexPosition, cost: f32) {
+        self.edges.entry(from).or_default().push((to, cost));
+    }
+    
+    pub fn get_edge_cost(&self, from: HexPosition, to: HexPosition) -> Option<f32> {
+        self.edges.get(&from)?
+            .iter()
+            .find(|(neighbor, _)| *neighbor == to)
+            .map(|(_, cost)| *cost)
+    }
+}
+
+#[derive(Debug)]
+struct PathNode {
+    position: HexPosition,
+    f_score: f32,
+}
+
+impl PartialEq for PathNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.f_score.eq(&other.f_score)
+    }
+}
+
+impl Eq for PathNode {}
+
+impl PartialOrd for PathNode {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        // Reverse ordering for min-heap behavior
+        other.f_score.partial_cmp(&self.f_score)
+    }
+}
+
+impl Ord for PathNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+    }
+}
+
+fn hex_to_world_pos(q: i32, r: i32) -> Vec2 {
+    let x = 32.0 * (3.0_f32.sqrt() * q as f32 + 3.0_f32.sqrt() / 2.0 * r as f32);
+    let y = 32.0 * (3.0 / 2.0 * r as f32);
+    Vec2::new(x, y)
+}
+
+pub fn register(app: &mut App) {
+    // Add required plugins
+    app.add_plugins(TilemapPlugin);
+    app.add_plugins(PhysicsPlugins::default());
+    
+    // Register resources
+    resources::register_resources(app);
+    
+    // Setup systems
+    app.add_systems(Startup, (
+        systems::setup_physics_world,
+        systems::spawn_hex_player,
+        {% for module in modules -%}
+        {{ module }}::spawn_{{ module }},
+        {% endfor %}
+    ).chain());
+    
+    // Update systems
+    app.add_systems(Update, (
+        systems::spawn_chunks_around_camera,
+        systems::despawn_outofrange_chunks,
+        systems::hex_movement_system,
+        systems::pathfinding_system,
+        systems::update_pathfinding_graph,
+        {% for module in modules -%}
+        {% if module != "factions" -%}
+        {{ module }}::update_{{ module }}_corruption,
+        {% endif -%}
+        {% endfor %}
+    ));
+}

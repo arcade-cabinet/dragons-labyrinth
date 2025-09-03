@@ -2602,6 +2602,7 @@ dependencies = [
  "chrono",
  "csv",
  "dl_seeds",
+ "dl_types",
  "fs_extra",
  "glob",
  "html5ever",

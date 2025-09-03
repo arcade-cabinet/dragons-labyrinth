@@ -1,6 +1,6 @@
 //! Books module for downloading literature from Project Gutenberg and Internet Archive
 //! 
-//! This module handles real downloads using gutenberg-rs and iars crates,
+//! This module handles real downloads using reqwest and iars crates,
 //! not manual excerpts. The downloaded texts are then analyzed by dl_analysis.
 
 use anyhow::Result;
@@ -173,35 +173,60 @@ pub struct BooksManifest {
     pub books: Vec<BookRecord>,
 }
 
-/// Download text from Project Gutenberg using gutenberg-rs crate
+/// Download text from Project Gutenberg using reqwest (replacing gutenberg-rs)
 pub fn download_gutenberg_text(ebook_id: u32, file_path: &Path) -> Result<()> {
-    // Create temporary directory for gutenberg-rs cache
-    let temp_dir = tempfile::tempdir()?;
-    let mut settings = gutenberg_rs::settings::GutenbergCacheSettings::default();
-    settings.cache_rdf_archive_name = temp_dir.path().join("rdf-files.tar.bz2").to_string_lossy().to_string();
-    settings.cache_rdf_unpack_directory = temp_dir.path().join("cache/epub").to_string_lossy().to_string();
-    settings.cache_filename = temp_dir.path().join("gutenberg.db").to_string_lossy().to_string();
-    settings.text_files_cache_folder = temp_dir.path().join("texts").to_string_lossy().to_string();
+    // Try multiple URL patterns that Project Gutenberg uses
+    let url_patterns = [
+        format!("https://www.gutenberg.org/files/{}/{}-0.txt", ebook_id, ebook_id),
+        format!("https://www.gutenberg.org/files/{}/{}.txt", ebook_id, ebook_id),
+        format!("https://www.gutenberg.org/ebooks/{}.txt.utf-8", ebook_id),
+        format!("https://www.gutenberg.org/cache/epub/{}/pg{}.txt", ebook_id, ebook_id),
+    ];
     
-    // Use tokio runtime for async operations
-    let rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(async {
-        // Setup SQLite cache (this will download and parse the metadata if needed)
-        let _cache = gutenberg_rs::setup_sqlite(&settings, false, false).await?;
-        
-        // Download the specific text using known Project Gutenberg URL pattern
-        let url = format!("https://www.gutenberg.org/files/{}/{}-0.txt", ebook_id, ebook_id);
-        let content = gutenberg_rs::text_get::get_text_from_link(&settings, &url).await?;
-        
-        // Strip Gutenberg headers/footers to get clean text
-        let clean_content = gutenberg_rs::text_get::strip_headers(content);
-        
-        std::fs::write(file_path, clean_content)?;
-        
-        Ok::<(), anyhow::Error>(())
-    })?;
+    for url in &url_patterns {
+        match reqwest::blocking::get(url) {
+            Ok(response) => {
+                if response.status().is_success() {
+                    let content = response.text()?;
+                    
+                    // Strip basic Project Gutenberg headers/footers
+                    let clean_content = strip_gutenberg_headers(&content);
+                    
+                    std::fs::write(file_path, clean_content)?;
+                    return Ok(());
+                }
+            }
+            Err(_) => continue, // Try next URL pattern
+        }
+    }
     
-    Ok(())
+    Err(anyhow::anyhow!("Could not download Project Gutenberg text {}", ebook_id))
+}
+
+/// Simple function to strip Project Gutenberg headers and footers
+fn strip_gutenberg_headers(content: &str) -> String {
+    let lines: Vec<&str> = content.lines().collect();
+    let mut start_idx = 0;
+    let mut end_idx = lines.len();
+    
+    // Find start of actual content (after the header)
+    for (i, line) in lines.iter().enumerate() {
+        if line.contains("*** START OF") || line.contains("***START OF") {
+            start_idx = i + 1;
+            break;
+        }
+    }
+    
+    // Find end of actual content (before the footer)
+    for (i, line) in lines.iter().enumerate().rev() {
+        if line.contains("*** END OF") || line.contains("***END OF") {
+            end_idx = i;
+            break;
+        }
+    }
+    
+    // Return cleaned content
+    lines[start_idx..end_idx].join("\n")
 }
 
 /// Search Internet Archive by keywords and download the first matching text

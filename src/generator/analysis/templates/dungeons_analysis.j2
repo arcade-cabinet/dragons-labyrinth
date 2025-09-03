@@ -1,0 +1,199 @@
+You are an expert Python developer creating comprehensive data extraction models for a D&D dungeon system with explicit UUID connections.
+
+## GOAL: Discover ALL extractable data for dungeons with spatial and UUID tracking
+
+**Context**: The uploaded files are sample dungeon data. Analyze them thoroughly and create Pydantic models that capture EVERYTHING you find.
+
+**Primary Focus**: Dungeon areas, encounters, and treasure systems with explicit UUID connection tracking.
+
+## CRITICAL REQUIREMENTS
+
+**UUID Connection Tracking**:
+- **EVERY UUID field** must be explicitly identified and documented
+- **Connection fields** (dungeon_uuid, area_uuid, monster_uuid, etc.) must be surfaced
+- **Entity relationships** must be made explicit through UUID references
+
+**Absolute Imports Only**:
+- **NO wildcard imports** (no `from x import *`)
+- **Explicit imports** only (e.g., `from generator.processors.models.regions import RegionModel`)
+- **Full import paths** for all dependencies
+
+## Analysis Approach
+
+Examine the uploaded files and identify:
+1. **Spatial data** - Dungeon area coordinates, connections, layout mapping
+2. **UUID patterns** - What UUID fields connect to other entities?
+3. **Area systems** - Rooms, passages, chambers, connections
+4. **Encounter systems** - Monsters, traps, environmental hazards
+5. **Treasure systems** - Loot, hoards, magic items, currency
+6. **Navigation systems** - Exits, entrances, secret passages
+7. **Environmental systems** - Lighting, atmosphere, special features
+8. **Quest systems** - Objectives, keys, progression elements
+
+## Key Patterns to Look For
+
+**Spatial Coordinate Patterns**:
+- **Area numbers**: Extract "Cave area #22" from `<div hidden id="doc-title">`
+- **Map coordinates**: Extract hex, x, y, zoom from `<a class="map-coords" hex="..." x="..." y="..." zoom="...">`
+- **Dungeon context**: Extract dungeon name from doc-title
+- **Area connections**: References to other areas and passages
+
+**UUID and Cross-Reference Patterns**:
+- **Entity UUID**: Extract from filename (entity_{UUID}.html)
+- **Dungeon UUIDs**: From breadcrumb links like `/sandbox/nTR8nJOW/location/nyEddicl`
+- **Area UUIDs**: From area references and internal links
+- **Monster UUIDs**: From monster stat blocks and encounter references
+- **Treasure UUIDs**: From loot and magic item references
+- **Quest UUIDs**: From objective and key item references
+
+**From HTML with BeautifulSoup**:
+- **Hidden doc-title**: `soup.find('div', {'id': 'doc-title'})` for area context
+- **Map coords anchor**: `soup.find('a', class_='map-coords')` for spatial data  
+- **Breadcrumbs**: Extract all `/sandbox/nTR8nJOW/{type}/{uuid}` pattern links
+- **Location links**: `soup.find_all('a', href=re.compile(r'/location/'))`
+- **Monster stat blocks**: Complete D&D monster statistics with abilities
+- **Treasure listings**: Detailed loot tables, currency, magic items
+- **Environmental descriptions**: Atmosphere, lighting, special features
+- **Area descriptions**: Room layouts, features, connections
+- **Trap systems**: Detection, effects, disarmament
+- **Secret areas**: Hidden passages, concealed treasures
+- **Quest elements**: Keys, objectives, progression items
+- **Random generation tables**: Dice-based content generation
+
+## Output Requirements
+
+Generate comprehensive Pydantic models with:
+- **Explicit UUID Documentation**: Comment every UUID field with what entity it connects to
+- **Connection Field Mapping**: List all fields that reference other entity UUIDs
+- **Absolute imports only**: Full import paths, no wildcards
+- **Discovery-driven structure** - Model what you actually find
+- **Complete encounter integration** - All monsters, traps, environmental hazards
+- **Treasure system capture** - All loot, currency, magic items
+- **BeautifulSoup extraction methods** - Include specific parsing logic for UUID extraction
+- **Modern Python types**: str, int, list[str], dict[str, Any], str | None
+
+**Required Code Structure**:
+```python
+# Absolute imports only - NO wildcards
+from typing import Any
+import re
+from pydantic import BaseModel, Field
+from bs4 import BeautifulSoup
+
+class DungeonArea(BaseModel):
+    """Individual area within a dungeon."""
+    # Entity identification
+    entity_uuid: str = Field(..., description="UUID from filename (entity_{UUID}.html)")
+    
+    # Spatial coordinates and location
+    area_number: int | None = Field(None, description="Area number like '22' from 'Cave area #22'")
+    dungeon_name: str | None = Field(None, description="Dungeon name from doc-title")
+    map_hex_id: str | None = Field(None, description="Map hex ID from map-coords anchor")
+    map_x: float | None = Field(None, description="Map X coordinate")
+    map_y: float | None = Field(None, description="Map Y coordinate")
+    
+    # Entity connections via UUIDs extracted from links
+    dungeon_uuid: str | None = Field(None, description="UUID of parent dungeon from breadcrumbs")
+    connected_area_uuids: list[str] = Field(default_factory=list, description="UUIDs of connected areas")
+    monster_uuids: list[str] = Field(default_factory=list, description="UUIDs of monsters in this area")
+    treasure_uuids: list[str] = Field(default_factory=list, description="UUIDs of treasure items")
+    quest_item_uuids: list[str] = Field(default_factory=list, description="UUIDs of quest-related items")
+    
+    @classmethod  
+    def extract_from_html(cls, html_content: str, filename: str) -> "DungeonArea":
+        """Extract all coordinate and UUID data from HTML using BeautifulSoup."""
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Extract entity UUID from filename
+        entity_uuid = filename.replace('entity_', '').replace('.html', '')
+        
+        # Extract area context from hidden doc-title
+        doc_title = soup.find('div', {'id': 'doc-title'})
+        area_number = None
+        dungeon_name = None
+        if doc_title:
+            # Extract area number from "Cave area #22 in Caverns of the Infernal Lich"
+            area_match = re.search(r'area #(\d+)', doc_title.text)
+            area_number = int(area_match.group(1)) if area_match else None
+            
+            # Extract dungeon name
+            if ' in ' in doc_title.text:
+                dungeon_name = doc_title.text.split(' in ', 1)[1].strip()
+            
+        # Extract map coordinates from map-coords anchor
+        map_coords = soup.find('a', class_='map-coords')
+        map_hex_id = map_coords.get('hex') if map_coords else None
+        map_x = float(map_coords.get('x', 0)) if map_coords and map_coords.get('x') else None
+        map_y = float(map_coords.get('y', 0)) if map_coords and map_coords.get('y') else None
+        
+        # Extract UUIDs from various link patterns
+        dungeon_uuid = cls._extract_uuid_from_links(soup, '/location/')
+        connected_area_uuids = cls._extract_area_connections(soup)
+        monster_uuids = cls._extract_monster_references(soup)
+        treasure_uuids = cls._extract_treasure_references(soup)
+        quest_item_uuids = cls._extract_quest_item_references(soup)
+        
+        return cls(
+            entity_uuid=entity_uuid,
+            area_number=area_number,
+            dungeon_name=dungeon_name,
+            map_hex_id=map_hex_id,
+            map_x=map_x,
+            map_y=map_y,
+            dungeon_uuid=dungeon_uuid,
+            connected_area_uuids=connected_area_uuids,
+            monster_uuids=monster_uuids,
+            treasure_uuids=treasure_uuids,
+            quest_item_uuids=quest_item_uuids
+        )
+        
+    @classmethod
+    def _extract_area_connections(cls, soup: BeautifulSoup) -> list[str]:
+        """Extract connected area references."""
+        # This would need specific implementation based on actual area connection patterns
+        connections = []
+        area_refs = soup.find_all(text=re.compile(r'Area #\d+'))
+        for ref in area_refs:
+            match = re.search(r'Area #(\d+)', str(ref))
+            if match:
+                connections.append(f"area_{match.group(1)}")
+        return list(set(connections))  # Remove duplicates
+        
+    @classmethod
+    def _extract_monster_references(cls, soup: BeautifulSoup) -> list[str]:
+        """Extract monster UUIDs from stat blocks and encounters."""
+        monster_uuids = []
+        # Look for monster stat blocks and encounter references
+        stat_blocks = soup.find_all('div', class_='monster-block')
+        for block in stat_blocks:
+            block_id = block.get('id')
+            if block_id and block_id.startswith('block-'):
+                monster_uuids.append(block_id.replace('block-', ''))
+        return monster_uuids
+        
+    @classmethod
+    def _extract_treasure_references(cls, soup: BeautifulSoup) -> list[str]:
+        """Extract treasure item UUIDs."""
+        # This would extract specific treasure item references
+        return []
+        
+    @classmethod
+    def _extract_quest_item_references(cls, soup: BeautifulSoup) -> list[str]:
+        """Extract quest item UUIDs."""
+        # This would extract quest-related item references
+        return []
+        
+    @classmethod
+    def extract_uuid_connections(cls) -> dict[str, str]:
+        """Return mapping of UUID fields to their entity types."""
+        return {
+            "entity_uuid": "dungeon_area",
+            "dungeon_uuid": "dungeon",
+            "connected_area_uuids": "dungeon_area",
+            "monster_uuids": "monster",
+            "treasure_uuids": "treasure",
+            "quest_item_uuids": "quest_item"
+        }
+```
+
+**Focus**: Extract ALL spatial coordinates, UUID connections, encounters, and treasure data systematically for perfect container integration.

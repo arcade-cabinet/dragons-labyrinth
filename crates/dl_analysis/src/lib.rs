@@ -1,31 +1,21 @@
 //! Analysis crate for Dragon's Labyrinth
 //! 
 //! This crate provides sophisticated HBF analysis matching the Python system:
-//! - 70,801+ entity processing with intelligent clustering
-//! - 3-phase AI pipeline (individual → dungeon containers → region containers)
+//! - SQLite entity extraction from HBF database
+//! - Entity categorization and clustering  
+//! - AI-powered analysis using OpenAI structured outputs
 //! - Spatial coordinate extraction (hex patterns like "W2S51")
-//! - UUID relationship mapping with edge typing
-//! - Template-based AI model generation
-//! - Structured outputs with field specifications
+//! - UUID relationship mapping
+//! - Analysis reporting and statistics
 
-pub mod base;
-pub mod build_api;
 pub mod clusters;
-pub mod containers;
-pub mod dungeons;
-pub mod entities;
-pub mod factions;
 pub mod orchestration;
 pub mod raw;
-pub mod regions;
-pub mod results;
-pub mod settlements;
-pub mod seeds;
-pub mod templates;
 pub mod reporting;
+pub mod results;
+pub mod seeds;
 
-// Re-export key types for external usage
-pub use base::{HexKey, MapCoord, EdgeType, FieldSpec, EntitySpec, Inventory};
+// Re-export key types for external usage  
 pub use orchestration::RawEntities;
 pub use results::{GenerationResults, ModelConnections, AnalysisSummary};
 

@@ -1,0 +1,138 @@
+use bevy::prelude::*;
+
+#[derive(Component, Debug, Clone)]
+pub struct Dungeon {
+    pub name: String,
+    pub dungeon_type: DungeonType,
+    pub threat_level: u32,
+    pub estimated_rooms: u32,
+    pub complexity_level: ComplexityLevel,
+    pub navigation_difficulty: NavigationDifficulty,
+    pub corruption_influence: u32,
+    pub exploration_difficulty: ExplorationDifficulty,
+    pub threat_density: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum DungeonType {
+    Crypt,
+    Cave,
+    Temple,
+    Lair,
+    Hideout,
+    Pit,
+    Generic,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ComplexityLevel {
+    Simple,
+    Moderate,
+    Complex,
+    VeryComplex,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum NavigationDifficulty {
+    Trivial,
+    Easy,
+    Moderate,
+    Hard,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExplorationDifficulty {
+    Trivial,
+    Easy,
+    Moderate,
+    Hard,
+    Extreme,
+    Nightmare,
+}
+
+impl Dungeon {
+    {% for dungeon in dungeons -%}
+    pub fn {{ dungeon.rust_name }}() -> Self {
+        Dungeon {
+            name: "{{ dungeon.name }}".to_string(),
+            dungeon_type: DungeonType::{{ dungeon.dungeon_type_rust }},
+            threat_level: {{ dungeon.threat_level }},
+            estimated_rooms: {{ dungeon.estimated_rooms }},
+            complexity_level: ComplexityLevel::{{ dungeon.complexity_rust }},
+            navigation_difficulty: NavigationDifficulty::{{ dungeon.navigation_rust }},
+            corruption_influence: {{ dungeon.corruption_influence }},
+            exploration_difficulty: ExplorationDifficulty::{{ dungeon.exploration_rust }},
+            threat_density: {{ dungeon.threat_density }},
+        }
+    }
+    {% endfor %}
+}
+
+// Dungeon-specific systems
+pub fn spawn_dungeons(mut commands: Commands) {
+    {% for dungeon in dungeons -%}
+    commands.spawn((
+        Dungeon::{{ dungeon.rust_name }}(),
+        HexTile { 
+            q: {{ dungeon.hex_q }}, 
+            r: {{ dungeon.hex_r }}, 
+            biome: "{{ dungeon.biome }}".to_string(), 
+            distance_band: "{{ dungeon.distance_band }}".to_string() 
+        },
+    ));
+    {% endfor %}
+}
+
+pub fn update_dungeon_threat_levels(
+    mut dungeons: Query<&mut Dungeon>,
+    player_distance: Res<PlayerDistance>,
+) {
+    for mut dungeon in dungeons.iter_mut() {
+        // Dungeons become more dangerous as player moves toward dragon
+        let distance_multiplier = player_distance.threat_multiplier();
+        let base_threat = dungeon.threat_level;
+        
+        // Apply distance-based threat scaling
+        if distance_multiplier > 1.0 {
+            // Dungeon threat increases with corruption levels
+        }
+    }
+}
+
+pub fn generate_dungeon_encounters(
+    dungeons: Query<&Dungeon>,
+    mut encounter_events: EventWriter<EncounterSpawnEvent>,
+) {
+    for dungeon in dungeons.iter() {
+        // Generate encounters based on dungeon characteristics
+        let encounter_rate = dungeon.threat_density * dungeon.threat_level as f32;
+        
+        if encounter_rate > 5.0 {
+            encounter_events.send(EncounterSpawnEvent {
+                dungeon_name: dungeon.name.clone(),
+                threat_level: dungeon.threat_level,
+                encounter_type: match dungeon.dungeon_type {
+                    DungeonType::Crypt => EncounterType::Undead,
+                    DungeonType::Temple => EncounterType::Cultist,
+                    DungeonType::Lair => EncounterType::Beast,
+                    _ => EncounterType::Generic,
+                },
+            });
+        }
+    }
+}
+
+#[derive(Event)]
+pub struct EncounterSpawnEvent {
+    pub dungeon_name: String,
+    pub threat_level: u32,
+    pub encounter_type: EncounterType,
+}
+
+#[derive(Debug, Clone)]
+pub enum EncounterType {
+    Undead,
+    Cultist,
+    Beast,
+    Generic,
+}
