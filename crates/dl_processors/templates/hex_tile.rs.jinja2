@@ -1,0 +1,31 @@
+//! Hex tile {{ index }} at position ({{ q }}, {{ r }})
+//! Biome: {{ biome }}
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Spawn this hex tile with spatial container integration
+pub fn spawn_hex_tile_with_container(
+    mut commands: Commands,
+    container: &mut SpatialContainer,
+) -> Entity {
+    let entity = commands.spawn((
+        HexPosition { q: {{ q }}, r: {{ r }} },
+        HexBiome::{{ biome_variant }},
+        HexId("{{ hex_uuid }}".to_string()),
+        BiomeFeatures::default(),
+    )).id();
+    
+    // Register in spatial container for O(1) lookups
+    container.register_hex_entity(({{ q }}, {{ r }}), entity);
+    
+    entity
+}
+
+/// Static hex data for container queries
+pub const HEX_STATIC_DATA: HexStaticData = HexStaticData {
+    uuid: "{{ hex_uuid }}",
+    q: {{ q }},
+    r: {{ r }},
+    biome: "{{ biome }}",
+};

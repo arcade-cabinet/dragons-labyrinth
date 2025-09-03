@@ -43,4 +43,5 @@ wasm-bindgen-futures = "0.4"
 
 [build-dependencies]
 dl_processors = { path = "../../crates/dl_processors" }
+dl_analysis = { path = "../../crates/dl_analysis" }
 anyhow = { workspace = true }

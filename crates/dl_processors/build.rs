@@ -1,5 +1,5 @@
 use anyhow::Result;
-use dl_analysis::{orchestration::RawEntities, results::GenerationResults};
+use dl_analysis::{orchestration::RawEntities, results::AnalysisSummary};
 use std::env;
 use std::fs;
 use std::path::PathBuf;
@@ -14,11 +14,19 @@ fn main() -> Result<()> {
     // Phase 1: Run dl_analysis orchestration system
     // This generates all raw HTML/JSON files + AI-generated models
     println!("cargo:warning=Running dl_analysis orchestration...");
-    let orchestrator = RawEntities::new();
-    let results = orchestrator.run_full_analysis()?;
+    let mut orchestrator = RawEntities::new();
     
-    println!("cargo:warning=Analysis complete - processed {} entities", 
-             results.summary.total_entities);
+    // Create necessary directories
+    let analysis_dir = dl_analysis::analysis_dir();
+    let models_dir = dl_analysis::models_dir();
+    std::fs::create_dir_all(&analysis_dir)?;
+    std::fs::create_dir_all(&models_dir)?;
+    
+    let mut logger = std::io::stdout();
+    let results = orchestrator.run_complete_analysis(&analysis_dir, &models_dir, &mut logger)?;
+    
+    println!("cargo:warning=Analysis complete - processed {} total entities", 
+             results.total_entities);
     
     // Phase 2: Load generated models and container data
     let analysis_dir = dl_analysis::analysis_dir();
@@ -52,16 +60,16 @@ fn main() -> Result<()> {
 
 /// Process generated AI models into ECS resource code
 fn process_generated_models(
-    results: &GenerationResults,
+    _results: &AnalysisSummary,
     json_dir: &PathBuf,
     models_dir: &PathBuf,
     out_dir: &PathBuf,
 ) -> Result<()> {
     // Load generated Rust models (these replace the old static structs)
     let regions_model_path = models_dir.join("regions.rs");
-    let dungeons_model_path = models_dir.join("dungeons.rs"); 
-    let settlements_model_path = models_dir.join("settlements.rs");
-    let factions_model_path = models_dir.join("factions.rs");
+    let _dungeons_model_path = models_dir.join("dungeons.rs"); 
+    let _settlements_model_path = models_dir.join("settlements.rs");
+    let _factions_model_path = models_dir.join("factions.rs");
     
     // Copy generated model files to our output
     if regions_model_path.exists() {
@@ -117,7 +125,7 @@ fn process_single_region(json_path: &PathBuf, regions_dir: &PathBuf) -> Result<(
         .and_then(|v| v.as_str())
         .unwrap_or("Unnamed Region");
     
-    let sanitized_uuid = sanitize_uuid(uuid);
+    let sanitized_uuid = dl_analysis::templates::sanitize_uuid(uuid);
     let region_dir = regions_dir.join(&sanitized_uuid);
     fs::create_dir_all(&region_dir)?;
     
@@ -136,151 +144,30 @@ fn process_single_region(json_path: &PathBuf, regions_dir: &PathBuf) -> Result<(
     Ok(())
 }
 
-/// Generate ECS resource code for a region using container-based spatial processing
+/// Generate ECS resource code for a region using upstream template functionality
 fn generate_region_ecs_code(uuid: &str, name: &str, json_data: &serde_json::Value) -> String {
-    let sanitized_name = sanitize_ident(name);
-    
     // Extract spatial data for container processing
     let corruption_level = json_data.get("corruption_level")
         .and_then(|v| v.as_f64())
         .unwrap_or(0.0);
     
-    format!(r#"//! Region: {}
-//! UUID: {}
-//! Generated ECS resources with container-based spatial processing
-
-use bevy::prelude::*;
-use crate::components::*;
-
-/// Region resource component
-#[derive(Resource, Debug, Clone)]
-pub struct {}Region {{
-    pub uuid: String,
-    pub name: String, 
-    pub corruption_level: f32,
-    pub hex_tiles: Vec<Entity>,
-    pub settlements: Vec<Entity>,
-    pub dungeons: Vec<Entity>,
-}}
-
-impl Default for {}Region {{
-    fn default() -> Self {{
-        Self {{
-            uuid: "{}".to_string(),
-            name: "{}".to_string(),
-            corruption_level: {:.2},
-            hex_tiles: Vec::new(),
-            settlements: Vec::new(),
-            dungeons: Vec::new(),
-        }}
-    }}
-}}
-
-/// Spawn this region using container-based spatial indexing
-pub fn spawn_region_with_containers(
-    mut commands: Commands,
-    mut region_resource: ResMut<{}Region>,
-) {{
-    // Create region entity with spatial container component
-    let region_entity = commands.spawn((
-        RegionId("{}".to_string()),
-        RegionName("{}".to_string()),
-        CorruptionLevel({:.2}),
-        SpatialContainer::new(),
-    )).id();
-    
-    // TODO: Load hex tiles using container system for O(1) lookups
-    // TODO: Process settlements with spatial relationships
-    // TODO: Process dungeons with container-based pathfinding
-    
-    println!("Spawned region: {} (UUID: {})", "{}", "{}");
-}}
-
-/// Get static metadata for this region
-pub const REGION_METADATA: RegionMetadata = RegionMetadata {{
-    uuid: "{}",
-    name: "{}",
-    base_corruption: {:.2},
-}};
-"#, 
-        name, uuid,
-        sanitized_name,
-        sanitized_name,
-        uuid, name, corruption_level,
-        sanitized_name,
-        uuid, name, corruption_level,
-        name, uuid, uuid,
-        uuid, name, corruption_level
-    )
+    // Use upstream template generation from dl_analysis
+    dl_analysis::templates::ecs_generation::generate_region_ecs_code(uuid, name, corruption_level)
 }
 
-/// Generate ECS code for hex tiles with spatial container integration
+/// Generate ECS code for hex tiles using upstream template functionality
 fn generate_hex_tile_ecs_code(hex_data: &serde_json::Value, index: usize) -> String {
     let q = hex_data.get("q").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let r = hex_data.get("r").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let biome = hex_data.get("biome").and_then(|v| v.as_str()).unwrap_or("Unknown");
     let hex_uuid = hex_data.get("uuid").and_then(|v| v.as_str()).unwrap_or("unknown");
     
-    let biome_variant = match biome.to_lowercase().as_str() {
-        "wet meadow" => "WetMeadow",
-        "ashen forest" => "AshenForest", 
-        "flooded village" => "FloodedVillage",
-        "black swamp" => "BlackSwamp",
-        "fungal cathedral" => "FungalCathedral",
-        "shadowed fen" => "ShadowedFen",
-        "rust plains" => "RustPlains",
-        "hollow hills" => "HollowHills",
-        "corroded battleground" => "CorrodedBattleground",
-        "famine fields" => "FamineFields",
-        "bone forest" => "BoneForest",
-        "desolate expanse" => "DesolateExpanse",
-        "dragon scar" => "DragonScar",
-        "abyssal chasm" => "AbyssalChasm",
-        "final dread terrain" => "FinalDreadTerrain",
-        _ => "WetMeadow", // fallback
-    };
-    
-    format!(r#"//! Hex tile {} at position ({}, {})
-//! Biome: {}
-
-use bevy::prelude::*;
-use crate::components::*;
-
-/// Spawn this hex tile with spatial container integration
-pub fn spawn_hex_tile_with_container(
-    mut commands: Commands,
-    container: &mut SpatialContainer,
-) -> Entity {{
-    let entity = commands.spawn((
-        HexPosition {{ q: {}, r: {} }},
-        HexBiome::{},
-        HexId("{}".to_string()),
-        BiomeFeatures::default(),
-    )).id();
-    
-    // Register in spatial container for O(1) lookups
-    container.register_hex_entity(({}, {}), entity);
-    
-    entity
-}}
-
-/// Static hex data for container queries
-pub const HEX_STATIC_DATA: HexStaticData = HexStaticData {{
-    uuid: "{}",
-    q: {},
-    r: {},
-    biome: "{}",
-}};
-"#,
-        index, q, r, biome,
-        q, r, biome_variant, hex_uuid,
-        q, r,
-        hex_uuid, q, r, biome
-    )
+    // Use upstream template generation from dl_analysis
+    dl_analysis::templates::ecs_generation::generate_hex_tile_ecs_code(index, q, r, biome, hex_uuid)
 }
 
 /// Process dungeon entities (placeholder for now)
-fn process_dungeon_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+fn process_dungeon_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     // TODO: Implement dungeon processing with DungeonContainer spatial indexing
     let dungeons_dir = out_dir.join("dungeons");
     
@@ -302,7 +189,7 @@ pub fn spawn_all_dungeons(commands: &mut Commands) {
 }
 
 /// Process settlement entities (placeholder for now)
-fn process_settlement_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+fn process_settlement_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     // TODO: Implement settlement processing with generated models
     let settlements_dir = out_dir.join("settlements");
     
@@ -322,7 +209,7 @@ pub fn spawn_all_settlements(commands: &mut Commands) {
 }
 
 /// Process faction entities (placeholder for now)
-fn process_faction_entities(json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
+fn process_faction_entities(_json_dir: &PathBuf, out_dir: &PathBuf) -> Result<()> {
     // TODO: Implement faction processing
     let factions_dir = out_dir.join("factions");
     
@@ -342,7 +229,7 @@ pub fn spawn_all_factions(commands: &mut Commands) {
 }
 
 /// Generate spatial container resources using dl_analysis container system
-fn generate_container_resources(results: &GenerationResults, out_dir: &PathBuf) -> Result<()> {
+fn generate_container_resources(results: &dl_analysis::results::AnalysisSummary, out_dir: &PathBuf) -> Result<()> {
     let container_code = format!(r#"//! Container-based spatial processing resources
 //! Generated from {} entities
 
@@ -392,14 +279,12 @@ pub struct AnalysisMetadata {{
 
 pub const ANALYSIS_METADATA: AnalysisMetadata = AnalysisMetadata {{
     total_entities: {},
-    regions_processed: {},
-    dungeons_processed: {},
+    regions_processed: 0,
+    dungeons_processed: 0,
 }};
 "#,
-        results.summary.total_entities,
-        results.summary.total_entities,
-        results.summary.regions_processed,
-        results.summary.dungeons_processed,
+        results.total_entities,
+        results.total_entities,
     );
     
     fs::write(out_dir.join("containers.rs"), container_code)?;

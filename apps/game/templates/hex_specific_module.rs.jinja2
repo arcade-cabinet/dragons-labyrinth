@@ -1,0 +1,140 @@
+//! Hex tile ({{ q }}, {{ r }}) with all correlated data baked in
+//! Region: {{ region_uuid }}
+//! Hex UUID: {{ hex_uuid }}
+//! Generated with spatial container correlations
+
+use bevy::prelude::*;
+use crate::components::*;
+use crate::spatial::*;
+
+/// Complete hex tile data with all correlations
+#[derive(Resource, Debug, Clone)]
+pub struct {{ sanitized_hex }}HexTile {
+    pub coords: (i32, i32),
+    pub region_uuid: String,
+    pub hex_uuid: String,
+    pub entities: Vec<String>,
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub nearby_dungeons: Vec<String>,
+}
+
+impl Default for {{ sanitized_hex }}HexTile {
+    fn default() -> Self {
+        Self {
+            coords: ({{ q }}, {{ r }}),
+            region_uuid: "{{ region_uuid }}".to_string(),
+            hex_uuid: "{{ hex_uuid }}".to_string(),
+            entities: vec![{% for entity in hex_entities %}"{{ entity }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            settlements: vec![{% for settlement in settlements %}"{{ settlement }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            factions: vec![{% for faction in factions %}"{{ faction }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            npcs: vec![{% for npc in npcs %}"{{ npc }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            nearby_dungeons: vec![{% for dungeon in nearby_dungeons %}"{{ dungeon }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+        }
+    }
+}
+
+/// Spawn this hex tile with all correlated entities
+pub fn spawn_{{ sanitized_hex_lower }}_hex_with_correlations(
+    mut commands: Commands,
+    mut spatial_container: ResMut<SpatialContainer>,
+) -> Entity {
+    // Create main hex tile entity
+    let hex_entity = commands.spawn((
+        HexPosition { q: {{ q }}, r: {{ r }} },
+        HexId("{{ hex_uuid }}".to_string()),
+        RegionId("{{ region_uuid }}".to_string()),
+        HexCorrelations {
+            settlements: vec![{% for settlement in settlements %}"{{ settlement }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+            factions: vec![{% for faction in factions %}"{{ faction }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}], 
+            npcs: vec![{% for npc in npcs %}"{{ npc }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+            nearby_dungeons: vec![{% for dungeon in nearby_dungeons %}"{{ dungeon }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+        },
+    )).id();
+    
+    // Register in spatial container for O(1) lookups
+    spatial_container.register_hex_entity(({{ q }}, {{ r }}), hex_entity);
+    
+    {% if settlements %}
+    // Spawn correlated settlements at this hex
+    {% for settlement in settlements %}
+    spawn_settlement_at_hex("{{ settlement }}", hex_entity, &mut commands);
+    {% endfor %}
+    {% else %}
+    // No settlements at this hex
+    {% endif %}
+    
+    {% if factions %}
+    // Spawn faction representatives at this hex
+    {% for faction in factions %}
+    spawn_faction_presence("{{ faction }}", hex_entity, &mut commands);
+    {% endfor %}
+    {% else %}
+    // No faction presence at this hex
+    {% endif %}
+    
+    {% if npcs %}
+    // Spawn NPCs at this hex  
+    {% for npc in npcs %}
+    spawn_npc_at_hex("{{ npc }}", hex_entity, &mut commands);
+    {% endfor %}
+    {% else %}
+    // No NPCs at this hex
+    {% endif %}
+    
+    {% if nearby_dungeons %}
+    // Create dungeon entrance markers for nearby dungeons
+    {% for dungeon in nearby_dungeons %}
+    create_dungeon_entrance_marker("{{ dungeon }}", hex_entity, &mut commands);
+    {% endfor %}
+    {% else %}
+    // No nearby dungeons
+    {% endif %}
+    
+    println!("Spawned hex ({}, {}) with {} entities, {} settlements, {} factions, {} NPCs, {} nearby dungeons",
+             {{ q }}, {{ r }}, {{ hex_entities|length }}, {{ settlements|length }}, {{ factions|length }}, {{ npcs|length }}, {{ nearby_dungeons|length }});
+    
+    hex_entity
+}
+
+/// Get static hex metadata for queries
+pub const HEX_{{ sanitized_hex_upper }}_METADATA: HexMetadata = HexMetadata {
+    coords: ({{ q }}, {{ r }}),
+    region_uuid: "{{ region_uuid }}",
+    hex_uuid: "{{ hex_uuid }}",
+    entity_count: {{ hex_entities|length }},
+    settlement_count: {{ settlements|length }},
+    faction_count: {{ factions|length }},
+    npc_count: {{ npcs|length }},
+    dungeon_count: {{ nearby_dungeons|length }},
+};
+
+/// Container-based queries for this hex
+pub fn query_{{ sanitized_hex_lower }}_entities(
+    spatial_container: &SpatialContainer,
+) -> Vec<Entity> {
+    spatial_container.get_entities_at_hex(({{ q }}, {{ r }}))
+}
+
+// === Helper Functions ===
+
+/// Spawn settlement at this hex
+fn spawn_settlement_at_hex(settlement_uuid: &str, hex_entity: Entity, commands: &mut Commands) {
+    // TODO: Implement settlement spawning with generated models
+}
+
+/// Spawn faction presence at this hex  
+fn spawn_faction_presence(faction_uuid: &str, hex_entity: Entity, commands: &mut Commands) {
+    // TODO: Implement faction presence with territorial data
+}
+
+/// Spawn NPC at this hex
+fn spawn_npc_at_hex(npc_uuid: &str, hex_entity: Entity, commands: &mut Commands) {
+    // TODO: Implement NPC spawning with relationship data
+}
+
+/// Create dungeon entrance marker
+fn create_dungeon_entrance_marker(dungeon_uuid: &str, hex_entity: Entity, commands: &mut Commands) {
+    // TODO: Implement dungeon entrance markers with pathfinding
+}

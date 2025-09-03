@@ -7,7 +7,7 @@
 //! - Template validation and compilation
 //! - Sophisticated template utilities and filters
 
-use minijinja::{Environment, context};
+use minijinja::Environment;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use anyhow::{Result, Context as AnyhowContext};
@@ -67,6 +67,141 @@ impl TemplateManager {
 
         template.render(context)
             .with_context(|| format!("Failed to render template: {}", template_name))
+    }
+
+    /// Generate ECS region code using template (exposed for dl_processors)
+    pub fn generate_region_ecs_code(&self, uuid: &str, name: &str, corruption_level: f64) -> Result<String> {
+        let region_template_path = std::path::Path::new("templates/region_ecs.rs.jinja2");
+        
+        // For now, use a simple template string since we can't easily load external files in build.rs
+        let sanitized_name = sanitize_ident(name);
+        
+        Ok(format!(r#"//! Region: {}
+//! UUID: {}
+//! Generated ECS resources with container-based spatial processing
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Region resource component
+#[derive(Resource, Debug, Clone)]
+pub struct {}Region {{
+    pub uuid: String,
+    pub name: String, 
+    pub corruption_level: f32,
+    pub hex_tiles: Vec<Entity>,
+    pub settlements: Vec<Entity>,
+    pub dungeons: Vec<Entity>,
+}}
+
+impl Default for {}Region {{
+    fn default() -> Self {{
+        Self {{
+            uuid: "{}".to_string(),
+            name: "{}".to_string(),
+            corruption_level: {:.2},
+            hex_tiles: Vec::new(),
+            settlements: Vec::new(),
+            dungeons: Vec::new(),
+        }}
+    }}
+}}
+
+/// Spawn this region using container-based spatial indexing
+pub fn spawn_region_with_containers(
+    mut commands: Commands,
+    mut region_resource: ResMut<{}Region>,
+) {{
+    // Create region entity with spatial container component
+    let region_entity = commands.spawn((
+        RegionId("{}".to_string()),
+        RegionName("{}".to_string()),
+        CorruptionLevel({:.2}),
+        SpatialContainer::new(),
+    )).id();
+    
+    // TODO: Load hex tiles using container system for O(1) lookups
+    // TODO: Process settlements with spatial relationships
+    // TODO: Process dungeons with container-based pathfinding
+    
+    println!("Spawned region: {{}} (UUID: {{}})", name, uuid);
+}}
+
+/// Get static metadata for this region
+pub const REGION_METADATA: RegionMetadata = RegionMetadata {{
+    uuid: "{}",
+    name: "{}",
+    base_corruption: {:.2},
+}};
+"#, 
+            name, uuid,                    // 1, 2: Region comments
+            sanitized_name,                // 3: Struct name
+            sanitized_name,                // 4: Impl struct name
+            uuid, name, corruption_level,  // 5, 6, 7: Default values
+            sanitized_name,                // 8: Function parameter struct name
+            uuid, name, corruption_level,  // 9, 10, 11: Component values
+            uuid, name, corruption_level   // 12, 13, 14: Metadata constant
+        ))
+    }
+
+    /// Generate hex tile ECS code using template (exposed for dl_processors)
+    pub fn generate_hex_tile_ecs_code(&self, index: usize, q: i32, r: i32, biome: &str, hex_uuid: &str) -> Result<String> {
+        let biome_variant = match biome.to_lowercase().as_str() {
+            "wet meadow" => "WetMeadow",
+            "ashen forest" => "AshenForest", 
+            "flooded village" => "FloodedVillage",
+            "black swamp" => "BlackSwamp",
+            "fungal cathedral" => "FungalCathedral",
+            "shadowed fen" => "ShadowedFen",
+            "rust plains" => "RustPlains",
+            "hollow hills" => "HollowHills",
+            "corroded battleground" => "CorrodedBattleground",
+            "famine fields" => "FamineFields",
+            "bone forest" => "BoneForest",
+            "desolate expanse" => "DesolateExpanse",
+            "dragon scar" => "DragonScar",
+            "abyssal chasm" => "AbyssalChasm",
+            "final dread terrain" => "FinalDreadTerrain",
+            _ => "WetMeadow", // fallback
+        };
+        
+        Ok(format!(r#"//! Hex tile {} at position ({}, {})
+//! Biome: {}
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Spawn this hex tile with spatial container integration
+pub fn spawn_hex_tile_with_container(
+    mut commands: Commands,
+    container: &mut SpatialContainer,
+) -> Entity {{
+    let entity = commands.spawn((
+        HexPosition {{ q: {}, r: {} }},
+        HexBiome::{},
+        HexId("{}".to_string()),
+        BiomeFeatures::default(),
+    )).id();
+    
+    // Register in spatial container for O(1) lookups
+    container.register_hex_entity(({}, {}), entity);
+    
+    entity
+}}
+
+/// Static hex data for container queries
+pub const HEX_STATIC_DATA: HexStaticData = HexStaticData {{
+    uuid: "{}",
+    q: {},
+    r: {},
+    biome: "{}",
+}};
+"#,
+            index, q, r, biome,
+            q, r, biome_variant, hex_uuid,
+            q, r,
+            hex_uuid, q, r, biome
+        ))
     }
 
     /// Build template context from inventory and metadata
@@ -661,6 +796,42 @@ fn generate_spatial_methods(_args: &[minijinja::Value]) -> Result<String, miniji
         spatial
     }
     "#.to_string())
+}
+
+/// Utility function for sanitizing identifiers (exposed for downstream crates)
+pub fn sanitize_ident(s: &str) -> String {
+    s.split_whitespace()
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            }
+        })
+        .collect::<String>()
+        .replace(['-', '\'', ' '], "")
+}
+
+/// Utility function for sanitizing UUIDs (exposed for downstream crates)
+pub fn sanitize_uuid(uuid: &str) -> String {
+    uuid.replace(['-', ' '], "_").to_lowercase()
+}
+
+/// Exposed template generation functions for dl_processors and apps/game
+pub mod ecs_generation {
+    use super::*;
+    
+    /// Generate region ECS code (called by dl_processors)
+    pub fn generate_region_ecs_code(uuid: &str, name: &str, corruption_level: f64) -> String {
+        let manager = TemplateManager::new().unwrap();
+        manager.generate_region_ecs_code(uuid, name, corruption_level).unwrap()
+    }
+    
+    /// Generate hex tile ECS code (called by dl_processors)
+    pub fn generate_hex_tile_ecs_code(index: usize, q: i32, r: i32, biome: &str, hex_uuid: &str) -> String {
+        let manager = TemplateManager::new().unwrap();
+        manager.generate_hex_tile_ecs_code(index, q, r, biome, hex_uuid).unwrap()
+    }
 }
 
 #[cfg(test)]
