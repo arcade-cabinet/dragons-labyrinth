@@ -11,7 +11,7 @@ use crate::spatial::SpatialContainer;
 include!(concat!(env!("OUT_DIR"), "/generated_world.rs"));
 
 /// Entity set at a hex coordinate from generated resources
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct HexEntitySet {
     pub settlements: Vec<String>,
     pub factions: Vec<String>,

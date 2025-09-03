@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use rand::{Rng, thread_rng};
+use bevy_rand::prelude::*;
 use crate::world::components::tiles::HexCoord;
-use crate::systems::regional_progression::EmotionalState;
+use crate::world::systems::regional_progression::EmotionalState;
 
 #[derive(Component, Debug)]
 pub struct PlayerStats {
@@ -186,9 +186,8 @@ pub fn check_forced_rest(
 pub fn generate_weather_for_region(
     emotional_state: &EmotionalState,
     corruption_level: f32,
+    rng: &mut ChaCha8Rng,
 ) -> WeatherSystem {
-    let mut rng = thread_rng();
-    
     let weather_types = match emotional_state {
         EmotionalState::Peace => vec![
             (WeatherType::Clear, 0.6),
@@ -216,7 +215,7 @@ pub fn generate_weather_for_region(
         ],
     };
     
-    let roll = rng.gen::<f32>();
+    let roll: f32 = rng.r#gen();
     let mut cumulative = 0.0;
     let mut selected_weather = WeatherType::Clear;
     
@@ -229,13 +228,13 @@ pub fn generate_weather_for_region(
     }
     
     let base_intensity = 0.2 + corruption_level * 0.6;
-    let intensity_variation = rng.gen::<f32>() * 0.4 - 0.2; // ±0.2
+    let intensity_variation: f32 = rng.r#gen::<f32>() * 0.4 - 0.2; // ±0.2
     let final_intensity = (base_intensity + intensity_variation).clamp(0.0, 1.0);
     
     WeatherSystem {
         current_weather: selected_weather,
         intensity: final_intensity,
-        temperature: rng.gen::<f32>() * 2.0 - 1.0, // -1.0 to 1.0
+        temperature: rng.r#gen::<f32>() * 2.0 - 1.0, // -1.0 to 1.0
         visibility: match selected_weather {
             WeatherType::Clear => 1.0,
             WeatherType::Rain => 0.8,

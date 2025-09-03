@@ -2,8 +2,7 @@ use bevy::prelude::*;
 use bevy::audio::*;
 use std::collections::HashMap;
 use serde_json::Value;
-use crate::world::resources::DreadLevel;
-use crate::world::resources::GameState;
+use crate::world::state::{DreadLevel, GameState};
 
 // Note: Audio assets are pre-generated during build time using FREESOUND_API_KEY
 // Runtime audio system only plays pre-bundled audio files - no API calls needed

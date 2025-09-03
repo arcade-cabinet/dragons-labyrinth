@@ -9,7 +9,6 @@ pub mod procedural_audio;
 pub mod regional_progression;
 pub mod pathfinding;
 pub mod rest_fatigue;
-pub mod character_creator;
 
 pub use hex_world::*;
 pub use player::*;
@@ -22,4 +21,3 @@ pub use procedural_audio::*;
 pub use regional_progression::*;
 pub use pathfinding::*;
 pub use rest_fatigue::*;
-pub use character_creator::*;

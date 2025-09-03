@@ -105,31 +105,27 @@ pub fn generate_dungeon_areas_from_data(
     Ok(())
 }
 
-/// Generate dialogue modules with Seeds data integration
+/// Generate dialogue modules with REQUIRED pre-analyzed Seeds data
 pub fn generate_dialogue_modules_from_data(
     env: &Environment,
     results: &dl_analysis::results::GenerationResults,
-    seeds_manager: &Option<dl_analysis::seeds::SeedsDataManager>,
+    analyzed_seeds: &crate::AnalyzedSeedsData,
     out_dir: &Path,
 ) -> Result<()> {
     let dialogue_resources_dir = out_dir.join("dialogue_resources");
     fs::create_dir_all(&dialogue_resources_dir)?;
     
-    // If we have Seeds data, generate advanced dialogue
-    if let Some(seeds) = seeds_manager {
-        generate_seeds_powered_dialogue(env, results, seeds, &dialogue_resources_dir)?;
-    } else {
-        generate_fallback_dialogue(env, results, &dialogue_resources_dir)?;
-    }
+    // Use pre-analyzed, pre-categorized seeds data - no analysis needed
+    generate_dialogue_from_analyzed_seeds(env, results, analyzed_seeds, &dialogue_resources_dir)?;
     
     Ok(())
 }
 
-/// Generate dialogue using AI-powered Seeds linguistic processing and templates
-fn generate_seeds_powered_dialogue(
+/// Generate dialogue using pre-analyzed Seeds data (no analysis, just processing)
+fn generate_dialogue_from_analyzed_seeds(
     env: &Environment,
     results: &dl_analysis::results::GenerationResults,
-    seeds: &dl_analysis::seeds::SeedsDataManager,
+    analyzed_seeds: &crate::AnalyzedSeedsData,
     dialogue_dir: &Path,
 ) -> Result<()> {
     let npc_template = env.get_template("npc_dialogue.rs.jinja2")?;
@@ -138,15 +134,15 @@ fn generate_seeds_powered_dialogue(
     let mut generated_npcs = Vec::new();
     let mut generated_quests = Vec::new();
     
-    // Check if we have OPENAI_API_KEY for AI generation
-    let use_ai_generation = std::env::var("OPENAI_API_KEY").is_ok();
+    // OPENAI_API_KEY is REQUIRED - fail fast if missing
+    let _openai_key = std::env::var("OPENAI_API_KEY")
+        .expect("OPENAI_API_KEY environment variable is required for dialogue generation. Set it before building.");
     
-    if use_ai_generation {
-        println!("Using OpenAI API for dialogue and quest generation...");
-        
-        // Create AI dialogue generator
-        let rt = tokio::runtime::Runtime::new()?;
-        let ai_generator = crate::ai_dialogue::AiDialogueGenerator::new()?;
+    println!("Using OpenAI API for dialogue and quest generation...");
+    
+    // Create AI dialogue generator
+    let rt = tokio::runtime::Runtime::new()?;
+    let ai_generator = crate::ai_dialogue::AiDialogueGenerator::new()?;
         
         // Generate dialogue for each region's NPCs
         for region in &results.entities.regions {
@@ -162,12 +158,12 @@ fn generate_seeds_powered_dialogue(
                 if let Some(settlement) = results.entities.settlements.iter()
                     .find(|s| &s.entity_uuid == settlement_uuid) {
                     
-                    let npc_name = generate_npc_name_from_seeds(seeds, act, corruption_level);
+                    let npc_name = generate_npc_name_from_analyzed_seeds(analyzed_seeds, act, corruption_level);
                     let npc_uuid = format!("npc_{}_{}", region.entity_uuid, settlement_uuid);
                     let archetype = select_archetype_for_corruption(corruption_level);
                     
-                    // Prepare seeds dialogue data
-                    let seeds_dialogue_data = prepare_seeds_dialogue_data(seeds);
+                    // Use pre-analyzed dialogue data (no processing needed)
+                    let seeds_dialogue_data = prepare_dialogue_data_from_analyzed_seeds(analyzed_seeds);
                     
                     // Create NPC dialogue context
                     let npc_context = crate::ai_dialogue::NpcDialogueContext {
@@ -191,7 +187,7 @@ fn generate_seeds_powered_dialogue(
                     // Generate quest if appropriate
                     let generated_quest = if should_npc_offer_quest(act, corruption_level) {
                         let dungeon_uuid = find_nearby_dungeon(region, &results.entities.dungeons);
-                        let seeds_quest_data = prepare_seeds_quest_data(seeds, act);
+                        let seeds_quest_data = prepare_quest_data_from_analyzed_seeds(analyzed_seeds, act);
                         
                         let quest_context = crate::ai_dialogue::QuestGenerationContext {
                             quest_id: format!("quest_{}_{}", region.entity_uuid, npc_uuid),
@@ -231,43 +227,13 @@ fn generate_seeds_powered_dialogue(
                 }
             }
         }
-    } else {
-        println!("OPENAI_API_KEY not set, using fallback dialogue generation...");
-        
-        // Fallback to basic name generation and template dialogue
-        for region in &results.entities.regions {
-            let region_dialogue_dir = dialogue_dir.join("regions").join(&crate::utilities::sanitize_name(&region.entity_uuid));
-            fs::create_dir_all(&region_dialogue_dir)?;
-            
-            let (act, band) = determine_act_band_from_region(region);
-            let corruption_level = calculate_corruption_level(act, band);
-            
-            for settlement_uuid in &region.settlement_uuids {
-                let npc_name = format!("Villager_{}", &settlement_uuid[..8]);
-                let npc_uuid = format!("npc_{}_{}", region.entity_uuid, settlement_uuid);
-                
-                let template_context = minijinja::context! {
-                    npc_uuid => npc_uuid,
-                    npc_name => npc_name,
-                    settlement_uuid => settlement_uuid,
-                    region_uuid => region.entity_uuid,
-                    fallback_mode => true,
-                };
-                
-                let npc_module = npc_template.render(&template_context)?;
-                fs::write(region_dialogue_dir.join(format!("{}.rs", crate::utilities::sanitize_name(&npc_uuid))), npc_module)?;
-                
-                generated_npcs.push(npc_uuid);
-            }
-        }
-    }
     
     // Generate main dialogue module
     let dialogue_context = minijinja::context! {
         regions => results.entities.regions,
         generated_npcs => generated_npcs,
         generated_quests => generated_quests,
-        seeds_powered => use_ai_generation,
+        seeds_powered => true,
     };
     
     let dialogue_module = dialogue_module_template.render(&dialogue_context)?;
@@ -278,27 +244,6 @@ fn generate_seeds_powered_dialogue(
     Ok(())
 }
 
-/// Generate basic fallback dialogue when Seeds data is not available
-fn generate_fallback_dialogue(
-    env: &Environment,
-    results: &dl_analysis::results::GenerationResults,
-    dialogue_dir: &Path,
-) -> Result<()> {
-    let dialogue_module_template = env.get_template("dialogue_module.rs.jinja2")?;
-    
-    // Create basic dialogue context
-    let dialogue_context = minijinja::context! {
-        regions => results.entities.regions,
-        generated_npcs => Vec::<String>::new(),
-        generated_quests => Vec::<String>::new(),
-        seeds_powered => false,
-    };
-    
-    let dialogue_module = dialogue_module_template.render(&dialogue_context)?;
-    fs::write(dialogue_dir.join("mod.rs"), dialogue_module)?;
-    
-    Ok(())
-}
 
 // Helper functions for dialogue generation
 
@@ -359,7 +304,7 @@ fn determine_quest_pattern_from_act(act: u8) -> String {
 
 // AI-powered dialogue generation helper functions
 
-fn generate_npc_name_from_seeds(_seeds: &dl_analysis::seeds::SeedsDataManager, act: u8, corruption_level: f32) -> String {
+fn generate_npc_name_from_analyzed_seeds(_analyzed_seeds: &crate::AnalyzedSeedsData, act: u8, corruption_level: f32) -> String {
     // Generate name based on corruption level
     let name_type = if corruption_level < 0.3 {
         "peaceful"
@@ -387,7 +332,7 @@ fn select_archetype_for_corruption(corruption_level: f32) -> String {
     }
 }
 
-fn prepare_seeds_dialogue_data(seeds: &dl_analysis::seeds::SeedsDataManager) -> crate::ai_dialogue::SeedsDialogueData {
+fn prepare_dialogue_data_from_analyzed_seeds(analyzed_seeds: &crate::AnalyzedSeedsData) -> crate::ai_dialogue::SeedsDialogueData {
     let mut linguistic_patterns = Vec::new();
     let mut old_norse_vocabulary = HashMap::new();
     let mut cultural_references = Vec::new();
@@ -469,7 +414,7 @@ fn find_nearby_dungeon(region: &dl_analysis::entities::RegionHexTile, dungeons: 
     dungeons.first().map(|d| d.entity_uuid.clone())
 }
 
-fn prepare_seeds_quest_data(_seeds: &dl_analysis::seeds::SeedsDataManager, act: u8) -> crate::ai_dialogue::SeedsQuestData {
+fn prepare_quest_data_from_analyzed_seeds(_analyzed_seeds: &crate::AnalyzedSeedsData, act: u8) -> crate::ai_dialogue::SeedsQuestData {
     let mut literature_patterns = Vec::new();
     let mut horror_beats = Vec::new();
     let mut poe_excerpts = Vec::new();

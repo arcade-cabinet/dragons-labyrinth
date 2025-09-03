@@ -9,6 +9,7 @@
 //! - Structured outputs with field specifications
 
 pub mod base;
+pub mod build_api;
 pub mod clusters;
 pub mod containers;
 pub mod dungeons;

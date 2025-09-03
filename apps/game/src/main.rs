@@ -1,4 +1,10 @@
 use bevy::prelude::*;
+
+mod game;
+mod spatial;
+mod utils;
+mod world;
+
 use game::run_app;
 
 fn main() {

@@ -30,6 +30,7 @@ tempfile = { workspace = true }
 minijinja = "2.12"
 chrono = { version = "0.4", features = ["serde"] }
 csv = "1.3"
+dl_seeds = { path = "../dl_seeds" }
 
 [build-dependencies]
 anyhow = { workspace = true }

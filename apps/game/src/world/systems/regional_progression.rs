@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use rand::{Rng, SeedableRng};
-use rand::rngs::StdRng;
+use bevy_rand::prelude::*;
 use std::collections::HashMap;
 use crate::world::components::tiles::{BiomeType, HexCoord};
 use crate::world::state::WorldState;
@@ -69,7 +68,7 @@ pub fn generate_dynamic_region(
     band: u32,
     seed: u64,
 ) -> RegionData {
-    let mut rng = StdRng::seed_from_u64(seed + band as u64);
+    let mut rng = ChaCha8Rng::seed_from_u64(seed + band as u64);
     
     let emotional_state = match band {
         1..=20 => EmotionalState::Peace,
@@ -93,7 +92,7 @@ pub fn generate_dynamic_region(
     }
 }
 
-fn generate_region_name(emotional_state: &EmotionalState, rng: &mut StdRng) -> String {
+fn generate_region_name(emotional_state: &EmotionalState, rng: &mut ChaCha8Rng) -> String {
     let prefixes = match emotional_state {
         EmotionalState::Peace => vec!["Green", "Golden", "Gentle", "Blessed", "Fair"],
         EmotionalState::Unease => vec!["Grey", "Troubled", "Restless", "Shadowed", "Weary"],
@@ -110,13 +109,13 @@ fn generate_region_name(emotional_state: &EmotionalState, rng: &mut StdRng) -> S
         EmotionalState::Void => vec!["Nothing", "Expanse", "Rift", "Absence", "Silence"],
     };
     
-    let prefix = prefixes[rng.gen_range(0..prefixes.len())];
-    let suffix = suffixes[rng.gen_range(0..suffixes.len())];
+    let prefix = prefixes[rng.r#gen_range(0..prefixes.len())];
+    let suffix = suffixes[rng.r#gen_range(0..suffixes.len())];
     
     format!("{} {}", prefix, suffix)
 }
 
-fn generate_biome_composition(emotional_state: &EmotionalState, rng: &mut StdRng) -> HashMap<BiomeType, f32> {
+fn generate_biome_composition(emotional_state: &EmotionalState, rng: &mut ChaCha8Rng) -> HashMap<BiomeType, f32> {
     let mut composition = HashMap::new();
     
     match emotional_state {
@@ -183,7 +182,7 @@ pub fn should_spawn_milestone(
     player_level: u32,
     distance_from_center: f32,
     region_data: &RegionData,
-    rng: &mut StdRng,
+    rng: &mut ChaCha8Rng,
 ) -> Option<MilestoneType> {
     let base_chance = region_data.milestone_density;
     let level_modifier = (player_level as f32 / 10.0).clamp(0.1, 2.0);
@@ -191,10 +190,10 @@ pub fn should_spawn_milestone(
     
     let spawn_chance = base_chance * level_modifier * distance_modifier;
     
-    if rng.gen::<f32>() < spawn_chance {
+    if rng.r#gen::<f32>() < spawn_chance {
         let milestone_types = get_available_milestones(&region_data.emotional_arc);
         if !milestone_types.is_empty() {
-            return Some(milestone_types[rng.gen_range(0..milestone_types.len())].clone());
+            return Some(milestone_types[rng.r#gen_range(0..milestone_types.len())].clone());
         }
     }
     

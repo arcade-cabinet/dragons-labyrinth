@@ -39,30 +39,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("cargo:warning=HBF database not found at {:?} - analysis will be skipped at runtime", hbf_path);
     }
     
-    // Initialize Seeds data sources using dl_seeds crate
-    println!("cargo:warning=Initializing Seeds data sources...");
-    match dl_seeds::SeedsManager::initialize(&seeds_cache_dir) {
-        Ok(seeds_manager) => {
+    // Initialize Seeds data using the build API
+    println!("cargo:warning=Initializing Seeds data via build API...");
+    match dl_seeds::build_api::provide_seeds_data_for_analysis(&seeds_cache_dir) {
+        Ok(seeds_data) => {
             println!("cargo:warning=Seeds data initialized successfully");
-            
-            // Report downloaded books
-            for book in seeds_manager.books.get_downloaded_books() {
-                println!("cargo:warning=  Book: {} ({} bytes from {})", 
-                         book.title, book.file_size, book.source);
-            }
-            
-            // Report linguistic data
-            println!("cargo:warning=  Old Norse dictionary loaded with {} entries", 
-                     seeds_manager.linguistics.old_norse_dictionary.len());
-            
-            // Report dialogue archetypes
-            println!("cargo:warning=  {} character archetypes loaded", 
-                     seeds_manager.dialogue.character_archetypes.len());
-            println!("cargo:warning=  {} trait templates loaded", 
-                     seeds_manager.dialogue.trait_templates.len());
+            println!("cargo:warning=  Books analyzed: {}", seeds_data.literature.total_books);
+            println!("cargo:warning=  Dictionary entries: {}", seeds_data.linguistics.dictionary_size);
+            println!("cargo:warning=  Character archetypes: {}", seeds_data.dialogue.archetypes_count);
         }
         Err(e) => {
-            println!("cargo:warning=Failed to initialize Seeds data: {}. Will retry at runtime.", e);
+            println!("cargo:warning=Failed to initialize Seeds data: {}. Build will continue.", e);
         }
     }
     
