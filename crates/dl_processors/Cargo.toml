@@ -20,7 +20,11 @@ ammonia = { workspace = true }
 bevy = "0.16.1"
 bevy_ecs_tilemap = "0.16"
 minijinja = { version = "2.12", features = ["loader"] }
+openai_dive = { workspace = true }
+tokio = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
 dl_analysis = { path = "../dl_analysis" }
+dl_seeds = { path = "../dl_seeds" }
 
 [build-dependencies]
 dl_analysis = { path = "../dl_analysis" }

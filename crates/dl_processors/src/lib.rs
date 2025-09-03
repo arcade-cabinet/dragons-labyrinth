@@ -10,10 +10,12 @@ use std::path::PathBuf;
 pub mod components;
 pub mod generators;
 pub mod utilities;
+pub mod ai_dialogue;
 
 // Re-export public API
 pub use components::*;
 pub use utilities::AreaData;
+pub use ai_dialogue::*;
 
 /// Get the path to the generated code
 pub fn generated_dir() -> PathBuf {
@@ -51,7 +53,7 @@ pub fn generate_world_resources(out_dir: &std::path::Path) -> Result<()> {
         .with_entities(utilities::create_sample_entities());
     
     // Load Seeds data for dialogue generation
-    let seeds_dir = std::path::Path::new(env!("DL_SEEDS_DIR"));
+    let seeds_dir = std::path::Path::new("cache/seeds");
     let seeds_manager = match dl_analysis::seeds::SeedsDataManager::load_from_cache(seeds_dir) {
         Ok(manager) => Some(manager),
         Err(e) => {

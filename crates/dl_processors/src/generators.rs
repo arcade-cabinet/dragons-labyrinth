@@ -125,89 +125,139 @@ pub fn generate_dialogue_modules_from_data(
     Ok(())
 }
 
-/// Generate dialogue using Seeds linguistic processing and templates
+/// Generate dialogue using AI-powered Seeds linguistic processing and templates
 fn generate_seeds_powered_dialogue(
     env: &Environment,
     results: &dl_analysis::results::GenerationResults,
     seeds: &dl_analysis::seeds::SeedsDataManager,
     dialogue_dir: &Path,
 ) -> Result<()> {
-    use dl_analysis::seeds::{NameGenerationContext, DialogueGenerationContext, QuestGenerationContext};
-    
     let npc_template = env.get_template("npc_dialogue.rs.jinja2")?;
     let dialogue_module_template = env.get_template("dialogue_module.rs.jinja2")?;
     
     let mut generated_npcs = Vec::new();
     let mut generated_quests = Vec::new();
     
-    // Generate dialogue for each region's NPCs
-    for region in &results.entities.regions {
-        let region_dialogue_dir = dialogue_dir.join("regions").join(&crate::utilities::sanitize_name(&region.entity_uuid));
-        fs::create_dir_all(&region_dialogue_dir)?;
+    // Check if we have OPENAI_API_KEY for AI generation
+    let use_ai_generation = std::env::var("OPENAI_API_KEY").is_ok();
+    
+    if use_ai_generation {
+        println!("Using OpenAI API for dialogue and quest generation...");
         
-        // Determine Act/Band from region corruption or UUID pattern
-        let (act, band) = determine_act_band_from_region(region);
-        let corruption_level = calculate_corruption_level(act, band);
+        // Create AI dialogue generator
+        let rt = tokio::runtime::Runtime::new()?;
+        let ai_generator = crate::ai_dialogue::AiDialogueGenerator::new()?;
         
-        // Generate NPCs for this region based on settlements
-        for settlement_uuid in &region.settlement_uuids {
-            if let Some(settlement) = results.entities.settlements.iter()
-                .find(|s| &s.entity_uuid == settlement_uuid) {
-                
-                // Generate NPC name using Seeds linguistic processing
-                let name_context = NameGenerationContext {
-                    region_type: determine_region_type_from_biome(region),
-                    act,
-                    band,
-                    corruption_level,
-                };
-                
-                let npc_name = seeds.generate_name("villager", &name_context);
+        // Generate dialogue for each region's NPCs
+        for region in &results.entities.regions {
+            let region_dialogue_dir = dialogue_dir.join("regions").join(&crate::utilities::sanitize_name(&region.entity_uuid));
+            fs::create_dir_all(&region_dialogue_dir)?;
+            
+            // Determine Act/Band from region corruption or UUID pattern
+            let (act, band) = determine_act_band_from_region(region);
+            let corruption_level = calculate_corruption_level(act, band);
+            
+            // Generate NPCs for this region based on settlements
+            for settlement_uuid in &region.settlement_uuids {
+                if let Some(settlement) = results.entities.settlements.iter()
+                    .find(|s| &s.entity_uuid == settlement_uuid) {
+                    
+                    let npc_name = generate_npc_name_from_seeds(seeds, act, corruption_level);
+                    let npc_uuid = format!("npc_{}_{}", region.entity_uuid, settlement_uuid);
+                    let archetype = select_archetype_for_corruption(corruption_level);
+                    
+                    // Prepare seeds dialogue data
+                    let seeds_dialogue_data = prepare_seeds_dialogue_data(seeds);
+                    
+                    // Create NPC dialogue context
+                    let npc_context = crate::ai_dialogue::NpcDialogueContext {
+                        npc_uuid: npc_uuid.clone(),
+                        npc_name: npc_name.clone(),
+                        region_uuid: region.entity_uuid.clone(),
+                        settlement_uuid: settlement_uuid.clone(),
+                        region_type: determine_region_type_from_biome(region),
+                        act,
+                        band,
+                        corruption_level,
+                        location_type: determine_location_type_from_settlement(settlement),
+                        archetype: archetype.clone(),
+                        personality_traits: get_archetype_traits(&archetype),
+                        speech_patterns: get_archetype_speech_patterns(&archetype),
+                    };
+                    
+                    // Generate dialogue using AI
+                    let generated_dialogue = rt.block_on(ai_generator.generate_npc_dialogue(&npc_context, &seeds_dialogue_data))?;
+                    
+                    // Generate quest if appropriate
+                    let generated_quest = if should_npc_offer_quest(act, corruption_level) {
+                        let dungeon_uuid = find_nearby_dungeon(region, &results.entities.dungeons);
+                        let seeds_quest_data = prepare_seeds_quest_data(seeds, act);
+                        
+                        let quest_context = crate::ai_dialogue::QuestGenerationContext {
+                            quest_id: format!("quest_{}_{}", region.entity_uuid, npc_uuid),
+                            region_uuid: region.entity_uuid.clone(),
+                            dungeon_uuid,
+                            npc_giver: npc_uuid.clone(),
+                            act,
+                            band,
+                            corruption_level,
+                            preferred_pattern: determine_quest_pattern_from_act(act),
+                            available_locations: get_region_locations(region, &results.entities),
+                            horror_themes: get_horror_themes_for_act(act),
+                        };
+                        
+                        Some(rt.block_on(ai_generator.generate_quest(&quest_context, &seeds_quest_data))?)
+                    } else {
+                        None
+                    };
+                    
+                    let template_context = minijinja::context! {
+                        npc_uuid => npc_uuid,
+                        npc_name => npc_name,
+                        settlement_uuid => settlement_uuid,
+                        region_uuid => region.entity_uuid,
+                        generated_dialogue => generated_dialogue,
+                        generated_quest => generated_quest,
+                        archetype => archetype,
+                    };
+                    
+                    let npc_module = npc_template.render(&template_context)?;
+                    fs::write(region_dialogue_dir.join(format!("{}.rs", crate::utilities::sanitize_name(&npc_uuid))), npc_module)?;
+                    
+                    generated_npcs.push(npc_uuid);
+                    if let Some(ref quest) = generated_quest {
+                        generated_quests.push(quest.id.clone());
+                    }
+                }
+            }
+        }
+    } else {
+        println!("OPENAI_API_KEY not set, using fallback dialogue generation...");
+        
+        // Fallback to basic name generation and template dialogue
+        for region in &results.entities.regions {
+            let region_dialogue_dir = dialogue_dir.join("regions").join(&crate::utilities::sanitize_name(&region.entity_uuid));
+            fs::create_dir_all(&region_dialogue_dir)?;
+            
+            let (act, band) = determine_act_band_from_region(region);
+            let corruption_level = calculate_corruption_level(act, band);
+            
+            for settlement_uuid in &region.settlement_uuids {
+                let npc_name = format!("Villager_{}", &settlement_uuid[..8]);
                 let npc_uuid = format!("npc_{}_{}", region.entity_uuid, settlement_uuid);
                 
-                // Generate dialogue for this NPC
-                let dialogue_context = DialogueGenerationContext {
-                    player_name: "stranger".to_string(),
-                    player_title: "traveler".to_string(),
-                    time_of_day: "day".to_string(),
-                    location_type: determine_location_type_from_settlement(settlement),
-                    npc_tone: determine_npc_tone_from_corruption(corruption_level),
-                    should_offer_quest: should_npc_offer_quest(act, corruption_level),
-                    npc_uuid: npc_uuid.clone(),
-                };
-                
-                let dialogue_lines = seeds.generate_dialogue(&dialogue_context)?;
-                
-                // Generate quest if appropriate
-                let quest = if dialogue_context.should_offer_quest {
-                    let quest_context = QuestGenerationContext {
-                        region_uuid: region.entity_uuid.clone(),
-                        npc_uuid: npc_uuid.clone(),
-                        preferred_pattern: determine_quest_pattern_from_act(act),
-                        act,
-                        corruption_level,
-                    };
-                    Some(seeds.generate_quest(&quest_context)?)
-                } else {
-                    None
-                };
-                
-                let npc_context = minijinja::context! {
+                let template_context = minijinja::context! {
                     npc_uuid => npc_uuid,
                     npc_name => npc_name,
                     settlement_uuid => settlement_uuid,
                     region_uuid => region.entity_uuid,
-                    dialogue_lines => dialogue_lines,
-                    quest => quest,
+                    fallback_mode => true,
                 };
                 
-                let npc_module = npc_template.render(&npc_context)?;
+                let npc_module = npc_template.render(&template_context)?;
                 fs::write(region_dialogue_dir.join(format!("{}.rs", crate::utilities::sanitize_name(&npc_uuid))), npc_module)?;
                 
                 generated_npcs.push(npc_uuid);
-                if let Some(q) = quest {
-                    generated_quests.push(q.id);
-                }
             }
         }
     }
@@ -217,11 +267,13 @@ fn generate_seeds_powered_dialogue(
         regions => results.entities.regions,
         generated_npcs => generated_npcs,
         generated_quests => generated_quests,
-        seeds_powered => true,
+        seeds_powered => use_ai_generation,
     };
     
     let dialogue_module = dialogue_module_template.render(&dialogue_context)?;
     fs::write(dialogue_dir.join("mod.rs"), dialogue_module)?;
+    
+    println!("Generated dialogue for {} NPCs and {} quests", generated_npcs.len(), generated_quests.len());
     
     Ok(())
 }
@@ -302,5 +354,234 @@ fn determine_quest_pattern_from_act(act: u8) -> String {
         2 => "purification".to_string(), 
         3 => "escort".to_string(),
         _ => "investigation".to_string(),
+    }
+}
+
+// AI-powered dialogue generation helper functions
+
+fn generate_npc_name_from_seeds(_seeds: &dl_analysis::seeds::SeedsDataManager, act: u8, corruption_level: f32) -> String {
+    // Generate name based on corruption level
+    let name_type = if corruption_level < 0.3 {
+        "peaceful"
+    } else if corruption_level < 0.7 {
+        "troubled"
+    } else {
+        "corrupted"
+    };
+    
+    // Generate name using act and corruption level
+    format!("{}_Act{}", name_type, act)
+}
+
+fn select_archetype_for_corruption(corruption_level: f32) -> String {
+    if corruption_level < 0.2 {
+        "wandering_scholar".to_string()
+    } else if corruption_level < 0.4 {
+        "mercenary".to_string()
+    } else if corruption_level < 0.6 {
+        "holy_warrior".to_string()
+    } else if corruption_level < 0.8 {
+        "corrupted_noble".to_string()
+    } else {
+        "dark_cultist".to_string()
+    }
+}
+
+fn prepare_seeds_dialogue_data(seeds: &dl_analysis::seeds::SeedsDataManager) -> crate::ai_dialogue::SeedsDialogueData {
+    let mut linguistic_patterns = Vec::new();
+    let mut old_norse_vocabulary = HashMap::new();
+    let mut cultural_references = Vec::new();
+    
+    // Add Old Norse vocabulary (simplified for now)
+    old_norse_vocabulary.insert("draugr".to_string(), "undead_warrior".to_string());
+    old_norse_vocabulary.insert("fylgja".to_string(), "spirit_guardian".to_string());
+    old_norse_vocabulary.insert("berserker".to_string(), "fury_warrior".to_string());
+    
+    linguistic_patterns.push(crate::ai_dialogue::LinguisticPattern {
+        pattern_type: "old_norse_compound".to_string(),
+        examples: vec!["skald-song".to_string(), "wolf-brother".to_string()],
+        cultural_context: "Norse mythology and warrior culture".to_string(),
+    });
+    
+    // Add predefined character archetypes (since DialogueTemplates is a struct, not a collection)
+    let mut character_archetypes = Vec::new();
+    character_archetypes.push(crate::ai_dialogue::CharacterArchetype {
+        archetype_type: "mercenary".to_string(),
+        alignment: "neutral".to_string(),
+        traits: vec!["pragmatic".to_string(), "skilled".to_string(), "cynical".to_string()],
+        motivations: vec!["gold".to_string(), "survival".to_string(), "reputation".to_string()],
+        speech_patterns: vec!["terse".to_string(), "professional".to_string()],
+    });
+    
+    character_archetypes.push(crate::ai_dialogue::CharacterArchetype {
+        archetype_type: "holy_warrior".to_string(),
+        alignment: "light".to_string(),
+        traits: vec!["righteous".to_string(), "brave".to_string(), "stubborn".to_string()],
+        motivations: vec!["justice".to_string(), "protection".to_string(), "faith".to_string()],
+        speech_patterns: vec!["formal".to_string(), "inspiring".to_string()],
+    });
+    
+    character_archetypes.push(crate::ai_dialogue::CharacterArchetype {
+        archetype_type: "dark_cultist".to_string(),
+        alignment: "dark".to_string(),
+        traits: vec!["secretive".to_string(), "manipulative".to_string(), "knowledgeable".to_string()],
+        motivations: vec!["power".to_string(), "forbidden_knowledge".to_string(), "chaos".to_string()],
+        speech_patterns: vec!["cryptic".to_string(), "unsettling".to_string()],
+    });
+    
+    // Add cultural references
+    cultural_references.push("Norse poetry tradition".to_string());
+    cultural_references.push("Medieval Christianity".to_string());
+    cultural_references.push("Celtic folklore".to_string());
+    
+    crate::ai_dialogue::SeedsDialogueData {
+        linguistic_patterns,
+        character_archetypes,
+        old_norse_vocabulary,
+        cultural_references,
+    }
+}
+
+fn get_archetype_traits(archetype: &str) -> Vec<String> {
+    match archetype {
+        "mercenary" => vec!["pragmatic".to_string(), "skilled".to_string(), "cynical".to_string()],
+        "holy_warrior" => vec!["righteous".to_string(), "brave".to_string(), "stubborn".to_string()],
+        "dark_cultist" => vec!["secretive".to_string(), "manipulative".to_string(), "knowledgeable".to_string()],
+        "wandering_scholar" => vec!["curious".to_string(), "analytical".to_string(), "absent_minded".to_string()],
+        "corrupted_noble" => vec!["arrogant".to_string(), "desperate".to_string(), "haunted".to_string()],
+        _ => vec!["neutral".to_string()],
+    }
+}
+
+fn get_archetype_speech_patterns(archetype: &str) -> Vec<String> {
+    match archetype {
+        "mercenary" => vec!["terse".to_string(), "professional".to_string()],
+        "holy_warrior" => vec!["formal".to_string(), "inspiring".to_string()],
+        "dark_cultist" => vec!["cryptic".to_string(), "unsettling".to_string()],
+        "wandering_scholar" => vec!["verbose".to_string(), "academic".to_string()],
+        "corrupted_noble" => vec!["aristocratic".to_string(), "bitter".to_string()],
+        _ => vec!["casual".to_string()],
+    }
+}
+
+fn find_nearby_dungeon(region: &dl_analysis::entities::RegionHexTile, dungeons: &[dl_analysis::entities::RegionHexTile]) -> Option<String> {
+    // Simple heuristic - find first dungeon that might be near this region
+    dungeons.first().map(|d| d.entity_uuid.clone())
+}
+
+fn prepare_seeds_quest_data(_seeds: &dl_analysis::seeds::SeedsDataManager, act: u8) -> crate::ai_dialogue::SeedsQuestData {
+    let mut literature_patterns = Vec::new();
+    let mut horror_beats = Vec::new();
+    let mut poe_excerpts = Vec::new();
+    let mut dracula_themes = Vec::new();
+    let mut quest_archetypes = Vec::new();
+    
+    // Add patterns from Poe (simplified for now)
+    literature_patterns.push(crate::ai_dialogue::LiteraturePattern {
+        source_work: "Edgar Allan Poe".to_string(),
+        pattern_type: "psychological_horror".to_string(),
+        beats: vec!["isolation".to_string(), "obsession".to_string(), "revelation".to_string(), "madness".to_string()],
+        themes: vec!["death".to_string(), "guilt".to_string(), "revenge".to_string()],
+        horror_elements: vec!["unreliable_narrator".to_string(), "buried_alive".to_string(), "haunting_past".to_string()],
+    });
+    
+    // Add patterns from Dracula
+    literature_patterns.push(crate::ai_dialogue::LiteraturePattern {
+        source_work: "Bram Stoker - Dracula".to_string(),
+        pattern_type: "gothic_horror".to_string(),
+        beats: vec!["arrival".to_string(), "seduction".to_string(), "transformation".to_string(), "hunt".to_string()],
+        themes: vec!["corruption".to_string(), "invasion".to_string(), "purity_vs_evil".to_string()],
+        horror_elements: vec!["ancient_evil".to_string(), "loss_of_humanity".to_string(), "blood_curse".to_string()],
+    });
+    
+    poe_excerpts.push("The boundaries which divide Life from Death are at best shadowy and vague.".to_string());
+    poe_excerpts.push("All that we see or seem is but a dream within a dream.".to_string());
+    
+    dracula_themes.push("The old centuries had, and have, powers of their own which mere 'modernity' cannot kill.".to_string());
+    dracula_themes.push("There are darknesses in life and there are lights, and you are one of the lights.".to_string());
+    
+    // Horror progression beats based on act
+    horror_beats = match act {
+        1 => vec!["subtle_wrongness".to_string(), "first_signs".to_string(), "growing_unease".to_string()],
+        2 => vec!["clear_threat".to_string(), "first_loss".to_string(), "desperation".to_string()],
+        3 => vec!["manifest_horror".to_string(), "betrayal".to_string(), "corruption_spreads".to_string()],
+        _ => vec!["investigation".to_string(), "confrontation".to_string(), "resolution".to_string()],
+    };
+    
+    // Quest archetypes
+    quest_archetypes.push(crate::ai_dialogue::QuestArchetype {
+        archetype_name: "investigation".to_string(),
+        typical_structure: vec!["discover_mystery".to_string(), "gather_clues".to_string(), "confront_truth".to_string()],
+        horror_integration: vec!["unreliable_witnesses".to_string(), "disturbing_evidence".to_string(), "horrific_revelation".to_string()],
+        corruption_themes: vec!["hidden_knowledge".to_string(), "price_of_truth".to_string(), "madness_from_discovery".to_string()],
+    });
+    
+    quest_archetypes.push(crate::ai_dialogue::QuestArchetype {
+        archetype_name: "purification".to_string(),
+        typical_structure: vec!["identify_corruption".to_string(), "gather_sacred_items".to_string(), "perform_ritual".to_string()],
+        horror_integration: vec!["corruption_fights_back".to_string(), "allies_turn".to_string(), "ritual_demands_sacrifice".to_string()],
+        corruption_themes: vec!["purity_vs_corruption".to_string(), "cost_of_cleansing".to_string(), "corruption_spreads".to_string()],
+    });
+    
+    crate::ai_dialogue::SeedsQuestData {
+        literature_patterns,
+        horror_beats,
+        poe_excerpts,
+        dracula_themes,
+        quest_archetypes,
+    }
+}
+
+fn get_region_locations(region: &dl_analysis::entities::RegionHexTile, entities: &dl_analysis::results::EntityCollections) -> Vec<String> {
+    let mut locations = Vec::new();
+    
+    // Add settlements in this region
+    for settlement_uuid in &region.settlement_uuids {
+        if let Some(_settlement) = entities.settlements.iter().find(|s| &s.entity_uuid == settlement_uuid) {
+            locations.push(format!("settlement_{}", settlement_uuid));
+        }
+    }
+    
+    // Add nearby dungeons
+    locations.push("nearby_ruins".to_string());
+    locations.push("ancient_grove".to_string());
+    locations.push("cursed_shrine".to_string());
+    
+    locations
+}
+
+fn get_horror_themes_for_act(act: u8) -> Vec<String> {
+    match act {
+        1 => vec![
+            "pastoral_decay".to_string(),
+            "hidden_corruption".to_string(),
+            "lost_innocence".to_string(),
+            "false_safety".to_string(),
+        ],
+        2 => vec![
+            "growing_dread".to_string(),
+            "trust_fractures".to_string(),
+            "first_deaths".to_string(),
+            "spreading_fear".to_string(),
+        ],
+        3 => vec![
+            "manifest_horror".to_string(),
+            "companion_trauma".to_string(),
+            "moral_compromise".to_string(),
+            "descent_into_darkness".to_string(),
+        ],
+        4 => vec![
+            "warped_reality".to_string(),
+            "total_corruption".to_string(),
+            "loss_of_humanity".to_string(),
+            "apocalyptic_dread".to_string(),
+        ],
+        5 => vec![
+            "complete_horror".to_string(),
+            "reality_collapse".to_string(),
+            "dragon_influence".to_string(),
+            "final_confrontation".to_string(),
+        ],
+        _ => vec!["mystery".to_string(), "investigation".to_string()],
     }
 }
