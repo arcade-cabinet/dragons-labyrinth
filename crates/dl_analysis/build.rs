@@ -45,8 +45,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(seeds_manager) => {
             println!("cargo:warning=Seeds data initialized successfully");
             println!("cargo:warning=  Books loaded: {}", seeds_manager.books.get_downloaded_books().len());
-            println!("cargo:warning=  Dictionary entries: {}", seeds_manager.linguistics.old_norse_dictionary.len());
-            println!("cargo:warning=  Character archetypes: {}", seeds_manager.dialogue.character_archetypes.len());
         }
         Err(e) => {
             println!("cargo:warning=Failed to initialize Seeds data: {}. Build will continue.", e);

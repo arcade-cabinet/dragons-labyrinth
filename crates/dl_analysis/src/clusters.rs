@@ -20,11 +20,11 @@ use openai_dive::v1::resources::chat::{
 // Remove tiktoken import for now as it's not properly used
 // use tiktoken_rs::tiktoken::get_bpe_from_model;
 
-use crate::base::{
+use dl_types::analysis::base::{
     HTML_ENTITIES_SAMPLE_THRESHOLD, JSON_ENTITIES_SAMPLE_THRESHOLD,
     DEFAULT_MODEL, Inventory, FieldSpec, EntitySpec
 };
-use crate::raw::{RawEntity, EntityCategory, ContentFormat};
+use dl_types::analysis::{RawEntity, EntityCategory, ContentFormat};
 use crate::results::{GenerationResults, ModelConnections};
 
 /// Abstract trait for entity clusters with real AI generation
@@ -84,10 +84,10 @@ impl BaseEntitiesCluster {
 
     /// Add entity if it belongs to this cluster
     pub fn add_entity(&mut self, entity: RawEntity) -> bool {
-        if entity.category == self.category {
+        if entity.category == self.category.as_str() {
             // Check if entity matches cluster name (for specific clusters)
             if self.cluster_name == "combined" || 
-               entity.entity_name.as_ref().map_or(false, |name| name == &self.cluster_name) {
+               entity.entity_name == self.cluster_name {
                 self.entities.push(entity);
                 return true;
             }
@@ -98,10 +98,10 @@ impl BaseEntitiesCluster {
     /// Check if cluster has enough samples for AI generation
     pub fn can_generate_models(&self) -> bool {
         let html_count = self.entities.iter()
-            .filter(|e| e.format == ContentFormat::Html)
+            .filter(|e| e.entity_type == "html")
             .count();
         let json_count = self.entities.iter()
-            .filter(|e| e.format == ContentFormat::Json)
+            .filter(|e| e.entity_type == "json")
             .count();
         
         html_count > 0 || json_count > 0
@@ -113,11 +113,12 @@ impl BaseEntitiesCluster {
         self.json_files.clear();
 
         for entity in &self.entities {
-            let file_path = entity.write_to_disk(analysis_dir)?;
+            let file_path = crate::raw::write_entity_to_disk(entity, analysis_dir)?;
             
-            match entity.format {
-                ContentFormat::Html => self.html_files.push(file_path),
-                ContentFormat::Json => self.json_files.push(file_path),
+            if entity.entity_type == "json" {
+                self.json_files.push(file_path);
+            } else {
+                self.html_files.push(file_path);
             }
         }
 
@@ -180,7 +181,7 @@ impl BaseEntitiesCluster {
     /// Sample HTML entities respecting threshold
     fn sample_html_entities(&self) -> Vec<&RawEntity> {
         self.entities.iter()
-            .filter(|e| e.format == ContentFormat::Html)
+            .filter(|e| e.entity_type == "html")
             .take(HTML_ENTITIES_SAMPLE_THRESHOLD)
             .collect()
     }
@@ -188,7 +189,7 @@ impl BaseEntitiesCluster {
     /// Sample JSON entities respecting threshold
     fn sample_json_entities(&self) -> Vec<&RawEntity> {
         self.entities.iter()
-            .filter(|e| e.format == ContentFormat::Json)
+            .filter(|e| e.entity_type == "json")
             .take(JSON_ENTITIES_SAMPLE_THRESHOLD)
             .collect()
     }
@@ -506,10 +507,10 @@ impl RegionEntitiesCluster {
         // Combine sample content for analysis
         let mut sample_content = String::new();
         for (i, entity) in html_samples.iter().enumerate() {
-            sample_content.push_str(&format!("=== HTML Sample {} ===\n{}\n\n", i + 1, entity.value));
+            sample_content.push_str(&format!("=== HTML Sample {} ===\n{}\n\n", i + 1, entity.raw_value));
         }
         for (i, entity) in json_samples.iter().enumerate() {
-            sample_content.push_str(&format!("=== JSON Sample {} ===\n{}\n\n", i + 1, entity.value));
+            sample_content.push_str(&format!("=== JSON Sample {} ===\n{}\n\n", i + 1, entity.raw_value));
         }
 
         let user_prompt = format!("Analyze these samples:\n\n{}", sample_content);
@@ -990,7 +991,7 @@ impl {{ entity.name }} {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::raw::RawEntity;
+    use dl_types::analysis::RawEntity;
     use std::io::Cursor;
 
     #[test]

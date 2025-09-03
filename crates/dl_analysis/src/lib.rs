@@ -9,14 +9,12 @@
 //! - Analysis reporting and statistics
 
 pub mod clusters;
-pub mod orchestration;
 pub mod raw;
 pub mod reporting;
 pub mod results;
 pub mod seeds;
 
 // Re-export key types for external usage  
-pub use orchestration::RawEntities;
 pub use results::{GenerationResults, ModelConnections, AnalysisSummary};
 
 use std::path::PathBuf;
