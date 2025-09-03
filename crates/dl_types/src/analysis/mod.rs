@@ -2,7 +2,9 @@
 
 pub mod entities;
 pub mod base;
+pub mod raw;
 
 // Re-export all analysis types
 pub use entities::*;
 pub use base::*;
+pub use raw::*;
