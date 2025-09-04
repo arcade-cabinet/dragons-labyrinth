@@ -86,8 +86,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
     use rust_bert::pipelines::summarization::{SummarizationConfig, SummarizationModel};
 
     #[derive(Debug, serde::Deserialize)]
-    struct IaResponse { response: IaDocs }
-    #[derive(Debug, serde::Deserialize)]
     struct IaDocs { docs: Vec<IaDoc> }
     #[derive(Debug, serde::Deserialize)]
     struct IaDoc {
@@ -102,33 +100,63 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
     }
 
     fn ia_search_keywords(query_keywords: &str, rows: usize) -> Result<Vec<IaDoc>, Box<dyn std::error::Error>> {
-        // Advanced Search: constrain to texts + English; put keyword expr inside parentheses
-        let lucene_q = format!(
-            "mediatype:texts AND language:(eng) AND ({})",
-            query_keywords
-        );
+        // We'll try several query variants to maximize recall. Stop at first non-empty hit set.
+        let mut queries: Vec<String> = Vec::new();
+        // 1) Primary: texts + English
+        queries.push(format!("mediatype:texts AND language:(eng) AND ({})", query_keywords));
+        // 2) Strong PD seam: Gutenberg
+        queries.push(format!("collection:(gutenberg) AND ({})", query_keywords));
+        // 3) Broader: texts only
+        queries.push(format!("mediatype:texts AND ({})", query_keywords));
+        // 4) Broadest: keywords only
+        queries.push(format!("({})", query_keywords));
+
         let fields = "identifier,title,format,language,licenseurl,downloads";
-        let url = format!(
-            "https://archive.org/advancedsearch.php?q={}&fl={}&sort[]=downloads+desc&rows={}&page=1&output=json",
-            urlencoding::encode(&lucene_q),
-            urlencoding::encode(fields),
-            rows
-        );
-        let resp: serde_json::Value = reqwest::blocking::get(&url)?.json()?;
-        // Deserialize into our structs; tolerate missing fields
-        let docs: IaDocs = serde_json::from_value(resp.get("response").cloned().unwrap_or_default()
-            .as_object()
-            .map(|_| resp["response"].clone())
-            .unwrap_or_else(|| serde_json::json!({"docs": []})))
-            .unwrap_or(IaDocs { docs: vec![] });
-        Ok(docs.docs)
-    }
+        let mut all_docs: Vec<IaDoc> = Vec::new();
 
-    fn looks_texty(formats: &[String]) -> bool {
-        let needles = ["DjvuTXT", "TXT", "Text", "OCR Page Text"]; // common textual derivatives
-        formats.iter().any(|f| needles.iter().any(|n| f.contains(n)))
-    }
+        for (i, q) in queries.iter().enumerate() {
+            let url = format!(
+                "https://archive.org/advancedsearch.php?q={}&fl={}&sort[]=downloads+desc&rows={}&page=1&output=json",
+                urlencoding::encode(q),
+                urlencoding::encode(fields),
+                rows.max(500)
+            );
+            let resp: serde_json::Value = match reqwest::blocking::get(&url) {
+                Ok(r) => match r.json() { Ok(v) => v, Err(_) => continue },
+                Err(_) => continue,
+            };
 
+            // Extract docs array defensively
+            let docs_v = resp.get("response").and_then(|r| r.get("docs")).and_then(|d| d.as_array());
+            let Some(docs_arr) = docs_v else { continue };
+            if docs_arr.is_empty() { continue; }
+
+            // Map Value -> IaDoc safely
+            let mut mapped: Vec<IaDoc> = Vec::new();
+            for e in docs_arr {
+                let identifier = e.get("identifier").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                if identifier.is_empty() { continue; }
+                let title = e.get("title").and_then(|x| x.as_str()).map(|s| s.to_string());
+                let format = e.get("format").and_then(|x| x.as_array()).map(|arr| {
+                    arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect::<Vec<String>>()
+                }).unwrap_or_else(|| vec![]);
+                let language = e.get("language").and_then(|x| x.as_array()).map(|arr| {
+                    arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect::<Vec<String>>()
+                }).unwrap_or_else(|| vec![]);
+                let licenseurl = e.get("licenseurl").and_then(|x| x.as_str()).map(|s| s.to_string());
+                let downloads = e.get("downloads").and_then(|x| x.as_u64());
+                mapped.push(IaDoc { identifier, title, format, language, licenseurl, downloads });
+            }
+
+            if !mapped.is_empty() {
+                println!("cargo:warning=IA search variant {} returned {} candidates", i + 1, mapped.len());
+                all_docs = mapped;
+                break;
+            }
+        }
+
+        Ok(all_docs)
+    }
 
     fn download_text_from_identifier(identifier: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
         let item = iars::Item::new(identifier)
@@ -171,10 +199,14 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
 
         // Pull a generous pool, then filter locally
         let mut docs = ia_search_keywords(keyword_expr, 100)?;
+        // Print a sample URL for debugging
+        if docs.is_empty() {
+            println!("cargo:warning=No IA results at all for band '{}' — consider adjusting keywords or collections", band_key);
+        }
         // Prefer higher download count first as proxy for quality
         docs.sort_by(|a, b| b.downloads.unwrap_or(0).cmp(&a.downloads.unwrap_or(0)));
 
-        for doc in docs.into_iter().filter(|d| looks_texty(&d.format)) {
+        for doc in docs.into_iter() {
             if collected >= SAMPLES_PER_BAND { break; }
             let identifier = doc.identifier;
             match download_text_from_identifier(&identifier) {
@@ -404,17 +436,34 @@ const KNOWN_DUNGEONS: &[&str] = &[
 ];
 
 // Keyword-driven bands for thematic sampling from Internet Archive
+// NOTE: We bias toward rich public-domain seams (Gothic, folklore, medieval, pulp/weird)
+// and rely on item-level file listing to find actual text derivatives.
 const BANDS_KEYWORDS: &[(&str, &str)] = &[
-    // Lv 1–20 · Peace → Unease
-    ("peace_to_unease", "(pastoral OR idyll OR \"village life\" OR woodland OR \"snowy peaks\" OR tavern)"),
-    // Lv 21–40 · Unease → Dread
-    ("unease_to_dread", "(scorched OR blight OR desolation OR \"abandoned temple\" OR ruins OR cultist)"),
-    // Lv 41–60 · Dread → Terror
-    ("dread_to_terror", "(wasteland OR \"black sand\" OR \"lava field\" OR eldritch OR \"void crack\" OR fanatic)"),
-    // Lv 61–120 · Terror → Despair → Madness
-    ("terror_to_despair_madness", "(\"war camp\" OR raider OR betrayal OR \"social collapse\" OR execution OR \"defiled shrine\")"),
-    // Lv 121–180 · Madness → Void
-    ("madness_to_void", "(nightmare OR \"impossible geometry\" OR non-euclidean OR \"cosmic horror\" OR \"reality warping\")"),
+    // Broad classic fantasy / folklore vein
+    (
+        "peace_to_unease",
+        "(subject:(fantasy OR \"fairy tales\" OR folklore OR mythology OR \"heroic romance\" OR \"romances, chivalry\") OR title:(fairy OR legend OR knight OR wizard OR dragon OR saga))"
+    ),
+    // Gothic / supernatural starters
+    (
+        "unease_to_dread",
+        "(subject:(\"gothic fiction\" OR gothic OR \"ghost stories\" OR supernatural OR \"weird tales\") OR title:(ghost OR haunted OR vampire OR spectre OR specter OR eldritch))"
+    ),
+    // Horror / weird escalation
+    (
+        "dread_to_terror",
+        "(subject:(horror OR \"weird fiction\" OR macabre) OR title:(horror OR nightmare OR demon OR daemon OR vampire OR \"strange tales\"))"
+    ),
+    // Dark medieval / occult lore
+    (
+        "terror_to_despair_madness",
+        "(subject:(witchcraft OR demonology OR occult) OR title:(witch OR grimoire OR demonology OR sorcery OR necromancy))"
+    ),
+    // Cosmic / eldritch endgame
+    (
+        "madness_to_void",
+        "(subject:(\"weird fiction\" OR cosmic OR \"cosmic horror\") OR title:(eldritch OR abyss OR void OR cthulhu OR unnameable OR nameless))"
+    ),
 ];
 
 const SAMPLES_PER_BAND: usize = 3; // how many texts to grab per band
