@@ -13,6 +13,9 @@ use serde::{Deserialize, Serialize};
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
+use serde_json; // used for IA search response handling
+use reqwest;    // blocking client used for IA advancedsearch
+use urlencoding; // to safely encode lucene queries
 
 /// Sample HTML entity for TOML storage
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -81,47 +84,143 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// Generate books.toml with Internet Archive downloads and rust-bert summaries
 fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     use rust_bert::pipelines::summarization::{SummarizationConfig, SummarizationModel};
-    
-    // Initialize rust-bert summarization model
+
+    #[derive(Debug, serde::Deserialize)]
+    struct IaResponse { response: IaDocs }
+    #[derive(Debug, serde::Deserialize)]
+    struct IaDocs { docs: Vec<IaDoc> }
+    #[derive(Debug, serde::Deserialize)]
+    struct IaDoc {
+        identifier: String,
+        title: Option<String>,
+        #[serde(default)]
+        format: Vec<String>,
+        #[serde(default)]
+        language: Vec<String>,
+        licenseurl: Option<String>,
+        downloads: Option<u64>,
+    }
+
+    fn ia_search_keywords(query_keywords: &str, rows: usize) -> Result<Vec<IaDoc>, Box<dyn std::error::Error>> {
+        // Advanced Search: constrain to texts + English; put keyword expr inside parentheses
+        let lucene_q = format!(
+            "mediatype:texts AND language:(eng) AND ({})",
+            query_keywords
+        );
+        let fields = "identifier,title,format,language,licenseurl,downloads";
+        let url = format!(
+            "https://archive.org/advancedsearch.php?q={}&fl={}&sort[]=downloads+desc&rows={}&page=1&output=json",
+            urlencoding::encode(&lucene_q),
+            urlencoding::encode(fields),
+            rows
+        );
+        let resp: serde_json::Value = reqwest::blocking::get(&url)?.json()?;
+        // Deserialize into our structs; tolerate missing fields
+        let docs: IaDocs = serde_json::from_value(resp.get("response").cloned().unwrap_or_default()
+            .as_object()
+            .map(|_| resp["response"].clone())
+            .unwrap_or_else(|| serde_json::json!({"docs": []})))
+            .unwrap_or(IaDocs { docs: vec![] });
+        Ok(docs.docs)
+    }
+
+    fn looks_texty(formats: &[String]) -> bool {
+        let needles = ["DjvuTXT", "TXT", "Text", "OCR Page Text"]; // common textual derivatives
+        formats.iter().any(|f| needles.iter().any(|n| f.contains(n)))
+    }
+
+
+    fn download_text_from_identifier(identifier: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
+        let item = iars::Item::new(identifier)
+            .map_err(|e| format!("Invalid IA identifier {}: {:?}", identifier, e))?;
+        let files = item.list()
+            .map_err(|e| format!("Failed to list files for {}: {:?}", identifier, e))?;
+        // Inline selection of a good text derivative from the item file list
+        let mut candidates: Vec<&str> = files.iter().map(|f| f.path.as_str()).collect();
+        candidates.sort_by_key(|p| {
+            if p.ends_with("_djvu.txt") { 0 }
+            else if p.ends_with(".txt") && !p.ends_with("_scandata.txt") { 1 }
+            else if p.ends_with(".hocr.html") { 2 }
+            else { 9 }
+        });
+        let path = match candidates.into_iter().find(|p|
+            p.ends_with("_djvu.txt") ||
+            (p.ends_with(".txt") && !p.ends_with("_scandata.txt")) ||
+            p.ends_with(".hocr.html")
+        ) {
+            Some(p) => p.to_string(),
+            None => return Err(format!("No text-like files on item {}", identifier).into()),
+        };
+        let mut buf = Vec::new();
+        item.download_file(&path, &mut buf)
+            .map_err(|e| format!("Download failed for {} -> {}: {:?}", identifier, path, e))?;
+        let text = String::from_utf8_lossy(&buf).to_string();
+        if text.len() < 1000 {
+            return Err(format!("Downloaded text too short for {} ({} bytes)", identifier, text.len()).into());
+        }
+        Ok((path, text))
+    }
+
+    // Initialize summarizer once
     let summarization_model = SummarizationModel::new(SummarizationConfig::default())?;
-    let mut book_summaries = Vec::new();
-    
-    for (archive_id, filename, title) in KNOWN_ARCHIVE_ITEMS {
-        println!("cargo:warning=Downloading {} from Internet Archive...", title);
-        
-        // Download using iars Item API
-        if let Ok(content) = download_archive_item_with_iars(archive_id) {
-            // Use rust-bert to summarize (fail if summarization fails)
-            let summaries = summarization_model.summarize(&[content.clone()])?;
-            let summary = summaries.first().cloned()
-                .ok_or_else(|| format!("CRITICAL: rust-bert failed to generate summary for {}", title))?;
-            
-            let summary_len = summary.len();
-            book_summaries.push(BookSummary {
-                id: archive_id.to_string(),
-                title: title.to_string(),
-                filename: filename.to_string(),
-                summary,
-                full_length: content.len(),
-            });
-            
-            println!("cargo:warning=Summarized {} ({} chars -> {} chars)", 
-                     title, content.len(), summary_len);
-        } else {
-            return Err(format!("CRITICAL: Failed to download {} from archive item {}", title, archive_id).into());
+    let mut book_summaries: Vec<BookSummary> = Vec::new();
+
+    for (band_key, keyword_expr) in BANDS_KEYWORDS {
+        println!("cargo:warning=Searching Internet Archive for band '{}': {}", band_key, keyword_expr);
+        let mut collected = 0usize;
+
+        // Pull a generous pool, then filter locally
+        let mut docs = ia_search_keywords(keyword_expr, 100)?;
+        // Prefer higher download count first as proxy for quality
+        docs.sort_by(|a, b| b.downloads.unwrap_or(0).cmp(&a.downloads.unwrap_or(0)));
+
+        for doc in docs.into_iter().filter(|d| looks_texty(&d.format)) {
+            if collected >= SAMPLES_PER_BAND { break; }
+            let identifier = doc.identifier;
+            match download_text_from_identifier(&identifier) {
+                Ok((filename, content)) => {
+                    // Summarize
+                    let summaries = summarization_model.summarize(&[content.clone()])?;
+                    let summary = summaries.first().cloned()
+                        .ok_or_else(|| format!("CRITICAL: rust-bert failed to generate summary for {}", identifier))?;
+
+                    let title = doc.title.unwrap_or_else(|| identifier.clone());
+                    println!(
+                        "cargo:warning=Band '{}' picked {} ({} chars -> {} chars) via {}",
+                        band_key, title, content.len(), summary.len(), filename
+                    );
+
+                    book_summaries.push(BookSummary {
+                        id: identifier,
+                        title,
+                        filename,
+                        summary,
+                        full_length: content.len(),
+                    });
+                    collected += 1;
+                }
+                Err(e) => {
+                    println!("cargo:warning=Skipping {}: {}", identifier, e);
+                    continue;
+                }
+            }
+        }
+
+        if collected == 0 {
+            println!("cargo:warning=No downloadable texts found for band '{}' with query: {}", band_key, keyword_expr);
         }
     }
-    
-    // Create books TOML with summaries
+
+    // Write TOML
     let books_container = BooksTomlContainer {
         books: book_summaries,
         generated_at: chrono::Utc::now().to_rfc3339(),
     };
-    
+
     let toml_content = toml::to_string_pretty(&books_container)?;
     fs::write(output_path, toml_content)?;
-    
-    println!("cargo:warning=Generated books.toml with {} book summaries", books_container.books.len());
+    println!("cargo:warning=Generated books.toml with {} summaries ({} bands x {} each)",
+             books_container.books.len(), BANDS_KEYWORDS.len(), SAMPLES_PER_BAND);
     Ok(())
 }
 
@@ -154,60 +253,6 @@ fn download_archive_item_with_iars(archive_id: &str) -> Result<String, Box<dyn s
     
     Err(format!("No suitable text files found in archive item: {}", archive_id).into())
 }
-
-/// Download text from Internet Archive using search keywords
-fn download_from_archive(search_keywords: &str, output_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    use reqwest::blocking::get;
-    
-    // Use Internet Archive search API
-    let search_url = format!(
-        "https://archive.org/advancedsearch.php?q={}&fl=identifier,title&rows=5&output=json&mediatype=texts",
-        urlencoding::encode(search_keywords)
-    );
-    
-    let response = get(&search_url)?;
-    let search_results: serde_json::Value = response.json()?;
-    
-    // Try to download the first few results until one succeeds
-    if let Some(docs) = search_results["response"]["docs"].as_array() {
-        for doc in docs.iter().take(3) {
-            if let Some(identifier) = doc["identifier"].as_str() {
-                if download_archive_item_text(identifier, output_path).is_ok() {
-                    return Ok(());
-                }
-            }
-        }
-    }
-    
-    Err(format!("No downloadable texts found for: {}", search_keywords).into())
-}
-
-/// Download text content from specific Internet Archive item
-fn download_archive_item_text(archive_id: &str, output_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    use reqwest::blocking::get;
-    
-    // Try common text file patterns for Archive items
-    let text_patterns = [
-        format!("{}_djvu.txt", archive_id),
-        format!("{}.txt", archive_id),
-        "text.txt".to_string(),
-        format!("{}_text.pdf", archive_id), // Some archives have PDF text
-    ];
-    
-    for pattern in &text_patterns {
-        let download_url = format!("https://archive.org/download/{}/{}", archive_id, pattern);
-        if let Ok(response) = get(&download_url) {
-            if response.status().is_success() {
-                let content = response.text()?;
-                std::fs::write(output_path, content)?;
-                return Ok(());
-            }
-        }
-    }
-    
-    Err(format!("No text files found for Archive item: {}", archive_id).into())
-}
-
 
 fn strip_gutenberg_headers(content: &str) -> String {
     let lines: Vec<&str> = content.lines().collect();
@@ -353,13 +398,18 @@ const KNOWN_DUNGEONS: &[&str] = &[
     "Tomb of the Grey Ogre", "Tomb of the Unspoken Skeletons",
 ];
 
-const KNOWN_ARCHIVE_ITEMS: &[(&str, &str, &str)] = &[
-    ("lovecraftcollection", "lovecraft_collection.txt", "Complete Works of H.P. Lovecraft"),
-    ("grimmsfairytal00grim", "grimms_fairy_tales.txt", "Grimm's Fairy Tales"),
-    ("arthurianlegends00knowuoft", "arthurian_legends.txt", "Arthurian Legends"),
-    ("norsemythology00gueruoft", "norse_mythology.txt", "Norse Mythology"),
-    ("gothictales00various", "gothic_tales.txt", "Gothic Tales"),
-    ("medievalbestiaries", "medieval_bestiaries.txt", "Medieval Bestiaries"),
-    ("beowulfanglosaxo00unknuoft", "beowulf.txt", "Beowulf Anglo-Saxon Epic"),
-    ("draculabramstok00stokuoft", "dracula.txt", "Dracula by Bram Stoker"),
+// Keyword-driven bands for thematic sampling from Internet Archive
+const BANDS_KEYWORDS: &[(&str, &str)] = &[
+    // Lv 1–20 · Peace → Unease
+    ("peace_to_unease", "(pastoral OR idyll OR \"village life\" OR woodland OR \"snowy peaks\" OR tavern)"),
+    // Lv 21–40 · Unease → Dread
+    ("unease_to_dread", "(scorched OR blight OR desolation OR \"abandoned temple\" OR ruins OR cultist)"),
+    // Lv 41–60 · Dread → Terror
+    ("dread_to_terror", "(wasteland OR \"black sand\" OR \"lava field\" OR eldritch OR \"void crack\" OR fanatic)"),
+    // Lv 61–120 · Terror → Despair → Madness
+    ("terror_to_despair_madness", "(\"war camp\" OR raider OR betrayal OR \"social collapse\" OR execution OR \"defiled shrine\")"),
+    // Lv 121–180 · Madness → Void
+    ("madness_to_void", "(nightmare OR \"impossible geometry\" OR non-euclidean OR \"cosmic horror\" OR \"reality warping\")"),
 ];
+
+const SAMPLES_PER_BAND: usize = 3; // how many texts to grab per band
