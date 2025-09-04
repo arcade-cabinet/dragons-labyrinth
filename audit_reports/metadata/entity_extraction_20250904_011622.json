@@ -1,0 +1,13 @@
+{
+  "category": "analysis",
+  "subcategory": "extraction",
+  "type_name": "dl_analysis::audit_types::EntityExtractionAudit",
+  "report_name": "entity_extraction",
+  "timestamp": "2025-09-04T01:16:22.791050Z",
+  "row_count": 1,
+  "column_count": 16,
+  "file_path": "audit_reports/audits/analysis/extraction/entity_extraction.csv",
+  "file_size_bytes": 417,
+  "archive_created": "audit_reports/archives/audit_archive_20250904_011622.tar.gz",
+  "generation_time_ms": 4
+}

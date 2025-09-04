@@ -1,0 +1,13 @@
+{
+  "category": "analysis",
+  "subcategory": "dungeon_rich_data",
+  "type_name": "dl_analysis::audit_types::DungeonAreaRichDataAudit",
+  "report_name": "dungeon_rich_data",
+  "timestamp": "2025-09-04T00:23:10.081097Z",
+  "row_count": 1,
+  "column_count": 31,
+  "file_path": "audit_reports/audits/analysis/dungeon_rich_data/dungeon_rich_data.csv",
+  "file_size_bytes": 1141,
+  "archive_created": null,
+  "generation_time_ms": 0
+}

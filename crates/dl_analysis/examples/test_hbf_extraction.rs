@@ -25,12 +25,17 @@ fn main() -> Result<()> {
     // Create RawEntities container
     let mut entities = RawEntities::new();
 
+    // Initialize audit system
+    let audit_system = std::env::var("AUDIT_REPORTS_DIR")
+        .ok()
+        .map(|dir| dl_audit::AuditSystem::new(dir));
+
     // Load all entities from HBF database
     println!("⚡ Loading entities from HBF database...");
-    entities.load_from_hbf_database(&hbf_path)?;
+    entities.load_from_hbf_database(&hbf_path, audit_system.as_ref())?;
 
     // Generate analysis summary
-    let summary = entities.get_analysis_summary();
+    let summary = entities.get_analysis_summary(audit_system.as_ref());
     
     println!("📊 EXTRACTION RESULTS:");
     println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

@@ -1,0 +1,13 @@
+{
+  "category": "analysis",
+  "subcategory": "categorization",
+  "type_name": "dl_analysis::audit_types::CategorizationAccuracyAudit",
+  "report_name": "categorization_accuracy",
+  "timestamp": "2025-09-04T01:09:36.013109Z",
+  "row_count": 1,
+  "column_count": 27,
+  "file_path": "../../audit_reports/audits/analysis/categorization/categorization_accuracy.csv",
+  "file_size_bytes": 765,
+  "archive_created": null,
+  "generation_time_ms": 0
+}

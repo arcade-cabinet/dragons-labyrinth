@@ -4,36 +4,26 @@ version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-tracing = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-ron = { workspace = true }
-uuid = { workspace = true }
-regex = { workspace = true }
-lazy_static = { workspace = true }
-scraper = { workspace = true }
-ammonia = { workspace = true }
-bevy = { workspace = true }
-bevy_ecs_tilemap = { workspace = true }
-minijinja = { workspace = true, features = ["loader"] }
-openai_dive = { workspace = true }
-tokio = { workspace = true }
-chrono = { workspace = true, features = ["serde"] }
-dl_analysis = { workspace = true }
-dl_seeds = { workspace = true }
+# Core dependencies
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+# Our types and utilities
 dl_types = { path = "../dl_types" }
+dl_analysis = { path = "../dl_analysis" }
+dl_audit = { path = "../dl_audit" }
+
+# Template processing
+tera = "1.20"
+
+# File operations
+ron = "0.8"
+walkdir.workspace = true
 
 [build-dependencies]
-dl_analysis = { workspace = true }
-anyhow = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-ron = { workspace = true }
-uuid = { workspace = true }
-quote = { workspace = true }
-syn = { workspace = true }
-proc-macro2 = { workspace = true }
+anyhow.workspace = true
+dl_analysis = { path = "../dl_analysis" }

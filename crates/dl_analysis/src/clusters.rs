@@ -12,19 +12,19 @@ use std::collections::HashMap;
 use std::fs;
 use anyhow::{Result, Context};
 use tokio::runtime::Runtime;
-use openai_dive::v1::api::Client;
-use openai_dive::v1::resources::chat::{
-    ChatCompletionParametersBuilder, ChatMessage, ChatMessageContent,
-    ChatCompletionResponseFormat, JsonSchemaBuilder
-};
-// Remove tiktoken import for now as it's not properly used
-// use tiktoken_rs::tiktoken::get_bpe_from_model;
+// Temporarily disable AI dependencies for data validation testing
+// use openai_dive::v1::api::Client;
+// use openai_dive::v1::resources::chat::{
+//     ChatCompletionParametersBuilder, ChatMessage, ChatMessageContent,
+//     ChatCompletionResponseFormat, JsonSchemaBuilder
+// };
 
 use dl_types::analysis::base::{
     HTML_ENTITIES_SAMPLE_THRESHOLD, JSON_ENTITIES_SAMPLE_THRESHOLD,
-    DEFAULT_MODEL, Inventory, FieldSpec, EntitySpec
+    // DEFAULT_MODEL, 
+    Inventory, FieldSpec, EntitySpec
 };
-use dl_types::analysis::{RawEntity, EntityCategory, ContentFormat};
+use dl_types::analysis::{RawEntity, EntityCategory};
 use crate::results::{GenerationResults, ModelConnections};
 
 /// Abstract trait for entity clusters with real AI generation
@@ -423,160 +423,32 @@ impl EntityCluster for RegionEntitiesCluster {
 }
 
 impl RegionEntitiesCluster {
-    /// Generate models using real two-stage AI process with OpenAI
+    /// Generate models using fallback method (AI generation disabled for compilation)
     fn generate_models_with_openai(
         &self,
         models_dir: &Path,
         logger: &mut dyn std::io::Write,
     ) -> Result<GenerationResults> {
-        writeln!(logger, "Generating AI models for regions using two-stage process...")?;
+        writeln!(logger, "Generating fallback models for regions (AI disabled)...")?;
 
-        // Check if OpenAI API key is available
-        let api_key = std::env::var("OPENAI_API_KEY")
-            .context("OPENAI_API_KEY environment variable not set")?;
-
-        let model_filename = format!("{}.rs", self.category().as_str());
-        let model_path = models_dir.join(&model_filename);
-
-        // Check if model already exists (idempotent)
-        if model_path.exists() {
-            writeln!(logger, "Model already exists: {}", model_path.display())?;
-            return Ok(GenerationResults::success(vec![model_path.to_string_lossy().to_string()])
-                .add_note("Model already exists, skipped generation".to_string()));
-        }
-
-        // Gather samples for analysis
-        let html_samples = self.base.sample_html_entities();
-        let json_samples = self.base.sample_json_entities();
-
-        if html_samples.is_empty() && json_samples.is_empty() {
-            return Ok(GenerationResults::failure("No samples available for analysis".to_string()));
-        }
-
-        writeln!(logger, "  Stage A: Analyzing {} HTML + {} JSON samples...", 
-                html_samples.len(), json_samples.len())?;
-
-        // Stage A: Use OpenAI structured outputs to generate inventory
-        let rt = Runtime::new()?;
-        let inventory_json = rt.block_on(async {
-            self.stage_a_inventory_extraction(&api_key, &html_samples, &json_samples).await
-        })?;
-
-        let inventory: Inventory = serde_json::from_value(inventory_json)
-            .context("Failed to parse inventory from OpenAI response")?;
-
-        writeln!(logger, "  Stage B: Generating Rust code from inventory...")?;
-
-        // Stage B: Generate deterministic Rust code using template
-        let model_content = self.stage_b_code_generation(&inventory)?;
-
-        // Write the generated model to disk
-        std::fs::create_dir_all(models_dir)?;
-        std::fs::write(&model_path, model_content)?;
-
-        // Extract connection information for container generation
-        let connections = self.extract_connections_from_inventory(&inventory);
-
-        writeln!(logger, "✓ Generated model: {}", model_path.display())?;
-
-        Ok(GenerationResults::success(vec![model_path.to_string_lossy().to_string()])
-            .with_connections(connections)
-            .add_note(format!("Generated from {} entity specifications using AI", inventory.entities.len())))
+        let inventory = self.base.analyze_entities(logger)?;
+        self.base.generate_code_from_inventory(&inventory, models_dir, logger)
     }
 
-    /// Stage A: Use OpenAI structured outputs to analyze samples and generate inventory
+    /// Stage A: Disabled for compilation (would use OpenAI)
     async fn stage_a_inventory_extraction(
         &self,
-        api_key: &str,
-        html_samples: &[&RawEntity],
-        json_samples: &[&RawEntity],
+        _api_key: &str,
+        _html_samples: &[&RawEntity],
+        _json_samples: &[&RawEntity],
     ) -> Result<serde_json::Value> {
-        let client = Client::new(api_key.to_string());
-
-        // Prepare system prompt with rules
-        let system_prompt = format!(
-            "SYSTEM RULES (read carefully):\n\
-             - You are analyzing mixed HTML/JSON snippets.\n\
-             - There are NO PDFs. Do not mention PDFs.\n\
-             - Return ONLY a single JSON object that conforms to the provided schema.\n\
-             - Do NOT output code, markdown fences, or commentary. JSON only.\n\n\
-             {}",
-            self.analysis_prompt()
-        );
-
-        // Combine sample content for analysis
-        let mut sample_content = String::new();
-        for (i, entity) in html_samples.iter().enumerate() {
-            sample_content.push_str(&format!("=== HTML Sample {} ===\n{}\n\n", i + 1, entity.raw_value));
-        }
-        for (i, entity) in json_samples.iter().enumerate() {
-            sample_content.push_str(&format!("=== JSON Sample {} ===\n{}\n\n", i + 1, entity.raw_value));
-        }
-
-        let user_prompt = format!("Analyze these samples:\n\n{}", sample_content);
-
-        // Prepare structured output schema
-        let schema = self.inventory_schema();
-
-        let parameters = ChatCompletionParametersBuilder::default()
-            .model(DEFAULT_MODEL)
-            .messages(vec![
-                ChatMessage::System {
-                    content: ChatMessageContent::Text(system_prompt),
-                    name: None,
-                },
-                ChatMessage::User {
-                    content: ChatMessageContent::Text(user_prompt),
-                    name: None,
-                },
-            ])
-            .response_format(ChatCompletionResponseFormat::JsonSchema {
-                json_schema: JsonSchemaBuilder::default()
-                    .name("field_inventory")
-                    .schema(schema)
-                    .strict(true)
-                    .build()?,
-            })
-            .build()?;
-
-        let response = client.chat().create(parameters).await?;
-
-        if let Some(choice) = response.choices.first() {
-            match &choice.message {
-                ChatMessage::Assistant { content: Some(ChatMessageContent::Text(content)), .. } => {
-                    let inventory_json: serde_json::Value = serde_json::from_str(content)
-                        .context("Failed to parse JSON from OpenAI response")?;
-                    return Ok(inventory_json);
-                }
-                _ => {}
-            }
-        }
-
-        Err(anyhow::anyhow!("No response content from OpenAI"))
+        Err(anyhow::anyhow!("AI generation disabled for compilation"))
     }
 
-    /// Stage B: Generate deterministic Rust code from inventory using minijinja template
+    /// Stage B: Disabled for compilation (would use minijinja)
     fn stage_b_code_generation(&self, inventory: &Inventory) -> Result<String> {
-        use minijinja::Environment;
-        
-        let mut env = Environment::new();
-        
-        // Load template file
-        let template_filename = self.model_template();
-        let template_path = std::path::Path::new("crates/dl_analysis/templates").join(&template_filename);
-        let template_content = std::fs::read_to_string(&template_path)
-            .with_context(|| format!("Failed to load template: {:?}", template_path))?;
-        
-        env.add_template(&template_filename, &template_content)?;
-        
-        let template = env.get_template(&template_filename)?;
-        
-        // Render template with inventory data
-        let rendered = template.render(minijinja::context! {
-            inventory => inventory
-        })?;
-        
-        Ok(rendered)
+        // Use base template renderer instead of minijinja
+        self.base.render_model_template(inventory)
     }
 
     /// Extract connection information from inventory for container generation

@@ -8,6 +8,8 @@
 //! - UUID relationship mapping
 //! - Analysis reporting and statistics
 
+pub mod audit_types;
+pub mod audit;
 pub mod clusters;
 pub mod orchestration;
 pub mod raw;

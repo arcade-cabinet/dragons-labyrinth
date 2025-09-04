@@ -7,6 +7,7 @@ use anyhow::Result;
 use std::path::PathBuf;
 
 // Module declarations
+pub mod audit;
 pub mod generators;
 pub mod utilities;
 pub mod ai_dialogue;

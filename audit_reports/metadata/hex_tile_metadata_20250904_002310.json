@@ -1,0 +1,13 @@
+{
+  "category": "analysis",
+  "subcategory": "hex_tile_metadata",
+  "type_name": "dl_analysis::audit_types::HexTileMetadataAudit",
+  "report_name": "hex_tile_metadata",
+  "timestamp": "2025-09-04T00:23:10.042326Z",
+  "row_count": 1,
+  "column_count": 25,
+  "file_path": "audit_reports/audits/analysis/hex_tile_metadata/hex_tile_metadata.csv",
+  "file_size_bytes": 891,
+  "archive_created": null,
+  "generation_time_ms": 0
+}

@@ -4,37 +4,33 @@ version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-tracing = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-ron = { workspace = true }
-openai_dive = { workspace = true }
-tiktoken-rs = { workspace = true }
-tokio = { workspace = true }
-rusqlite = { workspace = true }
-uuid = { workspace = true }
-regex = { workspace = true }
-lazy_static = { workspace = true }
-rayon = { workspace = true }
-glob = { workspace = true }
-walkdir = { workspace = true }
-scraper = { workspace = true }
-html5ever = { workspace = true }
-ammonia = { workspace = true }
-fs_extra = { workspace = true }
-tempfile = { workspace = true }
-minijinja = { workspace = true }
-chrono = { workspace = true, features = ["serde"] }
-csv = { workspace = true }
-dl_seeds = { workspace = true }
+# Core dependencies
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+# Our types and utilities
 dl_types = { path = "../dl_types" }
+dl_audit = { path = "../dl_audit" }
+
+# AI integration
+openai = "1.0.0-beta.4"
+tokio = { version = "1", features = ["full"] }
+
+# Database access for HBF
+rusqlite = "0.34.0"
+
+# File operations
+walkdir.workspace = true
+ron = "0.8"
+csv = "1.3"
+
+# Template processing  
+tera = "1.20"
 
 [build-dependencies]
-anyhow = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-dl_seeds = { workspace = true }
+anyhow.workspace = true
+dl_seeds = { path = "../dl_seeds" }
