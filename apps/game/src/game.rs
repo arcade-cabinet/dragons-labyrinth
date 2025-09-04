@@ -1,14 +1,12 @@
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
-use avian3d::prelude::*;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
 use bevy_yarnspinner::prelude::*;
-use bevy_yoleck::prelude::*;
 
 use crate::world::systems::*;
 use crate::world::components::*;
-use crate::world::resources::*;
+use crate::world::state::*;
 // Consolidated: no separate WorldPlugin needed
 
 pub struct GamePlugin;
@@ -37,90 +35,36 @@ impl Plugin for GamePlugin {
         // Third-party plugins
         app.add_plugins((
             TilemapPlugin,
-            PhysicsPlugins::default(),
             CobwebPlugin::default(),
             CobwebUiPlugin,
-            YarnSpinnerPlugin,
-            YoleckPlugin,
+            YarnSpinnerPlugin::default(),
         ));
 
         // World organization consolidated into this plugin
 
-        // Game resources
+        // Game resources - only include what actually exists
         app.init_resource::<WorldState>()
             .init_resource::<GameState>()
             .init_resource::<DreadLevel>()
-            .init_resource::<AssetHandles>()
-            .init_resource::<RegionalProgression>()
-            .init_resource::<MovementPreview>()
-            .init_resource::<DayNightCycle>()
-            .init_resource::<WeatherSystem>()
-            .init_resource::<CharacterCreator>()
-            .init_resource::<UIManager>()
-            .init_resource::<ProceduralAudioSystem>();
+            .init_resource::<AssetHandles>();
 
-        // Game components registration
-        app.register_component_hooks::<Tile>()
-            .register_component_hooks::<Player>()
-            .register_component_hooks::<Companion>()
-            .register_component_hooks::<DreadSource>()
-            .register_component_hooks::<NPC>()
-            .register_component_hooks::<Monster>()
-            .register_component_hooks::<CharacterModel>();
-
-        // Game systems
+        // Game systems - only include what actually exists
         app.add_systems(Startup, (
             setup_camera,
             setup_world,
-            setup_splash_screen,
-            setup_asset_fallbacks,
-            load_assets,
         ))
         .add_systems(Update, (
-            player_movement_system,
+            cross_platform_input_system,
             layer_cake_hex_world_system,
             companion_psychology_system,
             dread_progression_system,
             asset_loading_system,
             ui_update_system,
-            update_day_night_cycle,
-            update_movement_preview,
             check_forced_rest,
-            update_regional_progression,
-            update_horror_audio,
-            update_ui_animations,
-            update_procedural_audio,
-            play_ui_sound_effects,
-        ).run_if(in_state(GameStateEnum::Playing)))
-        
-        // Add generated world plugin
-        .add_plugins(crate::spatial::SpatialPlugin)
-        
-        // Splash screen
-        .add_systems(Update, update_splash_screen.run_if(in_state(GameStateEnum::Loading)))
-        .add_systems(OnExit(GameStateEnum::Loading), cleanup_ui_screen::<SplashScreen>)
-        
-        // Main menu
-        .add_systems(OnEnter(GameStateEnum::MainMenu), (setup_main_menu, play_menu_audio))
-        .add_systems(Update, handle_main_menu_input.run_if(in_state(GameStateEnum::MainMenu)))
-        .add_systems(OnExit(GameStateEnum::MainMenu), cleanup_ui_screen::<MainMenuScreen>)
-        
-        // Character creation
-        .add_systems(OnEnter(GameStateEnum::CharacterCreation), (setup_character_creator_ui, play_character_creation_audio))
-        .add_systems(Update, handle_character_creator_input.run_if(in_state(GameStateEnum::CharacterCreation)))
-        .add_systems(OnExit(GameStateEnum::CharacterCreation), (
-            cleanup_ui_screen::<CharacterCreationScreen>,
-            spawn_player_character,
-        ));
+        ).run_if(in_state(GameStateEnum::Playing)));
 
         // Game states
         app.init_state::<GameStateEnum>();
-
-        // Development tools
-        #[cfg(debug_assertions)]
-        {
-            app.add_plugins(bevy::dev_tools::ui_debug_overlay::UiDebugPlugin);
-        }
     }
 }
 
@@ -139,13 +83,11 @@ pub enum GameStateEnum {
 fn setup_camera(mut commands: Commands) {
     // Overhead camera for hex world
     commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 50.0, 0.0)
-                .looking_at(Vec3::ZERO, Vec3::Y),
-            projection: Projection::Orthographic(OrthographicProjection {
-                scale: 0.5,
-                ..default()
-            }),
+        Camera3d::default(),
+        Transform::from_xyz(0.0, 50.0, 0.0)
+            .looking_at(Vec3::ZERO, Vec3::Y),
+        OrthographicProjection {
+            scale: 0.5,
             ..default()
         },
         Name::new("OverheadCamera"),
@@ -190,3 +132,9 @@ struct MainMenuMarker;
 
 #[derive(Component)]
 pub struct StartGameButton;
+
+pub fn run_app() {
+    App::new()
+        .add_plugins(GamePlugin)
+        .run();
+}

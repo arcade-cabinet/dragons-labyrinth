@@ -39,14 +39,14 @@ pub fn asset_loading_system(
     
     // Check tilemap texture
     if let Some(handle) = &asset_handles.tilemap_texture {
-        if asset_server.load_state(handle.id()) != LoadState::Loaded {
+        if !matches!(asset_server.load_state(handle.id()), LoadState::Loaded) {
             all_loaded = false;
         }
     }
     
     // Check biome textures
     for (name, handle) in &asset_handles.biome_textures {
-        if asset_server.load_state(handle.id()) != LoadState::Loaded {
+        if !matches!(asset_server.load_state(handle.id()), LoadState::Loaded) {
             all_loaded = false;
             break;
         }
@@ -54,7 +54,7 @@ pub fn asset_loading_system(
     
     // Check feature models
     for (name, handle) in &asset_handles.feature_models {
-        if asset_server.load_state(handle.id()) != LoadState::Loaded {
+        if !matches!(asset_server.load_state(handle.id()), LoadState::Loaded) {
             all_loaded = false;
             break;
         }

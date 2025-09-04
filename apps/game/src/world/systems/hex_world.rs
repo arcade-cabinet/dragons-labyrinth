@@ -4,21 +4,12 @@ use std::collections::HashMap;
 
 use crate::world::components::{Tile, BiomeType, PathOverlay, FeatureOverlay, HexPosition, HexId, HexCorrelations};
 use crate::world::state::{WorldState, AssetHandles};
-use crate::utils::hex::*;
 use crate::spatial::SpatialContainer;
+use dl_types::world::HexCoord;
+use crate::utils::hex::{hex_to_world, world_to_hex};
 
 // Include generated world resources
 include!(concat!(env!("OUT_DIR"), "/generated_world.rs"));
-
-/// Entity set at a hex coordinate from generated resources
-#[derive(Clone, Default)]
-pub struct HexEntitySet {
-    pub settlements: Vec<String>,
-    pub factions: Vec<String>,
-    pub npcs: Vec<String>,
-    pub dungeons: Vec<String>,
-    pub special_features: Vec<String>,
-}
 
 /// Layer cake hex world system that uses generated dual pattern resources
 /// Replaces static mapgen with sophisticated generated content
@@ -28,7 +19,7 @@ pub fn layer_cake_hex_world_system(
     mut spatial_container: ResMut<SpatialContainer>,
     player_query: Query<&Transform, (With<crate::world::components::Player>, Changed<Transform>)>,
     asset_handles: Res<AssetHandles>,
-    mut tilemap_query: Query<&mut TilemapStorage>,
+    mut tilemap_query: Query<&mut TileStorage>,
     correlations: Res<EntityCorrelations>,
 ) {
     // Use generated resources instead of procedural generation
@@ -80,17 +71,17 @@ fn load_generated_hex_with_correlations(
     world_state: &mut ResMut<WorldState>,
     spatial_container: &mut ResMut<SpatialContainer>,
     asset_handles: &Res<AssetHandles>,
-    tilemap_query: &mut Query<&mut TilemapStorage>,
+    tilemap_query: &mut Query<&mut TileStorage>,
     correlations: &Res<EntityCorrelations>,
 ) {
     // Query generated resources for this hex coordinate
-    let hex_entities = correlations.get_entities_at_hex((hex_coord.x, hex_coord.y));
+    let hex_entities = correlations.get_entities_at_hex((hex_coord.q, hex_coord.r));
     
     // Determine biome type from generated data or default based on distance
     let biome_type = determine_biome_from_correlations(hex_coord, hex_entities);
     
     // Create tile entity with bevy_ecs_tilemap integration
-    let tile_pos = TilePos::new(hex_coord.x as u32, hex_coord.y as u32);
+    let tile_pos = TilePos::new(hex_coord.q as u32, hex_coord.r as u32);
     let texture_index = get_texture_index_for_biome(&biome_type);
     
     if let Ok(mut tilemap_storage) = tilemap_query.get_single_mut() {
@@ -107,8 +98,8 @@ fn load_generated_hex_with_correlations(
                 paths: Vec::new(),
                 features: Vec::new(),
             },
-            HexPosition { q: hex_coord.x, r: hex_coord.y },
-            HexId(format!("hex_{}_{}", hex_coord.x, hex_coord.y)),
+            HexPosition { q: hex_coord.q, r: hex_coord.r },
+            HexId(format!("hex_{}_{}", hex_coord.q, hex_coord.r)),
             HexCorrelations {
                 settlements: hex_entities.settlements.clone(),
                 factions: hex_entities.factions.clone(),
@@ -121,7 +112,7 @@ fn load_generated_hex_with_correlations(
         tilemap_storage.set(&tile_pos, tile_entity);
         
         // Register in spatial container for O(1) lookups
-        spatial_container.register_hex_entity((hex_coord.x, hex_coord.y), tile_entity);
+        spatial_container.register_hex_entity((hex_coord.q, hex_coord.r), tile_entity);
         
         // Spawn correlated entities at this hex using generated data
         spawn_correlated_entities_at_hex(
@@ -223,7 +214,7 @@ fn establish_player_starting_position(
             commands.spawn((
                 Transform::from_translation(world_pos + Vec3::new(0.0, 2.0, 0.0)),
                 crate::world::components::Player::default(),
-                HexPosition { q: coords.0, r: coords.1 },
+                HexPosition::new(coords.0, coords.1),
                 Name::new("Player"),
             ));
             
@@ -235,7 +226,7 @@ fn establish_player_starting_position(
             commands.spawn((
                 Transform::from_translation(origin_pos + Vec3::new(0.0, 2.0, 0.0)),
                 crate::world::components::Player::default(),
-                HexPosition { q: 0, r: 0 },
+                HexPosition::new(0, 0),
                 Name::new("Player"),
             ));
             
@@ -287,7 +278,7 @@ fn determine_biome_from_correlations(hex_coord: HexCoord, hex_entities: &HexEnti
         BiomeType::Grassland
     } else if !hex_entities.dungeons.is_empty() {
         // Hexes with dungeons tend to be corrupted or dangerous
-        BiomeType::Corrupted(Box::new(BiomeType::Forest))
+        BiomeType::VoidForest
     } else {
         // Use distance-based fallback like original system
         get_biome_from_distance(hex_coord)
@@ -296,13 +287,13 @@ fn determine_biome_from_correlations(hex_coord: HexCoord, hex_entities: &HexEnti
 
 /// Fallback biome determination based on distance (simplified from original)
 fn get_biome_from_distance(hex_coord: HexCoord) -> BiomeType {
-    let distance_from_origin = (hex_coord.x.abs() + hex_coord.y.abs()) as f32;
+    let distance_from_origin = (hex_coord.q.abs() + hex_coord.r.abs()) as f32;
     
     match distance_from_origin {
         d if d < 10.0 => BiomeType::Grassland,
         d if d < 30.0 => BiomeType::Forest,
-        d if d < 60.0 => BiomeType::Desert,
-        _ => BiomeType::Corrupted(Box::new(BiomeType::Void)),
+        d if d < 60.0 => BiomeType::CorruptedDesert,
+        _ => BiomeType::Void,
     }
 }
 
@@ -311,14 +302,14 @@ fn get_texture_index_for_biome(biome_type: &BiomeType) -> TileTextureIndex {
     let index = match biome_type {
         BiomeType::Grassland => 0,
         BiomeType::Forest => 1,
-        BiomeType::Mountain => 2,
-        BiomeType::Desert => 3,
-        BiomeType::Swamp => 4,
-        BiomeType::Water => 5,
-        BiomeType::Snow => 6,
-        BiomeType::Lava => 7,
-        BiomeType::Void => 8,
-        BiomeType::Corrupted(_) => 9,
+        BiomeType::Water => 2,
+        BiomeType::Swamp => 3,
+        BiomeType::CorruptedForest => 4,
+        BiomeType::Desert => 5,
+        BiomeType::CorruptedDesert => 6,
+        BiomeType::VoidForest => 7,
+        BiomeType::Lava => 8,
+        BiomeType::Void => 9,
         _ => 0, // Default to grassland
     };
     TileTextureIndex(index)
@@ -331,7 +322,7 @@ fn get_hexes_around_point(center: HexCoord, radius: i32) -> Vec<HexCoord> {
     for dx in -radius..=radius {
         for dy in -radius..=radius {
             if dx.abs() + dy.abs() <= radius {  // Hex distance constraint
-                hexes.push(HexCoord::new(center.x + dx, center.y + dy));
+                hexes.push(HexCoord::new(center.q + dx, center.r + dy));
             }
         }
     }

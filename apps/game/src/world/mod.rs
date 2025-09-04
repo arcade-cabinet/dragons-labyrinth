@@ -8,6 +8,7 @@ pub mod alignment;
 pub mod atlas;
 pub mod actors;
 pub mod systems;
+pub mod regions;
 
 // ECS consolidation: alias existing modules under world/
 pub mod components;

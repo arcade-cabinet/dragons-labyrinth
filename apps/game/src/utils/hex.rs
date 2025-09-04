@@ -1,62 +1,10 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct HexCoord {
-    pub x: i32,
-    pub y: i32,
-}
-
-impl HexCoord {
-    pub fn new(x: i32, y: i32) -> Self {
-        Self { x, y }
-    }
-    
-    pub fn zero() -> Self {
-        Self { x: 0, y: 0 }
-    }
-    
-    pub fn distance(&self, other: &HexCoord) -> i32 {
-        ((self.x - other.x).abs() + (self.x + self.y - other.x - other.y).abs() + (self.y - other.y).abs()) / 2
-    }
-    
-    pub fn neighbors(&self) -> Vec<HexCoord> {
-        vec![
-            HexCoord::new(self.x + 1, self.y),
-            HexCoord::new(self.x + 1, self.y - 1),
-            HexCoord::new(self.x, self.y - 1),
-            HexCoord::new(self.x - 1, self.y),
-            HexCoord::new(self.x - 1, self.y + 1),
-            HexCoord::new(self.x, self.y + 1),
-        ]
-    }
-    
-    pub fn neighbors_within_range(&self, range: i32) -> Vec<HexCoord> {
-        let mut neighbors = Vec::new();
-        for x in -range..=range {
-            for y in (-range).max(-x-range)..=range.min(-x+range) {
-                let neighbor = HexCoord::new(self.x + x, self.y + y);
-                if neighbor != *self {
-                    neighbors.push(neighbor);
-                }
-            }
-        }
-        neighbors
-    }
-    
-    pub fn to_world(&self) -> Vec3 {
-        hex_to_world(*self)
-    }
-    
-    pub fn from_world(world_pos: Vec3) -> Self {
-        world_to_hex(world_pos)
-    }
-}
+use dl_types::world::HexCoord;
 
 pub fn hex_to_world(hex: HexCoord) -> Vec3 {
     let size = 32.0; // Half the hex tile size
-    let x = size * (3.0_f32.sqrt() * hex.x as f32 + 3.0_f32.sqrt() / 2.0 * hex.y as f32);
-    let z = size * (3.0 / 2.0 * hex.y as f32);
+    let x = size * (3.0_f32.sqrt() * hex.q as f32 + 3.0_f32.sqrt() / 2.0 * hex.r as f32);
+    let z = size * (3.0 / 2.0 * hex.r as f32);
     Vec3::new(x, 0.0, z)
 }
 
@@ -105,7 +53,7 @@ pub fn hex_direction(direction: i32) -> HexCoord {
 
 pub fn hex_neighbor(hex: HexCoord, direction: i32) -> HexCoord {
     let dir = hex_direction(direction);
-    HexCoord::new(hex.x + dir.x, hex.y + dir.y)
+    HexCoord::new(hex.q + dir.q, hex.r + dir.r)
 }
 
 pub fn hex_ring(center: HexCoord, radius: i32) -> Vec<HexCoord> {
@@ -114,7 +62,8 @@ pub fn hex_ring(center: HexCoord, radius: i32) -> Vec<HexCoord> {
     }
     
     let mut results = Vec::new();
-    let mut hex = HexCoord::new(center.x + hex_direction(4).x * radius, center.y + hex_direction(4).y * radius);
+    let dir_4 = hex_direction(4);
+    let mut hex = HexCoord::new(center.q + dir_4.q * radius, center.r + dir_4.r * radius);
     
     for direction in 0..6 {
         for _step in 0..radius {
@@ -135,15 +84,15 @@ pub fn hex_spiral(center: HexCoord, radius: i32) -> Vec<HexCoord> {
 }
 
 pub fn hex_line(start: HexCoord, end: HexCoord) -> Vec<HexCoord> {
-    let distance = start.distance(&end);
+    let distance = hex_distance(start, end);
     let mut results = Vec::new();
     
     for i in 0..=distance {
         let t = i as f32 / distance.max(1) as f32;
-        let lerp_x = start.x as f32 * (1.0 - t) + end.x as f32 * t;
-        let lerp_y = start.y as f32 * (1.0 - t) + end.y as f32 * t;
+        let lerp_q = start.q as f32 * (1.0 - t) + end.q as f32 * t;
+        let lerp_r = start.r as f32 * (1.0 - t) + end.r as f32 * t;
         
-        results.push(world_to_hex(Vec3::new(lerp_x * 32.0, 0.0, lerp_y * 32.0)));
+        results.push(world_to_hex(Vec3::new(lerp_q * 32.0, 0.0, lerp_r * 32.0)));
     }
     
     results
@@ -151,12 +100,40 @@ pub fn hex_line(start: HexCoord, end: HexCoord) -> Vec<HexCoord> {
 
 pub fn hex_range(center: HexCoord, range: i32) -> Vec<HexCoord> {
     let mut results = Vec::new();
-    for x in -range..=range {
-        for y in (-range).max(-x - range)..=range.min(-x + range) {
-            results.push(HexCoord::new(center.x + x, center.y + y));
+    for q in -range..=range {
+        for r in (-range).max(-q - range)..=range.min(-q + range) {
+            results.push(HexCoord::new(center.q + q, center.r + r));
         }
     }
     results
+}
+
+pub fn hex_distance(a: HexCoord, b: HexCoord) -> i32 {
+    ((a.q - b.q).abs() + (a.q + a.r - b.q - b.r).abs() + (a.r - b.r).abs()) / 2
+}
+
+pub fn hex_neighbors(hex: HexCoord) -> Vec<HexCoord> {
+    vec![
+        HexCoord::new(hex.q + 1, hex.r),
+        HexCoord::new(hex.q + 1, hex.r - 1),
+        HexCoord::new(hex.q, hex.r - 1),
+        HexCoord::new(hex.q - 1, hex.r),
+        HexCoord::new(hex.q - 1, hex.r + 1),
+        HexCoord::new(hex.q, hex.r + 1),
+    ]
+}
+
+pub fn hex_neighbors_within_range(center: HexCoord, range: i32) -> Vec<HexCoord> {
+    let mut neighbors = Vec::new();
+    for q in -range..=range {
+        for r in (-range).max(-q-range)..=range.min(-q+range) {
+            let neighbor = HexCoord::new(center.q + q, center.r + r);
+            if neighbor != center {
+                neighbors.push(neighbor);
+            }
+        }
+    }
+    neighbors
 }
 
 #[cfg(test)]
@@ -167,13 +144,13 @@ mod tests {
     fn test_hex_distance() {
         let a = HexCoord::new(0, 0);
         let b = HexCoord::new(3, 0);
-        assert_eq!(a.distance(&b), 3);
+        assert_eq!(hex_distance(a, b), 3);
     }
 
     #[test]
     fn test_hex_neighbors() {
         let hex = HexCoord::new(0, 0);
-        let neighbors = hex.neighbors();
+        let neighbors = hex_neighbors(hex);
         assert_eq!(neighbors.len(), 6);
         assert!(neighbors.contains(&HexCoord::new(1, 0)));
         assert!(neighbors.contains(&HexCoord::new(0, 1)));

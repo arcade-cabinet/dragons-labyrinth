@@ -1,0 +1,450 @@
+//! Complete ECS World System for Dragon's Labyrinth
+//! Generated from {{ total_entities }} entities ({{ regions_count }} regions, {{ dungeons_count }} dungeons, {{ settlements_count }} settlements, {{ factions_count }} factions)
+//! Uses dl_types::world::HexCoord throughout for consistency
+
+use bevy::prelude::*;
+use dl_types::world::HexCoord;
+use std::collections::HashMap;
+
+// ================================
+// COMPLETE ECS COMPONENT SYSTEM
+// ================================
+
+/// Complete hex position component using proper dl_types
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct HexPosition {
+    pub coord: HexCoord,
+}
+
+impl HexPosition {
+    pub fn new(q: i32, r: i32) -> Self {
+        Self {
+            coord: HexCoord { q, r }
+        }
+    }
+    
+    pub fn to_world_pos(&self) -> Vec3 {
+        let x = (3.0_f32.sqrt() * self.coord.q as f32 + 3.0_f32.sqrt() / 2.0 * self.coord.r as f32) * 32.0;
+        let z = (3.0 / 2.0 * self.coord.r as f32) * 32.0;
+        Vec3::new(x, 0.0, z)
+    }
+}
+
+/// Biome component with complete type integration
+#[derive(Component, Debug, Clone)]
+pub struct BiomeComponent {
+    pub biome_type: dl_types::BiomeType,
+    pub corruption_level: f32,
+    pub environmental_hazards: Vec<String>,
+}
+
+/// Settlement component with complete data
+#[derive(Component, Debug, Clone)]
+pub struct SettlementComponent {
+    pub uuid: String,
+    pub settlement_type: String,
+    pub population: u32,
+    pub leadership: Vec<String>,
+    pub trade_goods: Vec<String>,
+    pub faction_allegiance: Option<String>,
+    pub corruption_resistance: f32,
+}
+
+/// Faction presence component
+#[derive(Component, Debug, Clone)]
+pub struct FactionPresenceComponent {
+    pub faction_uuid: String,
+    pub influence_level: f32,
+    pub controlled_territories: Vec<HexCoord>,
+    pub allied_factions: Vec<String>,
+    pub enemy_factions: Vec<String>,
+    pub power_level: u32,
+}
+
+/// NPC component with complete behavioral data
+#[derive(Component, Debug, Clone)]
+pub struct NPCComponent {
+    pub uuid: String,
+    pub npc_type: String,
+    pub is_active: bool,
+    pub dialogue_tree_id: Option<String>,
+    pub current_location: HexCoord,
+    pub movement_pattern: MovementPattern,
+    pub trauma_level: f32,
+}
+
+/// Dungeon entrance component
+#[derive(Component, Debug, Clone)]
+pub struct DungeonEntranceComponent {
+    pub dungeon_uuid: String,
+    pub entrance_type: String,
+    pub is_accessible: bool,
+    pub connected_areas: Vec<String>,
+    pub challenge_rating: u32,
+    pub loot_tables: Vec<String>,
+}
+
+/// Movement patterns for NPCs
+#[derive(Debug, Clone)]
+pub enum MovementPattern {
+    Stationary,
+    Patrol { waypoints: Vec<HexCoord>, current_index: usize },
+    Random { radius: u32 },
+    FollowPlayer { max_distance: u32 },
+}
+
+/// Player component with progression tracking
+#[derive(Component, Debug, Clone)]
+pub struct PlayerComponent {
+    pub current_hex: HexCoord,
+    pub dread_level: f32,
+    pub corruption_band: u32,
+    pub companion_relationships: HashMap<String, f32>,
+    pub inventory: Vec<String>,
+    pub health: f32,
+    pub max_health: f32,
+}
+
+// ================================
+// COMPLETE RESOURCE SYSTEM
+// ================================
+
+/// World spatial container for O(1) hex lookups
+#[derive(Resource, Default)]
+pub struct WorldSpatialContainer {
+    pub hex_to_entity: HashMap<HexCoord, Entity>,
+    pub uuid_to_entity: HashMap<String, Entity>,
+    pub settlement_locations: HashMap<String, HexCoord>,
+    pub faction_territories: HashMap<String, Vec<HexCoord>>,
+    pub npc_locations: HashMap<String, HexCoord>,
+    pub dungeon_entrances: HashMap<String, HexCoord>,
+}
+
+impl WorldSpatialContainer {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    
+    pub fn register_hex_entity(&mut self, coord: HexCoord, entity: Entity) {
+        self.hex_to_entity.insert(coord, entity);
+    }
+    
+    pub fn register_uuid_entity(&mut self, uuid: String, entity: Entity) {
+        self.uuid_to_entity.insert(uuid, entity);
+    }
+    
+    pub fn get_entity_at_hex(&self, coord: HexCoord) -> Option<Entity> {
+        self.hex_to_entity.get(&coord).copied()
+    }
+    
+    pub fn get_entity_by_uuid(&self, uuid: &str) -> Option<Entity> {
+        self.uuid_to_entity.get(uuid).copied()
+    }
+    
+    pub fn get_nearby_hexes(&self, center: HexCoord, radius: u32) -> Vec<HexCoord> {
+        let mut result = Vec::new();
+        for q in -radius as i32..=radius as i32 {
+            for r in -radius as i32..=radius as i32 {
+                if q.abs() + r.abs() + (q + r).abs() <= radius as i32 * 2 {
+                    result.push(HexCoord { q: center.q + q, r: center.r + r });
+                }
+            }
+        }
+        result
+    }
+}
+
+/// Entity correlations for fast relationship queries
+#[derive(Resource, Default)]
+pub struct EntityCorrelations {
+    pub hex_to_entities: HashMap<HexCoord, HexEntitySet>,
+    pub region_boundaries: HashMap<String, Vec<HexCoord>>,
+    pub faction_influence_map: HashMap<HexCoord, Vec<(String, f32)>>,
+}
+
+/// Complete entity set at hex coordinates
+#[derive(Debug, Clone, Default)]
+pub struct HexEntitySet {
+    pub settlements: Vec<Entity>,
+    pub factions: Vec<Entity>,
+    pub npcs: Vec<Entity>,
+    pub dungeons: Vec<Entity>,
+    pub special_features: Vec<Entity>,
+    pub hex_entity: Option<Entity>,
+}
+
+impl EntityCorrelations {
+    pub fn new() -> Self {
+        let mut correlations = Self::default();
+        
+        // Initialize with generated data from all {{ total_entities }} entities
+        {% for region in regions %}
+        // Region: {{ region.uuid }}
+        {% for hex_coord in region.hex_coordinates %}
+        let coord = HexCoord { q: {{ hex_coord.q }}, r: {{ hex_coord.r }} };
+        correlations.hex_to_entities.insert(coord, HexEntitySet::default());
+        {% endfor %}
+        {% endfor %}
+        
+        correlations
+    }
+    
+    pub fn get_entities_at_hex(&self, coord: HexCoord) -> &HexEntitySet {
+        static EMPTY: HexEntitySet = HexEntitySet {
+            settlements: Vec::new(),
+            factions: Vec::new(),
+            npcs: Vec::new(),
+            dungeons: Vec::new(),
+            special_features: Vec::new(),
+            hex_entity: None,
+        };
+        
+        self.hex_to_entities.get(&coord).unwrap_or(&EMPTY)
+    }
+}
+
+// ================================
+// COMPLETE ECS SYSTEMS
+// ================================
+
+/// System to initialize the complete world from generated data
+pub fn initialize_complete_world(
+    mut commands: Commands,
+    mut spatial_container: ResMut<WorldSpatialContainer>,
+    mut correlations: ResMut<EntityCorrelations>,
+) {
+    info!("Initializing complete world with {{ total_entities }} entities...");
+    
+    // Spawn all {{ regions_count }} regions with their hex tiles
+    {% for region in regions %}
+    spawn_region_{{ region.uuid|replace('-', '_') }}(&mut commands, &mut spatial_container, &mut correlations);
+    {% endfor %}
+    
+    // Spawn all {{ settlements_count }} settlements
+    {% for settlement in settlements %}
+    spawn_settlement_{{ settlement.uuid|replace('-', '_') }}(&mut commands, &mut spatial_container);
+    {% endfor %}
+    
+    // Initialize {{ factions_count }} faction territories
+    {% for faction in factions %}
+    initialize_faction_{{ faction.uuid|replace('-', '_') }}(&mut commands, &mut spatial_container);
+    {% endfor %}
+    
+    // Spawn all {{ dungeons_count }} dungeon entrances
+    {% for dungeon in dungeons %}
+    spawn_dungeon_entrance_{{ dungeon.uuid|replace('-', '_') }}(&mut commands, &mut spatial_container);
+    {% endfor %}
+    
+    info!("Complete world initialization finished: {} hex tiles spawned", spatial_container.hex_to_entity.len());
+}
+
+{% for region in regions %}
+/// Spawn region {{ region.uuid }} with all its hex tiles
+fn spawn_region_{{ region.uuid|replace('-', '_') }}(
+    commands: &mut Commands,
+    spatial_container: &mut ResMut<WorldSpatialContainer>,
+    correlations: &mut ResMut<EntityCorrelations>,
+) {
+    info!("Spawning region {{ region.uuid }} with {{ region.hex_coordinates|length }} hex tiles");
+    
+    {% for hex_coord in region.hex_coordinates %}
+    let coord_{{ loop.index0 }} = HexCoord { q: {{ hex_coord.q }}, r: {{ hex_coord.r }} };
+    let hex_entity_{{ loop.index0 }} = commands.spawn((
+        HexPosition::new({{ hex_coord.q }}, {{ hex_coord.r }}),
+        BiomeComponent {
+            biome_type: {{ hex_coord.biome_type }},
+            corruption_level: {{ hex_coord.corruption_level }},
+            environmental_hazards: vec![{% for hazard in hex_coord.environmental_hazards %}"{{ hazard }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+        },
+        Transform::from_translation(coord_{{ loop.index0 }}.to_world_pos()),
+        Name::new("Hex ({{ hex_coord.q }}, {{ hex_coord.r }})"),
+    )).id();
+    
+    spatial_container.register_hex_entity(coord_{{ loop.index0 }}, hex_entity_{{ loop.index0 }});
+    spatial_container.register_uuid_entity("{{ hex_coord.uuid }}".to_string(), hex_entity_{{ loop.index0 }});
+    
+    // Update correlations for this hex
+    let mut entity_set = HexEntitySet::default();
+    entity_set.hex_entity = Some(hex_entity_{{ loop.index0 }});
+    correlations.hex_to_entities.insert(coord_{{ loop.index0 }}, entity_set);
+    {% endfor %}
+}
+{% endfor %}
+
+{% for settlement in settlements %}
+/// Spawn settlement {{ settlement.uuid }}
+fn spawn_settlement_{{ settlement.uuid|replace('-', '_') }}(
+    commands: &mut Commands,
+    spatial_container: &mut ResMut<WorldSpatialContainer>,
+) {
+    let coord = HexCoord { q: {{ settlement.hex_coordinate.q }}, r: {{ settlement.hex_coordinate.r }} };
+    let world_pos = coord.to_world_pos() + Vec3::new(0.0, 1.0, 0.0);
+    
+    let settlement_entity = commands.spawn((
+        HexPosition { coord },
+        SettlementComponent {
+            uuid: "{{ settlement.uuid }}".to_string(),
+            settlement_type: "{{ settlement.settlement_type }}".to_string(),
+            population: {{ settlement.population }},
+            leadership: vec![{% for leader in settlement.leadership %}"{{ leader }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+            trade_goods: vec![{% for good in settlement.trade_goods %}"{{ good }}".to_string(){% if not loop.last %}, {% endif %}{% endfor %}],
+            faction_allegiance: {% if settlement.faction_allegiance %}Some("{{ settlement.faction_allegiance }}".to_string()){% else %}None{% endif %},
+            corruption_resistance: {{ settlement.corruption_resistance }},
+        },
+        Transform::from_translation(world_pos),
+        Name::new("Settlement: {{ settlement.uuid }}"),
+    )).id();
+    
+    spatial_container.register_uuid_entity("{{ settlement.uuid }}".to_string(), settlement_entity);
+    spatial_container.settlement_locations.insert("{{ settlement.uuid }}".to_string(), coord);
+}
+{% endfor %}
+
+/// System for hex-based movement with proper coordinate handling
+pub fn hex_movement_system(
+    mut player_query: Query<(&mut PlayerComponent, &mut Transform), With<PlayerComponent>>,
+    input: Res<ButtonInput<KeyCode>>,
+    mut spatial_container: ResMut<WorldSpatialContainer>,
+) {
+    if let Ok((mut player, mut transform)) = player_query.get_single_mut() {
+        let mut new_coord = player.current_hex;
+        let mut moved = false;
+        
+        // Handle hex movement input (Q/W/E/A/S/D)
+        if input.just_pressed(KeyCode::KeyQ) {
+            new_coord = HexCoord { q: new_coord.q - 1, r: new_coord.r };
+            moved = true;
+        } else if input.just_pressed(KeyCode::KeyW) {
+            new_coord = HexCoord { q: new_coord.q, r: new_coord.r - 1 };
+            moved = true;
+        } else if input.just_pressed(KeyCode::KeyE) {
+            new_coord = HexCoord { q: new_coord.q + 1, r: new_coord.r - 1 };
+            moved = true;
+        } else if input.just_pressed(KeyCode::KeyA) {
+            new_coord = HexCoord { q: new_coord.q - 1, r: new_coord.r + 1 };
+            moved = true;
+        } else if input.just_pressed(KeyCode::KeyS) {
+            new_coord = HexCoord { q: new_coord.q, r: new_coord.r + 1 };
+            moved = true;
+        } else if input.just_pressed(KeyCode::KeyD) {
+            new_coord = HexCoord { q: new_coord.q + 1, r: new_coord.r };
+            moved = true;
+        }
+        
+        if moved {
+            player.current_hex = new_coord;
+            let world_pos = new_coord.to_world_pos();
+            transform.translation = world_pos + Vec3::new(0.0, 2.0, 0.0); // Slightly elevated for visibility
+            
+            // Update player dread based on distance from origin
+            let distance_from_origin = (new_coord.q.abs() + new_coord.r.abs() + (new_coord.q + new_coord.r).abs()) / 2;
+            player.dread_level = (distance_from_origin as f32 * 0.05).min(180.0);
+            player.corruption_band = match distance_from_origin {
+                0..=20 => 1,
+                21..=40 => 2,
+                41..=60 => 3,
+                61..=120 => 4,
+                _ => 5,
+            };
+            
+            info!("Player moved to ({}, {}) - Dread: {:.1}, Band: {}", 
+                  new_coord.q, new_coord.r, player.dread_level, player.corruption_band);
+        }
+    }
+}
+
+/// System to handle touch input for cross-platform support
+pub fn touch_movement_system(
+    mut player_query: Query<(&mut PlayerComponent, &mut Transform), With<PlayerComponent>>,
+    touches: Res<Touches>,
+    camera_query: Query<(&Camera, &GlobalTransform)>,
+) {
+    if let Ok((mut player, mut transform)) = player_query.get_single_mut() {
+        if let Ok((camera, camera_transform)) = camera_query.get_single() {
+            for touch in touches.iter_just_pressed() {
+                if let Some(world_position) = camera.viewport_to_world_2d(camera_transform, touch.position()) {
+                    // Convert world position to hex coordinates
+                    let hex_x = (world_position.x * 2.0 / 3.0) / 32.0;
+                    let hex_z = (world_position.y / 32.0) - (hex_x / 2.0);
+                    
+                    let q = hex_x.round() as i32;
+                    let r = hex_z.round() as i32;
+                    let new_coord = HexCoord { q, r };
+                    
+                    // Check if the new position is adjacent (valid move)
+                    let distance = (player.current_hex.q - q).abs() + 
+                                  (player.current_hex.r - r).abs() + 
+                                  ((player.current_hex.q + player.current_hex.r) - (q + r)).abs();
+                    
+                    if distance == 2 { // Adjacent hex in axial coordinates
+                        player.current_hex = new_coord;
+                        let world_pos = new_coord.to_world_pos();
+                        transform.translation = world_pos + Vec3::new(0.0, 2.0, 0.0);
+                        
+                        // Update dread level
+                        let distance_from_origin = (q.abs() + r.abs() + (q + r).abs()) / 2;
+                        player.dread_level = (distance_from_origin as f32 * 0.05).min(180.0);
+                        
+                        info!("Touch move to ({}, {}) - Dread: {:.1}", q, r, player.dread_level);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// System to update NPC positions and behaviors
+pub fn npc_behavior_system(
+    mut npc_query: Query<(&mut NPCComponent, &mut Transform)>,
+    time: Res<Time>,
+    spatial_container: Res<WorldSpatialContainer>,
+) {
+    for (mut npc, mut transform) in npc_query.iter_mut() {
+        match &mut npc.movement_pattern {
+            MovementPattern::Stationary => {
+                // NPCs stay put but might update their facing direction
+            },
+            MovementPattern::Patrol { waypoints, current_index } => {
+                if !waypoints.is_empty() {
+                    let target = waypoints[*current_index];
+                    let target_pos = target.to_world_pos();
+                    
+                    // Simple movement towards target
+                    let direction = (target_pos - transform.translation).normalize();
+                    transform.translation += direction * 20.0 * time.delta_seconds();
+                    
+                    // Check if reached target
+                    if transform.translation.distance(target_pos) < 5.0 {
+                        *current_index = (*current_index + 1) % waypoints.len();
+                        npc.current_location = target;
+                    }
+                }
+            },
+            MovementPattern::Random { radius } => {
+                // Implement random movement within radius
+                // TODO: Add random movement logic
+            },
+            MovementPattern::FollowPlayer { max_distance: _ } => {
+                // Implement player following logic
+                // TODO: Add player following logic
+            },
+        }
+    }
+}
+
+/// Main plugin that integrates the complete generated world
+pub struct CompleteGeneratedWorldPlugin;
+
+impl Plugin for CompleteGeneratedWorldPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_resource::<WorldSpatialContainer>()
+            .init_resource::<EntityCorrelations>()
+            .add_systems(Startup, initialize_complete_world)
+            .add_systems(Update, (
+                hex_movement_system,
+                touch_movement_system,
+                npc_behavior_system,
+            ));
+    }
+}

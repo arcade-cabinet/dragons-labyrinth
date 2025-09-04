@@ -1,6 +1,17 @@
 use bevy::prelude::*;
 use std::collections::{HashMap, HashSet};
-use crate::utils::hex::HexCoord;
+use dl_types::world::HexCoord;
+
+#[derive(Resource, Default, Debug, Clone, PartialEq)]
+pub enum GameState {
+    #[default]
+    Loading,
+    MainMenu,
+    CharacterCreation,
+    InGame,
+    Paused,
+    GameOver,
+}
 
 #[derive(Resource, Default)]
 pub struct WorldState {
@@ -38,7 +49,7 @@ impl WorldState {
     pub fn spread_corruption(&mut self, center: HexCoord, radius: i32, intensity: f32) {
         for dx in -radius..=radius {
             for dy in -radius..=radius {
-                let hex = HexCoord::new(center.x + dx, center.y + dy);
+                let hex = HexCoord::new(center.q + dx, center.r + dy);
                 let distance = ((dx * dx + dy * dy) as f32).sqrt();
                 let corruption_amount = intensity * (1.0 - (distance / radius as f32)).max(0.0);
                 self.add_corruption(hex, corruption_amount);
@@ -161,3 +172,92 @@ impl DreadLevel {
         )
     }
 }
+
+// Additional resources needed by game.rs
+#[derive(Resource, Default)]
+pub struct RegionalProgression {
+    pub current_band: u32,
+    pub progression_rate: f32,
+}
+
+#[derive(Resource, Default)]
+pub struct MovementPreview {
+    pub enabled: bool,
+    pub target_hex: Option<HexCoord>,
+}
+
+#[derive(Resource, Default)]
+pub struct DayNightCycle {
+    pub time_of_day: f32,
+    pub cycle_speed: f32,
+}
+
+#[derive(Resource, Default)]
+pub struct WeatherSystem {
+    pub current_weather: WeatherType,
+    pub intensity: f32,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WeatherType {
+    Clear,
+    Fog,
+    Rain,
+    Storm,
+    Corruption,
+}
+
+impl Default for WeatherType {
+    fn default() -> Self {
+        Self::Clear
+    }
+}
+
+#[derive(Resource, Default)]
+pub struct CharacterCreator {
+    pub name: String,
+    pub background: String,
+    pub starting_stats: CharacterStats,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CharacterStats {
+    pub health: f32,
+    pub sanity: f32,
+    pub experience: u32,
+    pub level: u32,
+}
+
+#[derive(Resource, Default)]
+pub struct UIManager {
+    pub current_ui: UIScreen,
+    pub ui_entities: Vec<Entity>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub enum UIScreen {
+    #[default]
+    None,
+    MainMenu,
+    CharacterCreation,
+    InGame,
+    Dialogue,
+    GameOver,
+}
+
+#[derive(Resource, Default)]
+pub struct ProceduralAudioSystem {
+    pub current_track: Option<String>,
+    pub ambient_volume: f32,
+    pub music_volume: f32,
+}
+
+// UI screen component markers
+#[derive(Component)]
+pub struct SplashScreen;
+
+#[derive(Component)]
+pub struct MainMenuScreen;
+
+#[derive(Component)]
+pub struct CharacterCreationScreen;

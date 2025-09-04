@@ -16,8 +16,8 @@ serde_json.workspace = true
 dl_types = { path = "../dl_types" }
 dl_audit = { path = "../dl_audit" }
 
-# AI integration
-openai = "1.0.0-beta.4"
+# AI integration - using same library as dl_processors
+openai_dive = "1.2"
 tokio = { version = "1", features = ["full"] }
 
 # Database access for HBF
@@ -34,3 +34,4 @@ tera = "1.20"
 [build-dependencies]
 anyhow.workspace = true
 dl_seeds = { path = "../dl_seeds" }
+ron = "0.8"

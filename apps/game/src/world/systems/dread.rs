@@ -114,8 +114,13 @@ pub fn spawn_dread_source(
     commands.spawn((
         DreadSource {
             intensity,
-            range,
-            source_type: source_type.clone(),
+            range: range,
+            source_type: match source_type.as_str() {
+                "corrupted_landscape" => crate::world::components::dread::DreadSourceType::CorruptedLandscape,
+                "cursed_artifact" => crate::world::components::dread::DreadSourceType::CursedArtifact,
+                "dragon_influence" => crate::world::components::dread::DreadSourceType::DragonInfluence,
+                _ => crate::world::components::dread::DreadSourceType::CorruptedLandscape,
+            },
             is_permanent: false,
         },
         Transform::from_translation(position),

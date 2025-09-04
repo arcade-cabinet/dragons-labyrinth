@@ -152,7 +152,6 @@ pub fn update_procedural_audio(
     mut audio_system: ResMut<ProceduralAudioSystem>,
     dread_level: Res<DreadLevel>,
     mut commands: Commands,
-    audio: Res<Audio>,
     game_state: Res<GameState>,
 ) {
     // Determine current theme based on dread level
@@ -243,15 +242,15 @@ pub fn play_contextual_audio_stinger(
         AudioStingerType::PlayerDeath => "audio/stingers/player_death.ogg",
     };
     
-    let handle = asset_server.load(audio_file);
-    commands.spawn(AudioBundle {
-        source: handle,
-        settings: PlaybackSettings {
+    let handle: Handle<AudioSource> = asset_server.load(audio_file);
+    commands.spawn((
+        AudioPlayer(handle),
+        PlaybackSettings {
             volume: Volume::Linear(audio_system.volume_multiplier * 0.8),
             mode: PlaybackMode::Despawn,
             ..default()
         },
-    });
+    ));
 }
 
 #[derive(Debug, Clone)]
@@ -270,15 +269,15 @@ pub fn play_menu_audio(
     audio_system: Res<ProceduralAudioSystem>,
 ) {
     // Play main menu ambience
-    let menu_audio = asset_server.load("audio/menu/dark_ambience.ogg");
-    commands.spawn(AudioBundle {
-        source: menu_audio,
-        settings: PlaybackSettings {
+    let menu_audio: Handle<AudioSource> = asset_server.load("audio/menu/dark_ambience.ogg");
+    commands.spawn((
+        AudioPlayer(menu_audio),
+        PlaybackSettings {
             volume: Volume::Linear(0.5),
             mode: PlaybackMode::Loop,
             ..default()
         },
-    });
+    ));
 }
 
 // System to handle character creation audio
@@ -287,15 +286,15 @@ pub fn play_character_creation_audio(
     asset_server: Res<AssetServer>,
 ) {
     // Slightly hopeful but foreboding character creation music
-    let creation_audio = asset_server.load("audio/character_creation/hopeful_dread.ogg");
-    commands.spawn(AudioBundle {
-        source: creation_audio,
-        settings: PlaybackSettings {
+    let creation_audio: Handle<AudioSource> = asset_server.load("audio/character_creation/hopeful_dread.ogg");
+    commands.spawn((
+        AudioPlayer(creation_audio),
+        PlaybackSettings {
             volume: Volume::Linear(0.4),
             mode: PlaybackMode::Loop,
             ..default()
         },
-    });
+    ));
 }
 
 // Audio event system for UI interactions
@@ -311,14 +310,14 @@ pub fn play_ui_sound_effects(
             _ => continue,
         };
         
-        let handle = asset_server.load(sound_file);
-        commands.spawn(AudioBundle {
-            source: handle,
-            settings: PlaybackSettings {
+        let handle: Handle<AudioSource> = asset_server.load(sound_file);
+        commands.spawn((
+            AudioPlayer(handle),
+            PlaybackSettings {
                 volume: Volume::Linear(0.3),
                 mode: PlaybackMode::Despawn,
                 ..default()
             },
-        });
+        ));
     }
 }

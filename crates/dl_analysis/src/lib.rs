@@ -10,6 +10,7 @@
 
 pub mod audit_types;
 pub mod audit;
+pub mod ai_analysis;
 pub mod clusters;
 pub mod orchestration;
 pub mod raw;

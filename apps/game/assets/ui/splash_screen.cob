@@ -1,7 +1,7 @@
 Cob(
     Scene(
         children: [
-            // Full screen dark background with subtle texture
+            // Full screen splash image background
             Node(
                 styles: Some(Style(
                     position_type: Absolute,
@@ -10,7 +10,19 @@ Cob(
                     width: Percent(100.0),
                     height: Percent(100.0),
                 )),
+                background_image: Some("images/splash/dragons_labyrinth_splash.png"),
                 children: [
+                    // Dark overlay for text readability
+                    Node(
+                        styles: Some(Style(
+                            position_type: Absolute,
+                            left: Px(0.0),
+                            top: Px(0.0),
+                            width: Percent(100.0),
+                            height: Percent(100.0),
+                        )),
+                        background_color: Some(Srgba(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.4)),
+                        children: [
                     // Dragon's Labyrinth title with horror glow effect
                     Node(
                         styles: Some(Style(
@@ -148,8 +160,9 @@ Cob(
                             )),
                         ],
                     ),
+                        ],
+                    ),
                 ],
-                background_color: Some(Srgba(red: 0.05, green: 0.05, blue: 0.05, alpha: 1.0)),
             ),
         ],
     )

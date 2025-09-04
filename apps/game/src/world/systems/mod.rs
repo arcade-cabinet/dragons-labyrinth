@@ -1,5 +1,6 @@
 pub mod hex_world;
 pub mod player;
+pub mod input;
 pub mod companions;
 pub mod dread;
 pub mod assets;
@@ -12,6 +13,7 @@ pub mod rest_fatigue;
 
 pub use hex_world::*;
 pub use player::*;
+pub use input::*;
 pub use companions::*;
 pub use dread::*;
 pub use assets::*;

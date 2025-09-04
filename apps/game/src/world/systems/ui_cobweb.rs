@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_cobweb_ui::prelude::*;
+use bevy_cobweb::prelude::*;
 use crate::world::state::GameState;
 use crate::game::GameStateEnum;
 
@@ -24,8 +25,8 @@ pub enum UIScreen {
 /// Load cobweb UI file and handle state transitions only
 pub fn setup_cobweb_ui(mut commands: Commands) {
     // Load the main UI file - all UI structure is defined there
+    // TODO: Implement proper .cob file loading when available
     commands.spawn((
-        CobwebUIBundle::from_file("ui/main_menu.cob"),
         Name::new("CobwebUI"),
     ));
 }

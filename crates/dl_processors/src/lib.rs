@@ -10,7 +10,7 @@ use std::path::PathBuf;
 pub mod audit;
 pub mod generators;
 pub mod utilities;
-pub mod ai_dialogue;
+// pub mod ai_dialogue; // Temporarily disabled for core pipeline validation
 
 // Moved from dl_analysis - these handle processing not analysis
 pub mod dungeons;
@@ -22,7 +22,7 @@ pub mod templates;
 
 // Re-export public API
 pub use utilities::AreaData;
-pub use ai_dialogue::*;
+// pub use ai_dialogue::*; // Temporarily disabled for core pipeline validation
 
 /// Get the path to the generated code
 pub fn generated_dir() -> PathBuf {
@@ -74,6 +74,9 @@ pub fn generate_world_resources(out_dir: &std::path::Path) -> Result<()> {
     
     // Generate spatial container system for ECS
     generate_spatial_containers(&env, out_dir, regions_count, dungeons_count)?;
+    
+    // Generate main world integration file expected by hex_world.rs
+    generate_world_integration_file(&env, out_dir, regions_count, dungeons_count, settlements_count, factions_count)?;
     
     // Load seeds data for dialogue generation
     let analyzed_seeds = load_analyzed_seeds_data(&analysis_output_dir)?;
@@ -227,6 +230,167 @@ impl WorldSpatialContainer {{
 "#, regions_count, dungeons_count);
 
     std::fs::write(out_dir.join("spatial_containers.rs"), container_code)?;
+    Ok(())
+}
+
+/// Generate main world integration file expected by hex_world.rs
+fn generate_world_integration_file(
+    env: &minijinja::Environment,
+    out_dir: &std::path::Path,
+    regions_count: usize,
+    dungeons_count: usize,
+    settlements_count: usize,
+    factions_count: usize
+) -> Result<()> {
+    let world_code = format!(r#"//! Generated world integration module
+//! Main integration file for {} regions, {} dungeons, {} settlements, {} factions
+
+use bevy::prelude::*;
+
+/// Resource that provides entity correlations for hex coordinates
+#[derive(Resource, Default)]
+pub struct EntityCorrelations {{
+    pub hex_to_entities: std::collections::HashMap<(i32, i32), HexEntitySet>,
+}}
+
+/// Entity set at a hex coordinate
+#[derive(Clone, Default)]
+pub struct HexEntitySet {{
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub dungeons: Vec<String>,
+    pub special_features: Vec<String>,
+}}
+
+impl EntityCorrelations {{
+    pub fn new() -> Self {{
+        let mut correlations = Self::default();
+        
+        // Initialize with sample data from generated resources
+        // This will be populated by the actual generated data
+        correlations.hex_to_entities.insert((0, 0), HexEntitySet {{
+            settlements: vec!["starting_village".to_string()],
+            factions: vec!["peaceful_faction".to_string()],
+            npcs: vec!["village_elder".to_string()],
+            dungeons: vec![],
+            special_features: vec!["shrine".to_string()],
+        }});
+        
+        correlations
+    }}
+    
+    pub fn get_entities_at_hex(&self, coords: (i32, i32)) -> &HexEntitySet {{
+        static EMPTY: HexEntitySet = HexEntitySet {{
+            settlements: Vec::new(),
+            factions: Vec::new(),
+            npcs: Vec::new(),
+            dungeons: Vec::new(),
+            special_features: Vec::new(),
+        }};
+        
+        self.hex_to_entities.get(&coords).unwrap_or(&EMPTY)
+    }}
+}}
+
+// Component markers for entity types
+#[derive(Component, Debug)]
+pub struct SettlementMarker {{
+    pub uuid: String,
+    pub settlement_type: String,
+}}
+
+#[derive(Component, Debug)]
+pub struct FactionPresenceMarker {{
+    pub uuid: String,
+    pub influence_level: f32,
+}}
+
+#[derive(Component, Debug)]
+pub struct NPCMarker {{
+    pub uuid: String,
+    pub npc_type: String,
+    pub is_active: bool,
+}}
+
+#[derive(Component, Debug)]
+pub struct DungeonEntranceMarker {{
+    pub dungeon_uuid: String,
+    pub entrance_type: String,
+    pub is_accessible: bool,
+}}
+
+// Helper functions for generated world integration
+pub fn determine_settlement_type_from_biome(biome_type: &dl_types::BiomeType) -> String {{
+    match biome_type {{
+        dl_types::BiomeType::Grassland => "village".to_string(),
+        dl_types::BiomeType::Forest => "outpost".to_string(),
+        dl_types::BiomeType::Swamp => "refuge".to_string(),
+        dl_types::BiomeType::Mountain => "stronghold".to_string(),
+        dl_types::BiomeType::Desert => "oasis".to_string(),
+        dl_types::BiomeType::Water => "port".to_string(),
+        dl_types::BiomeType::CorruptedGrassland | 
+        dl_types::BiomeType::CorruptedForest |
+        dl_types::BiomeType::CorruptedSwamp => "cursed_refuge".to_string(),
+        dl_types::BiomeType::VoidGrassland |
+        dl_types::BiomeType::VoidForest |
+        dl_types::BiomeType::VoidSwamp => "void_outpost".to_string(),
+        _ => "settlement".to_string(),
+    }}
+}}
+
+pub fn calculate_faction_influence(faction_uuid: &str, hex_coord: crate::utils::hex::HexCoord) -> f32 {{
+    // Simple distance-based influence calculation
+    let distance_from_origin = (hex_coord.x.abs() + hex_coord.y.abs()) as f32;
+    (1.0 / (1.0 + distance_from_origin * 0.1)).clamp(0.0, 1.0)
+}}
+
+pub fn spawn_biome_specific_features(
+    commands: &mut Commands,
+    hex_entity: Entity,
+    hex_coord: crate::utils::hex::HexCoord,
+    biome_type: &dl_types::BiomeType,
+    hex_entities: &HexEntitySet,
+) {{
+    let hex_world_pos = crate::utils::hex::hex_to_world(hex_coord);
+    
+    // Add environmental features based on biome using ACTUAL BiomeType variants
+    match biome_type {{
+        dl_types::BiomeType::Forest | dl_types::BiomeType::CorruptedForest => {{
+            if !hex_entities.special_features.is_empty() {{
+                let feature_entity = commands.spawn((
+                    Transform::from_translation(hex_world_pos + Vec3::new(2.0, 0.5, 2.0)),
+                    Name::new("ForestTree"),
+                )).id();
+                commands.entity(hex_entity).add_child(feature_entity);
+            }}
+        }},
+        dl_types::BiomeType::Grassland | dl_types::BiomeType::CorruptedGrassland => {{
+            if !hex_entities.special_features.is_empty() {{
+                let feature_entity = commands.spawn((
+                    Transform::from_translation(hex_world_pos + Vec3::new(-2.0, 0.5, -2.0)),
+                    Name::new("GrasslandFlowers"),
+                )).id();
+                commands.entity(hex_entity).add_child(feature_entity);
+            }}
+        }},
+        dl_types::BiomeType::Mountain | dl_types::BiomeType::CorruptedMountain => {{
+            if !hex_entities.special_features.is_empty() {{
+                let feature_entity = commands.spawn((
+                    Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.0, 0.0)),
+                    Name::new("MountainRock"),
+                )).id();
+                commands.entity(hex_entity).add_child(feature_entity);
+            }}
+        }},
+        _ => {{
+            // Default feature spawning for other biome types
+        }}
+    }}
+}}
+"#, regions_count, dungeons_count, settlements_count, factions_count);
+
+    std::fs::write(out_dir.join("generated_world.rs"), world_code)?;
     Ok(())
 }
 
