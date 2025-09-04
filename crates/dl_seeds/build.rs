@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     
-    // Generate books.toml with rust-bert summaries
+    // Generate books.toml with rust-bert summaries (idempotent)
     let books_toml_path = out_path.join("books.toml");
     if !books_toml_path.exists() {
         println!("cargo:warning=Generating books.toml with Internet Archive summaries");
@@ -209,6 +209,11 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         if collected == 0 {
             println!("cargo:warning=No downloadable texts found for band '{}' with query: {}", band_key, keyword_expr);
         }
+    }
+
+    // CRITICAL: Fail if we didn't get any book summaries
+    if book_summaries.is_empty() {
+        return Err("CRITICAL: Failed to download and summarize any Internet Archive texts for any band".into());
     }
 
     // Write TOML
