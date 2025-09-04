@@ -13,27 +13,27 @@ serde.workspace = true
 serde_json.workspace = true
 
 # Our types and utilities
-dl_types = { path = "../dl_types" }
-dl_analysis = { path = "../dl_analysis" }
-dl_audit = { path = "../dl_audit" }
+dl_types = { workspace = true }
+dl_analysis = { workspace = true }
+dl_audit = { workspace = true }
 
 # Template processing
-tera = "1.20"
-minijinja = "2.0"
+tera = { workspace = true }
+minijinja = { workspace = true }
 
 # AI integration - using newer compatible version
-openai_dive = "1.2"
+openai_dive = { workspace = true }
 
 # Text processing
 regex.workspace = true
 
 # File operations
-ron = "0.8"
+ron = { workspace = true }
 walkdir.workspace = true
 
 [build-dependencies]
 anyhow.workspace = true
 walkdir.workspace = true
-dl_analysis = { path = "../dl_analysis" }
-dl_audit = { path = "../dl_audit" }
-dl_types = { path = "../dl_types" }
+dl_analysis = { workspace = true }
+dl_audit = { workspace = true }
+dl_types = { workspace = true }

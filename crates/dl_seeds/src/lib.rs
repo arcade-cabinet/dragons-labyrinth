@@ -8,6 +8,12 @@
 //! Analysis happens in dl_analysis, generation in dl_processors
 
 pub mod books;
+pub mod entities;
+pub mod ai_client;
+pub mod regions;
+pub mod settlements;
+pub mod dungeons;
+pub mod factions;
 
 use anyhow::Result;
 use std::path::Path;
@@ -18,37 +24,37 @@ pub struct SeedsManager {
 }
 
 impl SeedsManager {
-    /// Initialize Seeds data by downloading and caching all sources
-    pub fn initialize(cache_dir: &Path) -> Result<Self> {
-        println!("Initializing Seeds data sources...");
-        std::fs::create_dir_all(cache_dir)?;
+    /// Generate all seeds from TOML samples using AI transformation
+    pub fn generate_from_toml(out_dir: &Path) -> Result<Self> {
+        println!("Generating Dragon's Labyrinth seeds from TOML samples...");
         
-        let books = books::BooksManager::initialize(&cache_dir.join("books"))?;
-        
-        Ok(Self {
-            books,
-        })
-    }
-    
-    /// Load Seeds data from existing cache
-    pub fn load_from_cache(cache_dir: &Path) -> Result<Self> {
-        let books = books::BooksManager::load_from_cache(&cache_dir.join("books"))?;
+        let books = books::BooksManager::generate_seeds_from_texts(out_dir)?;
         
         Ok(Self {
             books,
         })
     }
     
-    /// Get path to a downloaded book for analysis
-    pub fn get_book_path(&self, filename: &str) -> std::path::PathBuf {
-        self.books.get_book_path(filename)
+    /// Get world seeds from literature
+    pub fn get_world_seeds(&self) -> &[books::WorldSeed] {
+        &self.books.world_seeds
     }
     
-    /// Get list of successfully downloaded books
-    pub fn get_downloaded_books(&self) -> &[books::BookRecord] {
-        self.books.get_downloaded_books()
+    /// Get quest seeds from literature  
+    pub fn get_quest_seeds(&self) -> &[books::QuestSeed] {
+        &self.books.quest_seeds
+    }
+    
+    /// Get dialogue seeds from literature
+    pub fn get_dialogue_seeds(&self) -> &[books::DialogueSeed] {
+        &self.books.dialogue_seeds
     }
 }
 
 /// Re-export key types for external usage
 pub use books::{BooksManager, BookRecord};
+pub use entities::*;
+pub use regions::*;
+pub use settlements::*;
+pub use dungeons::*;
+pub use factions::*;

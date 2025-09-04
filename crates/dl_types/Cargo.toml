@@ -13,18 +13,18 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 # Minimal bevy for Component derives and basic types
-bevy_ecs = "0.16.1"
-bevy_math = "0.16.1" 
-bevy_color = "0.16.2"
-bevy_asset = "0.16.1"
-bevy_animation = "0.16.1"
-bevy_scene = "0.16.1"
-bevy_transform = "0.16.1"
+bevy_ecs = { workspace = true }
+bevy_math = { workspace = true } 
+bevy_color = { workspace = true }
+bevy_asset = { workspace = true }
+bevy_animation = { workspace = true }
+bevy_scene = { workspace = true }
+bevy_transform = { workspace = true }
 
 # For moved type dependencies
 regex = { workspace = true }
 cleasby_vigfusson_dictionary = { workspace = true }
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { workspace = true, features = ["serde"] }
 
 # For audit functionality (only trait, not implementation)
 # csv will be in dl_audit crate

@@ -8,20 +8,20 @@ repository.workspace = true
 
 [dependencies]
 # Polars for DataFrame functionality
-polars = { version = "0.50.0", features = ["lazy", "csv", "strings", "temporal", "regex", "timezones"] }
+polars = { workspace = true, features = ["lazy", "csv", "strings", "temporal", "regex", "timezones"] }
 
 # Core dependencies
 anyhow.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { workspace = true, features = ["serde"] }
 
 # Our unified types
-dl_types = { path = "../dl_types" }
+dl_types = { workspace = true }
 
 # File system and archiving
 fs_extra.workspace = true
-flate2 = "1.0" 
-tar = "0.4"
+flate2 = { workspace = true } 
+tar = { workspace = true }
 walkdir.workspace = true
 regex.workspace = true
