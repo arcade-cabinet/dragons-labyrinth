@@ -36,3 +36,4 @@ console = { workspace = true, features = ["std"] }
 iars = { git = "https://github.com/bigbass1997/iars.git" }
 cleasby_vigfusson_dictionary = { workspace = true }
 chrono = { workspace = true }
+tch = "0.17.0"

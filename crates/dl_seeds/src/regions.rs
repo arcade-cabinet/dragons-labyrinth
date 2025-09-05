@@ -6,7 +6,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-use crate::entities::{SampleEntity, CategorySamples};
+use crate::entities::CategorySamples;
 
 /// Dragon's Labyrinth region seed data (AI-generated)
 #[derive(Debug, Clone, Serialize, Deserialize)]

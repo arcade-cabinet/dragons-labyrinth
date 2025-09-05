@@ -2775,6 +2775,7 @@ dependencies = [
  "rust-bert",
  "serde",
  "serde_json",
+ "tch",
  "tempfile",
  "thiserror 2.0.16",
  "tokio",
