@@ -95,6 +95,51 @@ fn capitalize(s: &str) -> String {
     let mut c = s.chars();
     match c.next() { Some(f) => f.to_uppercase().collect::<String>() + c.as_str(), None => String::new() }
 }
+
+// Very small RAKE-like keyphrase extractor (top-level)
+fn rake_like_keyphrases(text: &str, top_k: usize) -> Vec<String> {
+    use std::collections::HashMap;
+    let stop: BTreeSet<&'static str> = [
+        "the","a","an","and","or","but","if","then","so","because","as","of","to","in","on","for","with","by","from","at","into","over","after","before","about","between","through","during","without","within","against","among","across","per","is","are","was","were","be","been","being","it","its","this","that","these","those","he","she","they","them","his","her","their","we","you","i","my","our"
+    ].into_iter().collect();
+
+    let mut phrases: Vec<Vec<String>> = Vec::new();
+    let mut current: Vec<String> = Vec::new();
+    let mut push_current = |phrases: &mut Vec<Vec<String>>, current: &mut Vec<String>| {
+        if current.len() >= 1 && current.iter().any(|w| w.chars().any(|c| c.is_alphabetic())) {
+            phrases.push(current.clone());
+        }
+        current.clear();
+    };
+
+    for raw in text.split(|c: char| !c.is_alphanumeric() && c != '\'' && c != '-') {
+        if raw.is_empty() { continue; }
+        let w = raw.to_ascii_lowercase();
+        if stop.contains(w.as_str()) { push_current(&mut phrases, &mut current); } else { current.push(w); }
+    }
+    push_current(&mut phrases, &mut current);
+
+    let mut freq: HashMap<String, usize> = HashMap::new();
+    let mut degree: HashMap<String, usize> = HashMap::new();
+    for p in &phrases {
+        let deg = p.len().saturating_sub(1);
+        for w in p {
+            *freq.entry(w.clone()).or_default() += 1;
+            *degree.entry(w.clone()).or_default() += deg;
+        }
+    }
+    let mut scored: Vec<(String, f32)> = phrases.into_iter().map(|p| {
+        let mut s = 0f32;
+        for w in &p {
+            let f = *freq.get(w).unwrap_or(&1) as f32;
+            let d = (*degree.get(w).unwrap_or(&0) + 1) as f32;
+            s += d / f;
+        }
+        (p.join(" "), s)
+    }).collect();
+    scored.sort_by(|a,b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    scored.into_iter().map(|(p,_)| p).take(top_k).collect()
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NameEntry {
     pub name: String,
@@ -123,6 +168,23 @@ pub struct LandmarkSeed {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NpcArchetype {
+    pub band: String,
+    pub title: String,
+    pub traits: Vec<String>,
+    pub motifs: Vec<String>,      // pulled from per-band keywords
+    pub evidence: Vec<String>,    // top keywords that promoted this archetype
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RegionStyle {
+    pub band: String,
+    pub region: String,
+    pub palette: Vec<String>,     // e.g., color/material words
+    pub motifs: Vec<String>,      // shapes/objects from keywords
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BandNames {
     pub regions: BTreeMap<String, Vec<NameEntry>>, // region -> names
 }
@@ -141,6 +203,9 @@ pub struct WorldTomlContainer {
     pub names: NamesPerBand,
     pub creatures: Vec<CreatureSeed>,
     pub landmarks: Vec<LandmarkSeed>,
+    pub npc_archetypes: Vec<NpcArchetype>,
+    pub region_styles: Vec<RegionStyle>,
+    pub per_band_keywords: BTreeMap<String, Vec<String>>,
 }
 
 /// Generate books.toml with Internet Archive downloads and rust-bert summaries
@@ -501,6 +566,20 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
                     // Compose enriched summary text
                     let final_summary = compose_summary(&base_summary, &label_scores, &sentiment, sent_score);
 
+                    // Infer band from strongest label (fallback to current band_key)
+                    let mut inferred_band = band_key.to_string();
+                    if let Some((top_lbl, _)) = label_scores.first() {
+                        if let Some(b) = label_to_band.get(top_lbl.as_str()) {
+                            inferred_band = (*b).to_string();
+                        }
+                    }
+
+                    // Extract keyphrases from narrative/summary
+                    let mut keywords = rake_like_keyphrases(&narrative, 20);
+                    if keywords.is_empty() {
+                        keywords = rake_like_keyphrases(&base_summary, 15);
+                    }
+
                     let title = doc.title.unwrap_or_else(|| identifier.clone());
                     println!(
                         "cargo:warning=Band '{}' picked {} ({} chars -> {} chars) via {}",
@@ -513,6 +592,9 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
                         filename,
                         summary: final_summary,
                         full_length: content.len(),
+                        band: inferred_band,
+                        labels: label_scores.clone(),
+                        keywords,
                     });
                     collected += 1;
                 }
@@ -894,6 +976,103 @@ fn generate_grammar_toml(output_path: &Path) -> Result<(), Box<dyn std::error::E
     println!("cargo:warning=Generated grammar.toml with per-band Old Norse terms");
     Ok(())
 }
+fn build_per_band_keyword_index(books: &BooksTomlContainer) -> BTreeMap<String, Vec<String>> {
+    let mut out: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    for b in &books.books {
+        out.entry(b.band.clone()).or_default().extend(b.keywords.clone());
+        for (lbl, _s) in &b.labels {
+            out.entry(b.band.clone()).or_default().push(lbl.to_string());
+        }
+    }
+    for (_k, v) in out.iter_mut() {
+        v.iter_mut().for_each(|s| *s = s.to_ascii_lowercase());
+        v.sort();
+        v.dedup();
+        if v.len() > 80 { v.truncate(80); }
+    }
+    out
+}
+
+fn derive_npcs_and_styles(
+    _books: &BooksTomlContainer,
+    names: &NamesPerBand,
+    band_keywords: &BTreeMap<String, Vec<String>>,
+) -> (Vec<NpcArchetype>, Vec<RegionStyle>) {
+    use std::collections::{BTreeMap, BTreeSet};
+
+    let mut trait_map: BTreeMap<&'static str, Vec<&'static str>> = BTreeMap::new();
+    trait_map.insert("witch", vec!["occult", "bitter", "secretive"]);
+    trait_map.insert("ghost", vec!["mournful", "hushed", "obsessive"]);
+    trait_map.insert("curse", vec!["fatalistic", "ritual", "unyielding"]);
+    trait_map.insert("blood", vec!["violent", "zealous", "reckless"]);
+    trait_map.insert("void",  vec!["detached", "cold", "whispering"]);
+    trait_map.insert("king",  vec!["authoritative", "proud", "traditional"]);
+    trait_map.insert("saint", vec!["compassionate", "sacrificial", "calm"]);
+    trait_map.insert("wolf",  vec!["pack-loyal", "suspicious", "feral"]);
+
+    let color_like = ["black","white","red","crimson","scarlet","ashen","silver","gold","ivory","emerald","sable","azure","verdant","pale","opal","cobalt"];
+    let material_like = ["iron","bone","stone","oak","ash","obsidian","salt","glass","coal","chalk","amber","brass"];
+
+    let mut npc_out: Vec<NpcArchetype> = Vec::new();
+    let mut style_out: Vec<RegionStyle> = Vec::new();
+
+    for (band, bundle) in &names.bands {
+        let klist = band_keywords.get(band).cloned().unwrap_or_default();
+
+        let mut used = BTreeSet::new();
+        for sig in trait_map.keys() {
+            if klist.iter().any(|k| k.contains(sig)) {
+                let traits = trait_map[*sig].iter().map(|s| s.to_string()).collect::<Vec<_>>();
+                let title = match *sig {
+                    "witch" => "Sanctuary Witch",
+                    "ghost" => "Weeping Shade",
+                    "curse" => "Oath-Bound Warden",
+                    "blood" => "Crimson Zealot",
+                    "void"  => "Hollow Augur",
+                    "king"  => "Fallen Castellan",
+                    "saint" => "Pale Pilgrim",
+                    "wolf"  => "Greyfang Captain",
+                    _ => "Wandering Adept",
+                }.to_string();
+                let evidence = klist.iter().filter(|k| k.contains(sig)).take(4).cloned().collect::<Vec<_>>();
+                if used.insert(title.clone()) {
+                    npc_out.push(NpcArchetype{
+                        band: band.clone(),
+                        title,
+                        traits,
+                        motifs: klist.iter().cloned().take(6).collect(),
+                        evidence,
+                    });
+                }
+            }
+        }
+        if npc_out.iter().filter(|n| n.band == *band).count() == 0 {
+            npc_out.push(NpcArchetype{
+                band: band.clone(),
+                title: "Wayworn Chronicler".into(),
+                traits: vec!["observant".into(),"careworn".into(),"resourceful".into()],
+                motifs: klist.iter().cloned().take(6).collect(),
+                evidence: klist.iter().take(3).cloned().collect(),
+            });
+        }
+
+        if let Some((region, _)) = bundle.regions.iter().next() {
+            let mut palette: Vec<String> = Vec::new();
+            for c in &color_like { if klist.iter().any(|k| k.contains(c)) { palette.push((*c).to_string()); } }
+            for m in &material_like { if klist.iter().any(|k| k.contains(m)) { palette.push((*m).to_string()); } }
+            if palette.is_empty() { palette = vec!["ashen".into(),"iron".into()]; }
+            style_out.push(RegionStyle{
+                band: band.clone(),
+                region: region.clone(),
+                palette,
+                motifs: klist.iter().cloned().take(10).collect(),
+            });
+        }
+    }
+
+    (npc_out, style_out)
+}
+
 fn generate_world_toml(world_path: &Path, out_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     // Build books & grammar into temporary files under OUT_DIR, then compose World TOML
     let books_tmp = out_dir.join(".__books_tmp.toml");
@@ -910,11 +1089,17 @@ fn generate_world_toml(world_path: &Path, out_dir: &Path) -> Result<(), Box<dyn 
     let grammar_content = std::fs::read_to_string(&grammar_tmp)?;
     let grammar: GrammarTomlContainer = toml::from_str(&grammar_content)?;
 
-    // Names per band (reuse grammar label bands to anchor Norse stems + synthetic regional names)
-    let names = synthesize_names_per_band(&grammar)?;
+    // Build per-band keyword index from literature first
+    let per_band_keywords = build_per_band_keyword_index(&books);
+
+    // Names per band, biased by high-signal keywords for each band
+    let names = synthesize_names_per_band(&grammar, &per_band_keywords)?;
 
     // Seeds from summaries (creatures + landmarks)
     let (creatures, landmarks) = extract_creatures_and_landmarks_from_books(&books)?;
+
+    // NPC & region styles, informed by names + per-band keywords
+    let (npc_archetypes, region_styles) = derive_npcs_and_styles(&books, &names, &per_band_keywords);
 
     // Compose world
     let world = WorldTomlContainer {
@@ -924,6 +1109,9 @@ fn generate_world_toml(world_path: &Path, out_dir: &Path) -> Result<(), Box<dyn 
         names,
         creatures,
         landmarks,
+        npc_archetypes,
+        region_styles,
+        per_band_keywords,
     };
 
     let toml_content = toml::to_string_pretty(&world)?;
@@ -936,7 +1124,10 @@ fn generate_world_toml(world_path: &Path, out_dir: &Path) -> Result<(), Box<dyn 
     Ok(())
 }
 
-fn synthesize_names_per_band(grammar: &GrammarTomlContainer) -> Result<NamesPerBand, Box<dyn std::error::Error>> {
+fn synthesize_names_per_band(
+    grammar: &GrammarTomlContainer,
+    band_keywords: &BTreeMap<String, Vec<String>>,
+) -> Result<NamesPerBand, Box<dyn std::error::Error>> {
     use rand::{Rng, SeedableRng};
     use rand_chacha::ChaCha8Rng;
 
@@ -1078,51 +1269,6 @@ fn synthesize_names_per_band(grammar: &GrammarTomlContainer) -> Result<NamesPerB
 
         bands_out.insert(band.clone(), BandNames { regions });
     }
-// Very small RAKE-like keyphrase extractor
-fn rake_like_keyphrases(text: &str, top_k: usize) -> Vec<String> {
-    // very small RAKE-ish: split on stopwords & punctuation, score by word freq * degree
-    use std::collections::HashMap;
-    let stop: BTreeSet<&'static str> = [
-        "the","a","an","and","or","but","if","then","so","because","as","of","to","in","on","for","with","by","from","at","into","over","after","before","about","between","through","during","without","within","against","among","across","per","is","are","was","were","be","been","being","it","its","this","that","these","those","he","she","they","them","his","her","their","we","you","i","my","our"
-    ].into_iter().collect();
-
-    let mut phrases: Vec<Vec<String>> = Vec::new();
-    let mut current: Vec<String> = Vec::new();
-    let mut push_current = |phrases: &mut Vec<Vec<String>>, current: &mut Vec<String>| {
-        if current.len() >= 1 && current.iter().any(|w| w.chars().any(|c| c.is_alphabetic())) {
-            phrases.push(current.clone());
-        }
-        current.clear();
-    };
-
-    for raw in text.split(|c: char| !c.is_alphanumeric() && c != '\'' && c != '-') {
-        if raw.is_empty() { continue; }
-        let w = raw.to_ascii_lowercase();
-        if stop.contains(w.as_str()) { push_current(&mut phrases, &mut current); } else { current.push(w); }
-    }
-    push_current(&mut phrases, &mut current);
-
-    let mut freq: HashMap<String, usize> = HashMap::new();
-    let mut degree: HashMap<String, usize> = HashMap::new();
-    for p in &phrases {
-        let deg = p.len().saturating_sub(1);
-        for w in p {
-            *freq.entry(w.clone()).or_default() += 1;
-            *degree.entry(w.clone()).or_default() += deg;
-        }
-    }
-    let mut scored: Vec<(String, f32)> = phrases.into_iter().map(|p| {
-        let mut s = 0f32;
-        for w in &p {
-            let f = *freq.get(w).unwrap_or(&1) as f32;
-            let d = (*degree.get(w).unwrap_or(&0) + 1) as f32;
-            s += d / f;
-        }
-        (p.join(" "), s)
-    }).collect();
-    scored.sort_by(|a,b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    scored.into_iter().map(|(p,_)| p).take(top_k).collect()
-}
 
     Ok(NamesPerBand { bands: bands_out, generated_at: chrono::Utc::now().to_rfc3339() })
 }
