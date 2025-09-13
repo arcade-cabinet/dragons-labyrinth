@@ -1,0 +1,42 @@
+(
+    id: "aerin_plectrude_building",
+    display_name: "Aerin Plectrude",
+    model_path: "buildings/aerin_plectrude/aerin_plectrude.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "aerin_plectrude",
+    ],
+    cult: Some("aerin_plectrude"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/aerin_plectrude_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: Some("aquatic_horror"),
+    forge_material: Some("ancient_bone"),
+)

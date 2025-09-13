@@ -1,0 +1,100 @@
+# Settlement Training Data - Villages, Towns, and Communities
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "locations"
+subcategory = "settlements"
+description = "Villages, towns, cities, and inhabited communities"
+
+# Training examples from build_config.toml known_entities.settlements
+[[examples]]
+name = "Village of Ashamar"
+content_patterns = ["village of name", "small community", "rural settlement"]
+markers = ["village of", "community name", "settlement type"]
+corruption_band = 1
+horror_theme = "rural_decay"
+
+[[examples]]
+name = "Town of Devilville"
+content_patterns = ["town of name", "larger community", "infernal settlement"]
+markers = ["town of", "devilville", "infernal reference"]
+corruption_band = 3
+horror_theme = "infernal_influence"
+
+[[examples]]
+name = "City of Headsmen"
+content_patterns = ["city of name", "urban center", "execution theme"]
+markers = ["city of", "headsmen", "execution reference"]
+corruption_band = 4
+horror_theme = "institutionalized_violence"
+
+[[examples]]
+name = "Village of Headbone"
+content_patterns = ["village of name", "death imagery", "bone reference"]
+markers = ["village of", "headbone", "death theme"]
+corruption_band = 2
+horror_theme = "death_proximity"
+
+[[examples]]
+name = "City of Palemoon"
+content_patterns = ["city of name", "celestial reference", "pale imagery"]
+markers = ["city of", "palemoon", "celestial corruption"]
+corruption_band = 2
+horror_theme = "corrupted_light"
+
+[[examples]]
+name = "Village of Kothian"
+content_patterns = ["village of name", "ancient reference", "old settlement"]
+markers = ["village of", "ancient name", "historical settlement"]
+corruption_band = 2
+horror_theme = "ancient_secrets"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "village/town/city + of + name format",
+    "settlement descriptions",
+    "community references",
+    "inhabited area designations",
+    "population centers",
+    "civic structures",
+    "community leadership"
+]
+
+negative_indicators = [
+    "character names",
+    "creature statistics", 
+    "treasure amounts",
+    "spell descriptions",
+    "pure terrain features",
+    "mechanical rules"
+]
+
+# Settlement types and patterns
+settlement_types = [
+    "village", "town", "city", "hamlet", "outpost",
+    "settlement", "community", "township", "borough",
+    "stronghold", "trading post", "waystation"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "population_decline", "social_breakdown", "institutional_corruption",
+    "collective_madness", "isolation_effects", "reality_distortion"
+]
+
+social_evolution = [
+    "thriving_community → abandoned_ruins",
+    "peaceful_life → constant_fear",
+    "social_bonds → mutual_suspicion",
+    "prosperity → desperate_survival"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "settlement"
+poly_count_range = [10000, 30000]
+texture_resolution = "2048x2048"
+required_animations = ["day_cycle", "population_activity", "weather_effects"]
+socket_requirements = ["building_plots", "road_connections", "activity_centers"]

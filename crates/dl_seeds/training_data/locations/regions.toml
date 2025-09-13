@@ -1,0 +1,103 @@
+# Region Training Data - Biomes and Environmental Areas
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "locations"
+subcategory = "regions"
+description = "Environmental regions, biomes, and natural areas"
+
+# Training examples from build_config.toml known_entities.regions
+[[examples]]
+name = "Aurora Bushes"
+content_patterns = ["color + vegetation", "natural biome", "environmental area"]
+markers = ["aurora", "bushes", "natural feature"]
+corruption_band = 1
+horror_theme = "nature_corruption"
+
+[[examples]]
+name = "Blood Blade Fields"
+content_patterns = ["color + weapon + terrain", "corrupted landscape", "ominous biome"]
+markers = ["blood", "blade", "fields", "violent imagery"]
+corruption_band = 3
+horror_theme = "battle_scarred_land"
+
+[[examples]]
+name = "Darkfall Plains"
+content_patterns = ["dark + event + terrain", "shadow biome", "foreboding landscape"]
+markers = ["darkfall", "plains", "shadow theme"]
+corruption_band = 2
+horror_theme = "encroaching_darkness"
+
+[[examples]]
+name = "Hell's Gate Desert"
+content_patterns = ["infernal + portal + terrain", "hellish biome", "gateway location"]
+markers = ["hell", "gate", "desert", "infernal reference"]
+corruption_band = 4
+horror_theme = "infernal_gateway"
+
+[[examples]]
+name = "Nightmare Desert"
+content_patterns = ["fear + terrain", "psychological biome", "dream corruption"]
+markers = ["nightmare", "desert", "psychological horror"]
+corruption_band = 4
+horror_theme = "psychological_landscape"
+
+[[examples]]
+name = "Vicious Crags"
+content_patterns = ["aggressive + rocky_terrain", "hostile environment", "dangerous landscape"]
+markers = ["vicious", "crags", "aggressive terrain"]
+corruption_band = 3
+horror_theme = "hostile_environment"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "biome and terrain names",
+    "environmental descriptions",
+    "landscape features",
+    "natural area references", 
+    "wilderness designations",
+    "geographical formations",
+    "climate and ecology terms"
+]
+
+negative_indicators = [
+    "character names",
+    "creature statistics",
+    "treasure amounts",
+    "spell descriptions",
+    "building structures",
+    "mechanical rules"
+]
+
+# Terrain types from build_config.toml
+terrain_types = [
+    "forest", "wood", "grove", "wold", "copse",
+    "desert", "wasteland", "dune", "dunes", 
+    "mountain", "peak", "crag", "cliffs",
+    "swamp", "bog", "fen", "marsh", "wetlands",
+    "plains", "fields", "meadows", "grasslands",
+    "wilderness", "wilds", "timberlands", "woodlands"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "unnatural_growth", "twisted_ecology", "reality_distortion",
+    "temporal_anomalies", "impossible_geography", "cursed_ground"
+]
+
+environmental_evolution = [
+    "lush_nature → withering_corruption",
+    "safe_travel → treacherous_paths",
+    "natural_beauty → cosmic_wrongness",
+    "fertile_ground → cursed_earth"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "terrain"
+poly_count_range = [8000, 20000]
+texture_resolution = "2048x2048"
+required_animations = ["ambient", "weather_effects", "day_night_cycle"]
+socket_requirements = ["spawn_points", "path_markers", "environmental_effects"]

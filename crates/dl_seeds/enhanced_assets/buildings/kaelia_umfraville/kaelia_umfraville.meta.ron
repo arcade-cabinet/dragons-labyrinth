@@ -1,0 +1,42 @@
+(
+    id: "kaelia_umfraville_building",
+    display_name: "Kaelia Umfraville",
+    model_path: "buildings/kaelia_umfraville/kaelia_umfraville.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "kaelia_umfraville",
+    ],
+    cult: Some("kaelia_umfraville"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/kaelia_umfraville_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("shadow_essence"),
+)

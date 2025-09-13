@@ -1,0 +1,107 @@
+# Location Training Data - Dungeons and Adventure Sites
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "locations"
+subcategory = "dungeons"
+description = "Dungeons, lairs, hideouts, and adventure locations"
+
+# Training examples extracted from HBF analysis
+[[examples]]
+name = "Lair of the Mourning Hopes"
+content_patterns = ["lair of the", "emotional descriptor", "dungeon name"]
+markers = ["lair prefix", "emotional theme", "location identifier"]
+corruption_band = 3
+horror_theme = "corrupted_sanctum"
+
+[[examples]]
+name = "Hideout of the Unspoken Desire"
+content_patterns = ["hideout of the", "forbidden concept", "secret location"]
+markers = ["hideout prefix", "unspoken theme", "hidden base"]
+corruption_band = 4
+horror_theme = "forbidden_refuge"
+
+[[examples]]
+name = "Caverns of the Infernal Lich"
+content_patterns = ["caverns of the", "undead ruler", "natural dungeon"]
+markers = ["caverns prefix", "lich reference", "underground complex"]
+corruption_band = 5
+horror_theme = "undead_domain"
+
+[[examples]]
+name = "Cave area #11"
+content_patterns = ["area type + number", "hierarchical location", "sub-area"]
+markers = ["area designation", "numeric identifier", "spatial hierarchy"]
+corruption_band = 2
+horror_theme = "maze_confusion"
+
+# Training examples from build_config.toml known dungeons
+[[examples]]
+name = "Crypt of the Corrupted Order"
+content_patterns = ["crypt of the", "fallen organization", "burial site"]
+markers = ["crypt prefix", "corruption theme", "order reference"]
+corruption_band = 4
+horror_theme = "fallen_faith"
+
+[[examples]]
+name = "Temple of the Violent Ogre"
+content_patterns = ["temple of the", "monstrous deity", "religious site"]
+markers = ["temple prefix", "creature worship", "sacred corruption"]
+corruption_band = 3
+horror_theme = "profane_worship"
+
+# Classification patterns from build_config.toml landmarks
+[patterns]
+positive_indicators = [
+    "lair/hideout/caverns/crypt/temple/shrine/tomb prefixes",
+    "of the [descriptive] [noun] format",
+    "area/room/chamber + number",
+    "in [parent location] hierarchy",
+    "dungeon/cave/underground references",
+    "adventure site descriptions"
+]
+
+negative_indicators = [
+    "character names",
+    "creature statistics",
+    "treasure amounts",
+    "spell descriptions", 
+    "pure narrative text"
+]
+
+# Dungeon type lexicon from build_config.toml
+location_types = [
+    "temple", "shrine", "sanctum", "abbey",
+    "fortress", "stronghold", "citadel", "castle", "keep", "bastion", "redoubt", "tower",
+    "crypt", "tomb", "sepulchre", "catacomb", "barrow",
+    "cave", "cavern", "grotto", "hollow",
+    "ruin", "ruins",
+    "forest", "wood", "grove", "wold", "copse",
+    "desert", "wasteland", "dune", "dunes",
+    "mountain", "peak", "crag",
+    "swamp", "bog", "fen", "marsh",
+    "abyss", "chasm", "rift", "fissure", "void",
+    "labyrinth", "maze"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "architectural_impossibility", "non_euclidean_geometry", "reality_warping",
+    "temporal_distortion", "spatial_confusion", "cosmic_influence"
+]
+
+environmental_evolution = [
+    "sacred_space → profane_corruption",
+    "natural_cave → otherworldly_hollow",
+    "defensive_structure → cosmic_gateway",
+    "burial_site → necromantic_nexus"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "environment"
+poly_count_range = [5000, 15000]
+texture_resolution = "2048x2048"
+required_animations = ["ambient", "environmental_effect", "entrance", "collapse"]
+socket_requirements = ["entrance_points", "treasure_spawns", "encounter_zones", "lighting_anchors"]

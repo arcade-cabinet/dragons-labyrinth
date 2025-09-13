@@ -1,0 +1,68 @@
+(
+    id: "lucien_aldegarde_leader",
+    display_name: "Lucien Aldegarde (Leader)",
+    model_path: "leaders/lucien_aldegarde.glb",
+    scale: (1.2, 1.2, 1.2),
+    bounds: (
+        min: (-0.6, 0.0, -0.6),
+        max: (0.6, 2.4, 0.6),
+    ),
+    animations: [
+        "idle",
+        "walk",
+        "attack",
+        "cast_spell",
+        "death",
+        "command",
+        "inspire",
+    ],
+    sockets: [
+        (
+            name: "head",
+            position: (0.0, 2.1, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+        (
+            name: "weapon_hand",
+            position: (0.4, 1.4, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+        (
+            name: "focus_hand",
+            position: (-0.4, 1.4, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+        (
+            name: "banner",
+            position: (0.0, 2.5, -0.5),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "leader",
+        "elite",
+        "commander",
+        "lucien_aldegarde",
+    ],
+    cult: Some("lucien_aldegarde"),
+    class: Some("leader"),
+    upgrades_to: None,
+    ui_icon: Some("icons/lucien_aldegarde_leader.png"),
+    sounds: [
+        (
+            event: "command",
+            sound_path: "sounds/leader_command.ogg",
+            volume: 1.0,
+            pitch_variation: 0.05,
+        ),
+        (
+            event: "death",
+            sound_path: "sounds/leader_death.ogg",
+            volume: 1.2,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("legendary_materials"),
+)

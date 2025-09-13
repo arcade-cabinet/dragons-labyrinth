@@ -1,0 +1,76 @@
+# Item Training Data - Treasure and Equipment
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "items"
+subcategory = "treasure"
+description = "Gold, gems, equipment, magical items, and treasure"
+
+# Training examples extracted from HBF analysis
+[[examples]]
+name = "2,640 gp"
+content_patterns = ["amount + currency", "treasure value", "monetary reward"]
+markers = ["number with comma", "gp suffix", "currency amount"]
+corruption_band = 1
+horror_theme = "cursed_wealth"
+
+# Common treasure patterns from D&D
+[[examples]]
+name = "magical sword"
+content_patterns = ["adjective + weapon", "equipment", "magical item"]
+markers = ["weapon type", "magical modifier", "equipment category"]
+corruption_band = 2
+horror_theme = "corrupted_steel"
+
+[[examples]]
+name = "golden chalice"
+content_patterns = ["material + object", "valuable item", "ceremonial object"]
+markers = ["precious material", "object type", "ceremonial purpose"]
+corruption_band = 2
+horror_theme = "tainted_gold"
+
+[[examples]]
+name = "ancient tome"
+content_patterns = ["age + book", "knowledge item", "spell source"]
+markers = ["age descriptor", "book type", "knowledge source"]
+corruption_band = 3
+horror_theme = "forbidden_knowledge"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "currency amounts (gp, sp, cp)",
+    "weapon and armor names",
+    "magical item descriptions",
+    "treasure values",
+    "equipment lists",
+    "item properties"
+]
+
+negative_indicators = [
+    "character names", 
+    "location descriptions",
+    "creature statistics",
+    "spell effects",
+    "story narrative"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "cursed_properties", "soul_binding", "reality_warping",
+    "memory_alteration", "compulsive_behavior", "gradual_possession"
+]
+
+forge_materials = [
+    "corrupted_iron", "void_crystal", "ancient_bone", "cursed_wood",
+    "shadow_essence", "blood_silver", "nightmare_stone", "soul_steel"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "item"
+poly_count_range = [500, 2000]
+texture_resolution = "512x512"
+required_animations = ["idle", "pickup", "use", "drop"]
+socket_requirements = ["hand_attachment", "character_mounting", "inventory_icon"]

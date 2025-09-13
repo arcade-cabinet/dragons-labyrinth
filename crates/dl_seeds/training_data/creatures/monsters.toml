@@ -1,0 +1,94 @@
+# Creature Training Data - Monsters and Bestiary
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "creatures"
+subcategory = "monsters"
+description = "Monsters, beasts, and hostile creatures for encounters"
+
+# Training examples extracted from HBF analysis
+[[examples]]
+name = "5 Onis"
+content_patterns = ["number + creature", "group encounter", "japanese monster"]
+markers = ["quantity prefix", "creature name", "encounter group"]
+corruption_band = 3
+horror_theme = "demonic_presence"
+
+[[examples]]
+name = "speaking Grimlocks"
+content_patterns = ["adjective + creature", "intelligent beast", "unusual ability"]
+markers = ["descriptive modifier", "creature name", "special ability"]
+corruption_band = 2
+horror_theme = "corrupted_intelligence"
+
+[[examples]]
+name = "2 Adult Brass Dragons"
+content_patterns = ["number + age + type + creature", "high-level encounter", "metallic dragon"]
+markers = ["quantity", "age descriptor", "dragon type", "creature category"]
+corruption_band = 4
+horror_theme = "ancient_power"
+
+[[examples]]
+name = "5 Wereboars"
+content_patterns = ["number + lycanthrope", "shapeshifter group", "hybrid creature"]
+markers = ["quantity", "were-creature", "lycanthrope type"]
+corruption_band = 3
+horror_theme = "bestial_transformation"
+
+[[examples]]
+name = "4 Ettins"
+content_patterns = ["number + giant", "multiple heads", "giant-kin"]
+markers = ["quantity", "giant type", "multi-headed"]
+corruption_band = 3
+horror_theme = "primal_savagery"
+
+# Classification patterns from build_config.toml creatures lexicon
+[patterns]
+positive_indicators = [
+    "creature names from lexicon",
+    "number + creature format",
+    "monster stat blocks",
+    "encounter descriptions", 
+    "bestiary entries",
+    "combat encounters"
+]
+
+negative_indicators = [
+    "character names",
+    "location descriptions",
+    "treasure amounts", 
+    "spell descriptions",
+    "mechanical rules"
+]
+
+# D&D creature lexicon from build_config.toml
+creature_lexicon = [
+    "dragon", "wyrm", "serpent", "demon", "daemon", "devil", "imp", 
+    "goblin", "orc", "ogre", "troll", "giant", "wraith", "ghost", 
+    "specter", "spectre", "vampire", "ghoul", "lich", "harpy", "hydra", 
+    "wolf", "werewolf", "spider", "kraken", "leviathan", "basilisk", 
+    "manticore", "chimera", "gargoyle", "hag", "witch", "warlock",
+    "oni", "grimlock", "ettin", "wereboar"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "unnatural_behavior", "reality_distortion", "cosmic_influence",
+    "physical_mutation", "psychological_breakdown", "otherworldly_presence"
+]
+
+evolution_stages = [
+    "natural_beast → corrupted_animal",
+    "intelligent_creature → cosmic_puppet", 
+    "magical_being → void_touched_entity",
+    "undead_spirit → reality_fragment"
+]
+
+# Asset generation specifications  
+[asset_specs]
+model_type = "creature"
+poly_count_range = [2000, 6000]
+texture_resolution = "1024x1024"
+required_animations = ["idle", "walk", "attack", "death", "special_ability"]
+socket_requirements = ["weapon_attachments", "spell_effects", "environmental_interaction"]

@@ -1,0 +1,42 @@
+(
+    id: "elspethria_verderosa_building",
+    display_name: "Elspethria Verderosa",
+    model_path: "buildings/elspethria_verderosa/elspethria_verderosa.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "elspethria_verderosa",
+    ],
+    cult: Some("elspethria_verderosa"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/elspethria_verderosa_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: None,
+    forge_material: Some("void_crystal"),
+)

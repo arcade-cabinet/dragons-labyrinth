@@ -1,0 +1,92 @@
+# Spell Training Data - Magic Systems and Arcane Knowledge
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "spells"
+subcategory = "magic_systems"
+description = "Spells, magical effects, enchantments, and arcane knowledge"
+
+# Training examples based on D&D magic patterns
+[[examples]]
+name = "Fireball"
+content_patterns = ["spell name", "evocation magic", "elemental damage"]
+markers = ["single word spell", "damage type", "area effect"]
+corruption_band = 2
+horror_theme = "destructive_power"
+
+[[examples]]
+name = "Charm Person"
+content_patterns = ["verb + target", "enchantment magic", "mind control"]
+markers = ["action verb", "target type", "mental effect"]
+corruption_band = 3
+horror_theme = "will_domination"
+
+[[examples]]
+name = "Speak with Dead"
+content_patterns = ["verb with noun", "necromancy magic", "communication"]
+markers = ["communication spell", "undead interaction", "necromantic effect"]
+corruption_band = 4
+horror_theme = "death_communion"
+
+[[examples]]
+name = "Wish"
+content_patterns = ["reality alteration", "ultimate magic", "cosmic power"]
+markers = ["single word", "ultimate spell", "reality changing"]
+corruption_band = 5
+horror_theme = "cosmic_manipulation"
+
+# Magic school classifications
+[[examples]]
+name = "Magic Missile"
+content_patterns = ["adjective + weapon", "force magic", "guaranteed hit"]
+markers = ["magical", "projectile", "force damage"]
+corruption_band = 1
+horror_theme = "arcane_violence"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "spell names and incantations",
+    "magical effect descriptions",
+    "arcane terminology",
+    "school of magic references",
+    "casting components",
+    "spell level indicators",
+    "magical theory"
+]
+
+negative_indicators = [
+    "character names",
+    "location descriptions",
+    "creature statistics",
+    "treasure amounts",
+    "mechanical dice rolls"
+]
+
+# Magic schools from D&D tradition
+magic_schools = [
+    "abjuration", "conjuration", "divination", "enchantment",
+    "evocation", "illusion", "necromancy", "transmutation"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "sanity_cost", "soul_sacrifice", "reality_tear", "cosmic_attention",
+    "forbidden_knowledge", "price_beyond_gold", "unwilling_transformation"
+]
+
+magical_evolution = [
+    "helpful_cantrip → desperate_necessity",
+    "protective_ward → binding_curse",
+    "healing_magic → flesh_manipulation",
+    "divination → cosmic_awareness"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "effect"
+poly_count_range = [800, 2500]
+texture_resolution = "512x512"
+required_animations = ["cast", "effect", "impact", "dissipate"]
+socket_requirements = ["caster_attachment", "target_effects", "area_markers"]

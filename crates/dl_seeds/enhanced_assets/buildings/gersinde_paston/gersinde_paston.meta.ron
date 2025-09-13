@@ -1,0 +1,42 @@
+(
+    id: "gersinde_paston_building",
+    display_name: "Gersinde Paston",
+    model_path: "buildings/gersinde_paston/gersinde_paston.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "gersinde_paston",
+    ],
+    cult: Some("gersinde_paston"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/gersinde_paston_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(3),
+    horror_theme: Some("decay_progression"),
+    forge_material: Some("cursed_wood"),
+)

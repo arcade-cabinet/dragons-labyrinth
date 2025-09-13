@@ -1,0 +1,78 @@
+# Mechanics Training Data - Dice, Rules, and Game Systems
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "mechanics"
+subcategory = "dice_rules"
+description = "Game mechanics, dice rolls, probability systems, and rules"
+
+# Training examples extracted from HBF analysis
+[[examples]]
+name = "2 in 6"
+content_patterns = ["number in number", "probability ratio", "dice mechanic"]
+markers = ["probability format", "dice system", "chance mechanic"]
+corruption_band = 1
+horror_theme = "fateful_chance"
+
+[[examples]]
+name = "1d20 + 5"
+content_patterns = ["dice notation", "modifier", "roll mechanic"]
+markers = ["d-notation", "modifier value", "dice formula"]
+corruption_band = 1
+horror_theme = "random_fate"
+
+[[examples]]
+name = "DC 15"
+content_patterns = ["difficulty class", "target number", "skill check"]
+markers = ["DC prefix", "target value", "check difficulty"]
+corruption_band = 1
+horror_theme = "inevitable_failure"
+
+[[examples]]
+name = "saving throw"
+content_patterns = ["save mechanic", "resistance check", "fate roll"]
+markers = ["saving", "throw", "resistance mechanic"]
+corruption_band = 2
+horror_theme = "desperate_resistance"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "dice notation (d4, d6, d8, d10, d12, d20, d100)",
+    "probability ratios (X in Y)",
+    "difficulty classes (DC X)",
+    "modifiers (+X, -X)",
+    "saving throws",
+    "skill checks",
+    "game mechanics terminology"
+]
+
+negative_indicators = [
+    "character names",
+    "location descriptions", 
+    "treasure amounts",
+    "story narrative",
+    "creature descriptions"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "weighted_against_players", "escalating_difficulty", "inevitable_doom",
+    "cursed_luck", "reality_breakdown", "cosmic_indifference"
+]
+
+mechanical_evolution = [
+    "fair_chance → weighted_doom",
+    "player_agency → cosmic_predestination",
+    "skill_mastery → reality_distortion", 
+    "heroic_saves → desperate_survival"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "ui_element"
+poly_count_range = [100, 500]
+texture_resolution = "256x256"
+required_animations = ["idle", "roll", "result_display"]
+socket_requirements = ["ui_anchors", "effect_displays", "audio_cues"]

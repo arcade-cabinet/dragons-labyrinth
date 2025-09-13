@@ -1,0 +1,42 @@
+(
+    id: "halidor_berohilde_building",
+    display_name: "Halidor Berohilde",
+    model_path: "buildings/halidor_berohilde/halidor_berohilde.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "halidor_berohilde",
+    ],
+    cult: Some("halidor_berohilde"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/halidor_berohilde_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: None,
+    forge_material: Some("corrupted_iron"),
+)

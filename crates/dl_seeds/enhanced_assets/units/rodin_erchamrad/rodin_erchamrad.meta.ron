@@ -1,0 +1,40 @@
+(
+    id: "rodin_erchamrad_model",
+    display_name: "Rodin Erchamrad",
+    model_path: "units/rodin_erchamrad/rodin_erchamrad.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-0.5, 0.0, -0.5),
+        max: (0.5, 2.0, 0.5),
+    ),
+    animations: [
+        "idle",
+        "walk",
+        "death",
+    ],
+    sockets: [
+        (
+            name: "head",
+            position: (0.0, 1.8, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "rodin_erchamrad",
+    ],
+    cult: Some("rodin_erchamrad"),
+    class: Some("cultist"),
+    upgrades_to: None,
+    ui_icon: Some("icons/rodin_erchamrad.png"),
+    sounds: [
+        (
+            event: "death",
+            sound_path: "sounds/generic_death.ogg",
+            volume: 1.0,
+            pitch_variation: 0.15,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("shadow_essence"),
+)

@@ -1,0 +1,40 @@
+(
+    id: "urisima_alinhilde_model",
+    display_name: "Urisima Alinhilde",
+    model_path: "units/urisima_alinhilde/urisima_alinhilde.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-0.5, 0.0, -0.5),
+        max: (0.5, 2.0, 0.5),
+    ),
+    animations: [
+        "idle",
+        "walk",
+        "death",
+    ],
+    sockets: [
+        (
+            name: "head",
+            position: (0.0, 1.8, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "urisima_alinhilde",
+    ],
+    cult: Some("urisima_alinhilde"),
+    class: Some("cultist"),
+    upgrades_to: None,
+    ui_icon: Some("icons/urisima_alinhilde.png"),
+    sounds: [
+        (
+            event: "death",
+            sound_path: "sounds/generic_death.ogg",
+            volume: 1.0,
+            pitch_variation: 0.15,
+        ),
+    ],
+    corruption_band: Some(3),
+    horror_theme: Some("aquatic_horror"),
+    forge_material: Some("shadow_essence"),
+)

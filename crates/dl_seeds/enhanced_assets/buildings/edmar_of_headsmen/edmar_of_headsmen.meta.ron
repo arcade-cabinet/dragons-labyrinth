@@ -1,0 +1,42 @@
+(
+    id: "edmar_of_headsmen_building",
+    display_name: "Edmar of Headsmen",
+    model_path: "buildings/edmar_of_headsmen/edmar_of_headsmen.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "edmar_of_headsmen",
+    ],
+    cult: Some("edmar_of_headsmen"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/edmar_of_headsmen_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: Some("aquatic_horror"),
+    forge_material: Some("corrupted_iron"),
+)

@@ -1,0 +1,42 @@
+(
+    id: "valyndria_of_ashamar_building",
+    display_name: "Valyndria of Ashamar",
+    model_path: "buildings/valyndria_of_ashamar/valyndria_of_ashamar.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "valyndria_of_ashamar",
+    ],
+    cult: Some("valyndria_of_ashamar"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/valyndria_of_ashamar_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: Some("blood_corruption"),
+    forge_material: Some("cursed_wood"),
+)

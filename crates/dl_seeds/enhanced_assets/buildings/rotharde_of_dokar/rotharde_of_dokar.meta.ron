@@ -1,0 +1,42 @@
+(
+    id: "rotharde_of_dokar_building",
+    display_name: "Rotharde of Dokar",
+    model_path: "buildings/rotharde_of_dokar/rotharde_of_dokar.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "rotharde_of_dokar",
+    ],
+    cult: Some("rotharde_of_dokar"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/rotharde_of_dokar_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: Some("decay_progression"),
+    forge_material: Some("shadow_essence"),
+)

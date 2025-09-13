@@ -1,0 +1,42 @@
+(
+    id: "volkward_theodebrand_building",
+    display_name: "Volkward Theodebrand",
+    model_path: "buildings/volkward_theodebrand/volkward_theodebrand.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "volkward_theodebrand",
+    ],
+    cult: Some("volkward_theodebrand"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/volkward_theodebrand_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("shadow_essence"),
+)

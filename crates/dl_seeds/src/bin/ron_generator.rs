@@ -686,10 +686,41 @@ fn create_terrain_metadata_from_entity(
 ) -> ModelMetadata {
     let sanitized_name = sanitize_name(&entity.entity_name);
     
+    // Use biome type detection to enhance terrain classification based on entity position
+    // For now, use a default coordinate since we don't have position data from entities
+    let default_coords = (0, 0); // Could be extracted from entity content in future
+    let biome_type = determine_biome_type(default_coords);
+    let mut tags = vec!["terrain".to_string(), "environmental".to_string(), sanitize_name(region)];
+    
+    // Add biome-specific tags based on determined type
+    match biome_type.as_str() {
+        "forest" => {
+            tags.extend(vec!["woodland".to_string(), "trees".to_string()]);
+        }
+        "mountain" => {
+            tags.extend(vec!["rocky".to_string(), "elevation".to_string()]);
+        }
+        "swamp" => {
+            tags.extend(vec!["wetland".to_string(), "murky".to_string()]);
+        }
+        "desert" => {
+            tags.extend(vec!["arid".to_string(), "sandy".to_string()]);
+        }
+        "plain" => {
+            tags.extend(vec!["grassland".to_string(), "open".to_string()]);
+        }
+        "water" => {
+            tags.extend(vec!["aquatic".to_string(), "liquid".to_string()]);
+        }
+        _ => {
+            tags.push("unknown_biome".to_string());
+        }
+    }
+    
     ModelMetadata {
-        id: format!("{}_terrain", sanitized_name),
-        display_name: format!("{} Terrain", entity.entity_name),
-        model_path: format!("terrain/{}.glb", sanitized_name),
+        id: format!("{}_{}_terrain", sanitized_name, biome_type),
+        display_name: format!("{} {} Terrain", entity.entity_name, biome_type.to_uppercase()),
+        model_path: format!("terrain/{}/{}.glb", biome_type, sanitized_name),
         scale: (1.0, 1.0, 1.0),
         bounds: ModelBounds {
             min: (-5.0, 0.0, -5.0),
@@ -697,15 +728,15 @@ fn create_terrain_metadata_from_entity(
         },
         animations: vec!["idle".to_string(), "environmental".to_string()],
         sockets: vec![],
-        tags: vec!["terrain".to_string(), "environmental".to_string(), sanitize_name(region)],
+        tags,
         cult: None,
-        class: Some("terrain".to_string()),
+        class: Some(format!("{}_terrain", biome_type)),
         upgrades_to: None,
-        ui_icon: Some(format!("icons/{}_terrain.png", sanitized_name)),
+        ui_icon: Some(format!("icons/{}_{}_terrain.png", biome_type, sanitized_name)),
         sounds: vec![
             SoundEvent {
                 event: "ambient".to_string(),
-                sound_path: format!("sounds/{}_ambient.ogg", sanitized_name),
+                sound_path: format!("sounds/{}_{}_ambient.ogg", biome_type, sanitized_name),
                 volume: 0.3,
                 pitch_variation: 0.2,
             }
@@ -728,7 +759,30 @@ fn generate_category_assets(
 ) -> Result<()> {
     println!("🔄 Generating {} assets...", category);
     
-    let entities = load_analyzed_entities(input_dir)?;
+    let mut entities = load_analyzed_entities(input_dir)?;
+    
+    // Apply faction filtering if specified
+    if let Some(faction_name) = faction_filter {
+        println!("  Filtering for faction: {}", faction_name);
+        
+        // Filter factions to only include the specified one
+        entities.factions.retain(|name, _| name.to_lowercase().contains(&faction_name.to_lowercase()));
+        
+        // Filter settlements that might belong to this faction
+        entities.settlements.retain(|name, entities_list| {
+            name.to_lowercase().contains(&faction_name.to_lowercase()) ||
+            entities_list.iter().any(|e| e.raw_value.to_lowercase().contains(&faction_name.to_lowercase()))
+        });
+        
+        // Filter regions related to this faction
+        entities.regions.retain(|name, entities_list| {
+            name.to_lowercase().contains(&faction_name.to_lowercase()) ||
+            entities_list.iter().any(|e| e.raw_value.to_lowercase().contains(&faction_name.to_lowercase()))
+        });
+        
+        println!("  Filtered to {} factions, {} settlements, {} regions", 
+                 entities.factions.len(), entities.settlements.len(), entities.regions.len());
+    }
     
     match category {
         "units" => generate_units_from_entities(&entities, output_dir, true)?,

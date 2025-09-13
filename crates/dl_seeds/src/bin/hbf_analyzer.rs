@@ -118,11 +118,34 @@ fn main() -> Result<()> {
 }
 
 fn analyze_all_entities(database_path: &PathBuf, output_dir: &PathBuf, generate_reports: bool) -> Result<()> {
-    println!("🔄 Analyzing all entities from HBF database...");
+    println!("🔄 Analyzing all entities from HBF database with training data enhancement...");
     
-    // Load and process all entities
-    let mut raw_entities = RawEntities::new();
-    raw_entities.load_from_hbf_database(database_path)?;
+    // Try to load training data for enhanced categorization
+    let training_dir = std::env::current_dir()?.join("training_data");
+    let mut use_training = false;
+    
+    if training_dir.exists() {
+        println!("📚 Training data directory found, loading enhanced categorization...");
+        use_training = true;
+    } else {
+        println!("⚠️ No training data found, using basic categorization");
+    }
+    
+    // Load and process all entities with or without training
+    let mut raw_entities = if use_training {
+        // Use enhanced categorization with training data
+        let (mut entities, training_repo) = RawEntities::new_with_training(&training_dir)?;
+        println!("✅ Loaded {} training examples from TOML files", training_repo.total_examples());
+        
+        // Load entities from database using enhanced categorization
+        entities.load_from_hbf_database_with_training(database_path, &training_repo)?;
+        entities
+    } else {
+        // Use basic categorization
+        let mut entities = RawEntities::new();
+        entities.load_from_hbf_database(database_path)?;
+        entities
+    };
     
     // Write organized entities to disk
     raw_entities.write_all_entities(output_dir)?;
@@ -136,7 +159,22 @@ fn analyze_all_entities(database_path: &PathBuf, output_dir: &PathBuf, generate_
     println!("  Settlements: {}", summary.settlements_count);
     println!("  Factions: {}", summary.factions_count);
     println!("  Dungeons: {}", summary.dungeons_count);
+    if use_training {
+        println!("  Characters: {}", summary.characters_count);
+        println!("  Creatures: {}", summary.creatures_count);
+        println!("  Items: {}", summary.items_count);
+        println!("  Spells: {}", summary.spells_count);
+        println!("  Mechanics: {}", summary.mechanics_count);
+    }
     println!("  Uncategorized: {}", summary.uncategorized_count);
+    
+    // Calculate categorization success rate
+    let total_categorized = summary.total_entities - summary.uncategorized_count;
+    let success_rate = if summary.total_entities > 0 {
+        (total_categorized as f32 / summary.total_entities as f32 * 100.0).round()
+    } else { 0.0 };
+    println!("📈 Categorization Success Rate: {}% ({} of {} entities)", 
+             success_rate, total_categorized, summary.total_entities);
     
     // Generate CSV reports if requested
     if generate_reports {
@@ -165,16 +203,31 @@ fn query_entities(
 ) -> Result<()> {
     println!("🔍 Querying entities...");
     
-    let mut raw_entities = RawEntities::new();
-    raw_entities.load_from_hbf_database(database_path)?;
+    // Load training data if available for consistent results
+    let training_dir = std::env::current_dir()?.join("training_data");
+    let raw_entities = if training_dir.exists() {
+        println!("📚 Loading with training data for consistent categorization...");
+        let (mut entities, training_repo) = RawEntities::new_with_training(&training_dir)?;
+        entities.load_from_hbf_database_with_training(database_path, &training_repo)?;
+        entities
+    } else {
+        let mut entities = RawEntities::new();
+        entities.load_from_hbf_database(database_path)?;
+        entities
+    };
     
     match category {
         Some("regions") => query_category(&raw_entities.regions, entity_name, show_html, limit)?,
         Some("settlements") => query_category(&raw_entities.settlements, entity_name, show_html, limit)?,
         Some("factions") => query_category(&raw_entities.factions, entity_name, show_html, limit)?,
         Some("dungeons") => query_category(&raw_entities.dungeons, entity_name, show_html, limit)?,
+        Some("characters") => query_category(&raw_entities.characters, entity_name, show_html, limit)?,
+        Some("creatures") => query_category(&raw_entities.creatures, entity_name, show_html, limit)?,
+        Some("items") => query_category(&raw_entities.items, entity_name, show_html, limit)?,
+        Some("spells") => query_category(&raw_entities.spells, entity_name, show_html, limit)?,
+        Some("mechanics") => query_category(&raw_entities.mechanics, entity_name, show_html, limit)?,
         Some(cat) => {
-            println!("❌ Unknown category: {}. Use: regions, settlements, factions, dungeons", cat);
+            println!("❌ Unknown category: {}. Use: regions, settlements, factions, dungeons, characters, creatures, items, spells, mechanics", cat);
             return Ok(());
         }
         None => {
@@ -183,6 +236,11 @@ fn query_entities(
             println!("  settlements: {} groups", raw_entities.settlements.len());
             println!("  factions: {} groups", raw_entities.factions.len());
             println!("  dungeons: {} groups", raw_entities.dungeons.len());
+            println!("  characters: {} groups", raw_entities.characters.len());
+            println!("  creatures: {} groups", raw_entities.creatures.len());
+            println!("  items: {} groups", raw_entities.items.len());
+            println!("  spells: {} groups", raw_entities.spells.len());
+            println!("  mechanics: {} groups", raw_entities.mechanics.len());
             println!("  uncategorized: {} entities", raw_entities.uncategorized.len());
         }
     }

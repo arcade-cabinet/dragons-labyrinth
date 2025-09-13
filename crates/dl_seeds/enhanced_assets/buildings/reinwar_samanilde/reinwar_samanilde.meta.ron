@@ -1,0 +1,42 @@
+(
+    id: "reinwar_samanilde_building",
+    display_name: "Reinwar Samanilde",
+    model_path: "buildings/reinwar_samanilde/reinwar_samanilde.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-2.0, 0.0, -2.0),
+        max: (2.0, 3.0, 2.0),
+    ),
+    animations: [
+        "idle",
+        "construction",
+        "destruction",
+    ],
+    sockets: [
+        (
+            name: "entrance",
+            position: (0.0, 0.0, 2.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "building",
+        "structure",
+        "reinwar_samanilde",
+    ],
+    cult: Some("reinwar_samanilde"),
+    class: Some("building"),
+    upgrades_to: None,
+    ui_icon: Some("icons/reinwar_samanilde_building.png"),
+    sounds: [
+        (
+            event: "construction",
+            sound_path: "sounds/building_construct.ogg",
+            volume: 0.7,
+            pitch_variation: 0.1,
+        ),
+    ],
+    corruption_band: Some(1),
+    horror_theme: Some("void_consumption"),
+    forge_material: Some("ancient_bone"),
+)

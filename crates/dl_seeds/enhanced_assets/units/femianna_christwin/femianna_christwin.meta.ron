@@ -1,0 +1,40 @@
+(
+    id: "femianna_christwin_model",
+    display_name: "Femianna Christwin",
+    model_path: "units/femianna_christwin/femianna_christwin.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-0.5, 0.0, -0.5),
+        max: (0.5, 2.0, 0.5),
+    ),
+    animations: [
+        "idle",
+        "walk",
+        "death",
+    ],
+    sockets: [
+        (
+            name: "head",
+            position: (0.0, 1.8, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "femianna_christwin",
+    ],
+    cult: Some("femianna_christwin"),
+    class: Some("cultist"),
+    upgrades_to: None,
+    ui_icon: Some("icons/femianna_christwin.png"),
+    sounds: [
+        (
+            event: "death",
+            sound_path: "sounds/generic_death.ogg",
+            volume: 1.0,
+            pitch_variation: 0.15,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("shadow_essence"),
+)

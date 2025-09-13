@@ -1,0 +1,101 @@
+# Faction Training Data - Guilds, Orders, and Organizations
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "locations"
+subcategory = "factions"
+description = "Guilds, orders, organizations, and group affiliations"
+
+# Training examples from build_config.toml known_entities.factions
+[[examples]]
+name = "The Defiled Wolves"
+content_patterns = ["the + adjective + animal", "corrupted organization", "bestial faction"]
+markers = ["the", "defiled", "wolves", "group designation"]
+corruption_band = 3
+horror_theme = "bestial_corruption"
+
+[[examples]]
+name = "The Fists Of Justice"
+content_patterns = ["the + body_part + of + concept", "militant organization", "justice faction"]
+markers = ["the", "fists", "of justice", "militant theme"]
+corruption_band = 2
+horror_theme = "corrupted_justice"
+
+[[examples]]
+name = "The Red Snakes"
+content_patterns = ["the + color + animal", "serpentine organization", "color-coded faction"]
+markers = ["the", "red", "snakes", "color designation"]
+corruption_band = 3
+horror_theme = "serpentine_corruption"
+
+[[examples]]
+name = "The Swords Of Justice"
+content_patterns = ["the + weapon + of + concept", "martial organization", "weapon faction"]
+markers = ["the", "swords", "of justice", "weapon theme"]
+corruption_band = 2
+horror_theme = "violent_justice"
+
+[[examples]]
+name = "The White Wyverns"
+content_patterns = ["the + color + dragon", "draconic organization", "aerial faction"]
+markers = ["the", "white", "wyverns", "draconic theme"]
+corruption_band = 4
+horror_theme = "draconic_influence"
+
+# Additional D&D faction patterns
+[[examples]]
+name = "Guild of Artificers"
+content_patterns = ["guild of profession", "professional organization", "craft guild"]
+markers = ["guild of", "profession", "craft specialization"]
+corruption_band = 1
+horror_theme = "craft_corruption"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "the + group_name format",
+    "guild/order/organization references",
+    "group affiliation descriptions", 
+    "collective identity markers",
+    "organizational structure",
+    "membership terminology",
+    "factional allegiances"
+]
+
+negative_indicators = [
+    "individual character names",
+    "creature statistics",
+    "treasure amounts",
+    "spell descriptions", 
+    "terrain features",
+    "mechanical rules"
+]
+
+# Organization types and patterns
+organization_types = [
+    "guild", "order", "organization", "company", "brotherhood",
+    "covenant", "cult", "sect", "faction", "alliance",
+    "syndicate", "circle", "lodge", "society"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+corruption_indicators = [
+    "ideological_extremism", "collective_madness", "power_corruption",
+    "ritual_obsession", "cosmic_influence", "organizational_decay"
+]
+
+factional_evolution = [
+    "noble_purpose → fanatical_extremism",
+    "protective_guild → oppressive_regime",
+    "scholarly_order → cosmic_cult",
+    "merchant_company → exploitative_syndicate"
+]
+
+# Asset generation specifications
+[asset_specs]
+model_type = "organization"
+poly_count_range = [3000, 8000]
+texture_resolution = "1024x1024"
+required_animations = ["recruitment", "ritual", "conflict", "expansion"]
+socket_requirements = ["banner_attachments", "symbol_displays", "territory_markers"]

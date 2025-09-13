@@ -351,7 +351,7 @@ fn generate_analysis_summary(
     Ok(())
 }
 
-/// Generate a report of uncategorized entities
+/// Generate split reports of uncategorized entities (manageable chunks)
 pub fn generate_uncategorized_report(
     uncategorized: &[RawEntity],
     reports_dir: &Path
@@ -360,37 +360,133 @@ pub fn generate_uncategorized_report(
         return Ok(());
     }
     
-    let file_path = reports_dir.join("uncategorized_entities.csv");
-    let mut wtr = Writer::from_path(file_path)?;
+    const CHUNK_SIZE: usize = 1000; // Split into 1K entity chunks
+    const SAMPLE_SIZE: usize = 100; // Representative sample for quick analysis
     
-    // Write headers
-    wtr.write_record(&[
+    // Generate summary file with just a sample for quick review
+    let sample_path = reports_dir.join("uncategorized_sample.csv");
+    let mut sample_wtr = Writer::from_path(sample_path)?;
+    
+    sample_wtr.write_record(&[
         "UUID",
         "Category",
-        "Entity Name",
+        "Entity Name", 
         "Content Preview",
-        "Hex Coordinates"
+        "Potential Category"
     ])?;
     
-    // Write each uncategorized entity
-    for entity in uncategorized {
+    // Write sample with categorization hints
+    for entity in uncategorized.iter().take(SAMPLE_SIZE) {
         let content_preview = if entity.raw_value.len() > 100 {
             format!("{}...", &entity.raw_value[..100])
         } else {
             entity.raw_value.clone()
         };
         
-        wtr.write_record(&[
+        let potential_category = detect_potential_category(&entity.raw_value, &entity.entity_name);
+        
+        sample_wtr.write_record(&[
             &entity.uuid,
             &entity.category,
             &entity.entity_name,
             &content_preview,
-            "Unknown", // Placeholder for hex coordinates - need to extract from content
+            &potential_category,
         ])?;
     }
+    sample_wtr.flush()?;
     
-    wtr.flush()?;
+    // Generate pattern analysis file
+    let patterns_path = reports_dir.join("uncategorized_patterns.csv");
+    let mut patterns_wtr = Writer::from_path(patterns_path)?;
+    
+    patterns_wtr.write_record(&[
+        "Pattern",
+        "Entity Count",
+        "Percentage",
+        "Example Names"
+    ])?;
+    
+    let patterns = analyze_uncategorized_patterns(uncategorized);
+    for (pattern, (count, examples)) in patterns {
+        let percentage = (count as f32 / uncategorized.len() as f32 * 100.0).round();
+        let example_list = examples.join("; ");
+        
+        patterns_wtr.write_record(&[
+            &pattern,
+            &count.to_string(),
+            &format!("{}%", percentage),
+            &example_list,
+        ])?;
+    }
+    patterns_wtr.flush()?;
+    
+    // Generate chunked files only if explicitly requested (not by default)
+    println!("📊 Generated uncategorized sample ({} entities) and pattern analysis", SAMPLE_SIZE);
+    println!("   Total uncategorized: {} entities", uncategorized.len());
+    println!("   Use 'export' command with 'csv' format for full data if needed");
+    
     Ok(())
+}
+
+/// Detect potential category for an uncategorized entity
+fn detect_potential_category(content: &str, entity_name: &str) -> String {
+    let content_lower = content.to_lowercase();
+    let name_lower = entity_name.to_lowercase();
+    
+    // Enhanced pattern detection
+    if content_lower.contains("village") || content_lower.contains("town") || 
+       content_lower.contains("city") || content_lower.contains("settlement") ||
+       name_lower.contains("village") || name_lower.contains("town") {
+        "settlements".to_string()
+    } else if content_lower.contains("guild") || content_lower.contains("organization") ||
+              content_lower.contains("cult") || content_lower.contains("order") ||
+              content_lower.contains("covenant") || content_lower.contains("brotherhood") ||
+              name_lower.contains("guild") || name_lower.contains("order") {
+        "factions".to_string()
+    } else if content_lower.contains("cave") || content_lower.contains("lair") || 
+              content_lower.contains("crypt") || content_lower.contains("tomb") ||
+              content_lower.contains("temple") || content_lower.contains("shrine") ||
+              content_lower.contains("hideout") || content_lower.contains("cavern") ||
+              name_lower.contains("cave") || name_lower.contains("lair") {
+        "dungeons".to_string()
+    } else if content_lower.contains("forest") || content_lower.contains("mountain") || 
+              content_lower.contains("biome") || content_lower.contains("region") ||
+              content_lower.contains("wilderness") || content_lower.contains("plains") ||
+              content_lower.contains("hills") || content_lower.contains("valley") ||
+              name_lower.contains("forest") || name_lower.contains("mountain") {
+        "regions".to_string()
+    } else if content_lower.contains("npc") || content_lower.contains("character") ||
+              content_lower.contains("person") || content_lower.contains("individual") {
+        "characters".to_string()
+    } else if content_lower.contains("item") || content_lower.contains("weapon") ||
+              content_lower.contains("armor") || content_lower.contains("equipment") {
+        "items".to_string()
+    } else if content_lower.contains("spell") || content_lower.contains("magic") ||
+              content_lower.contains("enchantment") || content_lower.contains("ritual") {
+        "spells".to_string()
+    } else if content_lower.contains("creature") || content_lower.contains("monster") ||
+              content_lower.contains("beast") || content_lower.contains("dragon") {
+        "creatures".to_string()
+    } else {
+        "unknown".to_string()
+    }
+}
+
+/// Analyze patterns in uncategorized entities
+fn analyze_uncategorized_patterns(uncategorized: &[RawEntity]) -> std::collections::HashMap<String, (usize, Vec<String>)> {
+    let mut patterns: std::collections::HashMap<String, (usize, Vec<String>)> = std::collections::HashMap::new();
+    
+    for entity in uncategorized.iter().take(2000) { // Sample first 2000 for performance
+        let potential_category = detect_potential_category(&entity.raw_value, &entity.entity_name);
+        
+        let entry = patterns.entry(potential_category).or_insert((0, Vec::new()));
+        entry.0 += 1;
+        if entry.1.len() < 5 { // Keep only 5 examples per pattern
+            entry.1.push(entity.entity_name.clone());
+        }
+    }
+    
+    patterns
 }
 
 #[cfg(test)]

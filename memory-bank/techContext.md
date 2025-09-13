@@ -19,6 +19,12 @@
   - Pillow: Image processing
   - Typer: CLI interface
 
+#### Training Data System (New)
+- **Format**: TOML-based training files with D&D patterns
+- **Purpose**: Self-improving HBF entity categorization
+- **Coverage**: 45 training examples across 9 categories
+- **Integration**: Feedback loop with pattern recognition
+
 #### OpenAI API
 - **Text Model**: Configurable (default: gpt-5.1)
 - **Image Model**: Configurable (default: gpt-image-1)
@@ -33,17 +39,24 @@ dragons-labyrinth/
 ├── .clinerules           # AI agent instructions
 ├── Cargo.toml           # Rust workspace config
 ├── pyproject.toml       # Python project config
+├── crates/dl_seeds/     # Enhanced seeding system
+│   ├── training_data/   # 🆕 TOML training files
+│   │   ├── characters/  # NPCs and named individuals
+│   │   ├── creatures/   # Monsters and beasts
+│   │   ├── items/       # Equipment and treasure
+│   │   ├── spells/      # Magic systems
+│   │   ├── mechanics/   # Game rules and dice
+│   │   └── locations/   # All location types
+│   └── src/bin/        # Enhanced standalone binaries
 ├── ai/                  # Python generation pipeline
 ├── apps/                # Rust applications
 │   └── game/           # Main game executable
-├── crates/             # Rust libraries
-│   └── world/          # Game world logic
 ├── content/            # Source markdown files
 ├── build/              # Generated JSON data
 └── memory-bank/        # Project documentation
 ```
 
-### Build Artifacts
+### Enhanced Build Artifacts
 ```
 build/
 ├── master/             # Core game data
@@ -56,7 +69,14 @@ build/
 ├── features/          # Game features
 │   └── shops/         # Shop inventories
 ├── narrative/         # Story content
-└── image_plan.json    # Asset generation plan
+├── image_plan.json    # Asset generation plan
+└── enhanced_analysis/ # 🆕 Training-enhanced HBF processing
+    ├── characters.json # NPCs and named individuals
+    ├── creatures.json  # Monsters and encounters
+    ├── items.json      # Equipment and treasure
+    ├── spells.json     # Magic and enchantments
+    ├── mechanics.json  # Rules and probability
+    └── reports/        # Split CSV analysis
 ```
 
 ## Development Environment
@@ -75,8 +95,9 @@ OPENAI_IMAGE_MODEL=gpt-image-1 # Optional
 ```
 
 ### Package Management
-- **Rust**: Cargo workspaces
+- **Rust**: Cargo workspaces with training data integration
 - **Python**: uv/hatch for dependencies
+- **Training Data**: TOML files for categorization enhancement
 - **Node**: Not required (removed with Godot)
 
 ## Key Dependencies
@@ -89,114 +110,125 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"             # JSON parsing
 anyhow = "1"                 # Error handling
 rand = "0.8"                 # Random generation
+toml = "1"                   # 🆕 Training data parsing
+walkdir = "2"                # 🆕 Training file discovery
 ```
 
-### Python Dependencies
+### Enhanced dl_seeds Dependencies
 ```toml
-# Core
-openai = ">=1.50.0"          # AI integration
-pydantic = ">=2.8.0"         # Data validation
-typer = ">=0.12.0"           # CLI framework
+# Training data system
+toml = { workspace = true }           # Training file parsing
+walkdir = { workspace = true }        # Training directory traversal
 
-# Processing
-pillow = ">=10.4.0"          # Image manipulation
-beautifulsoup4 = ">=4.12.3"  # HTML parsing
-jinja2 = ">=3.1.4"           # Template engine
+# Enhanced categorization
+rusqlite = { workspace = true }       # HBF database access
+regex = { workspace = true }          # Pattern matching
+csv = { workspace = true }            # Split reporting
 
-# Data
-pandas = ">=2.2.0"           # Data analysis
-sqlalchemy = ">=2.0.0"       # Database access
-sqlmodel = ">=0.0.24"        # ORM
-
-# Utilities
-rich = ">=13.9.0"            # Terminal output
-tqdm = ">=4.66.0"            # Progress bars
-requests = ">=2.32.0"        # HTTP requests
+# AI integration (original)
+rust-bert = { workspace = true }      # Pattern recognition models
+openai_dive = { workspace = true }    # OpenAI integration
+polars = { workspace = true }         # DataFrame processing
 ```
 
-## Build & Run Commands
+## Enhanced Build & Run Commands
 
-### Python Content Generation
+### Training Data Enhanced Analysis
 ```bash
-# Install dependencies
-pip install -e .
+# Enhanced HBF analysis with training data
+cd crates/dl_seeds
+cargo run --bin hbf-analyzer -d game.hbf -o analysis/ analyze-all --reports
 
-# Generate game content
-python -m ai canonize        # Convert markdown to canon
-python -m ai plan           # Create world plan
-python -m ai expand         # Generate regions
-python -m ai image-plan     # Design assets
-python -m ai images         # Generate tilesets
-python -m ai narrative      # Expand dialogue
+# Query specific enhanced categories
+cargo run --bin hbf-analyzer -d game.hbf query -c creatures -l 5
+cargo run --bin hbf-analyzer -d game.hbf query -c characters -l 5
+cargo run --bin hbf-analyzer -d game.hbf query -c mechanics -l 5
+
+# RON generation with enhanced data
+cargo run --bin ron-generator -i analysis/ -o assets/ generate-all --corruption-bands
+
+# Replit prompts with RON enhancement
+cargo run --bin replit-prompter -i analysis/ -a assets/ -o prompts/ generate-all --corruption-themes
 ```
 
-### Rust Game Development
+### Training Data Management
 ```bash
-# Build game
-cargo build --release
+# Add new training examples (manual)
+vim crates/dl_seeds/training_data/creatures/monsters.toml
 
-# Run game
+# Test training data loading
+cargo run --bin hbf-analyzer -d game.hbf analyze-all  # Shows training count
+
+# Validate training data integration
+cargo run --bin hbf-analyzer -d game.hbf query        # Shows all 9 categories
+```
+
+### Development Workflow Enhanced
+```bash
+# 1. Edit training data (if needed)
+vim crates/dl_seeds/training_data/[category]/[subcategory].toml
+
+# 2. Run enhanced analysis
+cargo run --bin hbf-analyzer -d game.hbf -o analysis/ analyze-all --reports
+
+# 3. Generate enhanced RONs
+cargo run --bin ron-generator -i analysis/ -o assets/ generate-all --corruption-bands
+
+# 4. Create training-aware prompts
+cargo run --bin replit-prompter -i analysis/ -a assets/ -o prompts/ generate-all
+
+# 5. Hot-reload test (press R in game)
 cargo run -p game
-
-# Run with hot-reload testing
-cargo watch -x "run -p game"
-```
-
-### Development Workflow
-```bash
-# 1. Edit content
-vim content/Architecture.md
-
-# 2. Regenerate
-python -m ai canonize && python -m ai plan && python -m ai expand
-
-# 3. Run game
-cargo run -p game
-
-# 4. Hot-reload test (press R in game)
 ```
 
 ## Architecture Decisions
 
-### Why Rust + Bevy (not Godot)
-- **Performance**: Native performance, no GDScript overhead
-- **Architecture**: ECS fits our component-heavy design
-- **Simplicity**: Direct JSON loading vs Godot resources
-- **Control**: Full control over rendering pipeline
-- **Hot-Reload**: Simpler implementation than Godot
+### Why Training Data System (New)
+- **Self-Improvement**: System gets better with each training addition
+- **Pattern Recognition**: Teaches system D&D content types systematically
+- **Scalability**: Unlimited categorization enhancement potential
+- **Quality**: Rich content properly categorized for asset generation
+- **Horror Integration**: Training examples include corruption themes
 
-### Why Python Generation (not Rust)
-- **AI Libraries**: Better OpenAI integration
-- **Flexibility**: Rapid prototyping of generation logic
-- **Ecosystem**: Rich data processing libraries
-- **Separation**: Clear boundary between generation and runtime
+### Why TOML Training Files (vs Database)
+- **Human-Readable**: Easy to edit and maintain training examples
+- **Version Control**: Training data changes tracked in git
+- **External Configuration**: No recompilation needed for training updates
+- **Pattern Documentation**: Training files serve as categorization documentation
+- **Horror Integration**: Corruption bands and themes in training examples
 
-### Why JSON (not Database)
-- **Simplicity**: No ORM complexity
-- **Portability**: Easy to share/version
-- **Debugging**: Human-readable format
-- **Performance**: Fast loading at startup
-- **Hot-Reload**: Simple file watching
+### Why Enhanced Categorization (vs Basic)
+- **D&D Content Diversity**: Original 4 categories insufficient for rich D&D data
+- **Asset Generation**: More categories → more diverse Replit prompts
+- **Training Feedback**: Enhanced categories enable better training examples
+- **Horror RPG Support**: Specialized categories support companion trauma, forge systems
+
+### Why Split Reporting (vs Massive Files)
+- **System Performance**: Prevents overload with 70K+ entity datasets
+- **Analysis Efficiency**: 100-entity samples enable rapid pattern recognition
+- **User Experience**: Manageable files vs massive CSV exports
+- **Iterative Development**: Quick analysis cycles for training refinement
 
 ## Performance Considerations
 
-### Memory Usage
+### Memory Usage (Enhanced)
+- **Training Data**: Minimal overhead (~1MB TOML files)
 - **World Data**: ~10MB JSON loaded at startup
 - **Textures**: Lazy-loaded as needed
 - **Entities**: Component pools for efficiency
-- **Target**: <500MB RAM usage
+- **Target**: <500MB RAM usage maintained
 
-### CPU Usage
-- **Hex Math**: Pre-calculated lookup tables
-- **Pathfinding**: A* with caching
-- **Systems**: Parallel execution where possible
-- **Target**: 60 FPS on 2015+ hardware
+### CPU Usage (Training Enhanced)
+- **Training Loading**: One-time TOML parsing cost
+- **Pattern Recognition**: Efficient string matching algorithms
+- **Enhanced Categorization**: Scalable with training examples
+- **Target**: 60 FPS maintained with training enhancement
 
-### GPU Usage
-- **2D Rendering**: Minimal requirements
-- **Shaders**: Simple hex tile materials
-- **Batching**: Instanced rendering for tiles
-- **Target**: Intel integrated graphics
+### Enhanced Processing
+- **Training Impact**: Measurable categorization improvement
+- **Scalable Enhancement**: More training → exponentially better results
+- **Split Reporting**: Prevents processing bottlenecks
+- **Pattern Caching**: Training data cached during analysis sessions
 
 ## Platform Support
 
@@ -212,47 +244,60 @@ cargo run -p game
 
 ## Testing Strategy
 
-### Unit Tests
+### Enhanced Unit Tests
 ```bash
-# Rust tests
+# Rust tests (including training data)
 cargo test
+
+# Training data validation
+cargo test training_repository
+
+# Enhanced categorization tests
+cargo test enhanced_categorization
 
 # Python tests
 pytest ai/tests/
 ```
 
-### Integration Tests
-- Full pipeline execution
-- World generation validation
-- Save/load cycles
-- Hot-reload verification
+### Training Data Integration Tests
+- Training data loading validation
+- Pattern recognition accuracy tests
+- Categorization improvement measurement
+- End-to-end pipeline with training enhancement
 
-### Performance Tests
-- Frame rate monitoring
-- Memory leak detection
-- Load time benchmarks
-- Pathfinding stress tests
+### Performance Tests Enhanced
+- Frame rate monitoring with training data
+- Memory leak detection with enhanced categorization
+- Training data loading performance benchmarks
+- Enhanced analysis processing time measurement
 
 ## Deployment
 
-### Distribution
-- **Format**: Single executable + data folder
-- **Size**: ~50MB download
-- **Updates**: Replace data files for content
+### Enhanced Distribution
+- **Format**: Single executable + data folder + training data
+- **Size**: ~50MB download + training TOML files
+- **Updates**: Replace data files + training examples for content enhancement
 - **Saves**: User home directory
 
-### Content Updates
+### Training Data Updates
 ```bash
-# Update content only
-python -m ai canonize plan expand
-cp -r build/* game_release/data/
+# Update training examples only
+git pull  # Get new training data
+cargo run --bin hbf-analyzer -d game.hbf analyze-all  # Enhanced analysis
+
+# Full content + training update
+python -m ai canonize plan expand  # Content generation
+cargo run --bin hbf-analyzer analyze-all  # Enhanced categorization
 ```
 
-### Binary Updates
+### Enhanced Binary Updates
 ```bash
-# Full rebuild
+# Full rebuild with training enhancement
 cargo build --release
-cp target/release/game game_release/
+cp target/release/hbf-analyzer game_release/
+cp target/release/ron-generator game_release/
+cp target/release/replit-prompter game_release/
+cp -r training_data/ game_release/
 ```
 
 ## Security Considerations
@@ -262,80 +307,74 @@ cp target/release/game game_release/
 - Use environment variables
 - Document in .env.example
 
+### Training Data Security
+- Training examples versioned in git
+- No sensitive content in training files
+- TOML files human-readable for security review
+
 ### User Data
 - Saves in user directory only
 - No network features planned
 - No telemetry or analytics
 
-## Known Limitations
+## Enhanced Monitoring & Debugging
 
-### Current
-- Single-threaded AI generation
-- No multiplayer support
-- Limited to 2D rendering
-- English-only content
+### Training Data Development Tools
+- TOML syntax validation
+- Training example effectiveness measurement
+- Pattern recognition success rate tracking
+- Categorization accuracy monitoring
 
-### Acceptable
-- These align with project scope
-- Focus on single-player horror
-- 2D supports our art style
-- Localization post-launch maybe
-
-## Monitoring & Debugging
-
-### Development Tools
-- Bevy inspector egui
-- Chrome DevTools for WASM
-- Python debugger for generation
-- VS Code integrated debugging
-
-### Logging
+### Enhanced Logging
 ```rust
-// Rust
-log::info!("Player moved to {:?}", pos);
+// Training data loading
+log::info!("Loaded {} training examples from TOML files", training_repo.total_examples());
 
-// Python
-logger.info(f"Generated {len(regions)} regions")
+// Enhanced categorization
+log::info!("Categorization Success Rate: {}%", success_rate);
+
+// Pattern recognition
+log::debug!("Training pattern matched: {} → {}", entity_name, category);
 ```
 
-### Profiling
-- Bevy Tracy integration
-- Python cProfile for generation
-- Memory profiling with Valgrind
-- GPU profiling with RenderDoc
+### Training Data Profiling
+- Training data loading performance
+- Pattern recognition efficiency measurement
+- Enhanced categorization impact analysis
+- Training example effectiveness tracking
 
 ## Future Technical Considerations
 
-### Potential Optimizations
-- Texture atlasing for tiles
-- Chunk-based world loading
-- Background content generation
-- Shader-based fog of war
+### Training Data Enhancements
+- Automated training example generation from successful categorizations
+- Machine learning pattern recognition for training refinement
+- Training data validation and quality assurance tools
+- Advanced pattern matching with fuzzy recognition
 
-### Potential Features
-- Steam Workshop support
-- Mod loading system
-- Replay system
-- Achievement integration
+### Enhanced Pipeline Optimizations
+- Training data caching for improved performance
+- Parallel training data processing
+- Advanced HTML parsing with ML enhancement
+- Pattern recognition optimization algorithms
 
-### Technical Debt
-- Schema implementations needed
-- Image generation incomplete
-- Combat system placeholder
-- Companion AI basic
+### Scalability Improvements
+- Training data hot-reloading without restart
+- Distributed training data repositories
+- Training example sharing between development teams
+- Advanced categorization with ensemble methods
 
 ## Migration Notes
 
-### From Godot to Bevy
-- Removed GDScript files
-- Removed .tscn/.tres resources  
-- Converted to ECS components
-- Simplified to JSON data
+### From Basic to Training-Enhanced Categorization
+- Added TOML training data files
+- Enhanced entity categorization with 9 categories
+- Implemented pattern recognition with training examples
+- Integrated horror RPG themes throughout training system
 
-### From Complex Python
-- Removed generator/ subpackage mess
-- Simplified to ai/ directory
-- Modern Python patterns
-- Clear module separation
+### From Massive CSV to Split Reporting
+- Replaced massive CSV exports with 100-entity samples
+- Added pattern analysis files for categorization insights
+- Implemented manageable reporting preventing system overload
+- Maintained full export capability on explicit request
 
-This technical context provides the foundation for understanding and extending Dragon's Labyrinth's implementation.
+This enhanced technical context provides the foundation for understanding Dragon's Labyrinth's comprehensive training data feedback loop system with self-improving HBF processing capabilities.

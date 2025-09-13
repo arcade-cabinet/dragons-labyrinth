@@ -1,0 +1,45 @@
+(
+    id: "guther_erchamrich_model",
+    display_name: "Guther Erchamrich",
+    model_path: "units/guther_erchamrich/guther_erchamrich.glb",
+    scale: (1.0, 1.0, 1.0),
+    bounds: (
+        min: (-0.5, 0.0, -0.5),
+        max: (0.5, 2.0, 0.5),
+    ),
+    animations: [
+        "idle",
+        "walk",
+        "death",
+    ],
+    sockets: [
+        (
+            name: "head",
+            position: (0.0, 1.8, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+        (
+            name: "weapon_hand",
+            position: (0.3, 1.2, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+        ),
+    ],
+    tags: [
+        "guther_erchamrich",
+    ],
+    cult: Some("guther_erchamrich"),
+    class: Some("cultist"),
+    upgrades_to: None,
+    ui_icon: Some("icons/guther_erchamrich.png"),
+    sounds: [
+        (
+            event: "death",
+            sound_path: "sounds/generic_death.ogg",
+            volume: 1.0,
+            pitch_variation: 0.15,
+        ),
+    ],
+    corruption_band: Some(2),
+    horror_theme: None,
+    forge_material: Some("shadow_essence"),
+)

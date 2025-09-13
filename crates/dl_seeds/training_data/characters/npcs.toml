@@ -1,0 +1,70 @@
+# Character Training Data - NPCs and Named Individuals
+# Generated from build_config.toml patterns and HBF analysis
+
+[category]
+name = "characters"
+subcategory = "npcs"
+description = "Named player characters, NPCs, and important individuals"
+
+# Training examples extracted from HBF analysis
+[[examples]]
+name = "Giso of Headbone"
+content_patterns = ["person name", "of location", "individual identity"]
+markers = ["proper noun", "personal name", "location reference"]
+corruption_band = 2
+horror_theme = "personal_corruption"
+
+[[examples]]
+name = "Gainard of Balaal"
+content_patterns = ["person name", "of location", "individual identity"]
+markers = ["proper noun", "personal name", "location reference"]
+corruption_band = 2
+horror_theme = "personal_corruption"
+
+[[examples]]
+name = "Sylphrena Whitehelm"
+content_patterns = ["person name", "surname", "individual identity"]
+markers = ["proper noun", "personal name", "descriptive surname"]
+corruption_band = 1
+horror_theme = "noble_descent"
+
+# Classification patterns
+[patterns]
+positive_indicators = [
+    "proper names with titles",
+    "individual person references", 
+    "NPC dialogue or descriptions",
+    "character backstories",
+    "personal relationships",
+    "individual motivations"
+]
+
+negative_indicators = [
+    "group references",
+    "generic descriptions", 
+    "mechanical rules",
+    "treasure amounts",
+    "creature statistics"
+]
+
+# Horror RPG transformation guidelines
+[horror_transformation]
+companion_trauma_indicators = [
+    "memory_loss", "paranoia", "guilt", "fear_of_intimacy", 
+    "survivor_guilt", "trust_issues", "nightmares", "detachment"
+]
+
+corruption_evolution = [
+    "normal_appearance → subtle_wrongness",
+    "healthy_relationships → growing_isolation", 
+    "clear_speech → cryptic_references",
+    "human_concerns → cosmic_awareness"
+]
+
+# Asset generation specifications  
+[asset_specs]
+model_type = "character"
+poly_count_range = [1500, 4000]
+texture_resolution = "1024x1024"
+required_animations = ["idle", "walk", "talk", "gesture", "death"]
+socket_requirements = ["head", "weapon_hand", "equipment_slots"]

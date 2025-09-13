@@ -181,6 +181,10 @@ fn generate_model_prompts(
     // Load analyzed entities
     let entities = load_analyzed_entities(input_dir)?;
     
+    // Load existing RON metadata to enhance prompts with asset specifications
+    let ron_metadata = load_ron_metadata_from_assets(assets_dir)?;
+    println!("  Loaded {} RON metadata files for prompt enhancement", ron_metadata.len());
+    
     // Generate prompts for each faction
     for (faction_name, faction_entities) in &entities.factions {
         if let Some(filter) = faction_filter {
@@ -193,14 +197,37 @@ fn generate_model_prompts(
         std::fs::create_dir_all(&faction_dir)?;
         
         for entity in faction_entities {
-            let prompt_template = create_model_prompt_from_entity(entity, faction_name);
+            // Check if we should skip this entity based on category filter
+            if let Some(cat_filter) = category_filter {
+                let entity_category = determine_entity_category(&entity.raw_value);
+                if entity_category != cat_filter {
+                    continue;
+                }
+            }
+            
+            let prompt_template = create_model_prompt_from_entity_enhanced(
+                entity, 
+                faction_name, 
+                &ron_metadata
+            );
             let markdown_content = render_model_prompt_to_markdown(&prompt_template);
             
             let filename = format!("{}_prompt.md", sanitize_name(&entity.entity_name));
             std::fs::write(faction_dir.join(filename), markdown_content)?;
         }
         
-        println!("  Generated {} model prompts for: {}", faction_entities.len(), faction_name);
+        let entity_count = if category_filter.is_some() {
+            faction_entities.iter().filter(|e| {
+                let entity_category = determine_entity_category(&e.raw_value);
+                entity_category == category_filter.unwrap()
+            }).count()
+        } else {
+            faction_entities.len()
+        };
+        
+        if entity_count > 0 {
+            println!("  Generated {} model prompts for: {}", entity_count, faction_name);
+        }
     }
     
     Ok(())
@@ -712,12 +739,38 @@ fn extract_trauma_indicators_from_content(content: &str) -> Vec<String> {
 }
 
 fn extract_speech_patterns_from_content(content: &str) -> Vec<String> {
-    vec![
+    let mut patterns = vec![
         "Uses faction-specific terminology naturally".to_string(),
         "Occasionally references cosmic concepts without explanation".to_string(),
-        "Speech becomes more stilted when discussing faction mysteries".to_string(),
-        "Uses metaphors related to their cosmic patron".to_string(),
-    ]
+    ];
+    
+    let content_lower = content.to_lowercase();
+    
+    // Extract speech patterns based on content analysis
+    if content_lower.contains("formal") || content_lower.contains("ceremony") || content_lower.contains("ritual") {
+        patterns.push("Speaks in formal, ceremonial tones when discussing sacred matters".to_string());
+    } else if content_lower.contains("casual") || content_lower.contains("common") {
+        patterns.push("Uses colloquial language but with unsettling undertones".to_string());
+    } else {
+        patterns.push("Speech becomes more stilted when discussing faction mysteries".to_string());
+    }
+    
+    if content_lower.contains("ancient") || content_lower.contains("old") || content_lower.contains("elder") {
+        patterns.push("References ancient knowledge with reverent whispers".to_string());
+    }
+    
+    if content_lower.contains("fear") || content_lower.contains("terror") || content_lower.contains("dread") {
+        patterns.push("Voice occasionally trembles when discussing cosmic truths".to_string());
+    }
+    
+    if content_lower.contains("whisper") || content_lower.contains("secret") || content_lower.contains("hidden") {
+        patterns.push("Tends to lower voice when sharing forbidden knowledge".to_string());
+    }
+    
+    // Always add cosmic metaphors as fallback
+    patterns.push("Uses metaphors related to their cosmic patron".to_string());
+    
+    patterns
 }
 
 fn create_sample_interactions(faction: &str, role: &str) -> Vec<String> {
@@ -805,16 +858,25 @@ fn generate_progression_docs(
     let progression_dir = output_dir.join("progression_guides");
     std::fs::create_dir_all(&progression_dir)?;
     
-    // Create upgrade progression guide
-    let progression_guide = create_upgrade_progression_guide();
+    // Create upgrade progression guide enhanced with existing RON assets
+    let progression_guide = if assets_dir.exists() {
+        create_upgrade_progression_guide_with_assets(assets_dir)?
+    } else {
+        create_upgrade_progression_guide()
+    };
+    
     std::fs::write(
         progression_dir.join("upgrade_progressions.md"),
         progression_guide,
     )?;
     
     if visual_guides {
-        // Create visual progression examples
-        let visual_guide = create_visual_progression_guide();
+        // Create visual progression examples, potentially enhanced by existing assets
+        let visual_guide = if assets_dir.exists() {
+            create_visual_progression_guide_with_assets(assets_dir)?
+        } else {
+            create_visual_progression_guide()
+        };
         std::fs::write(
             progression_dir.join("visual_progression_guide.md"),
             visual_guide,
@@ -1036,6 +1098,153 @@ replit_prompts/
 
     std::fs::write(output_dir.join("README.md"), index_content)?;
     Ok(())
+}
+
+fn load_ron_metadata_from_assets(assets_dir: &PathBuf) -> Result<HashMap<String, String>> {
+    let mut metadata = HashMap::new();
+    
+    // Search for RON files in assets directory to enhance prompts
+    if assets_dir.exists() {
+        for entry in walkdir::WalkDir::new(assets_dir).into_iter().filter_map(|e| e.ok()) {
+            if entry.path().extension().and_then(|s| s.to_str()) == Some("ron") {
+                if let Ok(content) = std::fs::read_to_string(entry.path()) {
+                    let file_stem = entry.path().file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("unknown");
+                    metadata.insert(file_stem.to_string(), content);
+                }
+            }
+        }
+    }
+    
+    Ok(metadata)
+}
+
+fn determine_entity_category(content: &str) -> String {
+    let content_lower = content.to_lowercase();
+    
+    if content_lower.contains("warrior") || content_lower.contains("fighter") {
+        "units"
+    } else if content_lower.contains("priest") || content_lower.contains("cleric") {
+        "units"
+    } else if content_lower.contains("leader") || content_lower.contains("commander") {
+        "leaders"
+    } else if content_lower.contains("building") || content_lower.contains("structure") {
+        "buildings"
+    } else if content_lower.contains("terrain") || content_lower.contains("landscape") {
+        "terrain"
+    } else {
+        "units" // Default category
+    }.to_string()
+}
+
+fn create_model_prompt_from_entity_enhanced(
+    entity: &RawEntity,
+    faction: &str,
+    ron_metadata: &HashMap<String, String>,
+) -> ModelPromptTemplate {
+    let mut template = create_model_prompt_from_entity(entity, faction);
+    
+    // Enhance template with RON metadata if available
+    let entity_key = sanitize_name(&entity.entity_name);
+    if let Some(ron_content) = ron_metadata.get(&entity_key) {
+        // Extract additional specifications from RON metadata
+        template.primary_prompt = format!(
+            "{}\n\nAdditional RON specifications: Consider the technical metadata requirements \
+            for animation sockets, material properties, and upgrade compatibility as defined \
+            in the asset pipeline.",
+            template.primary_prompt
+        );
+        
+        // Enhance technical specs based on RON content
+        if ron_content.contains("corruption_band") {
+            template.technical_specs.material_requirements.push(
+                "Corruption progression materials".to_string()
+            );
+        }
+        if ron_content.contains("sockets") {
+            template.technical_specs.material_requirements.push(
+                "Equipment socket compatibility".to_string()
+            );
+        }
+    }
+    
+    template
+}
+
+fn create_upgrade_progression_guide_with_assets(assets_dir: &PathBuf) -> Result<String> {
+    let base_guide = create_upgrade_progression_guide();
+    
+    // Scan assets directory for actual upgrade chains
+    let mut asset_examples = String::new();
+    
+    let upgrade_chains_dir = assets_dir.join("upgrade_chains");
+    if upgrade_chains_dir.exists() {
+        asset_examples.push_str("\n\n## Existing Asset Upgrade Chains\n\n");
+        
+        for entry in std::fs::read_dir(&upgrade_chains_dir)? {
+            if let Ok(entry) = entry {
+                if entry.path().extension().and_then(|s| s.to_str()) == Some("ron") {
+                    if let Some(filename) = entry.path().file_stem().and_then(|s| s.to_str()) {
+                        asset_examples.push_str(&format!("- {}\n", filename.replace('_', " ")));
+                    }
+                }
+            }
+        }
+    }
+    
+    // Scan for faction-specific assets
+    let units_dir = assets_dir.join("units");
+    if units_dir.exists() {
+        asset_examples.push_str("\n## Available Faction Units\n\n");
+        
+        for entry in std::fs::read_dir(&units_dir)? {
+            if let Ok(entry) = entry {
+                if entry.file_type()?.is_dir() {
+                    if let Some(faction_name) = entry.path().file_name().and_then(|s| s.to_str()) {
+                        let mut unit_count = 0;
+                        if let Ok(faction_entries) = std::fs::read_dir(entry.path()) {
+                            unit_count = faction_entries.count();
+                        }
+                        asset_examples.push_str(&format!("- {}: {} units\n", 
+                            faction_name.replace('_', " "), unit_count));
+                    }
+                }
+            }
+        }
+    }
+    
+    Ok(format!("{}{}", base_guide, asset_examples))
+}
+
+fn create_visual_progression_guide_with_assets(assets_dir: &PathBuf) -> Result<String> {
+    let base_guide = create_visual_progression_guide();
+    
+    // Add asset-specific examples based on existing RON files
+    let mut asset_enhancements = String::new();
+    
+    let ron_metadata = load_ron_metadata_from_assets(assets_dir)?;
+    if !ron_metadata.is_empty() {
+        asset_enhancements.push_str("\n\n## Asset-Based Examples\n\n");
+        asset_enhancements.push_str("Based on existing RON metadata files, the following progression examples \n");
+        asset_enhancements.push_str("are available for reference:\n\n");
+        
+        for (asset_name, ron_content) in ron_metadata.iter().take(5) {
+            if ron_content.contains("corruption_band") {
+                asset_enhancements.push_str(&format!("### {} (Asset Reference)\n", asset_name));
+                asset_enhancements.push_str("- Has corruption progression metadata\n");
+                if ron_content.contains("upgrades_to") {
+                    asset_enhancements.push_str("- Part of upgrade chain\n");
+                }
+                if ron_content.contains("sockets") {
+                    asset_enhancements.push_str("- Has equipment sockets defined\n");
+                }
+                asset_enhancements.push_str("\n");
+            }
+        }
+    }
+    
+    Ok(format!("{}{}", base_guide, asset_enhancements))
 }
 
 fn load_analyzed_entities(input_dir: &PathBuf) -> Result<RawEntities> {
