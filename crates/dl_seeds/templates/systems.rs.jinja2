@@ -1,0 +1,204 @@
+//! Generated ECS Systems for Dragon's Labyrinth
+//! From {{ total_entities }} entities with cross-platform input support
+
+use bevy::prelude::*;
+use dl_types::world::HexCoord;
+use crate::components::*;
+use crate::world::WorldSpatialContainer;
+
+/// System for hex-based movement with keyboard and touch support
+pub fn hex_movement_system(
+    mut player_query: Query<(&mut PlayerComponent, &mut Transform), With<PlayerComponent>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    touches: Res<Touches>,
+    camera_query: Query<(&Camera, &GlobalTransform), Without<PlayerComponent>>,
+    mut spatial_container: ResMut<WorldSpatialContainer>,
+) {
+    if let Ok((mut player, mut transform)) = player_query.get_single_mut() {
+        let mut new_coord = player.current_hex;
+        let mut moved = false;
+
+        // Handle keyboard movement (Q/W/E/A/S/D)
+        if keyboard_input.just_pressed(KeyCode::KeyQ) {
+            new_coord = HexCoord { q: new_coord.q - 1, r: new_coord.r };
+            moved = true;
+        } else if keyboard_input.just_pressed(KeyCode::KeyW) {
+            new_coord = HexCoord { q: new_coord.q, r: new_coord.r - 1 };
+            moved = true;
+        } else if keyboard_input.just_pressed(KeyCode::KeyE) {
+            new_coord = HexCoord { q: new_coord.q + 1, r: new_coord.r - 1 };
+            moved = true;
+        } else if keyboard_input.just_pressed(KeyCode::KeyA) {
+            new_coord = HexCoord { q: new_coord.q - 1, r: new_coord.r + 1 };
+            moved = true;
+        } else if keyboard_input.just_pressed(KeyCode::KeyS) {
+            new_coord = HexCoord { q: new_coord.q, r: new_coord.r + 1 };
+            moved = true;
+        } else if keyboard_input.just_pressed(KeyCode::KeyD) {
+            new_coord = HexCoord { q: new_coord.q + 1, r: new_coord.r };
+            moved = true;
+        }
+
+        // Handle touch input for cross-platform support
+        if !moved {
+            if let Ok((camera, camera_transform)) = camera_query.get_single() {
+                for touch in touches.iter_just_pressed() {
+                    if let Some(world_position) = camera.viewport_to_world_2d(camera_transform, touch.position()) {
+                        // Convert world position to hex coordinates
+                        let hex_x = (world_position.x * 2.0 / 3.0) / 32.0;
+                        let hex_z = (world_position.y / 32.0) - (hex_x / 2.0);
+                        
+                        let q = hex_x.round() as i32;
+                        let r = hex_z.round() as i32;
+                        let touch_coord = HexCoord { q, r };
+                        
+                        // Check if the new position is adjacent (valid move)
+                        let distance = (player.current_hex.q - q).abs() + 
+                                      (player.current_hex.r - r).abs() + 
+                                      ((player.current_hex.q + player.current_hex.r) - (q + r)).abs();
+                        
+                        if distance == 2 { // Adjacent hex in axial coordinates
+                            new_coord = touch_coord;
+                            moved = true;
+                            info!("Touch move to ({}, {})", q, r);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if moved {
+            player.current_hex = new_coord;
+            let world_pos = HexPosition::new(new_coord.q, new_coord.r).to_world_pos();
+            transform.translation = world_pos + Vec3::new(0.0, 2.0, 0.0); // Slightly elevated for visibility
+            
+            // Update player dread based on distance from origin (inverted power curve)
+            let distance_from_origin = (new_coord.q.abs() + new_coord.r.abs() + (new_coord.q + new_coord.r).abs()) / 2;
+            player.dread_level = (distance_from_origin as f32 * 0.05).min(180.0);
+            player.corruption_band = match distance_from_origin {
+                0..=20 => 1,   // Band 1: Peace
+                21..=40 => 2,  // Band 2: Unease
+                41..=60 => 3,  // Band 3: Dread
+                61..=120 => 4, // Band 4: Terror  
+                _ => 5,        // Band 5: Horror
+            };
+            
+            info!("Player moved to ({}, {}) - Dread: {:.1}, Band: {}", 
+                  new_coord.q, new_coord.r, player.dread_level, player.corruption_band);
+        }
+    }
+}
+
+/// System to update NPC positions and behaviors
+pub fn npc_behavior_system(
+    mut npc_query: Query<(&mut NPCComponent, &mut Transform)>,
+    time: Res<Time>,
+    spatial_container: Res<WorldSpatialContainer>,
+) {
+    for (mut npc, mut transform) in npc_query.iter_mut() {
+        match &mut npc.movement_pattern {
+            MovementPattern::Stationary => {
+                // NPCs stay put but might update their facing direction
+            },
+            MovementPattern::Patrol { waypoints, current_index } => {
+                if !waypoints.is_empty() {
+                    let target = waypoints[*current_index];
+                    let target_pos = HexPosition::new(target.q, target.r).to_world_pos();
+                    
+                    // Simple movement towards target
+                    let direction = (target_pos - transform.translation).normalize();
+                    transform.translation += direction * 20.0 * time.delta_seconds();
+                    
+                    // Check if reached target
+                    if transform.translation.distance(target_pos) < 5.0 {
+                        *current_index = (*current_index + 1) % waypoints.len();
+                        npc.current_location = target;
+                    }
+                }
+            },
+            MovementPattern::Random { radius } => {
+                // TODO: Implement random movement within radius using bevy_rand
+            },
+            MovementPattern::FollowPlayer { max_distance: _ } => {
+                // TODO: Implement player following logic
+            },
+        }
+    }
+}
+
+/// System to manage faction influence across territories
+pub fn faction_influence_system(
+    faction_query: Query<&FactionPresenceComponent>,
+    hex_query: Query<(Entity, &HexPosition), With<HexTileComponent>>,
+    mut spatial_container: ResMut<WorldSpatialContainer>,
+) {
+    for faction in faction_query.iter() {
+        for &territory_coord in &faction.controlled_territories {
+            // Update faction influence at territory hexes
+            if let Some(hex_entity) = spatial_container.get_entity_at_hex(territory_coord) {
+                // Faction influence is already stored in the component
+                // This system could handle dynamic influence changes
+            }
+        }
+    }
+}
+
+/// System to spawn environmental features based on biome
+pub fn biome_feature_system(
+    mut commands: Commands,
+    biome_query: Query<(Entity, &BiomeComponent, &HexPosition), Added<BiomeComponent>>,
+) {
+    for (hex_entity, biome, hex_pos) in biome_query.iter() {
+        let world_pos = hex_pos.to_world_pos();
+        
+        match biome.biome_type {
+            dl_types::BiomeType::Forest | dl_types::BiomeType::CorruptedForest => {
+                let tree_entity = commands.spawn((
+                    Transform::from_translation(world_pos + Vec3::new(2.0, 0.5, 2.0)),
+                    Name::new("ForestTree"),
+                )).id();
+                commands.entity(hex_entity).add_child(tree_entity);
+            },
+            dl_types::BiomeType::Grassland | dl_types::BiomeType::CorruptedGrassland => {
+                let flower_entity = commands.spawn((
+                    Transform::from_translation(world_pos + Vec3::new(-2.0, 0.5, -2.0)),
+                    Name::new("GrasslandFlowers"),
+                )).id();
+                commands.entity(hex_entity).add_child(flower_entity);
+            },
+            dl_types::BiomeType::Mountain | dl_types::BiomeType::CorruptedMountain => {
+                let rock_entity = commands.spawn((
+                    Transform::from_translation(world_pos + Vec3::new(0.0, 1.0, 0.0)),
+                    Name::new("MountainRock"),
+                )).id();
+                commands.entity(hex_entity).add_child(rock_entity);
+            },
+            _ => {
+                // Default or no special features for other biomes
+            }
+        }
+    }
+}
+
+/// System to handle companion trauma progression
+pub fn companion_trauma_system(
+    mut npc_query: Query<&mut NPCComponent>,
+    player_query: Query<&PlayerComponent, Changed<PlayerComponent>>,
+) {
+    if let Ok(player) = player_query.get_single() {
+        for mut npc in npc_query.iter_mut() {
+            // Increase trauma based on player's corruption band
+            let trauma_increase = match player.corruption_band {
+                1 => 0.001, // Minimal trauma in peaceful areas
+                2 => 0.005, // Light trauma in uneasy areas
+                3 => 0.015, // Moderate trauma in dread areas
+                4 => 0.030, // Heavy trauma in terror areas
+                5 => 0.050, // Severe trauma in horror areas
+                _ => 0.0,
+            };
+            
+            npc.trauma_level = (npc.trauma_level + trauma_increase).min(1.0);
+        }
+    }
+}

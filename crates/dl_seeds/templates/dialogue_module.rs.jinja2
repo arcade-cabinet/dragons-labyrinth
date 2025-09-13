@@ -1,0 +1,146 @@
+//! Generated dialogue module for Dragon's Labyrinth
+//! 
+//! This module contains all dialogue systems and NPCs generated from Seeds data.
+
+use std::collections::HashMap;
+
+{% if seeds_powered %}
+/// Seeds-powered dialogue system with linguistic processing
+pub struct DialogueSystem {
+    pub npcs: HashMap<String, NpcData>,
+    pub quests: HashMap<String, QuestData>, 
+}
+
+impl DialogueSystem {
+    pub fn new() -> Self {
+        let mut npcs = HashMap::new();
+        let mut quests = HashMap::new();
+        
+        {% for npc_uuid in generated_npcs %}
+        // Load NPC: {{ npc_uuid }}
+        // Implementation would load from generated module
+        {% endfor %}
+        
+        {% for quest_id in generated_quests %}
+        // Load Quest: {{ quest_id }}
+        // Implementation would load from generated data
+        {% endfor %}
+        
+        Self { npcs, quests }
+    }
+    
+    pub fn get_npc_dialogue(&self, npc_uuid: &str, context: &DialogueContext) -> Option<Vec<String>> {
+        self.npcs.get(npc_uuid).map(|npc| npc.get_dialogue(context))
+    }
+    
+    pub fn get_available_quests(&self, region_uuid: &str) -> Vec<&QuestData> {
+        self.quests.values()
+            .filter(|quest| quest.region_uuid == region_uuid)
+            .collect()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct NpcData {
+    pub uuid: String,
+    pub name: String,
+    pub region_uuid: String,
+    pub settlement_uuid: String,
+    pub dialogue_lines: Vec<String>,
+    pub tone: String,
+    pub quest_id: Option<String>,
+}
+
+impl NpcData {
+    pub fn get_dialogue(&self, context: &DialogueContext) -> Vec<String> {
+        // Apply context-sensitive dialogue selection
+        let mut selected_lines = Vec::new();
+        
+        for line in &self.dialogue_lines {
+            let processed_line = line
+                .replace("{player_name}", &context.player_name)
+                .replace("{time_of_day}", &context.time_of_day);
+            selected_lines.push(processed_line);
+        }
+        
+        selected_lines
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct QuestData {
+    pub id: String,
+    pub region_uuid: String,
+    pub npc_uuid: String,
+    pub pattern_type: String,
+    pub beats: Vec<String>,
+    pub themes: Vec<String>,
+    pub estimated_length: usize,
+}
+
+#[derive(Debug, Clone)]
+pub struct DialogueContext {
+    pub player_name: String,
+    pub time_of_day: String,
+    pub location_type: String,
+    pub corruption_level: f32,
+}
+
+impl Default for DialogueContext {
+    fn default() -> Self {
+        Self {
+            player_name: "stranger".to_string(),
+            time_of_day: "day".to_string(),
+            location_type: "village".to_string(),
+            corruption_level: 0.0,
+        }
+    }
+}
+
+{% else %}
+/// Fallback dialogue system when Seeds data is not available
+pub struct DialogueSystem {
+    pub fallback_lines: Vec<String>,
+}
+
+impl DialogueSystem {
+    pub fn new() -> Self {
+        let fallback_lines = vec![
+            "Hello, traveler.".to_string(),
+            "The road ahead is dangerous.".to_string(),
+            "Stay safe out there.".to_string(),
+        ];
+        
+        Self { fallback_lines }
+    }
+    
+    pub fn get_fallback_dialogue(&self) -> &[String] {
+        &self.fallback_lines
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct DialogueContext {
+    pub player_name: String,
+    pub time_of_day: String,
+    pub location_type: String,
+    pub corruption_level: f32,
+}
+
+impl Default for DialogueContext {
+    fn default() -> Self {
+        Self {
+            player_name: "stranger".to_string(),
+            time_of_day: "day".to_string(),
+            location_type: "village".to_string(),
+            corruption_level: 0.0,
+        }
+    }
+}
+
+{% endif %}
+
+/// Initialize the dialogue system
+pub fn initialize_dialogue() -> DialogueSystem {
+    DialogueSystem::new()
+}

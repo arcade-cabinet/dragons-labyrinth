@@ -1,0 +1,100 @@
+//! Hex tile ({{ q }}, {{ r }}) with all correlated entities
+//! Region: {{ region_uuid }}
+//! Generated with {{ settlements|length }} settlements, {{ factions|length }} factions, {{ npcs|length }} NPCs, {{ dungeons|length }} dungeons
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Hex tile data with all correlations
+#[derive(Resource, Debug, Clone)]
+pub struct Hex{{ q }}{{ r }}Tile {
+    pub coords: (i32, i32),
+    pub region_uuid: String,
+    pub settlements: Vec<String>,
+    pub factions: Vec<String>,
+    pub npcs: Vec<String>,
+    pub dungeons: Vec<String>,
+}
+
+impl Default for Hex{{ q }}{{ r }}Tile {
+    fn default() -> Self {
+        Self {
+            coords: ({{ q }}, {{ r }}),
+            region_uuid: "{{ region_uuid }}".to_string(),
+            settlements: vec![{% for settlement in settlements %}"{{ settlement }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            factions: vec![{% for faction in factions %}"{{ faction }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            npcs: vec![{% for npc in npcs %}"{{ npc }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            dungeons: vec![{% for dungeon in dungeons %}"{{ dungeon }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+        }
+    }
+}
+
+/// Spawn hex ({{ q }}, {{ r }}) with all correlated entities
+pub fn spawn_hex_{{ q }}_{{ r }}(
+    mut commands: Commands,
+    mut spatial_container: ResMut<SpatialContainer>,
+) -> Entity {
+    let hex_world_pos = Vec3::new({{ q }} as f32 * 64.0, 0.0, {{ r }} as f32 * 64.0);
+    
+    // Create main hex entity
+    let hex_entity = commands.spawn((
+        HexPosition { q: {{ q }}, r: {{ r }} },
+        HexId("hex_{{ q }}_{{ r }}".to_string()),
+        RegionId("{{ region_uuid }}".to_string()),
+        Transform::from_translation(hex_world_pos),
+        Name::new("Hex ({{ q }}, {{ r }})"),
+    )).id();
+    
+    // Register in spatial container
+    spatial_container.register_hex_entity(({{ q }}, {{ r }}), hex_entity);
+    
+{% for settlement in settlements %}
+    // Spawn settlement {{ settlement }} at this hex
+    let settlement_entity = commands.spawn((
+        Transform::from_translation(hex_world_pos + Vec3::new({{ loop.index * 5 }} as f32, 1.0, 0.0)),
+        SettlementId("{{ settlement }}".to_string()),
+        SettlementName("Settlement {{ loop.index }}".to_string()),
+        Name::new("{{ settlement }}"),
+    )).id();
+    commands.entity(hex_entity).add_child(settlement_entity);
+{% endfor %}
+
+{% for faction in factions %}
+    // Spawn faction {{ faction }} presence at this hex
+    let faction_entity = commands.spawn((
+        Transform::from_translation(hex_world_pos + Vec3::new(0.0, 1.0, {{ loop.index * 5 }} as f32)),
+        Name::new("{{ faction }}"),
+    )).id();
+    commands.entity(hex_entity).add_child(faction_entity);
+{% endfor %}
+
+{% for npc in npcs %}
+    // Spawn NPC {{ npc }} at this hex
+    let npc_entity = commands.spawn((
+        Transform::from_translation(hex_world_pos + Vec3::new({{ loop.index * -5 }} as f32, 1.0, 0.0)),
+        Name::new("{{ npc }}"),
+    )).id();
+    commands.entity(hex_entity).add_child(npc_entity);
+{% endfor %}
+
+{% for dungeon in dungeons %}
+    // Create dungeon entrance {{ dungeon }} at this hex
+    let entrance_entity = commands.spawn((
+        Transform::from_translation(hex_world_pos + Vec3::new(0.0, 2.0, 0.0)),
+        DungeonAreaId("{{ dungeon }}".to_string()),
+        Name::new("Entrance to {{ dungeon }}"),
+    )).id();
+    commands.entity(hex_entity).add_child(entrance_entity);
+{% endfor %}
+    
+    println!("Spawned hex ({{ q }}, {{ r }}) with {{ settlements|length }} settlements, {{ factions|length }} factions, {{ npcs|length }} NPCs, {{ dungeons|length }} dungeons");
+    hex_entity
+}
+
+/// Hex metadata for queries
+pub const HEX_{{ q }}_{{ r }}_METADATA: HexStaticData = HexStaticData {
+    uuid: "hex_{{ q }}_{{ r }}",
+    q: {{ q }},
+    r: {{ r }},
+    biome: "grassland",
+};

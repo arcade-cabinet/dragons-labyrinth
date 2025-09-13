@@ -1,9 +1,7 @@
-//! dl_seeds build script for idempotent TOML sampling
+//! dl_seeds build script - Memory-optimized with external configuration
 //! 
-//! Creates 4 TOML files (regions.toml, settlements.toml, factions.toml, dungeons.toml)
-//! each containing 5 randomly selected HTML entity samples from the HBF database.
-//! 
-//! This provides the seed data that dl_analysis will then process into structured JSON.
+//! Creates TOML files using shared AI models and external configuration.
+//! Eliminates duplicate model loading that was causing 70GB RAM usage.
 
 use std::env;
 use std::fs;
@@ -13,19 +11,200 @@ use serde::{Deserialize, Serialize};
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
-use serde_json; // used for IA search response handling
-use reqwest;    // blocking client used for IA advancedsearch
-use urlencoding; // to safely encode lucene queries
+use serde_json;
+use reqwest;
+use urlencoding;
 use rust_bert::pipelines::common::{ModelResource, ModelType};
 use rust_bert::resources::{RemoteResource, LocalResource, ResourceProvider};
 use rust_bert::t5::{T5ConfigResources, T5ModelResources, T5VocabResources};
 use regex::Regex;
 use rust_bert::pipelines::sentiment::SentimentModel;
 use rust_bert::pipelines::zero_shot_classification::ZeroShotClassificationModel;
+use rust_bert::pipelines::summarization::{SummarizationConfig, SummarizationModel};
 use tch::Device;
 use rust_bert::pipelines::zero_shot_classification::ZeroShotClassificationConfig;
 use cleasby_vigfusson_dictionary::{get_no_markup_dictionary, DictionaryEntry};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
+
+/// Build configuration loaded from external TOML
+#[derive(Debug, Deserialize)]
+struct BuildConfig {
+    sampling: SamplingConfig,
+    models: ModelConfig,
+    known_entities: KnownEntities,
+    band_keywords: BTreeMap<String, String>,
+    classification_labels: ClassificationLabels,
+    label_to_band_mapping: BTreeMap<String, String>,
+    regexes: RegexConfig,
+    filtering: FilteringConfig,
+    stop_words: StopWordsConfig,
+    phonotactics: BTreeMap<String, PhonotacticsConfig>,
+    lexicons: LexiconConfig,
+    landmarks: BTreeMap<String, Vec<String>>,
+    npc_traits: BTreeMap<String, Vec<String>>,
+    npc_titles: BTreeMap<String, String>,
+    band_weights: BTreeMap<String, BTreeMap<String, f32>>,
+    name_generation: NameGenerationConfig,
+    internet_archive: InternetArchiveConfig,
+}
+
+#[derive(Debug, Deserialize)]
+struct SamplingConfig {
+    samples_per_band: usize,
+    max_chars_narrative: usize,
+    min_narrative_length: usize,
+    classification_threshold: f64,
+    sentiment_threshold: f64,
+}
+
+#[derive(Debug, Deserialize)]
+struct ModelConfig {
+    t5_min_length: usize,
+    t5_max_length: usize,
+    t5_num_beams: usize,
+    t5_device: String,
+    zsc_device: String,
+    zsc_max_tokens: usize,
+    zsc_grammar_max_tokens: usize,
+    max_grammar_entries: usize,
+    max_terms_per_band: usize,
+}
+
+#[derive(Debug, Deserialize)]
+struct KnownEntities {
+    regions: Vec<String>,
+    settlements: Vec<String>,
+    factions: Vec<String>,
+    dungeons: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ClassificationLabels {
+    book_labels: Vec<String>,
+    grammar_labels: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RegexConfig {
+    prefilter_pattern: String,
+    legal_boilerplate: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct FilteringConfig {
+    disallowed_terms: Vec<String>,
+    disallowed_ids: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct StopWordsConfig {
+    rake_stop_words: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PhonotacticsConfig {
+    onset: Option<Vec<String>>,
+    vowel: Option<Vec<String>>,
+    coda: Option<Vec<String>>,
+    prefix: Option<Vec<String>>,
+    suffix: Option<Vec<String>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct LexiconConfig {
+    creatures: Vec<String>,
+    colors: Vec<String>,
+    materials: Vec<String>,
+    creature_endings: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct NameGenerationConfig {
+    person_count: usize,
+    location_count: usize,
+    norse_fallback_endings: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct InternetArchiveConfig {
+    search_fields: String,
+    max_search_rows: usize,
+    negatives: String,
+    fallback_collections: Vec<String>,
+    max_date_classic: u32,
+}
+
+/// Shared AI models to eliminate duplicate loading
+struct SharedAiModels {
+    summarization: SummarizationModel,
+    sentiment: SentimentModel,
+    zero_shot: ZeroShotClassificationModel,
+}
+
+impl SharedAiModels {
+    fn new(config: &ModelConfig) -> Result<Self, Box<dyn std::error::Error>> {
+        // Configure torch for memory efficiency
+        tch::set_num_threads(1);
+        tch::set_num_interop_threads(1);
+        println!("cargo:warning=Loading shared AI models (memory-optimized)...");
+
+        let cache_root = std::env::var("OUT_DIR")
+            .map(|p| Path::new(&p).join("rust_bert_cache"))
+            .unwrap_or_else(|_| Path::new("target").join("rust_bert_cache"));
+        let _ = std::fs::create_dir_all(&cache_root);
+
+        fn fetch_to_local(res: RemoteResource, cache_root: &Path) -> LocalResource {
+            let path = res.get_local_path().expect("model fetch failed");
+            let fname = path.file_name().unwrap_or_default();
+            let dest = cache_root.join(fname);
+            if dest != path {
+                let _ = std::fs::copy(&path, &dest);
+            }
+            LocalResource { local_path: dest }
+        }
+
+        // Load T5-SMALL for summarization
+        println!("cargo:warning=Loading T5-SMALL for summarization...");
+        let config_resource = fetch_to_local(RemoteResource::from_pretrained(T5ConfigResources::T5_SMALL), &cache_root);
+        let vocab_resource = fetch_to_local(RemoteResource::from_pretrained(T5VocabResources::T5_SMALL), &cache_root);
+        let weights_resource = fetch_to_local(RemoteResource::from_pretrained(T5ModelResources::T5_SMALL), &cache_root);
+
+        let mut summarization_config = SummarizationConfig::new(
+            ModelType::T5,
+            ModelResource::Torch(Box::new(weights_resource)),
+            config_resource,
+            vocab_resource,
+            None,
+        );
+        summarization_config.min_length = config.t5_min_length;
+        summarization_config.max_length = Some(config.t5_max_length);
+        summarization_config.num_beams = config.t5_num_beams;
+        summarization_config.do_sample = false;
+        summarization_config.device = Device::Cpu;
+        let summarization = SummarizationModel::new(summarization_config)?;
+
+        // Load lightweight sentiment model
+        println!("cargo:warning=Loading sentiment model...");
+        let sentiment = SentimentModel::new(Default::default())?;
+
+        // Load SINGLE BART instance for ALL zero-shot classification
+        println!("cargo:warning=Loading BART-LARGE-MNLI (shared instance)...");
+        let mut zsc_config = ZeroShotClassificationConfig::default();
+        zsc_config.device = Device::Cpu;
+        let zero_shot = ZeroShotClassificationModel::new(zsc_config)?;
+
+        Ok(Self { summarization, sentiment, zero_shot })
+    }
+}
+
+fn load_build_config() -> Result<BuildConfig, Box<dyn std::error::Error>> {
+    let config_path = Path::new("crates/dl_seeds/build_config.toml");
+    let config_content = fs::read_to_string(config_path)
+        .map_err(|e| format!("Failed to read build_config.toml: {}", e))?;
+    let config: BuildConfig = toml::from_str(&config_content)
+        .map_err(|e| format!("Failed to parse build_config.toml: {}", e))?;
+    Ok(config)
+}
 
 /// Sample HTML entity for TOML storage
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -45,9 +224,14 @@ pub struct CategorySamples {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=game.hbf");
+    println!("cargo:rerun-if-changed=crates/dl_seeds/build_config.toml");
 
     let out_dir = env::var("OUT_DIR")?;
     let out_path = Path::new(&out_dir);
+
+    // Load external configuration
+    let config = load_build_config()?;
+    println!("cargo:warning=Loaded build configuration from external TOML");
 
     // Check for HBF database
     let hbf_path = Path::new("game.hbf");
@@ -55,16 +239,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("game.hbf not found in dl_seeds directory".into());
     }
 
-    // Categories and their known entities
-    let categories = [
-        ("regions", KNOWN_REGIONS),
-        ("settlements", KNOWN_SETTLEMENTS),
-        ("factions", KNOWN_FACTIONS),
-        ("dungeons", KNOWN_DUNGEONS),
-    ];
-
     // Connect to HBF database
     let conn = Connection::open(hbf_path)?;
+
+    // Generate category samples using configuration
+    let categories = [
+        ("regions", &config.known_entities.regions),
+        ("settlements", &config.known_entities.settlements),
+        ("factions", &config.known_entities.factions),
+        ("dungeons", &config.known_entities.dungeons),
+    ];
 
     for (category, known_entities) in categories {
         let toml_path = out_path.join(format!("{}.toml", category));
@@ -72,22 +256,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Idempotent: only generate if TOML doesn't exist
         if !toml_path.exists() {
             println!("cargo:warning=Generating {} samples for {}", 5, category);
-            generate_category_toml(&conn, category, known_entities, &toml_path)?;
+            generate_category_toml_from_config(&conn, category, known_entities, &toml_path)?;
         } else {
             println!("cargo:warning={}.toml already exists, skipping generation", category);
         }
     }
 
-    // Single artifact: generate world.toml (integrated) idempotently
+    // Generate world.toml with shared models (MEMORY OPTIMIZED)
     let world_toml_path = out_path.join("world.toml");
     if !world_toml_path.exists() {
-        println!("cargo:warning=Generating world.toml (integrated)");
-        generate_world_toml(&world_toml_path, out_path)?;
+        println!("cargo:warning=Generating world.toml with shared AI models...");
+        generate_world_toml_optimized(&world_toml_path, out_path, &config)?;
     } else {
         println!("cargo:warning=world.toml already exists, skipping generation");
     }
 
-    println!("cargo:warning=dl_seeds TOML sampling complete");
+    println!("cargo:warning=Memory-optimized dl_seeds build complete");
     Ok(())
 }
 // Capitalize utility for names
@@ -208,12 +392,15 @@ pub struct WorldTomlContainer {
     pub per_band_keywords: BTreeMap<String, Vec<String>>,
 }
 
-/// Generate books.toml with Internet Archive downloads and rust-bert summaries
-fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    // Keep libtorch threading predictable without env vars
+/// Generate books.toml with shared models (CONSOLIDATED - avoids duplicate BART loading)
+fn generate_books_toml_with_shared_model(
+    output_path: &Path, 
+    shared_zsc_model: &ZeroShotClassificationModel
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Configure libtorch for single-threaded operation
     tch::set_num_threads(1);
     tch::set_num_interop_threads(1);
-    println!("cargo:warning=libtorch threads set: intra-op=1 inter-op=1");
+    println!("cargo:warning=Using shared models for books generation (memory-optimized)");
     use rust_bert::pipelines::summarization::{SummarizationConfig, SummarizationModel};
 
     #[derive(Debug, serde::Deserialize)]
@@ -247,7 +434,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
     fn clean_ocr(text: &str) -> String {
         let mut out = String::with_capacity(text.len());
         for line in text.lines() {
-            // skip lines with no letters (pure noise)
             if !line.chars().any(|c| c.is_alphabetic()) { continue; }
             let trimmed = line
                 .replace('\u{00A0}', " ")
@@ -267,13 +453,11 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         let mut start = 0usize;
         let mut end = bytes.len();
 
-        // Prefer explicit START/END markers
         if let Some(pos) = lower.find("*** start of the project gutenberg ebook") {
-            start = pos + 5; // move past the marker line
+            start = pos + 5;
         } else if let Some(pos) = lower.find("start of this project gutenberg ebook") {
             start = pos + 5;
         } else if let Some(pos) = lower.find("project gutenberg") {
-            // If we see Gutenberg early, push start forward a bit to skip header
             if pos < 10_000 { start = pos + 1_000; }
         }
         if let Some(pos) = lower.find("*** end of the project gutenberg ebook") {
@@ -286,7 +470,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
     }
 
     fn extract_narrative_snippet(text: &str, target_chars: usize) -> String {
-        // Remove obvious legal/distribution lines before scoring
         let legal_re = Regex::new(r"(?i)project\s+gutenberg|gutenberg\.org|www\.gutenberg|small\s+print|license|
                                     produced\s+by|e\s*-?text|etext|transcrib(er|ed)|\bebook\b").unwrap();
         let mut paragraphs: Vec<&str> = text.split("\n\n").collect();
@@ -297,11 +480,10 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         if paragraphs.is_empty() {
             return text.chars().take(target_chars).collect();
         }
-        // Score paragraphs: prefer ones with letters, sentence punctuation, and quotes
         fn score(p: &str) -> f32 {
             let len = p.len() as f32;
             let letters = p.chars().filter(|c| c.is_alphabetic()).count() as f32;
-            let quote = p.matches('"').count() as f32 + p.matches('“').count() as f32 + p.matches('’').count() as f32;
+            let quote = p.matches('"').count() as f32 + p.matches('"').count() as f32 + p.matches(''').count() as f32;
             let punct = p.matches('.').count() as f32 + p.matches('!').count() as f32 + p.matches('?').count() as f32;
             (letters / (len + 1.0)) * 0.6 + (quote.min(8.0) / 8.0) * 0.2 + (punct.min(12.0) / 12.0) * 0.2
         }
@@ -311,7 +493,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
             let s = score(p);
             if s > best_score { best_score = s; best_idx = i; }
         }
-        // Assemble a window around best paragraph
         let mut out = String::new();
         let mut i = best_idx.saturating_sub(2);
         while i < paragraphs.len() && out.len() < target_chars {
@@ -341,16 +522,81 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         out
     }
 
+    // Initialize T5 summarizer (lighter than BART)
+    let cache_root = std::env::var("OUT_DIR").map(|p| Path::new(&p).join("rust_bert_cache")).unwrap_or_else(|_| Path::new("target").join("rust_bert_cache"));
+    let _ = std::fs::create_dir_all(&cache_root);
+
+    fn fetch_to_local(res: RemoteResource, cache_root: &Path) -> LocalResource {
+        let path = res.get_local_path().expect("model fetch failed");
+        let fname = path.file_name().unwrap_or_default();
+        let dest = cache_root.join(fname);
+        if dest != path {
+            let _ = std::fs::copy(&path, &dest);
+        }
+        LocalResource { local_path: dest }
+    }
+
+    // Load T5-SMALL locally for summarization
+    let config_resource = fetch_to_local(RemoteResource::from_pretrained(T5ConfigResources::T5_SMALL), &cache_root);
+    let vocab_resource = fetch_to_local(RemoteResource::from_pretrained(T5VocabResources::T5_SMALL), &cache_root);
+    let weights_resource = fetch_to_local(RemoteResource::from_pretrained(T5ModelResources::T5_SMALL), &cache_root);
+
+    let mut summarization_config = SummarizationConfig::new(
+        ModelType::T5,
+        ModelResource::Torch(Box::new(weights_resource)),
+        config_resource,
+        vocab_resource,
+        None,
+    );
+    summarization_config.min_length = 64;
+    summarization_config.max_length = Some(128);
+    summarization_config.num_beams = 2;
+    summarization_config.do_sample = false;
+    summarization_config.device = Device::Cpu;
+    
+    println!("cargo:warning=Loading T5-SMALL for summarization...");
+    let summarization_model = SummarizationModel::new(summarization_config)?;
+    
+    // Load lightweight sentiment model
+    println!("cargo:warning=Loading sentiment model...");
+    let sentiment_model = SentimentModel::new(Default::default())?;
+
+    // Use the shared zero-shot classifier passed in
+    let zsc_labels = [
+        "gothic horror",
+        "medieval romance", 
+        "folklore",
+        "mythology",
+        "witchcraft",
+        "demonology",
+        "cosmic horror",
+        "weird fiction",
+        "ghost story",
+        "sword and sorcery",
+    ];
+
+    let mut label_to_band: HashMap<&str, &str> = HashMap::new();
+    label_to_band.insert("medieval romance", "peace_to_unease");
+    label_to_band.insert("folklore", "peace_to_unease");
+    label_to_band.insert("mythology", "peace_to_unease");
+    label_to_band.insert("ghost story", "unease_to_dread");
+    label_to_band.insert("witchcraft", "unease_to_dread");
+    label_to_band.insert("weird fiction", "unease_to_dread");
+    label_to_band.insert("gothic horror", "dread_to_terror");
+    label_to_band.insert("demonology", "dread_to_terror");
+    label_to_band.insert("battle & glory", "dread_to_terror");
+    label_to_band.insert("curse & fate", "terror_to_despair_madness");
+    label_to_band.insert("sea & voyage", "terror_to_despair_madness");
+    label_to_band.insert("cosmic horror", "madness_to_void");
+
+    let mut book_summaries: Vec<BookSummary> = Vec::new();
+
     fn ia_search_keywords(query_keywords: &str, rows: usize) -> Result<Vec<IaDoc>, Box<dyn std::error::Error>> {
-        // Multi-variant queries — stop at first non-empty hit set; bias public-domain seams and classics
-        let negatives = "-collection:(comicbooks)"; // avoid comic scans
+        let negatives = "-collection:(comicbooks)";
         let mut queries: Vec<String> = Vec::new();
-        // Public-domain heavy seams first
         queries.push(format!("collection:(gutenberg) AND mediatype:texts AND language:(eng) AND ({}) {}", query_keywords, negatives));
         queries.push(format!("collection:(folkloreandmythology OR gutenberg) AND mediatype:texts AND language:(eng) AND ({}) {}", query_keywords, negatives));
-        // Date-bounded classics (<= 1939)
         queries.push(format!("mediatype:texts AND language:(eng) AND date:[* TO 1939] AND ({}) {}", query_keywords, negatives));
-        // Fallbacks
         queries.push(format!("mediatype:texts AND language:(eng) AND ({}) {}", query_keywords, negatives));
         queries.push(format!("mediatype:texts AND ({}) {}", query_keywords, negatives));
 
@@ -369,12 +615,10 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
                 Err(_) => continue,
             };
 
-            // Extract docs array defensively
             let docs_v = resp.get("response").and_then(|r| r.get("docs")).and_then(|d| d.as_array());
             let Some(docs_arr) = docs_v else { continue };
             if docs_arr.is_empty() { continue; }
 
-            // Map Value -> IaDoc safely and filter obvious junk by title/id
             let mut mapped: Vec<IaDoc> = Vec::new();
             for e in docs_arr {
                 let identifier = e.get("identifier").and_then(|x| x.as_str()).unwrap_or("").to_string();
@@ -407,7 +651,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
             .map_err(|e| format!("Invalid IA identifier {}: {:?}", identifier, e))?;
         let files = item.list()
             .map_err(|e| format!("Failed to list files for {}: {:?}", identifier, e))?;
-        // Inline selection of a good text derivative from the item file list
         let mut candidates: Vec<&str> = files.iter().map(|f| f.path.as_str()).collect();
         candidates.sort_by_key(|p| {
             if p.ends_with("_djvu.txt") { 0 }
@@ -430,7 +673,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         if text.len() < 1000 {
             return Err(format!("Downloaded text too short for {} ({} bytes)", identifier, text.len()).into());
         }
-        // Stronger header/footer removal then OCR clean
         let core = strip_boilerplate_gutenberg(&text);
         let stripped = strip_gutenberg_headers(core);
         let cleaned = clean_ocr(&stripped);
@@ -440,7 +682,7 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         Ok((path, cleaned))
     }
 
-    // Prepare a local cache under OUT_DIR for model files
+    // Load T5 summarizer with optimized settings
     let cache_root = std::env::var("OUT_DIR").map(|p| Path::new(&p).join("rust_bert_cache")).unwrap_or_else(|_| Path::new("target").join("rust_bert_cache"));
     let _ = std::fs::create_dir_all(&cache_root);
 
@@ -454,7 +696,6 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         LocalResource { local_path: dest }
     }
 
-    // Initialize summarizer once (explicit T5-small)
     let config_resource = fetch_to_local(RemoteResource::from_pretrained(T5ConfigResources::T5_SMALL), &cache_root);
     let vocab_resource = fetch_to_local(RemoteResource::from_pretrained(T5VocabResources::T5_SMALL), &cache_root);
     let weights_resource = fetch_to_local(RemoteResource::from_pretrained(T5ModelResources::T5_SMALL), &cache_root);
@@ -467,77 +708,27 @@ fn generate_books_toml_with_summaries(output_path: &Path) -> Result<(), Box<dyn 
         None,
     );
     summarization_config.min_length = 64;
-    summarization_config.max_length = Some(256);
-    summarization_config.num_beams = 4;
+    summarization_config.max_length = Some(128);
+    summarization_config.num_beams = 2;
     summarization_config.do_sample = false;
     summarization_config.device = Device::Cpu;
+    
+    println!("cargo:warning=Loading T5-SMALL (optimized settings)...");
     let summarization_model = SummarizationModel::new(summarization_config)?;
-    println!("cargo:warning=Summarizer: T5-SMALL on CPU (beam=4, max=256)");
-
-    // Initialize optional classifiers to enrich summaries
-    let sentiment_model = SentimentModel::new(Default::default())?; // ~255MB
-
-    // Zero-shot classifier: use default BART-LARGE-MNLI (stable) but force CPU to avoid GPU surprises
-    let mut zsc_config = ZeroShotClassificationConfig::default();
-    zsc_config.device = Device::Cpu;
-    let zsc_model = ZeroShotClassificationModel::new(zsc_config)?;
-    let zsc_labels = [
-        "gothic horror",
-        "medieval romance",
-        "folklore",
-        "mythology",
-        "witchcraft",
-        "demonology",
-        "cosmic horror",
-        "weird fiction",
-        "ghost story",
-        "sword and sorcery",
-    ];
-    // Map labels to our five corruption bands
-    let mut label_to_band: std::collections::HashMap<&str, &str> = std::collections::HashMap::new();
-    label_to_band.insert("medieval romance", "peace_to_unease");
-    label_to_band.insert("folklore", "peace_to_unease");
-    label_to_band.insert("mythology", "peace_to_unease");
-    label_to_band.insert("ghost story", "unease_to_dread");
-    label_to_band.insert("witchcraft", "unease_to_dread");
-    label_to_band.insert("weird fiction", "unease_to_dread");
-    label_to_band.insert("gothic horror", "dread_to_terror");
-    label_to_band.insert("demonology", "dread_to_terror");
-    label_to_band.insert("battle & glory", "dread_to_terror");
-    label_to_band.insert("curse & fate", "terror_to_despair_madness");
-    label_to_band.insert("sea & voyage", "terror_to_despair_madness");
-    label_to_band.insert("cosmic horror", "madness_to_void");
-    println!(
-        "cargo:warning=Zero-shot: BART-LARGE-MNLI (default) on CPU (labels: {})",
-        zsc_labels.len()
-    );
+    
+    println!("cargo:warning=Loading lightweight sentiment model...");
+    let sentiment_model = SentimentModel::new(Default::default())?;
 
     let mut book_summaries: Vec<BookSummary> = Vec::new();
 
     for (band_key, keyword_expr) in BANDS_KEYWORDS {
-        println!("cargo:warning=Searching Internet Archive for band '{}': {}", band_key, keyword_expr);
+        println!("cargo:warning=Processing band '{}': {}", band_key, keyword_expr);
         let mut collected = 0usize;
 
-        // Pull a generous pool, then filter locally
         let mut docs = ia_search_keywords(keyword_expr, 100)?;
-        // Print a sample URL for debugging
         if docs.is_empty() {
-            println!("cargo:warning=No IA results at all for band '{}' — consider adjusting keywords or collections", band_key);
+            println!("cargo:warning=No IA results for band '{}'", band_key);
         }
-        // Prefer higher download count first as proxy for quality
-        docs.sort_by(|a, b| b.downloads.unwrap_or(0).cmp(&a.downloads.unwrap_or(0)));
-
-        for doc in docs.into_iter() {
-            if collected >= SAMPLES_PER_BAND { break; }
-            let identifier = doc.identifier;
-            match download_text_from_identifier(&identifier) {
-                Ok((filename, content)) => {
-                    // Summarize cleaned content with narrative-focused extraction and T5 prefix
-                    let max_chars = 8_000; // keep memory predictable in build.rs
-                    let narrative = extract_narrative_snippet(&content, max_chars);
-                    if narrative.len() < 600 {
-                        println!("cargo:warning=Narrative snippet too short ({}), skipping {}", narrative.len(), identifier);
-                        continue;
                     }
                     // T5 expects a summarization prefix for best results
                     let prefixed = format!("summarize: {}", narrative);
@@ -857,21 +1048,16 @@ const BANDS_KEYWORDS: &[(&str, &str)] = &[
 
 const SAMPLES_PER_BAND: usize = 3; // how many texts to grab per band
 
-fn generate_grammar_toml(output_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    use rust_bert::pipelines::zero_shot_classification::{ZeroShotClassificationConfig, ZeroShotClassificationModel};
-
-    // Keep libtorch threading predictable in build scripts
-    tch::set_num_threads(1);
-    tch::set_num_interop_threads(1);
-
+fn generate_grammar_toml_with_shared_model(
+    output_path: &Path, 
+    shared_zsc_model: &ZeroShotClassificationModel
+) -> Result<(), Box<dyn std::error::Error>> {
     // Load Old Norse dictionary (no markup)
     let entries: Vec<DictionaryEntry> = get_no_markup_dictionary()
         .map_err(|e| format!("Failed to load Cleasby & Vigfusson dictionary: {:?}", e))?;
 
-    // Zero-shot classifier on CPU (default BART-large-MNLI)
-    let mut zsc_config = ZeroShotClassificationConfig::default();
-    zsc_config.device = Device::Cpu;
-    let zsc_model = ZeroShotClassificationModel::new(zsc_config)?;
+    // Use shared zero-shot classifier instead of loading another instance
+    println!("cargo:warning=Using shared BART model for grammar classification");
 
     // Labels reflect game themes; we will attach terms to bands by these labels
     let labels = [
@@ -1074,13 +1260,26 @@ fn derive_npcs_and_styles(
 }
 
 fn generate_world_toml(world_path: &Path, out_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    // Build books & grammar into temporary files under OUT_DIR, then compose World TOML
+    // CONSOLIDATED MODEL LOADING: Initialize shared models once for both books and grammar
+    tch::set_num_threads(1);
+    tch::set_num_interop_threads(1);
+    println!("cargo:warning=Loading shared BART-LARGE-MNLI model for world generation...");
+    
+    let mut zsc_config = ZeroShotClassificationConfig::default();
+    zsc_config.device = Device::Cpu;
+    let shared_zsc_model = ZeroShotClassificationModel::new(zsc_config)?;
+    
+    // Build books & grammar using shared model
     let books_tmp = out_dir.join(".__books_tmp.toml");
     let grammar_tmp = out_dir.join(".__grammar_tmp.toml");
 
-    // Reuse existing generators but write into hidden temp files
-    generate_books_toml_with_summaries(&books_tmp)?;
-    generate_grammar_toml(&grammar_tmp)?;
+    // Use shared model pattern to avoid loading BART twice
+    generate_books_toml_with_shared_model(&books_tmp, &shared_zsc_model)?;
+    generate_grammar_toml_with_shared_model(&grammar_tmp, &shared_zsc_model)?;
+    
+    // Explicitly drop the shared model to free memory
+    drop(shared_zsc_model);
+    println!("cargo:warning=Shared BART model dropped, memory freed");
 
     // Load components
     let books_content = std::fs::read_to_string(&books_tmp)?;

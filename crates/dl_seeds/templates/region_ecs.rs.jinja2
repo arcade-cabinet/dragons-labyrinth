@@ -1,0 +1,57 @@
+//! Region: {{ name }}
+//! UUID: {{ uuid }}
+//! Generated ECS resources with container-based spatial processing
+
+use bevy::prelude::*;
+use crate::components::*;
+
+/// Region resource component
+#[derive(Resource, Debug, Clone)]
+pub struct {{ sanitized_name }}Region {
+    pub uuid: String,
+    pub name: String, 
+    pub corruption_level: f32,
+    pub hex_tiles: Vec<Entity>,
+    pub settlements: Vec<Entity>,
+    pub dungeons: Vec<Entity>,
+}
+
+impl Default for {{ sanitized_name }}Region {
+    fn default() -> Self {
+        Self {
+            uuid: "{{ uuid }}".to_string(),
+            name: "{{ name }}".to_string(),
+            corruption_level: {{ corruption_level }},
+            hex_tiles: Vec::new(),
+            settlements: Vec::new(),
+            dungeons: Vec::new(),
+        }
+    }
+}
+
+/// Spawn this region using container-based spatial indexing
+pub fn spawn_region_with_containers(
+    mut commands: Commands,
+    mut region_resource: ResMut<{{ sanitized_name }}Region>,
+) {
+    // Create region entity with spatial container component
+    let region_entity = commands.spawn((
+        RegionId("{{ uuid }}".to_string()),
+        RegionName("{{ name }}".to_string()),
+        CorruptionLevel({{ corruption_level }}),
+        SpatialContainer::new(),
+    )).id();
+    
+    // TODO: Load hex tiles using container system for O(1) lookups
+    // TODO: Process settlements with spatial relationships
+    // TODO: Process dungeons with container-based pathfinding
+    
+    println!("Spawned region: {} (UUID: {})", "{{ name }}", "{{ uuid }}");
+}
+
+/// Get static metadata for this region
+pub const REGION_METADATA: RegionMetadata = RegionMetadata {
+    uuid: "{{ uuid }}",
+    name: "{{ name }}",
+    base_corruption: {{ corruption_level }},
+};

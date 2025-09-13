@@ -1,0 +1,116 @@
+//! Generated ECS Components for Dragon's Labyrinth
+//! From {{ total_entities }} entities ({{ regions_count }} regions, {{ dungeons_count }} dungeons, {{ settlements_count }} settlements, {{ factions_count }} factions)
+
+use bevy::prelude::*;
+use dl_types::world::HexCoord;
+use std::collections::HashMap;
+
+/// Hex position component using proper dl_types
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct HexPosition {
+    pub coord: HexCoord,
+}
+
+impl HexPosition {
+    pub fn new(q: i32, r: i32) -> Self {
+        Self {
+            coord: HexCoord { q, r }
+        }
+    }
+    
+    pub fn to_world_pos(&self) -> Vec3 {
+        let x = (3.0_f32.sqrt() * self.coord.q as f32 + 3.0_f32.sqrt() / 2.0 * self.coord.r as f32) * 32.0;
+        let z = (3.0 / 2.0 * self.coord.r as f32) * 32.0;
+        Vec3::new(x, 0.0, z)
+    }
+}
+
+/// Biome component with complete type integration
+#[derive(Component, Debug, Clone)]
+pub struct BiomeComponent {
+    pub biome_type: dl_types::BiomeType,
+    pub corruption_level: f32,
+    pub environmental_hazards: Vec<String>,
+}
+
+/// Settlement component with complete data
+#[derive(Component, Debug, Clone)]
+pub struct SettlementComponent {
+    pub uuid: String,
+    pub settlement_type: String,
+    pub population: u32,
+    pub leadership: Vec<String>,
+    pub trade_goods: Vec<String>,
+    pub faction_allegiance: Option<String>,
+    pub corruption_resistance: f32,
+}
+
+/// Faction presence component
+#[derive(Component, Debug, Clone)]
+pub struct FactionPresenceComponent {
+    pub faction_uuid: String,
+    pub influence_level: f32,
+    pub controlled_territories: Vec<HexCoord>,
+    pub allied_factions: Vec<String>,
+    pub enemy_factions: Vec<String>,
+    pub power_level: u32,
+}
+
+/// NPC component with complete behavioral data
+#[derive(Component, Debug, Clone)]
+pub struct NPCComponent {
+    pub uuid: String,
+    pub npc_type: String,
+    pub is_active: bool,
+    pub dialogue_tree_id: Option<String>,
+    pub current_location: HexCoord,
+    pub movement_pattern: MovementPattern,
+    pub trauma_level: f32,
+}
+
+/// Dungeon entrance component
+#[derive(Component, Debug, Clone)]
+pub struct DungeonEntranceComponent {
+    pub dungeon_uuid: String,
+    pub entrance_type: String,
+    pub is_accessible: bool,
+    pub connected_areas: Vec<String>,
+    pub challenge_rating: u32,
+    pub loot_tables: Vec<String>,
+}
+
+/// Movement patterns for NPCs
+#[derive(Debug, Clone)]
+pub enum MovementPattern {
+    Stationary,
+    Patrol { waypoints: Vec<HexCoord>, current_index: usize },
+    Random { radius: u32 },
+    FollowPlayer { max_distance: u32 },
+}
+
+/// Player component with progression tracking
+#[derive(Component, Debug, Clone)]
+pub struct PlayerComponent {
+    pub current_hex: HexCoord,
+    pub dread_level: f32,
+    pub corruption_band: u32,
+    pub companion_relationships: HashMap<String, f32>,
+    pub inventory: Vec<String>,
+    pub health: f32,
+    pub max_health: f32,
+}
+
+/// Region identifier component
+#[derive(Component, Debug, Clone)]
+pub struct RegionComponent {
+    pub uuid: String,
+    pub region_type: String,
+    pub hex_bounds: Vec<HexCoord>,
+}
+
+/// Hex tile identifier component
+#[derive(Component, Debug, Clone)]
+pub struct HexTileComponent {
+    pub uuid: String,
+    pub region_uuid: String,
+}

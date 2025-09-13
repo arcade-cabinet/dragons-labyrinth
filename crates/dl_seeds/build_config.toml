@@ -1,0 +1,276 @@
+# Build configuration for dl_seeds - External constants and data
+
+[sampling]
+samples_per_band = 3
+max_chars_narrative = 8000
+min_narrative_length = 600
+classification_threshold = 0.30
+sentiment_threshold = 0.45
+
+[models]
+# T5 summarization settings (memory-optimized)
+t5_min_length = 64
+t5_max_length = 128
+t5_num_beams = 2
+t5_device = "cpu"
+
+# Zero-shot classification settings
+zsc_device = "cpu"
+zsc_max_tokens = 32
+zsc_grammar_max_tokens = 8
+
+# Memory limits
+max_grammar_entries = 500
+max_terms_per_band = 100
+
+[known_entities]
+regions = [
+    "Aurora Bushes", "Black Shield Timberlands", "Blood Blade Fields", "Bonecrusher Plains",
+    "Darkfall Dunes", "Darkfall Plains", "Fallen Star Steppe", "Fearless Wilds", 
+    "Firefly Cliffs", "Goblinchaser Jungle", "Goblinchaser Wilderness", "Goldenswan Timberlands",
+    "Goldseeker's Cliffs", "Grey Mist Snowlands", "Heartseeker Forest", "Heartseeker Moors",
+    "Hell's Gate Desert", "Holloweye Wilderness", "Iceborn Wilderness", "Javelin Plains",
+    "Javelin Wetlands", "Moonwatcher Wetlands", "Nightmare Desert", "Ragthorn Meadows",
+    "Ragthorn Woods", "Thunderwave Woodlands", "Vicious Crags"
+]
+
+settlements = [
+    "Village of Ashamar", "Village of Balaal", "Town of Devilville",
+    "Village of Dokar", "Village of Dorith", "Village of Harad",
+    "Village of Headbone", "City of Headsmen", "Village of Kothian",
+    "City of Palemoon"
+]
+
+factions = [
+    "The Defiled Wolves", "The Fists Of Justice", "The Red Snakes",
+    "The Swords Of Justice", "The White Wyverns"
+]
+
+dungeons = [
+    "Bowel of the Raging Pits", "Caverns of the Burning Souls",
+    "Caverns of the Infernal Lich", "Crypt of the Corrupted Order",
+    "Crypt of the Infernal Blades", "Crypt of the Mourning Goblin",
+    "Crypt of the Unholy Goblin", "Crypt of the Violent Ogre",
+    "Hideout of the Corrupted Order", "Hideout of the Unspoken Desire",
+    "Lair of the Foresaken Desire", "Lair of the Mourning Hopes",
+    "Shrine of the Infernal Blades", "Shrine of the Infernal Desire",
+    "Temple of the Violent Ogre", "Tomb of the Cursed Pits",
+    "Tomb of the Grey Ogre", "Tomb of the Unspoken Skeletons"
+]
+
+[band_keywords]
+peace_to_unease = "(subject:(fantasy OR \"fairy tales\" OR folklore OR mythology OR \"heroic romance\" OR \"romances, chivalry\") OR title:(fairy OR legend OR knight OR wizard OR dragon OR saga))"
+unease_to_dread = "(subject:(\"gothic fiction\" OR gothic OR \"ghost stories\" OR supernatural OR \"weird tales\") OR title:(ghost OR haunted OR vampire OR spectre OR specter OR eldritch))"
+dread_to_terror = "(subject:(horror OR \"weird fiction\" OR macabre) OR title:(horror OR nightmare OR demon OR daemon OR vampire OR \"strange tales\"))"
+terror_to_despair_madness = "(subject:(witchcraft OR demonology OR occult) OR title:(witch OR grimoire OR demonology OR sorcery OR necromancy))"
+madness_to_void = "(subject:(\"weird fiction\" OR cosmic OR \"cosmic horror\") OR title:(eldritch OR abyss OR void OR cthulhu OR unnameable OR nameless))"
+
+[classification_labels]
+book_labels = [
+    "gothic horror", "medieval romance", "folklore", "mythology", 
+    "witchcraft", "demonology", "cosmic horror", "weird fiction", 
+    "ghost story", "sword and sorcery"
+]
+
+grammar_labels = [
+    "gothic horror", "medieval romance", "folklore", "mythology", 
+    "witchcraft", "demonology", "cosmic horror", "weird fiction", 
+    "ghost story", "sword and sorcery", "sea & voyage", "battle & glory", "curse & fate"
+]
+
+[label_to_band_mapping]
+"medieval romance" = "peace_to_unease"
+"folklore" = "peace_to_unease"
+"mythology" = "peace_to_unease"
+"ghost story" = "unease_to_dread"
+"witchcraft" = "unease_to_dread"
+"weird fiction" = "unease_to_dread"
+"gothic horror" = "dread_to_terror"
+"demonology" = "dread_to_terror"
+"battle & glory" = "dread_to_terror"
+"curse & fate" = "terror_to_despair_madness"
+"sea & voyage" = "terror_to_despair_madness"
+"cosmic horror" = "madness_to_void"
+
+[regexes]
+prefilter_pattern = "(?i)\\b(dragon|wyrm|serpent|giant|elf|dwarf|troll|witch|seer|seeress|saga|battle|sword|helm|shield|king|queen|thane|jar(l|l)|god|odin|thor|frey|sea|ship|voyage|curse|doom|fate|rune|magic|seidr|war|blood|night|ghost|haunt|spirit|demon|hell|void|abyss)\\b"
+legal_boilerplate = "(?i)project\\s+gutenberg|gutenberg\\.org|www\\.gutenberg|small\\s+print|license|produced\\s+by|e\\s*-?text|etext|transcrib(er|ed)|\\bebook\\b"
+
+[filtering]
+disallowed_terms = [
+    "manga", "comic", "graphic novel", "z-lib", "zlib", "light novel",
+    "rulebook", "core rulebook", "chaosium", "dungeons & dragons", "pathfinder",
+    "home remedies", "recipes", "cookbook", "feng shui", "self-help",
+    "workbook", "coloring book", "reply", "a reply", "criticism", 
+    "study guide", "lesson", "works of", "complete works", "collection", "essays", "magazine"
+]
+
+disallowed_ids = ["pdfy-", "manga_", "comic", "z-lib", "zlib"]
+
+[stop_words]
+rake_stop_words = [
+    "the", "a", "an", "and", "or", "but", "if", "then", "so", "because", "as", "of", "to", 
+    "in", "on", "for", "with", "by", "from", "at", "into", "over", "after", "before", "about", 
+    "between", "through", "during", "without", "within", "against", "among", "across", "per", 
+    "is", "are", "was", "were", "be", "been", "being", "it", "its", "this", "that", "these", 
+    "those", "he", "she", "they", "them", "his", "her", "their", "we", "you", "i", "my", "our"
+]
+
+[phonotactics.celtic]
+onset = ["ab","bal","bryn","caer","dal","dun","eog","fin","glen","kil","lan","loch","pen","strath","tre","llan","aber","gwyn","cwm","rhys","owen"]
+vowel = ["a","ai","e","ei","i","o","oi","u","y"]
+coda = ["an","ach","aid","aidh","ael","wen","wyn","ydd","yth","more","bryn","gill","glen","og","yddin","fael"]
+
+[phonotactics.norse]
+prefix = ["as","bal","bjorn","ein","thor","ing","ulf","skj","sig","har","kar","gar","val","vid","yr"]
+suffix = ["gar","grim","vald","brand","mir","ric","ulf","stein","heim","fjord","borg","vik","gard","halla","svik","dr"]
+
+[phonotactics.semitic]
+onset = ["al","ibn","abd","sar","zar","qal","mar","ben","dar","sam","nah","ram","nur","hak","sul","amir","yas"]
+vowel = ["a","aa","i","u","ou","ia","ei"]
+coda = ["im","ir","un","ar","el","al"," ibn"," as"," ashar"," amun"," aldin"," allah"]
+
+[phonotactics.sino]
+onset = ["xi","li","shi","zh","ch","q","han","yuan","ming","song","tang","qin","gao","lin","bao","cheng","xun"]
+vowel = ["a","e","i","o","u","ia","ian","iao","uo","ui","ong","ang","eng","uan","ian"]
+coda = ["ng","n","r","an","ang","ong","en","er","ian","iao","uan","un"]
+
+[phonotactics.meso]
+onset = ["teo","itz","qui","xac","tol","az","mix","zap","mon","quet","tlal","cua","co","aco","teno"]
+vowel = ["a","e","i","o","u","oa","ua","ia","ie","ui"]
+coda = ["tl","can","lan","pan","co","tlan","hua","pan","chan","co","cotl","n","nah"]
+
+[phonotactics.welsh]
+onset = ["ll", "gw", "rh", "br", "cr", "dr", "gr", "pl", "pr", "tr", "pen", "caer", "aber", "llan"]
+vowel = ["a","e","i","o","u","y","ae","ai","ei","oe","wy","yw"]
+coda = ["dd","ff","ll","n","r","rn","th","fryn","glyn","nant","wyn","wen","ydd","faen","mawr"]
+
+[phonotactics.slavic_old]
+onset = ["sv", "sl", "vl", "dr", "pr", "kr", "br", "vladi", "yar", "bog", "mir", "rad", "dobr", "gor", "vol"]
+vowel = ["a","e","i","o","u","ya","yo","ye","iu","ia"]
+coda = ["mir","slav","grad","gorod","bor","pol","vin","gor","vetz","oslav","dan","dor","nik"]
+
+[phonotactics.akan]
+onset = ["ko", "kw", "ya", "yao", "kwan", "ofa", "aku", "ebo", "ka", "ab", "ad", "af", "ak", "kojo"]
+vowel = ["a","e","i","o","u","oa","ia","aa","ee"]
+coda = ["na","ne","no","ba","ma","fo","pon","suo","kwa","mansa","man","bo","kra"]
+
+[phonotactics.tamil]
+onset = ["ara","tha","sha","ra","ka","pa","na","vi","ma","sa","sur","kan","tam","ram","van"]
+vowel = ["a","aa","e","ee","i","ii","o","oo","u","uu","ai","au"]
+coda = ["n","m","nd","nt","th","ppan","ram","ran","kan","kum","var","vel","puram","patti","nadu"]
+
+[lexicons]
+creatures = [
+    "dragon","wyrm","serpent","demon","daemon","devil","imp","goblin","orc","ogre","troll","giant",
+    "wraith","ghost","specter","spectre","vampire","ghoul","lich","harpy","hydra","wolf","werewolf",
+    "spider","kraken","leviathan","basilisk","manticore","chimera","gargoyle","hag","witch","warlock"
+]
+
+colors = ["black","white","red","crimson","scarlet","ashen","silver","gold","ivory","emerald","sable","azure","verdant","pale","opal","cobalt"]
+materials = ["iron","bone","stone","oak","ash","obsidian","salt","glass","coal","chalk","amber","brass"]
+
+creature_endings = ["lord", "beast", "fiend", "spirit", "witch", "demon", "wyrm"]
+
+[landmarks]
+temple = ["temple","shrine","sanctum","abbey"]
+fortress = ["fortress","stronghold","citadel","castle","keep","bastion","redoubt","tower"]
+crypt = ["crypt","tomb","sepulchre","catacomb","barrow"]
+cave = ["cave","cavern","grotto","hollow"]
+ruin = ["ruin","ruins"]
+forest = ["forest","wood","grove","wold","copse"]
+desert = ["desert","wasteland","dune","dunes"]
+mountain = ["mountain","peak","crag"]
+swamp = ["swamp","bog","fen","marsh"]
+abyss = ["abyss","chasm","rift","fissure","void"]
+labyrinth = ["labyrinth","maze"]
+
+[npc_traits]
+witch = ["occult", "bitter", "secretive"]
+ghost = ["mournful", "hushed", "obsessive"]
+curse = ["fatalistic", "ritual", "unyielding"]
+blood = ["violent", "zealous", "reckless"]
+void = ["detached", "cold", "whispering"]
+king = ["authoritative", "proud", "traditional"]
+saint = ["compassionate", "sacrificial", "calm"]
+wolf = ["pack-loyal", "suspicious", "feral"]
+
+[npc_titles]
+witch = "Sanctuary Witch"
+ghost = "Weeping Shade"
+curse = "Oath-Bound Warden"
+blood = "Crimson Zealot"
+void = "Hollow Augur"
+king = "Fallen Castellan"
+saint = "Pale Pilgrim"
+wolf = "Greyfang Captain"
+default = "Wandering Adept"
+
+[band_weights]
+# Regional weights for name generation per corruption band
+[band_weights.peace_to_unease]
+celtic = 3.0
+welsh = 2.5
+norse = 2.0
+semitic = 1.0
+sino = 1.0
+meso = 1.0
+slavic_old = 1.0
+akan = 1.0
+tamil = 1.0
+
+[band_weights.unease_to_dread]
+celtic = 2.0
+norse = 2.0
+slavic_old = 2.0
+welsh = 1.5
+semitic = 1.2
+sino = 1.0
+meso = 1.0
+akan = 1.0
+tamil = 1.0
+
+[band_weights.dread_to_terror]
+slavic_old = 3.0
+norse = 2.5
+meso = 1.5
+semitic = 1.2
+celtic = 1.0
+sino = 1.0
+welsh = 1.0
+akan = 1.0
+tamil = 1.0
+
+[band_weights.terror_to_despair_madness]
+semitic = 2.5
+tamil = 2.0
+meso = 2.0
+slavic_old = 1.5
+norse = 1.2
+sino = 1.0
+celtic = 1.0
+welsh = 1.0
+akan = 1.0
+
+[band_weights.madness_to_void]
+slavic_old = 2.8
+sino = 2.2
+norse = 2.0
+meso = 1.5
+semitic = 1.2
+tamil = 1.2
+celtic = 0.8
+welsh = 0.8
+akan = 0.8
+
+[name_generation]
+person_count = 60
+location_count = 30
+norse_fallback_endings = ["heim","borg","vik","fjord","gard"]
+
+[internet_archive]
+search_fields = "identifier,title,format,language,licenseurl,downloads,date,year,collection"
+max_search_rows = 500
+negatives = "-collection:(comicbooks)"
+fallback_collections = ["gutenberg", "folkloreandmythology"]
+max_date_classic = 1939

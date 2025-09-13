@@ -1,0 +1,62 @@
+//! Generated NPC dialogue module for {{ npc_name }}
+//! 
+//! UUID: {{ npc_uuid }}
+//! Region: {{ region_uuid }}
+//! Settlement: {{ settlement_uuid }}
+
+use crate::dialogue::{NpcData, QuestData, DialogueContext};
+
+/// NPC: {{ npc_name }}
+pub const NPC_UUID: &str = "{{ npc_uuid }}";
+pub const NPC_NAME: &str = "{{ npc_name }}";
+pub const REGION_UUID: &str = "{{ region_uuid }}";
+pub const SETTLEMENT_UUID: &str = "{{ settlement_uuid }}";
+
+/// Dialogue lines for {{ npc_name }}
+pub const DIALOGUE_LINES: &[&str] = &[
+    {% for line in dialogue_lines %}
+    "{{ line }}",
+    {% endfor %}
+];
+
+/// Create NPC data structure
+pub fn create_npc_data() -> NpcData {
+    NpcData {
+        uuid: NPC_UUID.to_string(),
+        name: NPC_NAME.to_string(),
+        region_uuid: REGION_UUID.to_string(),
+        settlement_uuid: SETTLEMENT_UUID.to_string(),
+        dialogue_lines: DIALOGUE_LINES.iter().map(|s| s.to_string()).collect(),
+        tone: "friendly".to_string(), // Would be generated from Seeds data
+        quest_id: {% if quest %}Some("{{ quest.id }}"){% else %}None{% endif %},
+    }
+}
+
+{% if quest %}
+/// Quest data for {{ npc_name }}
+pub fn create_quest_data() -> QuestData {
+    QuestData {
+        id: "{{ quest.id }}".to_string(),
+        region_uuid: REGION_UUID.to_string(),
+        npc_uuid: NPC_UUID.to_string(),
+        pattern_type: "{{ quest.pattern_type }}".to_string(),
+        beats: vec![
+            {% for beat in quest.beats %}
+            "{{ beat }}".to_string(),
+            {% endfor %}
+        ],
+        themes: vec![
+            {% for theme in quest.themes %}
+            "{{ theme }}".to_string(),
+            {% endfor %}
+        ],
+        estimated_length: {{ quest.estimated_length }},
+    }
+}
+{% endif %}
+
+/// Get context-sensitive dialogue for {{ npc_name }}
+pub fn get_dialogue(context: &DialogueContext) -> Vec<String> {
+    let npc = create_npc_data();
+    npc.get_dialogue(context)
+}

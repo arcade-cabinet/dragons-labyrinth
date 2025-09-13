@@ -1,0 +1,53 @@
+//! Dungeon {{ dungeon_uuid }} module with all areas
+//! Generated with {{ areas|length }} areas
+
+use bevy::prelude::*;
+use crate::components::*;
+
+{% for area in areas %}
+pub mod {{ area.uuid|replace('-', '_') }};
+pub use {{ area.uuid|replace('-', '_') }}::*;
+{% endfor %}
+
+/// Spawn entire dungeon with all areas
+pub fn spawn_{{ dungeon_uuid|replace('-', '_') }}_dungeon(
+    mut commands: Commands,
+    mut spatial_container: ResMut<SpatialContainer>,
+) {
+    println!("Spawning dungeon {{ dungeon_uuid }} with {{ areas|length }} areas...");
+    
+{% for area in areas %}
+    spawn_{{ area.uuid }}_area(&mut commands, &mut spatial_container);
+{% endfor %}
+    
+    println!("Dungeon {{ dungeon_uuid }} spawned successfully");
+}
+
+/// Get all entities in this dungeon
+pub fn get_{{ dungeon_uuid|replace('-', '_') }}_entities(
+    spatial_container: &SpatialContainer,
+) -> Vec<Entity> {
+    let mut entities = Vec::new();
+{% for area in areas %}
+    if let Some(area_entity) = spatial_container.dungeon_entities.get("{{ area.uuid }}") {
+        entities.push(*area_entity);
+    }
+{% endfor %}
+    entities
+}
+
+/// Dungeon metadata
+pub const {{ dungeon_uuid|upper|replace('-', '_') }}_METADATA: DungeonData = DungeonData {
+    uuid: "{{ dungeon_uuid }}",
+    area_count: {{ areas|length }},
+    total_monsters: 0, // Will be calculated from areas
+    total_treasures: 0, // Will be calculated from areas
+};
+
+#[derive(Debug, Clone)]
+pub struct DungeonData {
+    pub uuid: &'static str,
+    pub area_count: usize,
+    pub total_monsters: usize,
+    pub total_treasures: usize,
+}
