@@ -7,19 +7,43 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+# Core dependencies
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
+
+# HTTP and URL handling
 reqwest = { workspace = true, features = ["blocking", "json"] }
 urlencoding = { workspace = true }
-tokio = { workspace = true, features = ["rt", "macros"] }
+
+# Async runtime
+tokio = { workspace = true, features = ["full"] }
+
+# File operations and utilities
 tempfile = { workspace = true }
 regex = { workspace = true }
-openai_dive = { workspace = true }
+walkdir = { workspace = true }
+fs_extra = { workspace = true }
+flate2 = { workspace = true }
+tar = { workspace = true }
+
+# Data formats
 toml = { workspace = true }
 ron = { workspace = true }
+csv = { workspace = true }
+
+# AI integration
+openai_dive = { workspace = true }
+
+# Template processing (consolidated from dl_analysis + dl_processors)
+tera = { workspace = true }
+minijinja = { workspace = true }
+
+# DataFrame functionality (from dl_audit)
+polars = { workspace = true, features = ["lazy", "csv", "strings", "temporal", "regex", "timezones"] }
+
 
 [build-dependencies]
 tempfile = { workspace = true }

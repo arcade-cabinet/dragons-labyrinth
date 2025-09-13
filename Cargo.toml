@@ -72,6 +72,7 @@ dl_analysis = { path = "crates/dl_analysis" }
 dl_processors = { path = "crates/dl_processors" }
 dl_seeds = { path = "crates/dl_seeds" }
 dl_types = { path = "crates/dl_types" }
+dl_audit = { path = "crates/dl_audit" }
 iars = "0.1.0"
 minijinja = "2.12"
 reqwest = "0.12"
@@ -83,7 +84,6 @@ bevy_ecs = "0.16.1"
 bevy_math = "0.16.1"
 bevy_scene = "0.16.1"
 bevy_transform = "0.16.1"
-dl_audit = { path = "crates/dl_audit" }
 flate2 = "1.1"
 polars = "0.50.0"
 rust-bert = "0.23.0"

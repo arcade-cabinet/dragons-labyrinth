@@ -5,7 +5,6 @@
 
 pub mod audit;
 pub mod world;
-pub mod analysis;
 pub mod processing;
 pub mod seeds;
 
@@ -14,7 +13,6 @@ pub use audit::{AuditableType, AuditMetadata};
 
 // Re-export all type modules
 pub use world::*;
-pub use analysis::*;
 pub use processing::*;
 pub use seeds::*;
 
