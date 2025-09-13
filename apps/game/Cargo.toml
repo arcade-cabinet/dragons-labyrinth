@@ -40,6 +40,6 @@ console_error_panic_hook = "0.1"
 wasm-bindgen-futures = "0.4"
 
 [build-dependencies]
-dl_processors = { workspace = true }
-dl_analysis = { workspace = true }
+dl_seeds = { workspace = true }
 anyhow = { workspace = true }
+tokio = { workspace = true }

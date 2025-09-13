@@ -6,6 +6,26 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
+/// Raw entity from HBF database processing
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RawEntity {
+    pub uuid: String,
+    pub category: String,
+    pub entity_name: String,
+    pub raw_value: String,
+}
+
+impl RawEntity {
+    pub fn new(uuid: String, category: String, entity_name: String, raw_value: String) -> Self {
+        Self {
+            uuid,
+            category,
+            entity_name,
+            raw_value,
+        }
+    }
+}
+
 /// Spatial container for hex-based entity lookups
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HexContainer {

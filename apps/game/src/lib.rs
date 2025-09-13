@@ -4,7 +4,8 @@ mod utils;
 pub mod spatial;
 
 // Include generated world resources at build time
-include!(concat!(env!("OUT_DIR"), "/generated_world.rs"));
+// TODO: Re-enable when consolidated system generates this file
+// include!(concat!(env!("OUT_DIR"), "/generated_world.rs"));
 
 use bevy::prelude::*;
 use game::*;

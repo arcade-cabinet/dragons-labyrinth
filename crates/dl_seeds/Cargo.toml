@@ -13,6 +13,10 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
+dl_types = { workspace = true }
+
+# Game engine (for Component derive macro)
+bevy = { workspace = true }
 
 # HTTP and URL handling
 reqwest = { workspace = true, features = ["blocking", "json"] }
@@ -43,6 +47,10 @@ minijinja = { workspace = true }
 
 # DataFrame functionality (from dl_audit)
 polars = { workspace = true, features = ["lazy", "csv", "strings", "temporal", "regex", "timezones"] }
+
+# Additional dependencies for consolidated functionality
+rusqlite = { workspace = true }
+cleasby_vigfusson_dictionary = { workspace = true }
 
 
 [build-dependencies]

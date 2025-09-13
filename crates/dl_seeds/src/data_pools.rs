@@ -46,12 +46,12 @@ impl CategorizedDataPools {
         // Convert world seeds to regions pool
         for seed in world_seeds {
             let region_data = serde_json::json!({
-                "id": seed.source_text.chars().take(16).collect::<String>(),
-                "biome_type": seed.biome_hint.as_ref().unwrap_or(&"Unknown".to_string()),
-                "corruption_level": seed.corruption_band,
-                "theme_keywords": seed.theme_keywords,
-                "environmental_description": seed.source_text,
-                "world_seed_id": format!("world-{}", seed.corruption_band),
+                "id": seed.source_book.chars().take(16).collect::<String>(),
+                "biome_type": &seed.biome_inspiration,
+                "corruption_level": 1, // Default corruption level
+                "theme_keywords": &seed.atmospheric_elements,
+                "environmental_description": &seed.environmental_features.join(", "),
+                "world_seed_id": format!("world-{}", seed.source_book.chars().take(8).collect::<String>()),
             });
             pools.regions.push(region_data);
         }
@@ -59,12 +59,12 @@ impl CategorizedDataPools {
         // Convert quest seeds to settlements and factions pools
         for seed in quest_seeds {
             let settlement_data = serde_json::json!({
-                "id": seed.quest_type.chars().take(16).collect::<String>(),
-                "quest_type": seed.quest_type,
-                "corruption_band": seed.corruption_band,
-                "settlement_theme": seed.theme_elements.get(0).unwrap_or(&"village".to_string()),
-                "description": seed.source_text,
-                "quest_seed_id": format!("quest-{}", seed.corruption_band),
+                "id": seed.quest_archetype.chars().take(16).collect::<String>(),
+                "quest_type": &seed.quest_archetype,
+                "corruption_band": 1, // Default corruption band
+                "settlement_theme": "village", // Default theme
+                "description": &seed.moral_dilemma,
+                "quest_seed_id": format!("quest-{}", seed.source_book.chars().take(8).collect::<String>()),
             });
             pools.settlements.push(settlement_data);
         }
@@ -73,11 +73,11 @@ impl CategorizedDataPools {
         for seed in dialogue_seeds {
             let book_data = serde_json::json!({
                 "id": seed.character_archetype.chars().take(16).collect::<String>(),
-                "character_type": seed.character_archetype,
-                "corruption_band": seed.corruption_band,
-                "dialogue_theme": seed.emotional_tone,
-                "source_content": seed.source_text,
-                "dialogue_seed_id": format!("dialogue-{}", seed.corruption_band),
+                "character_type": &seed.character_archetype,
+                "corruption_band": 1, // Default corruption band
+                "dialogue_theme": &seed.emotional_tone,
+                "source_content": &seed.trauma_indicators.join(", "),
+                "dialogue_seed_id": format!("dialogue-{}", seed.source_book.chars().take(8).collect::<String>()),
             });
             pools.books.push(book_data);
         }

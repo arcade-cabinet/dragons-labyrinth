@@ -31,10 +31,14 @@ pub mod dungeons;
 pub mod factions;
 
 // Consolidated functionality modules (from other crates)
-pub mod analysis;      // From dl_analysis/src/ai_analysis.rs
+pub mod ai_analysis;   // From dl_analysis/src/ai_analysis.rs
+pub mod analysis;      // Existing analysis module
 pub mod containers;    // From dl_analysis/src/containers.rs
 pub mod templates;     // From dl_processors/src/templates.rs
 pub mod orchestration; // Enhanced orchestration (already exists)
+pub mod reporting;     // From dl_analysis/src/reporting.rs
+pub mod utilities;     // From dl_processors/src/utilities.rs
+pub mod dataframe;     // From dl_audit/src/dataframe.rs
 
 // New runtime analysis functionality
 pub mod runtime_analysis;
@@ -52,7 +56,7 @@ use std::collections::HashMap;
 
 // Re-export consolidated types
 pub use analysis::AiAnalysisClient;
-pub use containers::{HexContainer, DungeonContainer, ClusteringContainer};
+pub use containers::{HexContainer, DungeonContainer, ClusteringContainer, RawEntity};
 pub use templates::TemplateManager;
 pub use runtime_analysis::SeedAnalysisEngine;
 pub use data_pools::CategorizedDataPools;
@@ -74,8 +78,22 @@ impl ComprehensiveSeeder {
         let ai_client = analysis::AiAnalysisClient::new()?;
         let template_manager = templates::TemplateManager::new()?;
         
+        // Create a temporary output directory for initialization
+        let temp_out_dir = std::env::temp_dir().join("dl_seeds_init");
+        std::fs::create_dir_all(&temp_out_dir)?;
+        
+        // Generate initial books manager (this will be replaced during pipeline execution)
+        let books = books::BooksManager::generate_seeds_from_texts(&temp_out_dir)
+            .unwrap_or_else(|_| books::BooksManager {
+                cache_dir: temp_out_dir.clone(),
+                downloaded_books: Vec::new(),
+                world_seeds: Vec::new(),
+                quest_seeds: Vec::new(),
+                dialogue_seeds: Vec::new(),
+            });
+        
         Ok(Self {
-            books: books::BooksManager::new(),
+            books,
             ai_client,
             template_manager,
             hex_container: containers::HexContainer::new(),

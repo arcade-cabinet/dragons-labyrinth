@@ -1,9 +1,17 @@
 //! Hex coordinate system types
 
-use bevy_ecs::prelude::*;
+use bevy::prelude::Component;
 use serde::{Deserialize, Serialize};
-use crate::audit::AuditableType;
 use std::collections::HashMap;
+
+// Simple trait for auditable types (local definition)
+pub trait AuditableType {
+    fn audit_headers() -> Vec<String>;
+    fn audit_row(&self) -> Vec<String>;
+    fn audit_category() -> String;
+    fn audit_subcategory() -> String;
+    fn extract_numeric_fields(&self) -> HashMap<String, f64> { HashMap::new() }
+}
 
 /// Hex coordinate using axial coordinate system (q, r)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component, Serialize, Deserialize)]

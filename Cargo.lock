@@ -2704,67 +2704,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9c272297e804878a2a4b707cfcfc6d2328b5bb936944613b4fdf2b9269afdfd"
 
 [[package]]
-name = "dl_analysis"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "csv",
- "dl_audit",
- "dl_seeds",
- "dl_types",
- "openai_dive",
- "ron 0.11.0",
- "serde",
- "serde_json",
- "tera",
- "tokio",
- "walkdir",
-]
-
-[[package]]
-name = "dl_audit"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "dl_types",
- "flate2",
- "fs_extra",
- "polars",
- "regex",
- "serde",
- "serde_json",
- "tar",
- "walkdir",
-]
-
-[[package]]
-name = "dl_processors"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "dl_analysis",
- "dl_audit",
- "dl_types",
- "minijinja",
- "openai_dive",
- "regex",
- "ron 0.11.0",
- "serde",
- "serde_json",
- "tera",
- "walkdir",
-]
-
-[[package]]
 name = "dl_seeds"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bevy",
  "chrono",
  "cleasby_vigfusson_dictionary",
  "console",
  "csv",
+ "dl_types",
  "flate2",
  "fs_extra",
  "iars",
@@ -3372,12 +3321,12 @@ dependencies = [
  "bevy_rand",
  "bevy_yarnspinner",
  "console_error_panic_hook",
- "dl_analysis",
- "dl_processors",
+ "dl_seeds",
  "dl_types",
  "ron 0.11.0",
  "serde",
  "serde_json",
+ "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

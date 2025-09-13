@@ -1,6 +1,6 @@
 //! ECS components used by the generated code
 
-use bevy_ecs::prelude::*;
+use bevy::prelude::{Component, Entity};
 use std::collections::HashMap;
 
 // Hex tile components

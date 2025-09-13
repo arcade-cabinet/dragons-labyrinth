@@ -7,8 +7,35 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use anyhow::Result;
 
-use dl_types::analysis::base::Inventory;
-use dl_types::analysis::raw::EntityCategory;
+// Local type definitions to replace dl_types imports
+use crate::orchestration::EntityCategory;
+
+/// Basic inventory structure for template processing
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Inventory {
+    pub entities: Vec<EntityModel>,
+    pub metadata: HashMap<String, String>,
+}
+
+/// Entity model for template processing
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EntityModel {
+    pub name: String,
+    pub description: Option<String>,
+    pub fields: Vec<FieldModel>,
+    pub relationships: Vec<String>,
+    pub spatial_data: Option<String>,
+}
+
+/// Field model for template processing
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FieldModel {
+    pub name: String,
+    pub field_type: String,
+    pub description: Option<String>,
+    pub required: bool,
+    pub connections: Vec<String>,
+}
 
 /// Template manager for code generation
 #[derive(Debug, Clone)]
@@ -299,12 +326,10 @@ mod tests {
 
     #[test]
     fn test_basic_module_generation() {
-        use dl_types::analysis::base::{EntityModel, FieldModel};
-        
         let manager = TemplateManager::new().unwrap();
         let category = EntityCategory::Regions;
         
-        let mut inventory = Inventory {
+        let inventory = Inventory {
             entities: vec![EntityModel {
                 name: "TestEntity".to_string(),
                 description: Some("A test entity".to_string()),
