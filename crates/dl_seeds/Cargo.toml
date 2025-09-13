@@ -6,6 +6,19 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
+# Enable standalone binaries
+[[bin]]
+name = "hbf-analyzer"
+path = "src/bin/hbf_analyzer.rs"
+
+[[bin]]
+name = "ron-generator"  
+path = "src/bin/ron_generator.rs"
+
+[[bin]]
+name = "replit-prompter"
+path = "src/bin/replit_prompter.rs"
+
 [dependencies]
 # Core dependencies
 anyhow = { workspace = true }
@@ -51,6 +64,9 @@ polars = { workspace = true, features = ["lazy", "csv", "strings", "temporal", "
 # Additional dependencies for consolidated functionality
 rusqlite = { workspace = true }
 cleasby_vigfusson_dictionary = { workspace = true }
+
+# CLI framework for standalone binaries
+clap = { version = "4.4", features = ["derive"] }
 
 
 [build-dependencies]

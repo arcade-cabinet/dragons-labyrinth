@@ -2,39 +2,42 @@ use anyhow::Result;
 use std::env;
 use std::path::PathBuf;
 
-/// Build script that generates world resources using consolidated dl_seeds
+/// Minimal build script - dl_seeds is now standalone binaries
+/// 
+/// The game no longer depends on dl_seeds as a build dependency.
+/// Instead, use the standalone binaries:
+/// - `cargo run --bin hbf-analyzer` - Analyze HBF database files
+/// - `cargo run --bin ron-generator` - Generate organized RON assets  
+/// - `cargo run --bin replit-prompter` - Create Replit 3D model prompts
 fn main() -> Result<()> {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=../../crates/dl_seeds");
-    println!("cargo:rerun-if-changed=../../crates/dl_types");
     
     let out_dir = PathBuf::from(env::var("OUT_DIR")?);
     
-    // Use consolidated dl_seeds for all world resource generation
-    println!("cargo:warning=Generating world resources from consolidated system...");
+    // Create placeholder generated files so the game compiles
+    println!("cargo:warning=Using standalone dl_seeds binaries (no build-time generation)");
     
-    // Create async runtime for dl_seeds operations
-    let rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(async {
-        // Create basic comprehensive seeder without requiring existing books.toml
-        let mut comprehensive_seeder = match dl_seeds::ComprehensiveSeeder::new().await {
-            Ok(seeder) => seeder,
-            Err(_) => {
-                // Fallback: create empty seeder if initialization fails
-                println!("cargo:warning=Using minimal seeding system (books.toml not available)");
-                return Ok(());
-            }
-        };
-        
-        // Run the basic pipeline
-        if let Err(e) = comprehensive_seeder.run_build_pipeline(&out_dir).await {
-            println!("cargo:warning=Pipeline execution completed with warnings: {}", e);
-        }
-        
-        Ok::<(), anyhow::Error>(())
-    })?;
+    // Create minimal placeholder for generated_world.rs
+    let placeholder_world = r#"//! Placeholder generated world file
+//! 
+//! To generate actual content, use the standalone dl_seeds binaries:
+//! 1. cargo run --bin hbf-analyzer --database game.hbf --output analysis/
+//! 2. cargo run --bin ron-generator --input analysis/ --output assets/
+//! 3. cargo run --bin replit-prompter --input analysis/ --assets assets/ --output replit_prompts/
+
+// Placeholder structures for compilation
+pub mod placeholder {
+    use std::collections::HashMap;
     
-    println!("cargo:warning=World resources generated successfully");
+    pub fn get_placeholder_data() -> HashMap<String, String> {
+        HashMap::new()
+    }
+}
+"#;
+    
+    std::fs::write(out_dir.join("generated_world.rs"), placeholder_world)?;
+    
+    println!("cargo:warning=Placeholder world generated - use standalone binaries for real content");
     
     Ok(())
 }
