@@ -1,34 +1,10 @@
-name: AI Review
-
-# Integrated with jbcom/control-center ecosystem
-# This workflow uses the control-center's tiered AI review system:
-# 1. Ollama (fast, cheap) → quick review
-# 2. Claude (escalation) → complex PRs
-# 3. Jules (refactor) → when code changes needed
+name: AI Review & Triage
 
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
-  # Manual trigger for on-demand review
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to review'
-        required: true
-        type: number
-      model_tier:
-        description: 'Model tier (ollama, claude, jules, all)'
-        default: 'ollama'
-        type: choice
-        options:
-          - ollama
-          - claude
-          - jules
-          - all
-
-env:
-  TARGET_REPO: ${{ github.repository }}
-  TARGET_PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -36,20 +12,34 @@ permissions:
   issues: write
 
 jobs:
-  # Use ecosystem-reviewer from control-center
-  # This provides tiered AI review (Ollama → Claude → Jules)
-  ecosystem-review:
-    name: Ecosystem AI Review
+  review:
+    name: Claude Review
     if: |
-      github.event_name == 'pull_request' ||
-      github.event_name == 'workflow_dispatch'
-    uses: jbcom/control-center/.github/workflows/ecosystem-reviewer.yml@main
-    with:
-      pr_number: ${{ inputs.pr_number || github.event.pull_request.number }}
-      repository: ${{ github.repository }}
-      model_tier: ${{ inputs.model_tier || 'ollama' }}
-    secrets:
-      CI_GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
-      OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_tools: "Read,Glob,Grep,LS,Bash(git diff),Bash(gh pr view),Bash(gh pr list),Bash(gh issue view)"
+          direct_prompt: |
+            Review this PR thoroughly. Focus on:
+            - Security issues (tokens, secrets, injection)
+            - Logic errors and bugs
+            - Performance problems
+            - Code quality improvements
+
+            For issues found:
+            1. Post inline comments on specific code
+            2. If blocking issues exist, request changes
+            3. If minor/no issues, approve the PR
+
+            PR: #${{ github.event.pull_request.number || github.event.issue.number }}

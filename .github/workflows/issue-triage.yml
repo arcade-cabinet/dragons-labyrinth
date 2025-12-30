@@ -1,0 +1,74 @@
+name: Issue Triage & Auto-Assignment
+
+on:
+  issues:
+    types: [opened, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  triage:
+    name: Claude Issue Triage
+    if: |
+      (github.event_name == 'issues') ||
+      (github.event_name == 'issue_comment' && (contains(github.event.comment.body, '@claude') || contains(github.event.comment.body, '/claude')))
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analyze Issue
+        if: secrets.ANTHROPIC_API_KEY != ''
+        uses: anthropics/claude-code-action@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_tools: "Read,Glob,Grep,LS,Bash(gh issue view),Bash(git log)"
+          direct_prompt: |
+            Analyze this GitHub issue and:
+
+            1. **Categorize** the issue type:
+               - bug: Something is broken
+               - feature: New functionality request
+               - enhancement: Improvement to existing feature
+               - documentation: Docs/examples needed
+               - question: User asking for help
+
+            2. **Assess severity** (for bugs):
+               - critical: Blocks usage completely
+               - high: Major functionality broken
+               - medium: Workaround exists
+               - low: Minor issue
+
+            3. **Post a comment** with:
+               - Issue type (label it as `/label <type>`)
+               - Severity assessment (for bugs)
+               - Initial thoughts on resolution
+
+            Issue #${{ github.event.issue.number }}
+            Title: ${{ github.event.issue.title }}
+            Body: ${{ github.event.issue.body }}
+
+  label:
+    name: Add Labels
+    needs: triage
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add issue-opened label
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['triage']
+            })
