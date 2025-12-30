@@ -1,0 +1,55 @@
+name: AI Review
+
+# Integrated with jbcom/control-center ecosystem
+# This workflow uses the control-center's tiered AI review system:
+# 1. Ollama (fast, cheap) → quick review
+# 2. Claude (escalation) → complex PRs
+# 3. Jules (refactor) → when code changes needed
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  # Manual trigger for on-demand review
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
+      model_tier:
+        description: 'Model tier (ollama, claude, jules, all)'
+        default: 'ollama'
+        type: choice
+        options:
+          - ollama
+          - claude
+          - jules
+          - all
+
+env:
+  TARGET_REPO: ${{ github.repository }}
+  TARGET_PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Use ecosystem-reviewer from control-center
+  # This provides tiered AI review (Ollama → Claude → Jules)
+  ecosystem-review:
+    name: Ecosystem AI Review
+    if: |
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch'
+    uses: jbcom/control-center/.github/workflows/ecosystem-reviewer.yml@main
+    with:
+      pr_number: ${{ inputs.pr_number || github.event.pull_request.number }}
+      repository: ${{ github.repository }}
+      model_tier: ${{ inputs.model_tier || 'ollama' }}
+    secrets:
+      CI_GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+      OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}

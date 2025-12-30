@@ -1,0 +1,42 @@
+name: AI Delegation
+
+# Issue automation integrated with jbcom/control-center
+# Triggered by comments in issues/PRs with AI agent mentions:
+# - `/julius <task>` → Google Jules (multi-file refactoring)
+# - `/cursor <task>` → Cursor Cloud Agent (long-running tasks)
+# - `@claude <task>` → Claude Code (complex reasoning)
+# - `@sage <question>` → Ollama (quick answers)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Delegate to appropriate AI agent based on comment trigger
+  delegate:
+    name: Delegate to AI Agent
+    if: |
+      contains(github.event.comment.body, '/julius') ||
+      contains(github.event.comment.body, '/cursor') ||
+      contains(github.event.comment.body, '@claude') ||
+      contains(github.event.comment.body, '@sage') ||
+      contains(github.event.comment.body, '/sage')
+    uses: jbcom/control-center/.github/workflows/ecosystem-delegator.yml@main
+    with:
+      comment_body: ${{ github.event.comment.body }}
+      issue_number: ${{ github.event.issue.number }}
+      issue_title: ${{ github.event.issue.title }}
+      issue_body: ${{ github.event.issue.body }}
+      repository: ${{ github.repository }}
+      default_branch: ${{ github.event.repository.default_branch }}
+    secrets:
+      CI_GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+      GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+      CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
